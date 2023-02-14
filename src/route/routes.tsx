@@ -5,34 +5,37 @@ import NaoAutenticado from '~/pages/403';
 import PagNotFound from '~/pages/404';
 import Autenticar from '~/pages/autenticar';
 import HomeDashboard from '~/pages/home-dashboard';
+import HomeCadastrar from '~/pages/item/cadastrar';
 import MainContent from '~/pages/main-content';
 import { AppState } from '../redux';
 
 const RoutesConfig: React.FC = () => {
-  const isAuthenticated = useSelector((state: AppState) => state.auth.isAuthenticated);
+ // const isAuthenticated = useSelector((state: AppState) => state.auth.isAuthenticated);
 
   return (
     <BrowserRouter>
-      {isAuthenticated ? (
+      {/* {isAuthenticated ? ( */}
         <Routes>
           <Route
             path='/'
             element={
               <MainContent>
                 <HomeDashboard />
+              
+                <HomeCadastrar/>
               </MainContent>
             }
           />
           <Route path='*' element={<PagNotFound />} />
         </Routes>
-      ) : (
-        <>
-          <Routes>
-            <Route path='/:codigoValidador' element={<Autenticar />} />
-            <Route path='*' element={<NaoAutenticado />} />
-          </Routes>
-        </>
-      )}
+      {/* // ) : (
+      //   <>
+      //     <Routes>
+      //       <Route path='/:codigoValidador' element={<Autenticar />} />
+      //       <Route path='*' element={<NaoAutenticado />} />
+      //     </Routes>
+      //   </>
+      // )} */}
     </BrowserRouter>
   );
 };

@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import { Colors } from '~/styles/colors';
 
 const LayoutContent = styled(Layout.Content)`
-  margin-top: 110px;
+  margin-top: 40px;
   background: ${Colors.CinzaFundo};
   height: 100%;
   padding-left: 10%;
@@ -16,7 +16,7 @@ const LayoutContent = styled(Layout.Content)`
 
 const CardContent = styled.div`
   width: 960px;
-  min-height: 80vh;
+  min-height: 100vh;
   background: #ffffff;
   box-shadow: 0px 2px 2px 2px rgba(0, 0, 0, 0.16);
   border-radius: 3px;
