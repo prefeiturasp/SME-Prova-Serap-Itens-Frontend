@@ -11,7 +11,8 @@ moment.locale('pt-br');
 const App = () => (
   <Provider store={store}>
     <PersistGate loading={null} persistor={persistor}>
-    {/* <RoutesConfig /> */}
+    {/* { <RoutesConfig /> } */}
+    <HeaderTitle></HeaderTitle>
   <ItemCadastro></ItemCadastro>
     </PersistGate>
   </Provider>
