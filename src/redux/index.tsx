@@ -12,7 +12,7 @@ const persistedReducer = persistReducer(
   {
     key: 'SERAP-ITEM-PERSIST',
     storage: sessionStorage,
-    whitelist: ['auth', 'filtroPrincipal'],
+    whitelist: ['auth', 'filtroPrincipal', 'areaConhecimento', 'disciplina', 'matriz', 'item'],
   },
   rootReducer,
 );

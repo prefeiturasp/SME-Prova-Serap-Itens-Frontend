@@ -14,7 +14,7 @@ const ContainerHeader = styled(Layout.Header)`
   z-index: 1;
   width: 100%;
   height: 110px;
-  background: ${Colors.AzulSerap};
+  background: ${Colors.CinzaFundo};
 `;
 
 const ContainerFiltro = styled.div`
@@ -71,10 +71,6 @@ const Header: React.FC = () => {
         </BackPreviousPage>
         <Title>Serap Itens</Title>
       </HeaderTitle>
-      <ContainerFiltro>
-        <FiltroPrincipal />
-      </ContainerFiltro>
-
     </ContainerHeader>
   );
 };

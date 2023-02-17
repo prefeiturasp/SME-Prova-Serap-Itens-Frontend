@@ -4,6 +4,7 @@ import { CardTotalizador } from '~/components/cards-totalizadores';
 import { SelecioneDto } from '~/domain/dto/selecione-dto';
 import { FiltroPrincipalProps } from '~/redux/modules/filtro-principal/reducers';
 import { converterSelecineDto } from '~/utils/converte-dto';
+import {MatrizObj} from '~/components/configuracao-item/modelo-matriz';
 import queryString from 'query-string';
 
 import api from './api';
@@ -66,7 +67,6 @@ const getDefaultSelect = (url: string): Promise<DefaultOptionType[]> =>
       }
       return [];
     });
-
 export default {
   obterDadosCardsTotalizadores,
   obterTiposVisualizacoesDados,

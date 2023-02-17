@@ -17,6 +17,7 @@ const AreaConhecimento: React.FC<AreaConhecimentoProps> = ({ form, setArea, opti
 
     if (resposta?.length) {
       setArea(resposta);
+      console.log(resposta);
       if (resposta.length === 1) form?.setFieldValue(nomeCampo, resposta[0].value);
     } else {
       setArea([]);
@@ -34,7 +35,7 @@ const AreaConhecimento: React.FC<AreaConhecimentoProps> = ({ form, setArea, opti
 
 
   return (
-    <Form.Item name={nomeCampo}>
+    <Form.Item name={nomeCampo} label="Area Conhecimento">
       <Select
         options={options}
         disabled={options?.length === 1}
