@@ -6,7 +6,7 @@ import Select from '~/components/select';
 import configuracaoItemService from '~/services/configuracaoItem-service';
 
 interface MatrizProps extends FormProps {
-    setMatrizes: Dispatch<SetStateAction<DefaultOptionType[]>>;
+  setMatrizes: Dispatch<SetStateAction<DefaultOptionType[]>>;
   options: DefaultOptionType[];
 }
 
@@ -15,22 +15,22 @@ const Matriz: React.FC<MatrizProps> = ({ form, setMatrizes, options }) => {
 
   const disciplina = Form.useWatch('disciplinas', form);
 
-  const obterMatrizes = useCallback(async () => {  
+  const obterMatrizes = useCallback(async () => {
     const resposta = await configuracaoItemService.obterMatriz(disciplina);
     if (resposta?.length) {
-        setMatrizes(resposta);
+      setMatrizes(resposta);
       if (resposta.length === 1) form?.setFieldValue(nomeCampo, resposta[0].value);
     } else {
-        setMatrizes([]);
+      setMatrizes([]);
       form?.setFieldValue(nomeCampo, null);
     }
   }, [form, setMatrizes, disciplina]);
 
   useEffect(() => {
     if (disciplina) {
-        obterMatrizes();
+      obterMatrizes();
     } else {
-        setMatrizes([]);
+      setMatrizes([]);
       form?.setFieldValue(nomeCampo, null);
     }
   }, [setMatrizes, disciplina, obterMatrizes, form]);

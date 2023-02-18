@@ -14,12 +14,10 @@ const Disciplina: React.FC<DisciplinaProps> = ({ form, setDisciplinas, options }
   const nomeCampo = 'disciplinas';
 
   const area = Form.useWatch('AreaConhecimento', form);
-console.log('Area disciplinas ', area);
   const obterDisciplinas = useCallback(async () => {
 
     const resposta = await configuracaoItemService.obterDisciplinas(area);
-    
-    console.log('resposta', resposta);
+
     if (resposta?.length) {
         setDisciplinas(resposta);
       if (resposta.length === 1) form?.setFieldValue(nomeCampo, resposta[0].value);

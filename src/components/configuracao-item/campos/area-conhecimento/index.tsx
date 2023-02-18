@@ -1,4 +1,4 @@
-import React , { Dispatch, SetStateAction, useCallback, useEffect }   from "react";
+import React, { Dispatch, SetStateAction, useCallback, useEffect } from "react";
 import { Form, FormProps } from 'antd';
 import { DefaultOptionType } from 'antd/lib/select';
 import Select from '~/components/select';
@@ -17,7 +17,6 @@ const AreaConhecimento: React.FC<AreaConhecimentoProps> = ({ form, setArea, opti
 
     if (resposta?.length) {
       setArea(resposta);
-      console.log(resposta);
       if (resposta.length === 1) form?.setFieldValue(nomeCampo, resposta[0].value);
     } else {
       setArea([]);
@@ -47,7 +46,7 @@ const AreaConhecimento: React.FC<AreaConhecimentoProps> = ({ form, setArea, opti
   );
 };
 
-export  default AreaConhecimento;
+export default AreaConhecimento;
 
 
 

@@ -12,7 +12,7 @@ const App = () => (
   <Provider store={store}>
     <PersistGate loading={null} persistor={persistor}>
     {/* { <RoutesConfig /> } */}
-    <HeaderTitle></HeaderTitle>
+    {/*<HeaderTitle></HeaderTitle>*/}
   <ItemCadastro></ItemCadastro>
     </PersistGate>
   </Provider>
