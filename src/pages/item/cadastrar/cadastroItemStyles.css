@@ -1,0 +1,9 @@
+.abaAtiva{display: block;}
+.abaInativa{display: none;}
+
+.botoesCadastro{
+    float: right;
+    margin-bottom: 5px;
+    align-items: baseline !important;
+    margin-top: 24px;
+}
