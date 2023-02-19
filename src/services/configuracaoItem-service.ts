@@ -42,6 +42,8 @@ const salvarRascunhoItem = (
 ): Promise<AxiosResponse<number>> =>
   api.post(`${URL_DEFAULT}/Item/salvar-rascunho`, item);
 
+const obterItem = (id: number): Promise<AxiosResponse<any>> => api.get(`${URL_DEFAULT}/Item/${id}`);
+
 export default {
   obterAreaConhecimento,
   obterDisciplinas,
@@ -49,5 +51,6 @@ export default {
   obterModeloMatriz,
   obterNivelEnsino,
   salvarItem,
-  salvarRascunhoItem
+  salvarRascunhoItem,
+  obterItem,
 };

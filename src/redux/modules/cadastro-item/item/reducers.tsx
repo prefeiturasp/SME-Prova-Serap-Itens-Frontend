@@ -2,11 +2,11 @@ import { DefaultOptionType } from 'antd/lib/select';
 import produce from 'immer';
 import { SelectValueType } from '~/domain/type/select';
 
-import { SetItem, typeSetFiltroAtual } from './actions';
+import { SetItem, SetIdItem, typeSetItemAtual, typeSetIdItemAtual } from './actions';
 
 export interface ItemProps {
   id: number;
-  codigo: string;
+  codigo: number;
   areaConhecimento: SelectValueType;
   disciplina: SelectValueType;
   matriz: SelectValueType;
@@ -17,7 +17,7 @@ export interface ItemProps {
 
 const initialValues = {
   id: 0,
-  codigo: '',
+  codigo: 0,
   areaConhecimento: null,
   disciplina: null,
   matriz: null,
@@ -27,10 +27,22 @@ const initialValues = {
   listaMatriz: [],
 };
 
+export const idItemPrincipal = (state: ItemProps = initialValues, action: SetIdItem) => {
+  return produce(state, (draft) => {
+    switch (action.type) {
+      case typeSetIdItemAtual:
+        draft.id = action.payload;
+        break;
+      default:
+        break;
+    }
+  });
+};
+
 const itemPrincipal = (state: ItemProps = initialValues, action: SetItem) => {
   return produce(state, (draft) => {
     switch (action.type) {
-      case typeSetFiltroAtual:
+      case typeSetItemAtual:
         draft.codigo = action.payload.codigo;
         draft.areaConhecimento = action.payload.areaConhecimento;
         draft.disciplina = action.payload.disciplina;
