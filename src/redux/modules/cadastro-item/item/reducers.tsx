@@ -43,6 +43,7 @@ const itemPrincipal = (state: ItemProps = initialValues, action: SetItem) => {
   return produce(state, (draft) => {
     switch (action.type) {
       case typeSetItemAtual:
+        draft.id = action.payload.id;
         draft.codigo = action.payload.codigo;
         draft.areaConhecimento = action.payload.areaConhecimento;
         draft.disciplina = action.payload.disciplina;

@@ -1,9 +1,19 @@
-.abaAtiva{display: block;}
-.abaInativa{display: none;}
 
 .botoesCadastro{
     float: right;
     margin-bottom: 5px;
     align-items: baseline !important;
     margin-top: 24px;
+}
+
+.margemTabs{
+    margin-left: 2rem;
+    margin-right: 2rem;
+}
+
+.form{
+    border-radius: 5px;
+    margin-left: 2rem;
+    margin-right: 2rem;
+    margin-bottom: 0%;
 }
