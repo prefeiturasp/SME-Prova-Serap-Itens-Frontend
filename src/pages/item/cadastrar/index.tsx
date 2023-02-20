@@ -17,6 +17,8 @@ import { Tab } from 'rc-tabs/lib/interface';
 import { Tabs } from 'antd';
 import { setItem } from '~/redux/modules/cadastro-item/item/actions';
 import { ItemProps } from '~/redux/modules/cadastro-item/item/reducers';
+import ComponentesItem from '~/components/configuracao-item/tabs/tab-componentes-item';
+import { Campos } from '~/domain/enums/campos-cadastro-item';
 
 export const Container = styled.div`
   height: 30px;
@@ -50,9 +52,9 @@ const ItemCadastro: React.FC = () => {
 
   const [form] = Form.useForm();
 
-  const disciplinaid = Form.useWatch('disciplinas', form);
-  const areaConhecimentoId = Form.useWatch('AreaConhecimento', form);
-  const matrizId = Form.useWatch('matriz', form);
+  const disciplinaid = Form.useWatch(Campos.disciplinas, form);
+  const areaConhecimentoId = Form.useWatch(Campos.areaConhecimento, form);
+  const matrizId = Form.useWatch(Campos.matriz, form);
 
   const [itemSalvar, setItemSalvar] = useState<ItemDto>({} as ItemDto);
 
@@ -98,9 +100,11 @@ const ItemCadastro: React.FC = () => {
       areaConhecimento: null,
       disciplina: null,
       matriz: null,
+      competencia: null,
       listaAreaConhecimentos: item.listaAreaConhecimentos,
       listaDisciplinas: item.listaDisciplinas,
       listaMatriz: item.listaMatriz,
+      listaCompetencias: item.listaCompetencias,
     };
     dispatch(setItem(itemAtual));
     setItemSalvar({} as ItemDto);
@@ -133,9 +137,11 @@ const ItemCadastro: React.FC = () => {
             areaConhecimento: item.areaConhecimento,
             disciplina: item.disciplina,
             matriz: item.matriz,
+            competencia: item.competencia,
             listaAreaConhecimentos: item.listaAreaConhecimentos,
             listaDisciplinas: item.listaDisciplinas,
             listaMatriz: item.listaMatriz,
+            listaCompetencias: item.listaCompetencias,
           };
           dispatch(setItem(itemAtual));
         })
@@ -256,7 +262,7 @@ const ItemCadastro: React.FC = () => {
 
   const tabs: Array<Tab> = [
     { key: '1', label: 'Configuração', children: contentTabConfiguracao },
-    { key: '2', label: 'Componentes do item', children: <h1>Componentes do item</h1> },
+    { key: '2', label: 'Componentes do item', children: <ComponentesItem form={form} testeNome='teste' /> },
     { key: '3', label: 'Elaboração do item', children: <h1>Elaboração do item</h1> },
   ];
 
