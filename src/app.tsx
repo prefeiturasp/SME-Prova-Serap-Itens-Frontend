@@ -3,7 +3,7 @@ import { Provider } from 'react-redux';
 import moment from 'moment';
 import { PersistGate } from 'redux-persist/integration/react';
 import { persistor, store } from './redux';
-import RoutesConfig from './route/routes';
+//import RoutesConfig from './route/routes';
 import ItemCadastro from './pages/item/cadastrar/index';
 
 moment.locale('pt-br');
