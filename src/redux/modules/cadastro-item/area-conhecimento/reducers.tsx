@@ -1,4 +1,5 @@
 import produce from 'immer';
+
 import { SetAreaAtual, typeSetAreaAtual } from './actions';
 
 export interface AreaConhecimentoProps {

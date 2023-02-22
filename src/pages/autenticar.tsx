@@ -6,6 +6,7 @@ import styled from 'styled-components';
 import { AppState } from '~/redux';
 import { setIsAuthenticated } from '~/redux/modules/auth/actions';
 //import autenticacaoService from '~/services/autenticacao-service';
+
 import { voltarAoSerap } from '~/utils/converte-dto';
 
 const ContainerAutenticar = styled.div`
