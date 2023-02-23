@@ -6,7 +6,7 @@ import styled from 'styled-components';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { Colors } from '~/styles/colors';
 import { voltarAoSerap } from '~/utils/converte-dto';
-// import FiltroPrincipal from '../filtro-principal';
+//import FiltroPrincipal from '../filtro-principal';
 
 const ContainerHeader = styled(Layout.Header)`
   padding: 0;
@@ -14,15 +14,15 @@ const ContainerHeader = styled(Layout.Header)`
   z-index: 1;
   width: 100%;
   height: 110px;
-  background: ${Colors.AzulSerap};
+  background: ${Colors.CinzaFundo};
 `;
 
-// const ContainerFiltro = styled.div`
-//   height: 62px;
-//   display: flex;
-//   justify-content: center;
-//   align-items: center;
-// `;
+const ContainerFiltro = styled.div`
+  height: 62px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;*/
 
 const HeaderTitle = styled.div`
   height: 48px;
@@ -69,11 +69,8 @@ const Header: React.FC = () => {
             Retornar a tela inicial
           </Button>
         </BackPreviousPage>
-        <Title>Cadastro de Itens</Title>
+        <Title>Serap Itens</Title>
       </HeaderTitle>
-      {/* <ContainerFiltro>
-        <FiltroPrincipal />
-      </ContainerFiltro> */}
     </ContainerHeader>
   );
 };

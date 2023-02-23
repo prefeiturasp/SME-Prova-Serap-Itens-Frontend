@@ -66,7 +66,6 @@ const getDefaultSelect = (url: string): Promise<DefaultOptionType[]> =>
       }
       return [];
     });
-
 export default {
   obterDadosCardsTotalizadores,
   obterTiposVisualizacoesDados,
