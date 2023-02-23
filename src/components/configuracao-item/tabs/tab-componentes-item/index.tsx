@@ -1,26 +1,26 @@
-import React, { Component, Dispatch, SetStateAction, useCallback, useEffect, useState } from 'react';
+import React, { Dispatch, SetStateAction, useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppState } from '~/redux';
 import { Col, Form, FormProps, Row, Radio } from 'antd';
-import type { RadioChangeEvent } from 'antd';
 import SelectForm from '~/components/select-form';
 import { Campos } from '~/domain/enums/campos-cadastro-item';
-import { ItemProps } from '~/redux/modules/cadastro-item/item/reducers';
+import { ComponentesItemProps } from '~/redux/modules/cadastro-item/item/reducers';
 import { DefaultOptionType } from 'antd/lib/select';
 import { CheckboxOptionType } from 'antd/es/checkbox/Group';
 import configuracaoItemService from '~/services/configuracaoItem-service';
-import { setItem } from '~/redux/modules/cadastro-item/item/actions';
+import { setComponentesItem } from '~/redux/modules/cadastro-item/item/actions';
 import { SelectValueType } from '~/domain/type/select';
 import './tabComponentesItemStyles.css';
 
-interface ComponentesItemProps extends FormProps {
+interface TabComponentesItemProps extends FormProps {
     testeNome: string;
 }
 
-const ComponentesItem: React.FC<ComponentesItemProps> = ({ form }) => {
+const ComponentesItem: React.FC<TabComponentesItemProps> = ({ form }) => {
 
     const dispatch = useDispatch();
     const item = useSelector((state: AppState) => state.item);
+    const componentesItem = useSelector((state: AppState) => state.componentesItem);
 
     const campoCompetencia = Campos.competencia;
     const campoHabilidade = Campos.habilidade;
@@ -31,19 +31,20 @@ const ComponentesItem: React.FC<ComponentesItemProps> = ({ form }) => {
     const competenciaIdForm = Form.useWatch(Campos.competencia, form);
     const anoMatrizForm = Form.useWatch(campoAnoMatriz, form);
     const dificuldadeSugeridaForm = Form.useWatch(campoDificuldadeSugerida, form);
+    const habilidadeForm = Form.useWatch(campoHabilidade, form);
 
+    const [objTabComponentesItem, setObjTabComponentesItem] =
+        useState<ComponentesItemProps>(componentesItem);
     const [listaCompetencias, setListaCompetencias] = useState<DefaultOptionType[]>([]);
     const [listaHabilidades, setListaHabilidades] = useState<DefaultOptionType[]>([]);
-    const [anoMatriz, setAnoMatriz] = useState<SelectValueType>();
     const [listaAnosMatriz, setListaAnosMatriz] = useState<CheckboxOptionType[]>([]);
-    const [dificuldadeSugerida, setDificuldadeSugerida] = useState<SelectValueType>();
 
     const initListaDificuldadeSugerida: CheckboxOptionType[] =
-        [{ label: 'Fácil', value: '1' },
-        { label: 'Muito Fácil', value: '5' },
-        { label: 'Médio', value: '2' },
-        { label: 'Difícil', value: '3' },
-        { label: 'Muito Difícil', value: '4' },];
+        [{ label: '1 - Muito Fácil', value: 5 },
+        { label: '2 - Fácil', value: 1 },
+        { label: '3 - Médio', value: 2 },
+        { label: '4 - Difícil', value: 3 },
+        { label: '5 - Muito Difícil', value: 4 },];
     const [listaDificuldadeSugerida, setListaDificuldadeSugerida] = useState<CheckboxOptionType[]>(initListaDificuldadeSugerida);
 
     const converterListaAnosMatriz = (lista?: DefaultOptionType[]) => {
@@ -94,10 +95,10 @@ const ComponentesItem: React.FC<ComponentesItemProps> = ({ form }) => {
         const resposta = await configuracaoItemService.obterAnosMatriz(matrizIdForm);
         if (resposta?.length) {
             setListaAnosMatriz(converterListaAnosMatriz(resposta));
-            if (resposta.length === 1) setAnoMatriz(resposta[0].value);
+            if (resposta.length === 1) form?.setFieldValue(campoAnoMatriz, resposta[0].value);
         } else {
             setListaAnosMatriz([]);
-            //form?.setFieldValue(campoCompetencia, null);
+            form?.setFieldValue(campoAnoMatriz, null);
         }
     }, [form, matrizIdForm]);
 
@@ -107,21 +108,22 @@ const ComponentesItem: React.FC<ComponentesItemProps> = ({ form }) => {
     }, [matrizIdForm, campoCompetencia, popularCampoSelectForm]);
 
     useEffect(() => {
-        const itemAtual: ItemProps = {
-            ...item,
-            competencia: competenciaIdForm,
-        };
-        dispatch(setItem(itemAtual));
         popularCampoSelectForm(competenciaIdForm, campoHabilidade, setListaHabilidades);
     }, [competenciaIdForm, campoHabilidade, item, dispatch, popularCampoSelectForm]);
 
     useEffect(() => {
-        setAnoMatriz(anoMatrizForm);
-    }, [anoMatrizForm]);
+        const novoObj: ComponentesItemProps = {
+            competencia: competenciaIdForm,
+            habilidade: habilidadeForm,
+            anoMatriz: anoMatrizForm,
+            dificuldadeSugerida: dificuldadeSugeridaForm,
+        };
+        setObjTabComponentesItem(novoObj);
+    }, [competenciaIdForm, anoMatrizForm, dificuldadeSugeridaForm, habilidadeForm]);
 
     useEffect(() => {
-        setDificuldadeSugerida(dificuldadeSugeridaForm);
-    }, [dificuldadeSugeridaForm]);
+        dispatch(setComponentesItem(objTabComponentesItem));
+    }, [objTabComponentesItem, dispatch]);
 
     return (
         <>
@@ -158,7 +160,7 @@ const ComponentesItem: React.FC<ComponentesItemProps> = ({ form }) => {
             <Row gutter={10}>
                 <Col span={10}>
                     <Form.Item label='Dificuldade sugerida' name={campoDificuldadeSugerida}>
-                        <Radio.Group 
+                        <Radio.Group
                             className='dificuldadeSugerida'
                             id='rblDificuldadeSugerida'
                             buttonStyle='solid'

@@ -7,9 +7,9 @@ import disciplina from './cadastro-item/disciplina/reducers';
 import matriz from './cadastro-item/matriz/reducers';
 import {
   itemPrincipal as item,
-  idMatriz,
-  idCompetencia,
-  listaCompetencias,
+  configuracaoItem,
+  componentesItem,
+  elaboracaoItem,
 } from './cadastro-item/item/reducers';
 
 const rootReducer = combineReducers({
@@ -20,9 +20,9 @@ const rootReducer = combineReducers({
   matriz,
   disciplina,
   item,
-  idMatriz,
-  idCompetencia,
-  listaCompetencias,
+  configuracaoItem,
+  componentesItem,
+  elaboracaoItem,
 });
 
 export default rootReducer;

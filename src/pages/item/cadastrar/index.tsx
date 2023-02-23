@@ -15,8 +15,18 @@ import configuracaoItemService from '~/services/configuracaoItem-service';
 import './cadastroItemStyles.css';
 import { Tab } from 'rc-tabs/lib/interface';
 import { Tabs } from 'antd';
-import { setItem } from '~/redux/modules/cadastro-item/item/actions';
-import { ItemProps } from '~/redux/modules/cadastro-item/item/reducers';
+import {
+  setItem,
+  setConfiguracaoItem,
+  setComponentesItem,
+  setElaboracaoItem,
+} from '~/redux/modules/cadastro-item/item/actions';
+import {
+  ItemProps,
+  ConfiguracaoItemProps,
+  ComponentesItemProps,
+  ElaboracaoItemProps,
+} from '~/redux/modules/cadastro-item/item/reducers';
 import ComponentesItem from '~/components/configuracao-item/tabs/tab-componentes-item';
 import { Campos } from '~/domain/enums/campos-cadastro-item';
 
@@ -38,50 +48,62 @@ export const Title = styled.div`
 `;
 
 const ItemCadastro: React.FC = () => {
+
   const dispatch = useDispatch();
   const [carregando, setCarregando] = useState<boolean>(false);
   const item = useSelector((state: AppState) => state.item);
+  const configuracaoItem = useSelector((state: AppState) => state.configuracaoItem);
+  const componentesItem = useSelector((state: AppState) => state.componentesItem);
   const matriz = useSelector((state: AppState) => state.matriz);
   const disciplina = useSelector((state: AppState) => state.disciplina);
 
-  const [objAreaConhecimento, setArea] = useState<DefaultOptionType[]>(item.listaAreaConhecimentos);
-  const [objDisciplina, setDisciplinas] = useState<DefaultOptionType[]>(item.listaDisciplinas);
-  const [objMatriz, setMatriz] = useState<DefaultOptionType[]>(item.listaMatriz);
+  const [objTabConfiguracaoItem, setObjTabConfiguracaoItem] = useState<ConfiguracaoItemProps>(configuracaoItem);
+  const [listaAreaConhecimento, setListaAreaConhecimento] = useState<DefaultOptionType[]>([]);
+  const [listaDisciplinas, setListaDisciplinas] = useState<DefaultOptionType[]>([]);
+  const [listaMatriz, setListaMatriz] = useState<DefaultOptionType[]>([]);
+
   const [modelomatriz, setModeloMatriz] = useState<string>(matriz.modelo);
   const [nivelEnsino, setNivelEnsino] = useState<string>(disciplina.nivelEnsino);
 
   const [form] = Form.useForm();
 
-  const disciplinaid = Form.useWatch(Campos.disciplinas, form);
-  const areaConhecimentoId = Form.useWatch(Campos.areaConhecimento, form);
-  const matrizId = Form.useWatch(Campos.matriz, form);
+  const disciplinaidForm = Form.useWatch(Campos.disciplinas, form);
+  const areaConhecimentoIdForm = Form.useWatch(Campos.areaConhecimento, form);
+  const matrizIdForm = Form.useWatch(Campos.matriz, form);
 
   const [itemSalvar, setItemSalvar] = useState<ItemDto>({} as ItemDto);
 
-  const initBloquearBtnSalvar: boolean =
-    disciplinaid == undefined ||
-    !disciplinaid ||
-    !areaConhecimentoId ||
-    areaConhecimentoId == undefined ||
-    !matrizId ||
-    matrizId == undefined;
+  const bloquearSalvar =
+    configuracaoItem.disciplina == undefined ||
+    !configuracaoItem.disciplina ||
+    !configuracaoItem.areaConhecimento ||
+    configuracaoItem.areaConhecimento == undefined ||
+    !configuracaoItem.matriz ||
+    configuracaoItem.matriz == undefined ||
+    componentesItem.competencia == undefined ||
+    !componentesItem.competencia ||
+    componentesItem.habilidade == undefined ||
+    !componentesItem.habilidade ||
+    componentesItem.anoMatriz == undefined ||
+    !componentesItem.anoMatriz ||
+    componentesItem.dificuldadeSugerida == undefined ||
+    !componentesItem.dificuldadeSugerida;
 
-  const initBloquearBtnSalvarRascunho: boolean =
-    disciplinaid == undefined ||
-    !disciplinaid ||
-    !areaConhecimentoId ||
-    areaConhecimentoId == undefined ||
-    !initBloquearBtnSalvar;
+  const bloquearSalvarRascunho =
+    configuracaoItem.disciplina == undefined ||
+    !configuracaoItem.disciplina ||
+    !configuracaoItem.areaConhecimento ||
+    configuracaoItem.areaConhecimento == undefined ||
+    !bloquearSalvar;
 
-  const [bloquearBtnSalvar, setBloquearBtnSalvar] = useState<boolean>(initBloquearBtnSalvar);
-  const [bloquearBtnSalvarRascunho, setBloquearBtnSalvarRascunho] = useState<boolean>(
-    initBloquearBtnSalvarRascunho,
-  );
+  const [bloquearBtnSalvar, setBloquearBtnSalvar] = useState<boolean>(bloquearSalvar);
+  const [bloquearBtnSalvarRascunho, setBloquearBtnSalvarRascunho] =
+    useState<boolean>(bloquearSalvarRascunho);
 
   useEffect(() => {
-    setBloquearBtnSalvar(initBloquearBtnSalvar);
-    setBloquearBtnSalvarRascunho(initBloquearBtnSalvarRascunho);
-  }, [initBloquearBtnSalvar, initBloquearBtnSalvarRascunho]);
+    setBloquearBtnSalvar(bloquearSalvar);
+    setBloquearBtnSalvarRascunho(bloquearSalvarRascunho);
+  }, [bloquearSalvar, bloquearSalvarRascunho]);
 
   type tipoMsg = 'success' | 'info' | 'warning' | 'error';
   const [api, contextHolder] = notification.useNotification();
@@ -96,17 +118,14 @@ const ItemCadastro: React.FC = () => {
     setCarregando(true);
     const itemAtual: ItemProps = {
       id: 0,
-      codigo: 0,
-      areaConhecimento: null,
-      disciplina: null,
-      matriz: null,
-      competencia: null,
-      listaAreaConhecimentos: item.listaAreaConhecimentos,
-      listaDisciplinas: item.listaDisciplinas,
-      listaMatriz: item.listaMatriz,
-      listaCompetencias: item.listaCompetencias,
+      configuracao: {} as ConfiguracaoItemProps,
+      componentes: {} as ComponentesItemProps,
+      elaboracao: {} as ElaboracaoItemProps,
     };
     dispatch(setItem(itemAtual));
+    dispatch(setConfiguracaoItem({} as ConfiguracaoItemProps));
+    dispatch(setComponentesItem({} as ComponentesItemProps));
+    dispatch(setElaboracaoItem({} as ElaboracaoItemProps));
     setItemSalvar({} as ItemDto);
     form.resetFields();
     setCarregando(false);
@@ -115,13 +134,17 @@ const ItemCadastro: React.FC = () => {
   const gerarItemSalvar = useCallback(() => {
     const dto: ItemDto = {
       id: item.id,
-      codigoItem: item.codigo,
-      areaConhecimentoId: areaConhecimentoId,
-      disciplinaId: disciplinaid,
-      matrizId: matrizId,
+      codigoItem: configuracaoItem.codigo,
+      areaConhecimentoId: Number.parseInt(configuracaoItem.areaConhecimento?.valueOf().toString()),
+      disciplinaId: configuracaoItem.disciplina,
+      matrizId: configuracaoItem.matriz,
+      competenciaId: componentesItem.competencia,
+      habilidadeId: componentesItem.habilidade,
+      anoMatrizId: componentesItem.anoMatriz,
+      dificuldadeId: componentesItem.dificuldadeSugerida,
     };
     setItemSalvar(dto);
-  }, [item, areaConhecimentoId, disciplinaid, matrizId]);
+  }, [item, areaConhecimentoIdForm, disciplinaidForm, matrizIdForm, objTabConfiguracaoItem]);
 
   const dadosItemSalvar = useMemo(() => gerarItemSalvar(), [gerarItemSalvar]);
 
@@ -131,17 +154,16 @@ const ItemCadastro: React.FC = () => {
       await configuracaoItemService
         .obterItem(id)
         .then((resp) => {
-          const itemAtual: ItemProps = {
-            id: id,
+          const configuracaoItem: ConfiguracaoItemProps = {
             codigo: resp?.data?.codigoItem,
-            areaConhecimento: item.areaConhecimento,
-            disciplina: item.disciplina,
-            matriz: item.matriz,
-            competencia: item.competencia,
-            listaAreaConhecimentos: item.listaAreaConhecimentos,
-            listaDisciplinas: item.listaDisciplinas,
-            listaMatriz: item.listaMatriz,
-            listaCompetencias: item.listaCompetencias,
+            areaConhecimento: resp?.data?.areaConhecimento,
+            disciplina: resp?.data?.disciplina,
+            matriz: resp?.data?.matriz,
+          };
+          const itemAtual: ItemProps = {
+            ...item,
+            id: id,
+            configuracao: configuracaoItem,
           };
           dispatch(setItem(itemAtual));
         })
@@ -202,7 +224,21 @@ const ItemCadastro: React.FC = () => {
 
   useEffect(() => {
     form.resetFields();
-  }, [form, objAreaConhecimento]);
+  }, [form, listaAreaConhecimento]);
+
+  useEffect(() => {
+    const novoObj: ConfiguracaoItemProps = {
+      codigo: 0,
+      areaConhecimento: areaConhecimentoIdForm,
+      disciplina: disciplinaidForm,
+      matriz: matrizIdForm,
+    };
+    setObjTabConfiguracaoItem(novoObj);
+  }, [disciplinaidForm, areaConhecimentoIdForm, matrizIdForm]);
+
+  useEffect(() => {
+    dispatch(setConfiguracaoItem(objTabConfiguracaoItem));
+  }, [objTabConfiguracaoItem, dispatch]);
 
   const contentTabConfiguracao: React.ReactNode = (
     <>
@@ -213,7 +249,7 @@ const ItemCadastro: React.FC = () => {
               <Input
                 disabled={true}
                 placeholder='Código Item'
-                value={item?.codigo > 0 ? item.codigo : ''}
+                value={configuracaoItem?.codigo > 0 ? configuracaoItem.codigo : ''}
               />
             </Form.Item>
           </Col>
@@ -222,19 +258,19 @@ const ItemCadastro: React.FC = () => {
           <Col span={8}>
             <AreaConhecimento
               form={form}
-              options={objAreaConhecimento}
-              setArea={setArea}
+              options={listaAreaConhecimento}
+              setArea={setListaAreaConhecimento}
             ></AreaConhecimento>
           </Col>
           <Col span={8}>
             <Disciplina
               form={form}
-              options={objDisciplina}
-              setDisciplinas={setDisciplinas}
+              options={listaDisciplinas}
+              setDisciplinas={setListaDisciplinas}
             ></Disciplina>
           </Col>
           <Col span={8}>
-            <Matriz form={form} options={objMatriz} setMatrizes={setMatriz}></Matriz>
+            <Matriz form={form} options={listaMatriz} setMatrizes={setListaMatriz}></Matriz>
           </Col>
         </Row>
         <hr />
@@ -262,7 +298,11 @@ const ItemCadastro: React.FC = () => {
 
   const tabs: Array<Tab> = [
     { key: '1', label: 'Configuração', children: contentTabConfiguracao },
-    { key: '2', label: 'Componentes do item', children: <ComponentesItem form={form} testeNome='teste' /> },
+    {
+      key: '2',
+      label: 'Componentes do item',
+      children: <ComponentesItem form={form} testeNome='teste' />,
+    },
     { key: '3', label: 'Elaboração do item', children: <h1>Elaboração do item</h1> },
   ];
 
@@ -294,7 +334,7 @@ const ItemCadastro: React.FC = () => {
           form={form}
           layout='vertical'
           initialValues={{
-            AreaConhecimento: objAreaConhecimento,
+            AreaConhecimento: listaAreaConhecimento,
           }}
           autoComplete='off'
         >

@@ -30,7 +30,7 @@ const SelectForm: React.FC<SelectProps> = ({ form, options, nomeCampo, label, ru
                 disabled={options?.length === 1}
                 placeholder='Selecione'
                 allowClear
-                showSearch
+                showSearch={false}
             />
         </Form.Item>
     );

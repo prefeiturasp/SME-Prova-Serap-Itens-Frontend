@@ -1,35 +1,33 @@
-import { ItemProps } from './reducers';
-import { DefaultOptionType } from 'antd/lib/select';
+import {
+  ItemProps,
+  ConfiguracaoItemProps,
+  ComponentesItemProps,
+  ElaboracaoItemProps,
+} from './reducers';
 
 export const typeSetItemAtual = '@itemPrincipal/setItemAtual';
-export const typeSetIdItemAtual = '@itemPrincipal/setIdItemAtual';
-export const typeSetIdMatrizAtual = '@itemPrincipal/setIdMatrizAtual';
-export const typeSetIdCompetencia = '@itemPrincipal/setIdCompetenciaAtual';
-export const typeSetListaCompetencias = '@itemPrincipal/setListaCompetencias';
+export const typeSetConfiguracaoItem = '@itemPrincipal/setConfiguracaoItem';
+export const typeSetComponentesItem = '@itemPrincipal/setComponentesItem';
+export const typeSetElaboracaoItem = '@itemPrincipal/setElaboracaoItem';
 
 export interface SetItem {
   type: typeof typeSetItemAtual;
   payload: ItemProps;
 }
 
-export interface SetIdItem {
-  type: typeof typeSetIdItemAtual;
-  payload: number;
+export interface SetConfiguracaoItem {
+  type: typeof typeSetConfiguracaoItem;
+  payload: ConfiguracaoItemProps;
 }
 
-export interface SetIdMatriz {
-  type: typeof typeSetIdMatrizAtual;
-  payload: number;
+export interface SetComponentesItem {
+  type: typeof typeSetComponentesItem;
+  payload: ComponentesItemProps;
 }
 
-export interface SetIdCompetencia {
-  type: typeof typeSetIdCompetencia;
-  payload: number;
-}
-
-export interface SetListaCompetencias {
-  type: typeof typeSetListaCompetencias;
-  payload: DefaultOptionType[];
+export interface SetElaboracaoItem {
+  type: typeof typeSetElaboracaoItem;
+  payload: ElaboracaoItemProps;
 }
 
 export const setItem = (payload: ItemProps): SetItem => {
@@ -39,30 +37,23 @@ export const setItem = (payload: ItemProps): SetItem => {
   };
 };
 
-export const setIdItem = (payload: number): SetIdItem => {
+export const setConfiguracaoItem = (payload: ConfiguracaoItemProps): SetConfiguracaoItem => {
   return {
-    type: typeSetIdItemAtual,
+    type: typeSetConfiguracaoItem,
     payload,
   };
 };
 
-export const setIdMatriz = (payload: number): SetIdMatriz => {
+export const setComponentesItem = (payload: ComponentesItemProps): SetComponentesItem => {
   return {
-    type: typeSetIdMatrizAtual,
+    type: typeSetComponentesItem,
     payload,
   };
 };
 
-export const setIdCompetencia = (payload: number): SetIdCompetencia => {
+export const setElaboracaoItem = (payload: ElaboracaoItemProps): SetElaboracaoItem => {
   return {
-    type: typeSetIdCompetencia,
-    payload,
-  };
-};
-
-export const setListaCompetencias = (payload: DefaultOptionType[]): SetListaCompetencias => {
-  return {
-    type: typeSetListaCompetencias,
+    type: typeSetElaboracaoItem,
     payload,
   };
 };

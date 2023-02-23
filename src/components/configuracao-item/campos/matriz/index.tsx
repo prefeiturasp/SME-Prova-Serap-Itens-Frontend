@@ -1,14 +1,9 @@
 import { Form, FormProps } from 'antd';
 import { DefaultOptionType } from 'antd/lib/select';
 import React, { Dispatch, SetStateAction, useCallback, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { AppState } from '~/redux';
-
 import Select from '~/components/select';
 import configuracaoItemService from '~/services/configuracaoItem-service';
-import { setItem } from '~/redux/modules/cadastro-item/item/actions';
 import { Campos } from '~/domain/enums/campos-cadastro-item';
-import { ItemProps } from '~/redux/modules/cadastro-item/item/reducers';
 
 interface MatrizProps extends FormProps {
   setMatrizes: Dispatch<SetStateAction<DefaultOptionType[]>>;
@@ -16,13 +11,8 @@ interface MatrizProps extends FormProps {
 }
 
 const Matriz: React.FC<MatrizProps> = ({ form, setMatrizes, options }) => {
-  const dispatch = useDispatch();
-
-  const item = useSelector((state: AppState) => state.item);
-  const matrizRedux = useSelector((state: AppState) => state.idMatriz);
   const nomeCampo = Campos.matriz;
-  const matrizIdForm = Form.useWatch(Campos.matriz, form);
-  const disciplina = Form.useWatch('disciplinas', form);
+  const disciplina = Form.useWatch(Campos.disciplinas, form);
 
   const obterMatrizes = useCallback(async () => {
     const resposta = await configuracaoItemService.obterMatriz(disciplina);
@@ -49,14 +39,6 @@ const Matriz: React.FC<MatrizProps> = ({ form, setMatrizes, options }) => {
   useEffect(() => {
     if (options?.length > 1) form?.setFieldValue(nomeCampo, null);
   }, [form, options, nomeCampo]);
-
-  useEffect(() => {
-    const itemAtual: ItemProps = {
-      ...item,
-      matriz: matrizIdForm,
-    };
-    dispatch(setItem(itemAtual));
-  }, [matrizIdForm, item, dispatch]);
 
   return (
     <Form.Item
