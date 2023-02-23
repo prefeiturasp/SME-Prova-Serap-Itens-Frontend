@@ -1,0 +1,17 @@
+.dificuldadeSugerida > label {
+    margin: 5px;
+    border-start-start-radius: 17px !important;
+    border-start-end-radius: 17px !important;
+    border-end-start-radius: 17px !important;            
+    border-end-end-radius: 17px !important;
+    background: #ededed;
+    border: none;
+}
+
+.dificuldadeSugerida > label::before {    
+    background: #fff !important;
+}
+
+.dificuldadeSugerida > label::after {    
+    background: #fff !important;
+}

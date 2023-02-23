@@ -32,6 +32,14 @@ const salvarRascunhoItem = (item: ItemDto): Promise<AxiosResponse<number>> =>
 const obterCompetenciasMatriz = (matrizId: SelectValueType): Promise<DefaultOptionType[]> =>
   geralService.getDefaultSelect(`${URL_DEFAULT}/competencia/matriz/${matrizId}`);
 
+const obterHabilidadesCompetencia = (
+  competenciaId: SelectValueType,
+): Promise<DefaultOptionType[]> =>
+  geralService.getDefaultSelect(`${URL_DEFAULT}/habilidade/competencia/${competenciaId}`);
+
+const obterAnosMatriz = (matrizId: SelectValueType): Promise<DefaultOptionType[]> =>
+  geralService.getDefaultSelect(`${URL_DEFAULT}/tipograde/matriz/${matrizId}`);
+
 const obterItem = (id: number): Promise<AxiosResponse<any>> => api.get(`${URL_DEFAULT}/Item/${id}`);
 
 export default {
@@ -44,4 +52,6 @@ export default {
   salvarRascunhoItem,
   obterItem,
   obterCompetenciasMatriz,
+  obterHabilidadesCompetencia,
+  obterAnosMatriz,
 };

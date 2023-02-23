@@ -12,7 +12,7 @@ import {
   SetListaCompetencias,
   typeSetListaCompetencias,
   SetIdMatriz,
-  typeSetIdMatrizAtual
+  typeSetIdMatrizAtual,
 } from './actions';
 
 export interface ItemProps {
@@ -54,7 +54,7 @@ export const idItemPrincipal = (state: ItemProps = initialValues, action: SetIdI
   });
 };
 
-const itemPrincipal = (state: ItemProps = initialValues, action: SetItem) => {
+export const itemPrincipal = (state: ItemProps = initialValues, action: SetItem) => {
   return produce(state, (draft) => {
     switch (action.type) {
       case typeSetItemAtual:
@@ -77,7 +77,7 @@ export const idMatriz = (state: ItemProps = initialValues, action: SetIdMatriz) 
   return produce(state, (draft) => {
     switch (action.type) {
       case typeSetIdMatrizAtual:
-        draft.competencia = action.payload;
+        draft.matriz = action.payload;
         break;
       default:
         break;
@@ -111,5 +111,3 @@ export const listaCompetencias = (
     }
   });
 };
-
-export default itemPrincipal;
