@@ -41,7 +41,7 @@ const ModeloMatriz: React.FC<MatrizPropsDispach> = ({ form, setModeloMatriz, mod
 
 
   return (
-    <Form.Item label="Modelo Matriz">
+    <Form.Item label="Modelo matriz">
       <strong> {modelo}</strong>
     </Form.Item>
   );

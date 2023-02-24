@@ -41,7 +41,7 @@ const Disciplina: React.FC<DisciplinaProps> = ({ form, setDisciplinas, options }
   }, [form, options]);
 
   return (
-    <Form.Item name={nomeCampo}  label="Componente Curricular" rules={[{ required: !!area, message: 'Campo obrigatório' }]}>
+    <Form.Item name={nomeCampo}  label="Componente curricular" rules={[{ required: !!area, message: 'Campo obrigatório' }]}>
       <Select
         options={options}
         disabled={options?.length === 1}

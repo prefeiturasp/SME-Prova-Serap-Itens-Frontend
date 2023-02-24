@@ -34,7 +34,7 @@ const AreaConhecimento: React.FC<AreaConhecimentoProps> = ({ form, setArea, opti
 
 
   return (
-    <Form.Item name={nomeCampo} label="Area Conhecimento">
+    <Form.Item name={nomeCampo} label="Área de conhecimento">
       <Select
         options={options}
         disabled={options?.length === 1}
@@ -47,6 +47,3 @@ const AreaConhecimento: React.FC<AreaConhecimentoProps> = ({ form, setArea, opti
 };
 
 export default AreaConhecimento;
-
-
-

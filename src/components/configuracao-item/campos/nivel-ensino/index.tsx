@@ -40,7 +40,7 @@ const NivelEnsino: React.FC<NivelEnsinoPropsDispach> = ({ form, setNivelEnsino, 
   }, [disciplinaId, obterNivelEnsinoDisciplina, form]);
 
   return (
-    <Form.Item label="Nível Ensino">
+    <Form.Item label="Nível de ensino">
       <strong> {nivelEnsino}</strong>
     </Form.Item>
   );

@@ -42,7 +42,7 @@ const Matriz: React.FC<MatrizProps> = ({ form, setMatrizes, options }) => {
   return (
     <Form.Item
       name={nomeCampo}
-      label='Matriz'
+      label='Matriz de avaliação'
       rules={[{ required: !!disciplina, message: 'Campo obrigatório' }]}
     >
       <Select
