@@ -11,6 +11,7 @@ interface AreaConhecimentoProps extends FormProps {
 
 const AreaConhecimento: React.FC<AreaConhecimentoProps> = ({ form, setArea, options }) => {
   const nomeCampo = 'AreaConhecimento';
+  const area = Form.useWatch(nomeCampo, form);
 
   const obterArea = useCallback(async () => {
     const resposta = await configuracaoItemService.obterAreaConhecimento();
@@ -34,7 +35,11 @@ const AreaConhecimento: React.FC<AreaConhecimentoProps> = ({ form, setArea, opti
 
 
   return (
-    <Form.Item name={nomeCampo} label="Área de conhecimento">
+    <Form.Item
+      name={nomeCampo}
+      label="Área de conhecimento"
+      rules={[{ required: (!area || area == undefined || area == null), message: 'Campo obrigatório' }]}
+    >
       <Select
         options={options}
         disabled={options?.length === 1}
