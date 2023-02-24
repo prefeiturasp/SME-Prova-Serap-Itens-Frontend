@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction, useCallback, useEffect } from "react";
+import React, { Dispatch, SetStateAction, useCallback, useEffect } from 'react';
 import { Form, FormProps } from 'antd';
 import { DefaultOptionType } from 'antd/lib/select';
 import Select from '~/components/select';
@@ -51,4 +51,4 @@ const AreaConhecimento: React.FC<AreaConhecimentoProps> = ({ form, setArea, opti
   );
 };
 
-export default AreaConhecimento;
+export default React.memo(AreaConhecimento);
