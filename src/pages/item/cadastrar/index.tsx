@@ -287,9 +287,6 @@ const ItemCadastro: React.FC = () => {
           className='form'
           form={form}
           layout='vertical'
-          initialValues={{
-            AreaConhecimento: objAreaConhecimento,
-          }}
           autoComplete='off'
         >
           <Tabs className='margemTabs' defaultActiveKey='1' type='card' items={tabs} />
