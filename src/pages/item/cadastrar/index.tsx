@@ -48,16 +48,17 @@ export const Title = styled.div`
 `;
 
 const ItemCadastro: React.FC = () => {
-
   const dispatch = useDispatch();
   const [carregando, setCarregando] = useState<boolean>(false);
   const item = useSelector((state: AppState) => state.item);
   const configuracaoItem = useSelector((state: AppState) => state.configuracaoItem);
   const componentesItem = useSelector((state: AppState) => state.componentesItem);
+  const elaboracaoItem = useSelector((state: AppState) => state.elaboracaoItem);
   const matriz = useSelector((state: AppState) => state.matriz);
   const disciplina = useSelector((state: AppState) => state.disciplina);
 
-  const [objTabConfiguracaoItem, setObjTabConfiguracaoItem] = useState<ConfiguracaoItemProps>(configuracaoItem);
+  const [objTabConfiguracaoItem, setObjTabConfiguracaoItem] =
+    useState<ConfiguracaoItemProps>(configuracaoItem);
   const [listaAreaConhecimento, setListaAreaConhecimento] = useState<DefaultOptionType[]>([]);
   const [listaDisciplinas, setListaDisciplinas] = useState<DefaultOptionType[]>([]);
   const [listaMatriz, setListaMatriz] = useState<DefaultOptionType[]>([]);
@@ -87,7 +88,13 @@ const ItemCadastro: React.FC = () => {
     componentesItem.anoMatriz == undefined ||
     !componentesItem.anoMatriz ||
     componentesItem.dificuldadeSugerida == undefined ||
-    !componentesItem.dificuldadeSugerida;
+    !componentesItem.dificuldadeSugerida ||
+    componentesItem.discriminacao == undefined ||
+    !componentesItem.discriminacao ||
+    componentesItem.dificuldade == undefined ||
+    !componentesItem.dificuldade ||
+    componentesItem.acertoCasual == undefined ||
+    !componentesItem.acertoCasual;
 
   const bloquearSalvarRascunho =
     configuracaoItem.disciplina == undefined ||
@@ -135,16 +142,20 @@ const ItemCadastro: React.FC = () => {
     const dto: ItemDto = {
       id: item.id,
       codigoItem: configuracaoItem.codigo,
-      areaConhecimentoId: Number.parseInt(configuracaoItem.areaConhecimento?.valueOf().toString()),
+      areaConhecimentoId: configuracaoItem.areaConhecimento,
       disciplinaId: configuracaoItem.disciplina,
       matrizId: configuracaoItem.matriz,
       competenciaId: componentesItem.competencia,
       habilidadeId: componentesItem.habilidade,
       anoMatrizId: componentesItem.anoMatriz,
       dificuldadeId: componentesItem.dificuldadeSugerida,
+      discriminacao: componentesItem.discriminacao,
+      dificuldade: componentesItem.dificuldade,
+      acertoCasual: componentesItem.acertoCasual,
+      textoBase: elaboracaoItem?.textoBase ?? '',
     };
     setItemSalvar(dto);
-  }, [item, areaConhecimentoIdForm, disciplinaidForm, matrizIdForm, objTabConfiguracaoItem]);
+  }, [item, configuracaoItem, componentesItem, elaboracaoItem]);
 
   const dadosItemSalvar = useMemo(() => gerarItemSalvar(), [gerarItemSalvar]);
 
@@ -177,7 +188,6 @@ const ItemCadastro: React.FC = () => {
 
   const inserirItem = useCallback(
     async (item: ItemDto) => {
-      dadosItemSalvar;
       await configuracaoItemService
         .salvarItem(item)
         .then((resp) => {
@@ -189,7 +199,7 @@ const ItemCadastro: React.FC = () => {
           mensagem('error', 'Erro', 'ocorreu um erro ao cadastrar o item');
         });
     },
-    [mensagem, obterDadosItem, dadosItemSalvar],
+    [mensagem, obterDadosItem],
   );
 
   const inserirRascunhoItem = useCallback(
@@ -210,6 +220,7 @@ const ItemCadastro: React.FC = () => {
 
   const salvarItem = useCallback(async () => {
     setCarregando(true);
+    dadosItemSalvar;
     if (item?.id > 0) {
       mensagem('info', 'Atenção', `Item já cadastrado, id:${item.id}`);
     } else {
@@ -220,7 +231,7 @@ const ItemCadastro: React.FC = () => {
       }
     }
     setCarregando(false);
-  }, [item.id, itemSalvar, bloquearBtnSalvar, mensagem, inserirItem, inserirRascunhoItem]);
+  }, [item.id, itemSalvar, bloquearBtnSalvar, mensagem, inserirItem, inserirRascunhoItem, dadosItemSalvar]);
 
   useEffect(() => {
     form.resetFields();

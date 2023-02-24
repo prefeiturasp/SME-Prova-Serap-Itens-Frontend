@@ -6,4 +6,7 @@ export enum Campos {
     habilidade = 'habilidade',
     anoMatriz = 'anoMatriz',
     dificuldadeSugerida = 'dificuldadeSugerida',
+    discriminacao = 'infoEstatisticasDiscriminacao',
+    dificuldade = 'infoEstatisticasDificuldade',
+    acertoCasual = 'infoEstatisticasAcertoCasual',
 }

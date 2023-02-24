@@ -30,12 +30,18 @@ export interface ComponentesItemProps {
   habilidade: SelectValueType;
   anoMatriz: SelectValueType;
   dificuldadeSugerida: SelectValueType;
+  discriminacao: number | string | null;
+  dificuldade: number | string | null;
+  acertoCasual: number | string | null;
 }
 const initialValuesComponentesItemProps = {
   competencia: null,
   habilidade: null,
   anoMatriz: null,
   dificuldadeSugerida: null,
+  discriminacao: null,
+  dificuldade: null,
+  acertoCasual: null,
 };
 
 export interface ElaboracaoItemProps {
@@ -103,6 +109,9 @@ export const componentesItem = (
         draft.habilidade = action.payload.habilidade;
         draft.anoMatriz = action.payload.anoMatriz;
         draft.dificuldadeSugerida = action.payload.dificuldadeSugerida;
+        draft.discriminacao = action.payload.discriminacao;
+        draft.dificuldade = action.payload.dificuldade;
+        draft.acertoCasual = action.payload.acertoCasual;
         break;
       default:
         break;

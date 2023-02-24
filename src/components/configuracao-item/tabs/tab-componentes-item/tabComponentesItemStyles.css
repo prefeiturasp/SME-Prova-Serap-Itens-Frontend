@@ -15,3 +15,9 @@
 .dificuldadeSugerida > label::after {    
     background: #fff !important;
 }
+
+.spanlblInfoEstatisticas {
+    margin-left: 2px;
+    font-size: 12px;
+    opacity:  0.5;
+}
