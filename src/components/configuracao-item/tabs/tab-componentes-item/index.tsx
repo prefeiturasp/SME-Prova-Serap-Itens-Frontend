@@ -1,7 +1,7 @@
 import React, { Dispatch, SetStateAction, useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppState } from '~/redux';
-import { Col, Form, FormProps, Row, Radio, InputNumber, Spin } from 'antd';
+import { Col, Form, FormProps, Row, Radio, Spin } from 'antd';
 import SelectForm from '~/components/select-form';
 import { Campos } from '~/domain/enums/campos-cadastro-item';
 import { ComponentesItemProps } from '~/redux/modules/cadastro-item/item/reducers';
@@ -10,13 +10,11 @@ import { CheckboxOptionType } from 'antd/es/checkbox/Group';
 import configuracaoItemService from '~/services/configuracaoItem-service';
 import { setComponentesItem } from '~/redux/modules/cadastro-item/item/actions';
 import { SelectValueType } from '~/domain/type/select';
+import { validarCampoForm, converterListaParaCheckboxOption } from '~/utils/funcoes';
+import { CampoNumero } from '~/components/campo-numero';
 import './tabComponentesItemStyles.css';
 
-interface TabComponentesItemProps extends FormProps {
-    testeNome: string;
-}
-
-const ComponentesItem: React.FC<TabComponentesItemProps> = ({ form }) => {
+const ComponentesItem: React.FC<FormProps> = ({ form }) => {
 
     const dispatch = useDispatch();
     const item = useSelector((state: AppState) => state.item);
@@ -55,6 +53,9 @@ const ComponentesItem: React.FC<TabComponentesItemProps> = ({ form }) => {
     const [listaDificuldadeSugerida, setListaDificuldadeSugerida] = useState<CheckboxOptionType[]>(
         []
     );
+    const [discriminacao, setDiscriminacao] = useState<string>('');
+    const [dificuldade, setDificuldade] = useState<string>('');
+    const [acertoCasual, setAcertoCasual] = useState<string>('');
 
     const obterListaDificuldadeSugerida = useCallback(async () => {
         setCarregandoDificuldadeSugerida(true);
@@ -70,14 +71,6 @@ const ComponentesItem: React.FC<TabComponentesItemProps> = ({ form }) => {
         }
     }, [form, setListaDificuldadeSugerida, campoDificuldadeSugerida]);
 
-    const converterListaParaCheckboxOption = (lista?: DefaultOptionType[]) => {
-        if (!lista || lista?.length == 0 || lista == null || lista == undefined)
-            return [];
-        const retorno = lista.map((item) => {
-            return { value: item.value, label: item.label } as CheckboxOptionType
-        });
-        return retorno;
-    };
 
     const popularCampoSelectForm = useCallback(
         async (
@@ -163,16 +156,6 @@ const ComponentesItem: React.FC<TabComponentesItemProps> = ({ form }) => {
         dispatch(setComponentesItem(objTabComponentesItem));
     }, [objTabComponentesItem, dispatch]);
 
-    const handleInputChange = (value: number | string | null) => {
-        const valor = value ?? '';
-        if (/^-?\d*(\.\d{0,10})?$/.test(valor.toString())) {
-            form?.setFieldValue(campoDiscriminacao, valor);
-        } else {
-            form?.setFieldValue(campoDiscriminacao, null);
-        }
-    };
-
-
     return (
         <>
             <Row gutter={10}>
@@ -182,7 +165,7 @@ const ComponentesItem: React.FC<TabComponentesItemProps> = ({ form }) => {
                         options={listaCompetencias}
                         nomeCampo={campoCompetencia}
                         label={'Competência'}
-                        rules={[]}
+                        campoObrigatorio={true}
                     ></SelectForm>
                 </Col>
                 <Col span={8}>
@@ -191,7 +174,7 @@ const ComponentesItem: React.FC<TabComponentesItemProps> = ({ form }) => {
                         options={listaHabilidades}
                         nomeCampo={campoHabilidade}
                         label={'Habilidade'}
-                        rules={[]}
+                        campoObrigatorio={true}
                     ></SelectForm>
                 </Col>
                 <Col span={8}>
@@ -221,31 +204,49 @@ const ComponentesItem: React.FC<TabComponentesItemProps> = ({ form }) => {
                 </Col>
             </Row>
             <hr />
-            <Row gutter={10}><h3><b>Informações estatísticas</b></h3></Row>
+            <Row gutter={10}>
+                <h3>
+                    <b>Informações estatísticas</b>
+                </h3>
+            </Row>
             <Row gutter={10}>
                 <Col span={8}>
-                    <Form.Item label={lblCampoDiscriminacao} name={campoDiscriminacao}>
-                        <InputNumber
+                    <Form.Item
+                        label={lblCampoDiscriminacao}
+                        name={campoDiscriminacao}
+                        rules={[
+                            {
+                                required: validarCampoForm(discriminacaoForm),
+                                message: 'Campo obrigatório',
+                            }
+                        ]}
+                    >
+                        <CampoNumero
                             style={{ width: '100%' }}
-                            onChange={handleInputChange}
+                            value={discriminacao}
+                            onChange={setDiscriminacao}
                         />
                     </Form.Item>
                 </Col>
                 <Col span={8}>
-                    <Form.Item label={lblCampoDificuldade} name={campoDificuldade}>
-                        <InputNumber
-                            style={{ width: '100%' }}
-                            formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                            parser={(value) => value!.replace(/\$\s?|(,*)/g, '')}
-                        />
+                    <Form.Item
+                        label={lblCampoDificuldade}
+                        name={campoDificuldade}
+                        rules={[{ required: validarCampoForm(dificuldadeForm), message: 'Campo obrigatório' }]}
+                    >
+                        <CampoNumero style={{ width: '100%' }} value={dificuldade} onChange={setDificuldade} />
                     </Form.Item>
                 </Col>
                 <Col span={8}>
-                    <Form.Item label={lblCampoAcertoCasual} name={campoAcertoCasual}>
-                        <InputNumber
+                    <Form.Item
+                        label={lblCampoAcertoCasual}
+                        name={campoAcertoCasual}
+                        rules={[{ required: validarCampoForm(acertoCasualForm), message: 'Campo obrigatório' }]}
+                    >
+                        <CampoNumero
                             style={{ width: '100%' }}
-                            formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                            parser={(value) => value!.replace(/\$\s?|(,*)/g, '')}
+                            value={acertoCasual}
+                            onChange={setAcertoCasual}
                         />
                     </Form.Item>
                 </Col>

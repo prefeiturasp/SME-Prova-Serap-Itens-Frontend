@@ -13,6 +13,7 @@ interface MatrizProps extends FormProps {
 const Matriz: React.FC<MatrizProps> = ({ form, setMatrizes, options }) => {
   const nomeCampo = Campos.matriz;
   const disciplina = Form.useWatch(Campos.disciplinas, form);
+  const matrizForm = Form.useWatch(nomeCampo, form);
 
   const obterMatrizes = useCallback(async () => {
     const resposta = await configuracaoItemService.obterMatriz(disciplina);
@@ -44,7 +45,12 @@ const Matriz: React.FC<MatrizProps> = ({ form, setMatrizes, options }) => {
     <Form.Item
       name={nomeCampo}
       label='Matriz'
-      rules={[{ required: !!disciplina, message: 'Campo obrigatório' }]}
+      rules={[
+        {
+          required: !matrizForm || matrizForm == undefined || matrizForm == null,
+          message: 'Campo obrigatório',
+        },
+      ]}
     >
       <Select
         options={options}

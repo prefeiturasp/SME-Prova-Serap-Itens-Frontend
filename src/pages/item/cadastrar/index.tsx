@@ -231,7 +231,15 @@ const ItemCadastro: React.FC = () => {
       }
     }
     setCarregando(false);
-  }, [item.id, itemSalvar, bloquearBtnSalvar, mensagem, inserirItem, inserirRascunhoItem, dadosItemSalvar]);
+  }, [
+    item.id,
+    itemSalvar,
+    bloquearBtnSalvar,
+    mensagem,
+    inserirItem,
+    inserirRascunhoItem,
+    dadosItemSalvar
+  ]);
 
   useEffect(() => {
     form.resetFields();
@@ -312,7 +320,7 @@ const ItemCadastro: React.FC = () => {
     {
       key: '2',
       label: 'Componentes do item',
-      children: <ComponentesItem form={form} testeNome='teste' />,
+      children: <ComponentesItem form={form} />,
     },
     { key: '3', label: 'Elaboração do item', children: <h1>Elaboração do item</h1> },
   ];
@@ -344,9 +352,6 @@ const ItemCadastro: React.FC = () => {
           className='form'
           form={form}
           layout='vertical'
-          initialValues={{
-            AreaConhecimento: listaAreaConhecimento,
-          }}
           autoComplete='off'
         >
           <Tabs className='margemTabs' defaultActiveKey='1' type='card' items={tabs} />
