@@ -14,6 +14,7 @@ const Matriz: React.FC<MatrizProps> = ({ form, setMatrizes, options }) => {
   const nomeCampo = 'matriz';
 
   const disciplina = Form.useWatch('disciplinas', form);
+  const matrizForm = Form.useWatch('matriz', form);
 
   const obterMatrizes = useCallback(async () => {
     const resposta = await configuracaoItemService.obterMatriz(disciplina);
@@ -43,7 +44,12 @@ const Matriz: React.FC<MatrizProps> = ({ form, setMatrizes, options }) => {
     <Form.Item
       name={nomeCampo}
       label='Matriz de avaliação'
-      rules={[{ required: !!disciplina, message: 'Campo obrigatório' }]}
+      rules={[
+        {
+          required: !matrizForm || matrizForm == undefined || matrizForm == null,
+          message: 'Campo obrigatório',
+        },
+      ]}
     >
       <Select
         options={options}
