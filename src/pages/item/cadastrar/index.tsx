@@ -75,13 +75,7 @@ const ItemCadastro: React.FC = () => {
     componentesItem.anoMatriz == undefined ||
     !componentesItem.anoMatriz ||
     componentesItem.dificuldadeSugerida == undefined ||
-    !componentesItem.dificuldadeSugerida ||
-    componentesItem.discriminacao == undefined ||
-    !componentesItem.discriminacao ||
-    componentesItem.dificuldade == undefined ||
-    !componentesItem.dificuldade ||
-    componentesItem.acertoCasual == undefined ||
-    !componentesItem.acertoCasual;
+    !componentesItem.dificuldadeSugerida;
 
   const bloquearSalvarRascunho =
     configuracaoItem.disciplina == undefined ||
