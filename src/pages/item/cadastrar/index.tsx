@@ -361,4 +361,4 @@ const ItemCadastro: React.FC = () => {
   );
 };
 
-export default ItemCadastro;
+export default React.memo(ItemCadastro);

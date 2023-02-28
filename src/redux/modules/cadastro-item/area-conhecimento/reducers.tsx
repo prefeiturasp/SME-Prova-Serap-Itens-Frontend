@@ -1,6 +1,4 @@
-import { DefaultOptionType } from 'antd/lib/select';
 import produce from 'immer';
-import { SelectValueType } from '~/domain/type/select';
 
 import { SetAreaAtual, typeSetAreaAtual } from './actions';
 
