@@ -38,7 +38,10 @@ const Matriz: React.FC<MatrizProps> = ({ form, setMatrizes, options }) => {
   }, [setMatrizes, disciplina, obterMatrizes, form, nomeCampo]);
 
   useEffect(() => {
-    if (options?.length > 1) form?.setFieldValue(nomeCampo, null);
+    if (options?.length > 1 || options?.length == 1) {
+      form?.resetFields([nomeCampo]);
+      form?.setFieldValue(nomeCampo, options?.length == 1 ? options[0].value : null);
+    }
   }, [form, options, nomeCampo]);
 
   return (

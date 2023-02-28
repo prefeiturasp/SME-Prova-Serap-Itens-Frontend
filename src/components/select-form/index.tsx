@@ -24,13 +24,9 @@ const SelectForm: React.FC<SelectProps> = ({
     const validacaoCampo = validarCampoForm(valorCampoForm);
 
     useEffect(() => {
-        if (options?.length > 1) {
+        if (options?.length > 1 || options?.length == 1) {
             form?.resetFields([campo]);
-            form?.setFieldValue(campo, null);
-        }
-        if (options?.length == 1) {
-            form?.resetFields([campo]);
-            form?.setFieldValue(campo, options[0].value);
+            form?.setFieldValue(campo, options?.length == 1 ? options[0].value : null);
         }
     }, [form, options, campo]);
 

@@ -9,7 +9,7 @@ export interface ItemDto {
   competenciaId: SelectValueType;
   habilidadeId: SelectValueType;
   anoMatrizId: SelectValueType;
-  dificuldadeId: SelectValueType;
+  dificuldadeSugeridaId: SelectValueType;
   discriminacao: number | string | null;
   dificuldade: number | string | null;
   acertoCasual: number | string | null;

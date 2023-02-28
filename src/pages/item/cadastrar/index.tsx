@@ -8,8 +8,6 @@ import NivelEnsino from '~/components/configuracao-item/campos/nivel-ensino';
 import { DefaultOptionType } from 'antd/lib/select';
 import Matriz from '~/components/configuracao-item/campos/matriz';
 import ModeloMatriz from '~/components/configuracao-item/modelo-matriz';
-import styled from 'styled-components';
-import { Colors } from '~/styles/colors';
 import { ItemDto } from '~/domain/dto/item-dto';
 import configuracaoItemService from '~/services/configuracaoItem-service';
 import './cadastroItemStyles.css';
@@ -29,23 +27,7 @@ import {
 } from '~/redux/modules/cadastro-item/item/reducers';
 import ComponentesItem from '~/components/configuracao-item/tabs/tab-componentes-item';
 import { Campos } from '~/domain/enums/campos-cadastro-item';
-
-export const Container = styled.div`
-  height: 30px;
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 12px;
-`;
-
-export const Title = styled.div`
-  color: #595959;
-  font-weight: 500;
-  font-size: 20px;
-  margin-bottom: 30px;
-  padding-left: 2rem;
-  padding-right: 4rem;
-  background: ${Colors.CinzaFundo};
-`;
+import { Separador, Title } from '~/components/configuracao-item/campos/elementos';
 
 const ItemCadastro: React.FC = () => {
   const dispatch = useDispatch();
@@ -67,6 +49,11 @@ const ItemCadastro: React.FC = () => {
   const [nivelEnsino, setNivelEnsino] = useState<string>(disciplina.nivelEnsino);
 
   const [form] = Form.useForm();
+  const initialValuesForm = {
+    infoEstatisticasDiscriminacao: '',
+    infoEstatisticasDificuldade: '',
+    infoEstatisticasAcertoCasual: '',
+  };
 
   const disciplinaidForm = Form.useWatch(Campos.disciplinas, form);
   const areaConhecimentoIdForm = Form.useWatch(Campos.areaConhecimento, form);
@@ -141,14 +128,14 @@ const ItemCadastro: React.FC = () => {
   const gerarItemSalvar = useCallback(() => {
     const dto: ItemDto = {
       id: item.id,
-      codigoItem: configuracaoItem.codigo > 0 ? configuracaoItem.codigo : null,
+      codigoItem: configuracaoItem.codigo,
       areaConhecimentoId: configuracaoItem.areaConhecimento,
       disciplinaId: configuracaoItem.disciplina,
       matrizId: configuracaoItem.matriz,
       competenciaId: componentesItem.competencia,
       habilidadeId: componentesItem.habilidade,
       anoMatrizId: componentesItem.anoMatriz,
-      dificuldadeId: componentesItem.dificuldadeSugerida,
+      dificuldadeSugeridaId: componentesItem.dificuldadeSugerida,
       discriminacao: componentesItem.discriminacao,
       dificuldade: componentesItem.dificuldade,
       acertoCasual: componentesItem.acertoCasual,
@@ -166,16 +153,15 @@ const ItemCadastro: React.FC = () => {
         .obterItem(id)
         .then((resp) => {
           const configuracaoItem: ConfiguracaoItemProps = {
+            ...objTabConfiguracaoItem,
             codigo: resp?.data?.codigoItem,
-            areaConhecimento: resp?.data?.areaConhecimento,
-            disciplina: resp?.data?.disciplina,
-            matriz: resp?.data?.matriz,
           };
           const itemAtual: ItemProps = {
             ...item,
             id: id,
             configuracao: configuracaoItem,
           };
+          setObjTabConfiguracaoItem(configuracaoItem);
           dispatch(setItem(itemAtual));
         })
         .catch((err) => {
@@ -183,7 +169,7 @@ const ItemCadastro: React.FC = () => {
         });
       setCarregando(false);
     },
-    [dispatch, item],
+    [dispatch, item, objTabConfiguracaoItem],
   );
 
   const inserirItem = useCallback(
@@ -247,13 +233,13 @@ const ItemCadastro: React.FC = () => {
 
   useEffect(() => {
     const novoObj: ConfiguracaoItemProps = {
-      codigo: 0,
+      codigo: configuracaoItem.codigo,
       areaConhecimento: areaConhecimentoIdForm,
       disciplina: disciplinaidForm,
       matriz: matrizIdForm,
     };
     setObjTabConfiguracaoItem(novoObj);
-  }, [disciplinaidForm, areaConhecimentoIdForm, matrizIdForm]);
+  }, [disciplinaidForm, areaConhecimentoIdForm, matrizIdForm, configuracaoItem]);
 
   useEffect(() => {
     dispatch(setConfiguracaoItem(objTabConfiguracaoItem));
@@ -292,7 +278,7 @@ const ItemCadastro: React.FC = () => {
             <Matriz form={form} options={listaMatriz} setMatrizes={setListaMatriz}></Matriz>
           </Col>
         </Row>
-        <hr />
+        <Separador />
         <Row gutter={10}>
           <Col>
             <ModeloMatriz
@@ -353,6 +339,7 @@ const ItemCadastro: React.FC = () => {
           form={form}
           layout='vertical'
           autoComplete='off'
+          initialValues={initialValuesForm}
         >
           <Tabs className='margemTabs' defaultActiveKey='1' type='card' items={tabs} />
         </Form>

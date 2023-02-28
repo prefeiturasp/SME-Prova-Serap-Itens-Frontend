@@ -13,6 +13,7 @@ import { SelectValueType } from '~/domain/type/select';
 import { validarCampoForm, converterListaParaCheckboxOption } from '~/utils/funcoes';
 import { CampoNumero } from '~/components/campo-numero';
 import './tabComponentesItemStyles.css';
+import { SpanInfoEstatisticas, Separador } from '~/components/configuracao-item/campos/elementos';
 
 const ComponentesItem: React.FC<FormProps> = ({ form }) => {
 
@@ -26,13 +27,11 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
     const campoDificuldadeSugerida = Campos.dificuldadeSugerida;
 
     const campoDiscriminacao = Campos.discriminacao;
-    const spanInfoEstatisticas: React.ReactNode =
-        <span className='spanlblInfoEstatisticas'>(de 0 até 10)</span>;
-    const lblCampoDiscriminacao: React.ReactNode = <>Discriminação{spanInfoEstatisticas}</>;
+    const lblCampoDiscriminacao: React.ReactNode = <>Discriminação{SpanInfoEstatisticas}</>;
     const campoDificuldade = Campos.dificuldade;
-    const lblCampoDificuldade: React.ReactNode = <>Dificuldade{spanInfoEstatisticas}</>;
+    const lblCampoDificuldade: React.ReactNode = <>Dificuldade{SpanInfoEstatisticas}</>;
     const campoAcertoCasual = Campos.acertoCasual;
-    const lblCampoAcertoCasual: React.ReactNode = <>Acerto casual{spanInfoEstatisticas}</>;
+    const lblCampoAcertoCasual: React.ReactNode = <>Acerto casual{SpanInfoEstatisticas}</>;
 
     const matrizIdForm = Form.useWatch(Campos.matriz, form);
     const competenciaIdForm = Form.useWatch(Campos.competencia, form);
@@ -180,29 +179,33 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
                 <Col span={8}>
                 </Col>
             </Row>
-            <hr />
+            <Separador />
             <Row gutter={10}>
                 <Col span={8}>
-                    <Form.Item label='Selecione o ano' name={campoAnoMatriz}
-                    rules={[
-                        {
-                            required: validarCampoForm(anoMatrizForm),
-                            message: 'Campo obrigatório',
-                        }
-                    ]}>
+                    <Form.Item
+                        label='Selecione o ano'
+                        name={campoAnoMatriz}
+                        rules={[
+                            {
+                                required: validarCampoForm(anoMatrizForm),
+                                message: 'Campo obrigatório',
+                            }
+                        ]}>
                         <Radio.Group options={listaAnosMatriz} />
                     </Form.Item>
                 </Col>
             </Row>
             <Row gutter={10}>
                 <Col span={10}>
-                    <Form.Item label='Dificuldade sugerida' name={campoDificuldadeSugerida}
-                    rules={[
-                        {
-                            required: validarCampoForm(dificuldadeSugeridaForm),
-                            message: 'Campo obrigatório',
-                        }
-                    ]}>
+                    <Form.Item
+                        label='Dificuldade sugerida'
+                        name={campoDificuldadeSugerida}
+                        rules={[
+                            {
+                                required: validarCampoForm(dificuldadeSugeridaForm),
+                                message: 'Campo obrigatório',
+                            }
+                        ]}>
                         <Spin size='small' spinning={carregandoDificuldadeSugerida}>
                             <Radio.Group
                                 className='dificuldadeSugerida'
@@ -215,7 +218,7 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
                     </Form.Item>
                 </Col>
             </Row>
-            <hr />
+            <Separador />
             <Row gutter={10}>
                 <h3>
                     <b>Informações estatísticas</b>
@@ -233,11 +236,7 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
                             }
                         ]}
                     >
-                        <CampoNumero
-                            style={{ width: '100%' }}
-                            value={discriminacao}
-                            onChange={setDiscriminacao}
-                        />
+                        <CampoNumero value={discriminacao} onChange={setDiscriminacao} />
                     </Form.Item>
                 </Col>
                 <Col span={8}>
@@ -246,7 +245,7 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
                         name={campoDificuldade}
                         rules={[{ required: validarCampoForm(dificuldadeForm), message: 'Campo obrigatório' }]}
                     >
-                        <CampoNumero style={{ width: '100%' }} value={dificuldade} onChange={setDificuldade} />
+                        <CampoNumero value={dificuldade} onChange={setDificuldade} />
                     </Form.Item>
                 </Col>
                 <Col span={8}>
@@ -255,11 +254,7 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
                         name={campoAcertoCasual}
                         rules={[{ required: validarCampoForm(acertoCasualForm), message: 'Campo obrigatório' }]}
                     >
-                        <CampoNumero
-                            style={{ width: '100%' }}
-                            value={acertoCasual}
-                            onChange={setAcertoCasual}
-                        />
+                        <CampoNumero value={acertoCasual} onChange={setAcertoCasual} />
                     </Form.Item>
                 </Col>
             </Row>

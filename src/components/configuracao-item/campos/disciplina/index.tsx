@@ -4,6 +4,7 @@ import React, { Dispatch, SetStateAction, useCallback, useEffect } from 'react';
 
 import Select from '~/components/select';
 import configuracaoItemService from '~/services/configuracaoItem-service';
+import { Campos } from '~/domain/enums/campos-cadastro-item';
 
 interface DisciplinaProps extends FormProps {
   setDisciplinas: Dispatch<SetStateAction<DefaultOptionType[]>>;
@@ -11,7 +12,7 @@ interface DisciplinaProps extends FormProps {
 }
 
 const Disciplina: React.FC<DisciplinaProps> = ({ form, setDisciplinas, options }) => {
-  const nomeCampo = 'disciplinas';
+  const nomeCampo = Campos.disciplinas;
 
   const area = Form.useWatch('AreaConhecimento', form);
   const disciplinaForm = Form.useWatch(nomeCampo, form);
@@ -38,8 +39,11 @@ const Disciplina: React.FC<DisciplinaProps> = ({ form, setDisciplinas, options }
   }, [setDisciplinas, area, obterDisciplinas, form]);
 
   useEffect(() => {
-    if (options?.length > 1) form?.setFieldValue(nomeCampo, null);
-  }, [form, options]);
+    if (options?.length > 1 || options?.length == 1) {
+      form?.resetFields([nomeCampo]);
+      form?.setFieldValue(nomeCampo, options?.length == 1 ? options[0].value : null);
+    }
+  }, [form, options, nomeCampo]);
 
   return (
     <Form.Item
