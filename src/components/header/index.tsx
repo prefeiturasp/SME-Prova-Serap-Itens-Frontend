@@ -6,6 +6,7 @@ import styled from 'styled-components';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { Colors } from '~/styles/colors';
 import { voltarAoSerap } from '~/utils/converte-dto';
+//import FiltroPrincipal from '../filtro-principal';
 
 const ContainerHeader = styled(Layout.Header)`
   padding: 0;
@@ -15,6 +16,13 @@ const ContainerHeader = styled(Layout.Header)`
   height: 110px;
   background: ${Colors.CinzaFundo};
 `;
+
+const ContainerFiltro = styled.div`
+  height: 62px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;*/
 
 const HeaderTitle = styled.div`
   height: 48px;
