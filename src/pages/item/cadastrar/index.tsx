@@ -136,9 +136,9 @@ const ItemCadastro: React.FC = () => {
       habilidadeId: componentesItem.habilidade,
       anoMatrizId: componentesItem.anoMatriz,
       dificuldadeSugeridaId: componentesItem.dificuldadeSugerida,
-      discriminacao: componentesItem.discriminacao,
-      dificuldade: componentesItem.dificuldade,
-      acertoCasual: componentesItem.acertoCasual,
+      discriminacao: componentesItem.discriminacao !== '' ? componentesItem.discriminacao : null,
+      dificuldade: componentesItem.dificuldade !== '' ? componentesItem.dificuldade : null,
+      acertoCasual: componentesItem.acertoCasual !== '' ? componentesItem.acertoCasual : null,
       textoBase: elaboracaoItem?.textoBase ?? '',
     };
     setItemSalvar(dto);
