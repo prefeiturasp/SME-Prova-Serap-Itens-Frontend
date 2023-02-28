@@ -183,14 +183,26 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
             <hr />
             <Row gutter={10}>
                 <Col span={8}>
-                    <Form.Item label='Selecione o ano' name={campoAnoMatriz}>
+                    <Form.Item label='Selecione o ano' name={campoAnoMatriz}
+                    rules={[
+                        {
+                            required: validarCampoForm(anoMatrizForm),
+                            message: 'Campo obrigatório',
+                        }
+                    ]}>
                         <Radio.Group options={listaAnosMatriz} />
                     </Form.Item>
                 </Col>
             </Row>
             <Row gutter={10}>
                 <Col span={10}>
-                    <Form.Item label='Dificuldade sugerida' name={campoDificuldadeSugerida}>
+                    <Form.Item label='Dificuldade sugerida' name={campoDificuldadeSugerida}
+                    rules={[
+                        {
+                            required: validarCampoForm(dificuldadeSugeridaForm),
+                            message: 'Campo obrigatório',
+                        }
+                    ]}>
                         <Spin size='small' spinning={carregandoDificuldadeSugerida}>
                             <Radio.Group
                                 className='dificuldadeSugerida'

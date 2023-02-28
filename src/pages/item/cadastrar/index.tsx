@@ -141,7 +141,7 @@ const ItemCadastro: React.FC = () => {
   const gerarItemSalvar = useCallback(() => {
     const dto: ItemDto = {
       id: item.id,
-      codigoItem: configuracaoItem.codigo,
+      codigoItem: configuracaoItem.codigo > 0 ? configuracaoItem.codigo : null,
       areaConhecimentoId: configuracaoItem.areaConhecimento,
       disciplinaId: configuracaoItem.disciplina,
       matrizId: configuracaoItem.matriz,
@@ -238,7 +238,7 @@ const ItemCadastro: React.FC = () => {
     mensagem,
     inserirItem,
     inserirRascunhoItem,
-    dadosItemSalvar
+    dadosItemSalvar,
   ]);
 
   useEffect(() => {
