@@ -17,6 +17,7 @@ const ContainerHeader = styled(Layout.Header)`
   background: ${Colors.CinzaFundo};
 `;
 
+/*
 const ContainerFiltro = styled.div`
   height: 62px;
   display: flex;
