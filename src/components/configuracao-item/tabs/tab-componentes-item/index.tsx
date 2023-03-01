@@ -13,7 +13,7 @@ import { SelectValueType } from '~/domain/type/select';
 import { validarCampoForm, converterListaParaCheckboxOption } from '~/utils/funcoes';
 import { CampoNumero } from '~/components/campo-numero';
 import './tabComponentesItemStyles.css';
-import { SpanInfoEstatisticas, Separador } from '~/components/configuracao-item/campos/elementos';
+import { Separador } from '~/components/configuracao-item/campos/elementos';
 
 const ComponentesItem: React.FC<FormProps> = ({ form }) => {
 
@@ -27,11 +27,8 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
     const campoDificuldadeSugerida = Campos.dificuldadeSugerida;
 
     const campoDiscriminacao = Campos.discriminacao;
-    const lblCampoDiscriminacao: React.ReactNode = <>Discriminação{SpanInfoEstatisticas}</>;
     const campoDificuldade = Campos.dificuldade;
-    const lblCampoDificuldade: React.ReactNode = <>Dificuldade{SpanInfoEstatisticas}</>;
     const campoAcertoCasual = Campos.acertoCasual;
-    const lblCampoAcertoCasual: React.ReactNode = <>Acerto casual{SpanInfoEstatisticas}</>;
 
     const matrizIdForm = Form.useWatch(Campos.matriz, form);
     const competenciaIdForm = Form.useWatch(Campos.competencia, form);
@@ -47,7 +44,7 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
         useState<ComponentesItemProps>(componentesItem);
     const [listaCompetencias, setListaCompetencias] = useState<DefaultOptionType[]>([]);
     const [listaHabilidades, setListaHabilidades] = useState<DefaultOptionType[]>([]);
-    const [listaAnosMatriz, setListaAnosMatriz] = useState<CheckboxOptionType[]>([]);
+    const [listaAnosMatriz, setListaAnosMatriz] = useState<DefaultOptionType[]>([]);
     const [carregandoDificuldadeSugerida, setCarregandoDificuldadeSugerida] = useState<boolean>(false);
     const [listaDificuldadeSugerida, setListaDificuldadeSugerida] = useState<CheckboxOptionType[]>(
         []
@@ -79,14 +76,15 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
         ) => {
 
             let resposta: DefaultOptionType[] = [];
+            const possuiParametro = param && param !== null && param !== undefined;
             switch (nomeCampo) {
                 case Campos.competencia:
-                    if (!param || param == null || param == undefined) return [];
-                    resposta = await configuracaoItemService.obterCompetenciasMatriz(param);
+                    if (possuiParametro)
+                        resposta = await configuracaoItemService.obterCompetenciasMatriz(param);
                     break;
                 case Campos.habilidade:
-                    if (!param || param == null || param == undefined) return [];
-                    resposta = await configuracaoItemService.obterHabilidadesCompetencia(param);
+                    if (possuiParametro)
+                        resposta = await configuracaoItemService.obterHabilidadesCompetencia(param);
                     break;
                 default:
                     break;
@@ -99,8 +97,9 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
                 setLista([]);
                 form?.setFieldValue(nomeCampo, null);
             }
-
-        }, [form]);
+        },
+        [form],
+    );
 
     const obterAnosMatriz = useCallback(async () => {
         if (!matrizIdForm || matrizIdForm == null || matrizIdForm == undefined) {
@@ -109,7 +108,7 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
         }
         const resposta = await configuracaoItemService.obterAnosMatriz(matrizIdForm);
         if (resposta?.length) {
-            setListaAnosMatriz(converterListaParaCheckboxOption(resposta));
+            setListaAnosMatriz(resposta);
             if (resposta.length === 1) form?.setFieldValue(campoAnoMatriz, resposta[0].value);
         } else {
             setListaAnosMatriz([]);
@@ -182,17 +181,13 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
             <Separador />
             <Row gutter={10}>
                 <Col span={8}>
-                    <Form.Item
-                        label='Selecione o ano'
-                        name={campoAnoMatriz}
-                        rules={[
-                            {
-                                required: validarCampoForm(anoMatrizForm),
-                                message: 'Campo obrigatório',
-                            }
-                        ]}>
-                        <Radio.Group options={listaAnosMatriz} />
-                    </Form.Item>
+                    <SelectForm
+                        form={form}
+                        options={listaAnosMatriz}
+                        nomeCampo={campoAnoMatriz}
+                        label={'Selecione o ano'}
+                        campoObrigatorio={true}
+                    ></SelectForm>
                 </Col>
             </Row>
             <Row gutter={10}>
@@ -227,32 +222,24 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
             <Row gutter={10}>
                 <Col span={8}>
                     <Form.Item
-                        label={lblCampoDiscriminacao}
+                        label='Discriminação'
                         name={campoDiscriminacao}
-                        rules={[
-                            {
-                                required: validarCampoForm(discriminacaoForm),
-                                message: 'Campo obrigatório',
-                            }
-                        ]}
                     >
                         <CampoNumero value={discriminacao} onChange={setDiscriminacao} />
                     </Form.Item>
                 </Col>
                 <Col span={8}>
                     <Form.Item
-                        label={lblCampoDificuldade}
+                        label='Dificuldade'
                         name={campoDificuldade}
-                        rules={[{ required: validarCampoForm(dificuldadeForm), message: 'Campo obrigatório' }]}
                     >
                         <CampoNumero value={dificuldade} onChange={setDificuldade} />
                     </Form.Item>
                 </Col>
                 <Col span={8}>
                     <Form.Item
-                        label={lblCampoAcertoCasual}
+                        label='Acerto casual'
                         name={campoAcertoCasual}
-                        rules={[{ required: validarCampoForm(acertoCasualForm), message: 'Campo obrigatório' }]}
                     >
                         <CampoNumero value={acertoCasual} onChange={setAcertoCasual} />
                     </Form.Item>
