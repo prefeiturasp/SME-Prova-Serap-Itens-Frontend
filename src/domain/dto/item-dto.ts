@@ -1,7 +1,17 @@
+import { SelectValueType } from '~/domain/type/select';
+
 export interface ItemDto {
   id: number;
-  codigoItem: number;
-  areaConhecimentoId: number;
-  disciplinaId: number;
-  matrizId: number;
+  codigoItem: number | null;
+  areaConhecimentoId: SelectValueType;
+  disciplinaId: SelectValueType;
+  matrizId: SelectValueType;
+  competenciaId: SelectValueType;
+  habilidadeId: SelectValueType;
+  anoMatrizId: SelectValueType;
+  dificuldadeSugeridaId: SelectValueType;
+  discriminacao: number | string | null;
+  dificuldade: number | string | null;
+  acertoCasual: number | string | null;
+  textoBase: string;
 }
