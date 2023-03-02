@@ -172,7 +172,7 @@ const ItemCadastro: React.FC = () => {
         .salvarItem(item)
         .then((resp) => {
           obterDadosItem(resp.data);
-          mensagem('success', 'Sucesso', 'Item cadastrado com suesso');
+          mensagem('success', 'Sucesso', 'Item cadastrado com sucesso');
         })
         .catch((err) => {
           console.log('Erro', err.message);
@@ -188,7 +188,7 @@ const ItemCadastro: React.FC = () => {
         .salvarRascunhoItem(item)
         .then((resp) => {
           obterDadosItem(resp.data);
-          mensagem('success', 'Sucesso', 'Rascunho de item cadastrado com suesso');
+          mensagem('success', 'Sucesso', 'Rascunho de item cadastrado com sucesso');
         })
         .catch((err) => {
           console.log('Erro', err.message);
