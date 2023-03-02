@@ -2,7 +2,7 @@ import { DefaultOptionType } from 'antd/lib/select';
 import api from './api';
 import { SelectValueType } from '~/domain/type/select';
 import geralService from '~/services/geral-service';
-import { MatrizObj } from '~/components/configuracao-item/modelo-matriz';
+import { MatrizObj } from '~/components/cadastro-item/modelo-matriz';
 import { AxiosResponse } from 'axios';
 import { DisciplinaProps } from '~/redux/modules/cadastro-item/disciplina/reducers';
 import { ItemDto } from '~/domain/dto/item-dto';

@@ -11,9 +11,9 @@ import configuracaoItemService from '~/services/configuracaoItem-service';
 import { setComponentesItem } from '~/redux/modules/cadastro-item/item/actions';
 import { SelectValueType } from '~/domain/type/select';
 import { validarCampoForm, converterListaParaCheckboxOption } from '~/utils/funcoes';
-import { CampoNumero } from '~/components/campo-numero';
+import { CampoNumero } from '~/components/cadastro-item/campo-numero';
 import './tabComponentesItemStyles.css';
-import { Separador } from '~/components/configuracao-item/campos/elementos';
+import { Separador } from '~/components/cadastro-item/elementos';
 
 const ComponentesItem: React.FC<FormProps> = ({ form }) => {
 
