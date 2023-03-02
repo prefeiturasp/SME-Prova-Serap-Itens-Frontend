@@ -25,6 +25,10 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
     const campoHabilidade = Campos.habilidade;
     const campoAnoMatriz = Campos.anoMatriz;
     const campoDificuldadeSugerida = Campos.dificuldadeSugerida;
+    const campoAssunto = Campos.assunto;
+    const campoSubAssunto = Campos.subAssunto;
+    const campoSituacaoItem = Campos.situacaoItem;
+    const campoTipoItem = Campos.tipoItem;
 
     const campoDiscriminacao = Campos.discriminacao;
     const campoDificuldade = Campos.dificuldade;
@@ -32,9 +36,15 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
 
     const matrizIdForm = Form.useWatch(Campos.matriz, form);
     const competenciaIdForm = Form.useWatch(Campos.competencia, form);
-    const anoMatrizForm = Form.useWatch(campoAnoMatriz, form);
-    const dificuldadeSugeridaForm = Form.useWatch(campoDificuldadeSugerida, form);
-    const habilidadeForm = Form.useWatch(campoHabilidade, form);
+    const anoMatrizIdForm = Form.useWatch(campoAnoMatriz, form);
+
+    const assuntoIdForm = Form.useWatch(campoAssunto, form);
+    const subAssuntoIdForm = Form.useWatch(campoSubAssunto, form);
+    const situacaoItemIdForm = Form.useWatch(campoSituacaoItem, form);
+    const tipoItemIdForm = Form.useWatch(campoTipoItem, form);
+
+    const dificuldadeSugeridaIdForm = Form.useWatch(campoDificuldadeSugerida, form);
+    const habilidadeIdForm = Form.useWatch(campoHabilidade, form);
 
     const discriminacaoForm = Form.useWatch(campoDiscriminacao, form);
     const dificuldadeForm = Form.useWatch(campoDificuldade, form);
@@ -45,6 +55,12 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
     const [listaCompetencias, setListaCompetencias] = useState<DefaultOptionType[]>([]);
     const [listaHabilidades, setListaHabilidades] = useState<DefaultOptionType[]>([]);
     const [listaAnosMatriz, setListaAnosMatriz] = useState<DefaultOptionType[]>([]);
+
+    const [listaAssuntos, setListaAssuntos] = useState<DefaultOptionType[]>([]);
+    const [listaSubAssuntos, setListaSubAssuntos] = useState<DefaultOptionType[]>([]);
+    const [listaSituacoesItem, setListaSituacoesItem] = useState<DefaultOptionType[]>([]);
+    const [listaTiposItem, setListaTiposItem] = useState<DefaultOptionType[]>([]);
+
     const [carregandoDificuldadeSugerida, setCarregandoDificuldadeSugerida] = useState<boolean>(false);
     const [listaDificuldadeSugerida, setListaDificuldadeSugerida] = useState<CheckboxOptionType[]>(
         []
@@ -76,15 +92,18 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
         ) => {
 
             let resposta: DefaultOptionType[] = [];
-            const possuiParametro = param && param !== null && param !== undefined;
             switch (nomeCampo) {
                 case Campos.competencia:
-                    if (possuiParametro)
-                        resposta = await configuracaoItemService.obterCompetenciasMatriz(param);
+                    resposta = await configuracaoItemService.obterCompetenciasMatriz(param);
                     break;
                 case Campos.habilidade:
-                    if (possuiParametro)
-                        resposta = await configuracaoItemService.obterHabilidadesCompetencia(param);
+                    resposta = await configuracaoItemService.obterHabilidadesCompetencia(param);
+                    break;
+                case Campos.assunto:
+                    resposta = [];
+                    break;
+                case Campos.subAssunto:
+                    resposta = [];
                     break;
                 default:
                     break;
@@ -132,9 +151,9 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
     useEffect(() => {
         const novoObj: ComponentesItemProps = {
             competencia: competenciaIdForm,
-            habilidade: habilidadeForm,
-            anoMatriz: anoMatrizForm,
-            dificuldadeSugerida: dificuldadeSugeridaForm,
+            habilidade: habilidadeIdForm,
+            anoMatriz: anoMatrizIdForm,
+            dificuldadeSugerida: dificuldadeSugeridaIdForm,
             discriminacao: discriminacaoForm,
             dificuldade: dificuldadeForm,
             acertoCasual: acertoCasualForm,
@@ -142,9 +161,9 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
         setObjTabComponentesItem(novoObj);
     }, [
         competenciaIdForm,
-        anoMatrizForm,
-        dificuldadeSugeridaForm,
-        habilidadeForm,
+        anoMatrizIdForm,
+        dificuldadeSugeridaIdForm,
+        habilidadeIdForm,
         discriminacaoForm,
         dificuldadeForm,
         acertoCasualForm,
@@ -197,7 +216,7 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
                         name={campoDificuldadeSugerida}
                         rules={[
                             {
-                                required: validarCampoForm(dificuldadeSugeridaForm),
+                                required: validarCampoForm(dificuldadeSugeridaIdForm),
                                 message: 'Campo obrigatório',
                             }
                         ]}>
@@ -211,6 +230,48 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
                             />
                         </Spin>
                     </Form.Item>
+                </Col>
+            </Row>
+            <Separador />
+            <Row gutter={10}>
+                <Col span={8}>
+                    <SelectForm
+                        form={form}
+                        options={listaAssuntos}
+                        nomeCampo={campoAssunto}
+                        label={'Assunto'}
+                        campoObrigatorio={false}
+                    ></SelectForm>
+                </Col>
+                <Col span={8}>
+                    <SelectForm
+                        form={form}
+                        options={listaSubAssuntos}
+                        nomeCampo={campoSubAssunto}
+                        label={'Sub-Assunto'}
+                        campoObrigatorio={false}
+                    ></SelectForm>
+                </Col>
+            </Row>
+            <Separador />
+            <Row gutter={10}>
+                <Col span={8}>
+                    <SelectForm
+                        form={form}
+                        options={listaSituacoesItem}
+                        nomeCampo={campoSituacaoItem}
+                        label={'Situação do Item'}
+                        campoObrigatorio={true}
+                    ></SelectForm>
+                </Col>
+                <Col span={8}>
+                    <SelectForm
+                        form={form}
+                        options={listaTiposItem}
+                        nomeCampo={campoTipoItem}
+                        label={'Tipo de Item'}
+                        campoObrigatorio={true}
+                    ></SelectForm>
                 </Col>
             </Row>
             <Separador />
