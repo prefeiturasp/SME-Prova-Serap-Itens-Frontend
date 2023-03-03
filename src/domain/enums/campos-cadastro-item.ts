@@ -10,7 +10,12 @@ export enum Campos {
     subAssunto = 'subAssunto',
     situacaoItem = 'situacaoItem',
     tipoItem = 'tipoItem',
+    quantidadeAlternativas = 'quantidadeAlternativas',
     discriminacao = 'infoEstatisticasDiscriminacao',
     dificuldade = 'infoEstatisticasDificuldade',
     acertoCasual = 'infoEstatisticasAcertoCasual',
+    palavraChave = 'palavraChave',
+    parametroBTransformado = 'parametroBTransformado',
+    mediaDesvioPadrao = 'mediaDesvioPadrao',
+    observacao = 'observacao',
 }

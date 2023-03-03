@@ -1,7 +1,7 @@
 import React, { Dispatch, SetStateAction, useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppState } from '~/redux';
-import { Col, Form, FormProps, Row, Radio, Spin } from 'antd';
+import { Col, Form, FormProps, Row, Radio, Spin, Input } from 'antd';
 import SelectForm from '~/components/select-form';
 import { Campos } from '~/domain/enums/campos-cadastro-item';
 import { ComponentesItemProps } from '~/redux/modules/cadastro-item/item/reducers';
@@ -10,7 +10,7 @@ import { CheckboxOptionType } from 'antd/es/checkbox/Group';
 import configuracaoItemService from '~/services/configuracaoItem-service';
 import { setComponentesItem } from '~/redux/modules/cadastro-item/item/actions';
 import { SelectValueType } from '~/domain/type/select';
-import { validarCampoForm, converterListaParaCheckboxOption } from '~/utils/funcoes';
+import { validarCampoForm, ruleCampoObrigatorioForm, converterListaParaCheckboxOption } from '~/utils/funcoes';
 import { CampoNumero } from '~/components/cadastro-item/campo-numero';
 import './tabComponentesItemStyles.css';
 import { Separador } from '~/components/cadastro-item/elementos';
@@ -18,6 +18,7 @@ import { Separador } from '~/components/cadastro-item/elementos';
 const ComponentesItem: React.FC<FormProps> = ({ form }) => {
 
     const dispatch = useDispatch();
+    const { TextArea } = Input;
     const item = useSelector((state: AppState) => state.item);
     const componentesItem = useSelector((state: AppState) => state.componentesItem);
 
@@ -29,10 +30,15 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
     const campoSubAssunto = Campos.subAssunto;
     const campoSituacaoItem = Campos.situacaoItem;
     const campoTipoItem = Campos.tipoItem;
+    const campoQuantidadeAlternativas = Campos.quantidadeAlternativas;
 
     const campoDiscriminacao = Campos.discriminacao;
     const campoDificuldade = Campos.dificuldade;
     const campoAcertoCasual = Campos.acertoCasual;
+    const campoPalavraChave = Campos.palavraChave;
+    const campoParametroBTransformado = Campos.parametroBTransformado;
+    const campoMediaDesvioPadrao = Campos.mediaDesvioPadrao;
+    const campoObservacao = Campos.observacao;
 
     const matrizIdForm = Form.useWatch(Campos.matriz, form);
     const competenciaIdForm = Form.useWatch(Campos.competencia, form);
@@ -42,6 +48,7 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
     const subAssuntoIdForm = Form.useWatch(campoSubAssunto, form);
     const situacaoItemIdForm = Form.useWatch(campoSituacaoItem, form);
     const tipoItemIdForm = Form.useWatch(campoTipoItem, form);
+    const quantidadeAlternativasIdForm = Form.useWatch(campoQuantidadeAlternativas, form);
 
     const dificuldadeSugeridaIdForm = Form.useWatch(campoDificuldadeSugerida, form);
     const habilidadeIdForm = Form.useWatch(campoHabilidade, form);
@@ -49,6 +56,11 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
     const discriminacaoForm = Form.useWatch(campoDiscriminacao, form);
     const dificuldadeForm = Form.useWatch(campoDificuldade, form);
     const acertoCasualForm = Form.useWatch(campoAcertoCasual, form);
+
+    const palavrasChaveForm = Form.useWatch(campoPalavraChave, form);
+    const parametroBTransformadoForm = Form.useWatch(campoParametroBTransformado, form);
+    const mediaDesvioPadraoForm = Form.useWatch(campoMediaDesvioPadrao, form);
+    const observacaoForm = Form.useWatch(campoObservacao, form);
 
     const [objTabComponentesItem, setObjTabComponentesItem] =
         useState<ComponentesItemProps>(componentesItem);
@@ -60,6 +72,7 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
     const [listaSubAssuntos, setListaSubAssuntos] = useState<DefaultOptionType[]>([]);
     const [listaSituacoesItem, setListaSituacoesItem] = useState<DefaultOptionType[]>([]);
     const [listaTiposItem, setListaTiposItem] = useState<DefaultOptionType[]>([]);
+    const [listaQuantidadeAlternativas, setListaQuantidadeAlternativas] = useState<DefaultOptionType[]>([]);
 
     const [carregandoDificuldadeSugerida, setCarregandoDificuldadeSugerida] = useState<boolean>(false);
     const [listaDificuldadeSugerida, setListaDificuldadeSugerida] = useState<CheckboxOptionType[]>(
@@ -68,6 +81,7 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
     const [discriminacao, setDiscriminacao] = useState<string>('');
     const [dificuldade, setDificuldade] = useState<string>('');
     const [acertoCasual, setAcertoCasual] = useState<string>('');
+    const [parametroBTransformado, setParametroBTransformado] = useState<string>('');
 
     const obterListaDificuldadeSugerida = useCallback(async () => {
         setCarregandoDificuldadeSugerida(true);
@@ -273,6 +287,15 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
                         campoObrigatorio={true}
                     ></SelectForm>
                 </Col>
+                <Col span={8}>
+                    <SelectForm
+                        form={form}
+                        options={listaQuantidadeAlternativas}
+                        nomeCampo={campoQuantidadeAlternativas}
+                        label={'Quantidade de alternativas / categorias'}
+                        campoObrigatorio={true}
+                    ></SelectForm>
+                </Col>
             </Row>
             <Separador />
             <Row gutter={10}>
@@ -303,6 +326,45 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
                         name={campoAcertoCasual}
                     >
                         <CampoNumero value={acertoCasual} onChange={setAcertoCasual} />
+                    </Form.Item>
+                </Col>
+            </Row>
+            <Row gutter={10}>
+                <Col span={8}>
+                    <Form.Item
+                        label='Palavra-chave'
+                        name={campoPalavraChave}
+                        rules={ruleCampoObrigatorioForm(palavrasChaveForm)}
+                    >
+                        <Input />
+                    </Form.Item>
+                </Col>
+            </Row>
+            <Row gutter={10}>
+                <Col span={8}>
+                    <Form.Item
+                        label='Parâmetro b transformado'
+                        name={campoParametroBTransformado}
+                    >
+                        <CampoNumero value={parametroBTransformado} onChange={setParametroBTransformado} />
+                    </Form.Item>
+                </Col>
+                <Col span={8}>
+                    <Form.Item
+                        label='Média e Desvio Padrão'
+                        name={campoMediaDesvioPadrao}
+                    >
+                        <Input />
+                    </Form.Item>
+                </Col>
+            </Row>
+            <Row gutter={10}>
+            <Col span={8}>
+                    <Form.Item
+                        label='Observação'
+                        name={campoObservacao}
+                    >
+                        <TextArea rows={4} placeholder="Até 100 caracteres" maxLength={100} />
                     </Form.Item>
                 </Col>
             </Row>

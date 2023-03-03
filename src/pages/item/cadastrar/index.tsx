@@ -36,6 +36,7 @@ const ItemCadastro: React.FC = () => {
     infoEstatisticasDiscriminacao: '',
     infoEstatisticasDificuldade: '',
     infoEstatisticasAcertoCasual: '',
+    parametroBTransformado: '',
   };
 
   const [itemSalvar, setItemSalvar] = useState<ItemDto>({} as ItemDto);
