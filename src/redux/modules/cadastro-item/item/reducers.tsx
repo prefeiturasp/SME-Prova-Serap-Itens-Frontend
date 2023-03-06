@@ -29,19 +29,37 @@ export interface ComponentesItemProps {
   competencia: SelectValueType;
   habilidade: SelectValueType;
   anoMatriz: SelectValueType;
+  assunto: SelectValueType;
+  subAssunto: SelectValueType;
+  situacaoItem: SelectValueType;
+  tipoItem: SelectValueType;
+  quantidadeAlternativas: SelectValueType;
   dificuldadeSugerida: SelectValueType;
   discriminacao: number | string | null;
   dificuldade: number | string | null;
   acertoCasual: number | string | null;
+  palavrasChave: string | null;
+  parametroBTransformado: number | string | null;
+  mediaDesvioPadrao: string | null;
+  observacao: string | null;
 }
 const initialValuesComponentesItemProps = {
   competencia: null,
   habilidade: null,
   anoMatriz: null,
+  assunto: null,
+  subAssunto: null,
+  situacaoItem: null,
+  tipoItem: null,
+  quantidadeAlternativas: null,
   dificuldadeSugerida: null,
   discriminacao: null,
   dificuldade: null,
   acertoCasual: null,
+  palavrasChave: null,
+  parametroBTransformado: null,
+  mediaDesvioPadrao: null,
+  observacao: null,
 };
 
 export interface ElaboracaoItemProps {
@@ -112,6 +130,15 @@ export const componentesItem = (
         draft.discriminacao = action.payload.discriminacao;
         draft.dificuldade = action.payload.dificuldade;
         draft.acertoCasual = action.payload.acertoCasual;
+        draft.assunto = action.payload.assunto;
+        draft.subAssunto = action.payload.subAssunto;
+        draft.situacaoItem = action.payload.situacaoItem;
+        draft.tipoItem = action.payload.tipoItem;
+        draft.quantidadeAlternativas = action.payload.quantidadeAlternativas;
+        draft.palavrasChave = action.payload.palavrasChave;
+        draft.parametroBTransformado = action.payload.parametroBTransformado;
+        draft.mediaDesvioPadrao = action.payload.mediaDesvioPadrao;
+        draft.observacao = action.payload.observacao;
         break;
       default:
         break;

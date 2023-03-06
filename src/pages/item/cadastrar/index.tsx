@@ -19,6 +19,7 @@ import {
 } from '~/redux/modules/cadastro-item/item/reducers';
 import { Title } from '~/components/cadastro-item/elementos';
 import TabForm from '~/components/cadastro-item/tab-form';
+import { tipoItem } from '~/utils/funcoes';
 
 const ItemCadastro: React.FC = () => {
   const dispatch = useDispatch();
@@ -37,6 +38,7 @@ const ItemCadastro: React.FC = () => {
     infoEstatisticasDificuldade: '',
     infoEstatisticasAcertoCasual: '',
     parametroBTransformado: '',
+    tipoItem: tipoItem[0],
   };
 
   const [itemSalvar, setItemSalvar] = useState<ItemDto>({} as ItemDto);
@@ -109,10 +111,19 @@ const ItemCadastro: React.FC = () => {
       competenciaId: componentesItem.competencia,
       habilidadeId: componentesItem.habilidade,
       anoMatrizId: componentesItem.anoMatriz,
+      assunto: componentesItem.assunto,
+      subAssunto: componentesItem.subAssunto,
+      situacaoItem: componentesItem.situacaoItem,
+      tipoItem: componentesItem.tipoItem,
+      quantidadeAlternativas: componentesItem.quantidadeAlternativas,
       dificuldadeSugeridaId: componentesItem.dificuldadeSugerida,
       discriminacao: componentesItem.discriminacao !== '' ? componentesItem.discriminacao : null,
       dificuldade: componentesItem.dificuldade !== '' ? componentesItem.dificuldade : null,
       acertoCasual: componentesItem.acertoCasual !== '' ? componentesItem.acertoCasual : null,
+      palavrasChave: componentesItem.palavrasChave,
+      parametroBTransformado: componentesItem.parametroBTransformado,
+      mediaDesvioPadrao: componentesItem.mediaDesvioPadrao,
+      observacao: componentesItem.observacao,
       textoBase: elaboracaoItem?.textoBase ?? '',
     };
     setItemSalvar(dto);

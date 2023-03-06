@@ -10,7 +10,16 @@ import { CheckboxOptionType } from 'antd/es/checkbox/Group';
 import configuracaoItemService from '~/services/configuracaoItem-service';
 import { setComponentesItem } from '~/redux/modules/cadastro-item/item/actions';
 import { SelectValueType } from '~/domain/type/select';
-import { validarCampoForm, ruleCampoObrigatorioForm, converterListaParaCheckboxOption } from '~/utils/funcoes';
+import {
+    validarCampoForm,
+    ruleCampoObrigatorioForm,
+    converterListaParaCheckboxOption,
+    tipoItem,
+    mockAssuntos,
+    mockSubAssuntos,
+    mockSituacoesItem,
+    mockQuantidadeAlternativas,
+} from '~/utils/funcoes';
 import { CampoNumero } from '~/components/cadastro-item/campo-numero';
 import './tabComponentesItemStyles.css';
 import { Separador } from '~/components/cadastro-item/elementos';
@@ -19,7 +28,6 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
 
     const dispatch = useDispatch();
     const { TextArea } = Input;
-    const item = useSelector((state: AppState) => state.item);
     const componentesItem = useSelector((state: AppState) => state.componentesItem);
 
     const campoCompetencia = Campos.competencia;
@@ -71,10 +79,12 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
     const [listaAssuntos, setListaAssuntos] = useState<DefaultOptionType[]>([]);
     const [listaSubAssuntos, setListaSubAssuntos] = useState<DefaultOptionType[]>([]);
     const [listaSituacoesItem, setListaSituacoesItem] = useState<DefaultOptionType[]>([]);
-    const [listaTiposItem, setListaTiposItem] = useState<DefaultOptionType[]>([]);
-    const [listaQuantidadeAlternativas, setListaQuantidadeAlternativas] = useState<DefaultOptionType[]>([]);
+    const [listaQuantidadeAlternativas, setListaQuantidadeAlternativas] = useState<
+        DefaultOptionType[]
+    >([]);
 
-    const [carregandoDificuldadeSugerida, setCarregandoDificuldadeSugerida] = useState<boolean>(false);
+    const [carregandoDificuldadeSugerida, setCarregandoDificuldadeSugerida] =
+        useState<boolean>(false);
     const [listaDificuldadeSugerida, setListaDificuldadeSugerida] = useState<CheckboxOptionType[]>(
         []
     );
@@ -114,10 +124,24 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
                     resposta = await configuracaoItemService.obterHabilidadesCompetencia(param);
                     break;
                 case Campos.assunto:
-                    resposta = [];
+                    //resposta = await configuracaoItemService.obterAssuntos();
+                    resposta = mockAssuntos;
                     break;
                 case Campos.subAssunto:
+                    //resposta = await configuracaoItemService.obterSubAssuntos(param);
+                    if (!validarCampoForm(param))
+                        resposta = mockSubAssuntos;
+                    break;
+                case Campos.situacaoItem:
+                    //resposta = await configuracaoItemService.obterSituacoesItem();
+                    resposta = mockSituacoesItem;
+                    break;
+                case Campos.tipoItem:
                     resposta = [];
+                    break;
+                case Campos.quantidadeAlternativas:
+                    //resposta = await configuracaoItemService.obterQuantidadeAlternativas();
+                    resposta = mockQuantidadeAlternativas;
                     break;
                 default:
                     break;
@@ -149,6 +173,24 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
         }
     }, [form, matrizIdForm, campoAnoMatriz]);
 
+    const obterAssuntos = useCallback(() => {
+        popularCampoSelectForm(null, campoAssunto, setListaAssuntos);
+    }, [popularCampoSelectForm, campoAssunto]);
+
+    const obterSituacoesItem = useCallback(() => {
+        popularCampoSelectForm(null, campoSituacaoItem, setListaSituacoesItem);
+    }, [popularCampoSelectForm, campoSituacaoItem]);
+
+    const obterQuantidadeAlternativas = useCallback(() => {
+        popularCampoSelectForm(null, campoQuantidadeAlternativas, setListaQuantidadeAlternativas);
+    }, [popularCampoSelectForm, campoQuantidadeAlternativas]);
+
+    useEffect(() => {
+        obterAssuntos();
+        obterSituacoesItem();
+        obterQuantidadeAlternativas();
+    }, [obterAssuntos, obterSituacoesItem, obterQuantidadeAlternativas]);
+
     useEffect(() => {
         obterListaDificuldadeSugerida();
     }, [obterListaDificuldadeSugerida]);
@@ -160,27 +202,49 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
 
     useEffect(() => {
         popularCampoSelectForm(competenciaIdForm, campoHabilidade, setListaHabilidades);
-    }, [competenciaIdForm, campoHabilidade, item, dispatch, popularCampoSelectForm]);
+    }, [competenciaIdForm, campoHabilidade, popularCampoSelectForm]);
+
+    useEffect(() => {
+        popularCampoSelectForm(assuntoIdForm, campoSubAssunto, setListaSubAssuntos);
+    }, [assuntoIdForm, campoSubAssunto, popularCampoSelectForm]);
 
     useEffect(() => {
         const novoObj: ComponentesItemProps = {
             competencia: competenciaIdForm,
             habilidade: habilidadeIdForm,
             anoMatriz: anoMatrizIdForm,
+            assunto: assuntoIdForm,
+            subAssunto: subAssuntoIdForm,
+            situacaoItem: situacaoItemIdForm,
+            tipoItem: tipoItemIdForm,
+            quantidadeAlternativas: quantidadeAlternativasIdForm,
             dificuldadeSugerida: dificuldadeSugeridaIdForm,
             discriminacao: discriminacaoForm,
             dificuldade: dificuldadeForm,
             acertoCasual: acertoCasualForm,
+            palavrasChave: palavrasChaveForm,
+            parametroBTransformado: parametroBTransformadoForm,
+            mediaDesvioPadrao: mediaDesvioPadraoForm,
+            observacao: observacaoForm,
         };
         setObjTabComponentesItem(novoObj);
     }, [
         competenciaIdForm,
         anoMatrizIdForm,
+        assuntoIdForm,
+        subAssuntoIdForm,
+        situacaoItemIdForm,
+        tipoItemIdForm,
+        quantidadeAlternativasIdForm,
         dificuldadeSugeridaIdForm,
         habilidadeIdForm,
         discriminacaoForm,
         dificuldadeForm,
         acertoCasualForm,
+        palavrasChaveForm,
+        parametroBTransformadoForm,
+        mediaDesvioPadraoForm,
+        observacaoForm,
     ]);
 
     useEffect(() => {
@@ -281,7 +345,7 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
                 <Col span={8}>
                     <SelectForm
                         form={form}
-                        options={listaTiposItem}
+                        options={tipoItem}
                         nomeCampo={campoTipoItem}
                         label={'Tipo de Item'}
                         campoObrigatorio={true}
@@ -359,7 +423,7 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
                 </Col>
             </Row>
             <Row gutter={10}>
-            <Col span={8}>
+                <Col span={8}>
                     <Form.Item
                         label='Observação'
                         name={campoObservacao}

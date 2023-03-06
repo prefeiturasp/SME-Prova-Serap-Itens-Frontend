@@ -43,12 +43,28 @@ const obterAnosMatriz = (matrizId: SelectValueType): Promise<DefaultOptionType[]
 const obterDificuldadeSugerida = (): Promise<DefaultOptionType[]> =>
   geralService.getDefaultSelect(`${URL_DEFAULT}/dificuldade`);
 
+const obterAssuntos = (): Promise<DefaultOptionType[]> =>
+  geralService.getDefaultSelect(`${URL_DEFAULT}/assunto`);
+
+const obterSubAssuntos = (assuntoId: SelectValueType): Promise<DefaultOptionType[]> =>
+  geralService.getDefaultSelect(`${URL_DEFAULT}/sub-assunto/${assuntoId}`);
+
+const obterSituacoesItem = (): Promise<DefaultOptionType[]> =>
+  geralService.getDefaultSelect(`${URL_DEFAULT}/situacao-item`);
+
+const obterQuantidadeAlternativas = (): Promise<DefaultOptionType[]> =>
+  geralService.getDefaultSelect(`${URL_DEFAULT}/quantidade-alternativas`);
+
 const obterItem = (id: number): Promise<AxiosResponse<any>> => api.get(`${URL_DEFAULT}/Item/${id}`);
 
 export default {
   obterAreaConhecimento,
   obterDisciplinas,
   obterMatriz,
+  obterAssuntos,
+  obterSubAssuntos,
+  obterSituacoesItem,
+  obterQuantidadeAlternativas,
   obterModeloMatriz,
   obterNivelEnsino,
   salvarItem,
