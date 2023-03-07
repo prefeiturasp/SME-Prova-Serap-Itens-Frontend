@@ -19,7 +19,7 @@ import {
 } from '~/redux/modules/cadastro-item/item/reducers';
 import { Title } from '~/components/cadastro-item/elementos';
 import TabForm from '~/components/cadastro-item/tab-form';
-import { tipoItem } from '~/utils/funcoes';
+import { DadosIniciais } from '~/domain/enums/campos-cadastro-item';
 
 const ItemCadastro: React.FC = () => {
   const dispatch = useDispatch();
@@ -38,7 +38,7 @@ const ItemCadastro: React.FC = () => {
     infoEstatisticasDificuldade: '',
     infoEstatisticasAcertoCasual: '',
     parametroBTransformado: '',
-    tipoItem: tipoItem[0],
+    tipoItem: DadosIniciais.tipoItemIdPadrao,
   };
 
   const [itemSalvar, setItemSalvar] = useState<ItemDto>({} as ItemDto);

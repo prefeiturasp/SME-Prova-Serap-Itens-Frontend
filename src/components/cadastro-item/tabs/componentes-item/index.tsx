@@ -14,7 +14,7 @@ import {
     validarCampoForm,
     ruleCampoObrigatorioForm,
     converterListaParaCheckboxOption,
-    tipoItem,
+    tiposItem,
     mockAssuntos,
     mockSubAssuntos,
     mockSituacoesItem,
@@ -23,6 +23,7 @@ import {
 import { CampoNumero } from '~/components/cadastro-item/campo-numero';
 import './tabComponentesItemStyles.css';
 import { Separador } from '~/components/cadastro-item/elementos';
+import TipoItem from '~/components/cadastro-item/campos/tipo-item';
 
 const ComponentesItem: React.FC<FormProps> = ({ form }) => {
 
@@ -88,6 +89,8 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
     const [listaDificuldadeSugerida, setListaDificuldadeSugerida] = useState<CheckboxOptionType[]>(
         []
     );
+    const [listaTiposItem, setListaTiposItem] = useState<DefaultOptionType[]>([]);
+
     const [discriminacao, setDiscriminacao] = useState<string>('');
     const [dificuldade, setDificuldade] = useState<string>('');
     const [acertoCasual, setAcertoCasual] = useState<string>('');
@@ -137,7 +140,8 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
                     resposta = mockSituacoesItem;
                     break;
                 case Campos.tipoItem:
-                    resposta = [];
+                    //resposta = await configuracaoItemService.obterTiposItem();
+                    resposta = tiposItem;
                     break;
                 case Campos.quantidadeAlternativas:
                     //resposta = await configuracaoItemService.obterQuantidadeAlternativas();
@@ -173,6 +177,10 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
         }
     }, [form, matrizIdForm, campoAnoMatriz]);
 
+    const obterTiposItem = useCallback(() => {
+        popularCampoSelectForm(null, campoTipoItem, setListaTiposItem);
+    }, [popularCampoSelectForm, campoTipoItem]);
+
     const obterAssuntos = useCallback(() => {
         popularCampoSelectForm(null, campoAssunto, setListaAssuntos);
     }, [popularCampoSelectForm, campoAssunto]);
@@ -186,10 +194,11 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
     }, [popularCampoSelectForm, campoQuantidadeAlternativas]);
 
     useEffect(() => {
+        obterTiposItem();
         obterAssuntos();
         obterSituacoesItem();
         obterQuantidadeAlternativas();
-    }, [obterAssuntos, obterSituacoesItem, obterQuantidadeAlternativas]);
+    }, [obterTiposItem, obterAssuntos, obterSituacoesItem, obterQuantidadeAlternativas]);
 
     useEffect(() => {
         obterListaDificuldadeSugerida();
@@ -343,13 +352,7 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
                     ></SelectForm>
                 </Col>
                 <Col span={8}>
-                    <SelectForm
-                        form={form}
-                        options={tipoItem}
-                        nomeCampo={campoTipoItem}
-                        label={'Tipo de Item'}
-                        campoObrigatorio={true}
-                    ></SelectForm>
+                    <TipoItem form={form} options={listaTiposItem} />
                 </Col>
                 <Col span={8}>
                     <SelectForm

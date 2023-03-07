@@ -24,7 +24,7 @@ export const ruleCampoObrigatorioForm = (valor: any): Rule[] => {
     ]
 };
 
-export const tipoItem =
+export const tiposItem =
     [
         { value: 1, label: 'Dicotômico' },
         { value: 2, label: 'Politômico' },

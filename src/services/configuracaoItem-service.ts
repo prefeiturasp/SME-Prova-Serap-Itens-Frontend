@@ -52,6 +52,9 @@ const obterSubAssuntos = (assuntoId: SelectValueType): Promise<DefaultOptionType
 const obterSituacoesItem = (): Promise<DefaultOptionType[]> =>
   geralService.getDefaultSelect(`${URL_DEFAULT}/situacao-item`);
 
+const obterTiposItem = (): Promise<DefaultOptionType[]> =>
+  geralService.getDefaultSelect(`${URL_DEFAULT}/tipos-item`);
+
 const obterQuantidadeAlternativas = (): Promise<DefaultOptionType[]> =>
   geralService.getDefaultSelect(`${URL_DEFAULT}/quantidade-alternativas`);
 
@@ -64,6 +67,7 @@ export default {
   obterAssuntos,
   obterSubAssuntos,
   obterSituacoesItem,
+  obterTiposItem,
   obterQuantidadeAlternativas,
   obterModeloMatriz,
   obterNivelEnsino,

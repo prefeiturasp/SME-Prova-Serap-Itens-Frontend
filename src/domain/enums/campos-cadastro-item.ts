@@ -19,3 +19,7 @@ export enum Campos {
     mediaDesvioPadrao = 'mediaDesvioPadrao',
     observacao = 'observacao',
 }
+
+export enum DadosIniciais {
+    tipoItemIdPadrao = 1,
+}
