@@ -44,19 +44,19 @@ const obterDificuldadeSugerida = (): Promise<DefaultOptionType[]> =>
   geralService.getDefaultSelect(`${URL_DEFAULT}/dificuldade`);
 
 const obterAssuntos = (): Promise<DefaultOptionType[]> =>
-  geralService.getDefaultSelect(`${URL_DEFAULT}/assunto`);
+  geralService.getDefaultSelect(`${URL_DEFAULT}/assuntos`);
 
 const obterSubAssuntos = (assuntoId: SelectValueType): Promise<DefaultOptionType[]> =>
-  geralService.getDefaultSelect(`${URL_DEFAULT}/sub-assunto/${assuntoId}`);
+  geralService.getDefaultSelect(`${URL_DEFAULT}/assuntos/subassuntos/${assuntoId}`);
 
 const obterSituacoesItem = (): Promise<DefaultOptionType[]> =>
-  geralService.getDefaultSelect(`${URL_DEFAULT}/situacao-item`);
+  geralService.getDefaultSelect(`${URL_DEFAULT}/item/situacoes`);
 
 const obterTiposItem = (): Promise<DefaultOptionType[]> =>
-  geralService.getDefaultSelect(`${URL_DEFAULT}/tipos-item`);
+  geralService.getDefaultSelect(`${URL_DEFAULT}/item/tipos`);
 
 const obterQuantidadeAlternativas = (): Promise<DefaultOptionType[]> =>
-  geralService.getDefaultSelect(`${URL_DEFAULT}/quantidade-alternativas`);
+  geralService.getDefaultSelect(`${URL_DEFAULT}/quantidadealternativa`);
 
 const obterItem = (id: number): Promise<AxiosResponse<any>> => api.get(`${URL_DEFAULT}/Item/${id}`);
 

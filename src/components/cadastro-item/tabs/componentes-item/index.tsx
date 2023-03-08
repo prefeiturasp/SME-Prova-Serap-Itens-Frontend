@@ -24,6 +24,7 @@ import { CampoNumero } from '~/components/cadastro-item/campo-numero';
 import './tabComponentesItemStyles.css';
 import { Separador } from '~/components/cadastro-item/elementos';
 import TipoItem from '~/components/cadastro-item/campos/tipo-item';
+import InputTag from '~/components/input-tag';
 
 const ComponentesItem: React.FC<FormProps> = ({ form }) => {
 
@@ -119,33 +120,31 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
         ) => {
 
             let resposta: DefaultOptionType[] = [];
+            const parametroValido = !validarCampoForm(param);
             switch (nomeCampo) {
                 case Campos.competencia:
-                    resposta = await configuracaoItemService.obterCompetenciasMatriz(param);
+                    if (parametroValido)
+                        resposta = await configuracaoItemService.obterCompetenciasMatriz(param);
                     break;
                 case Campos.habilidade:
-                    resposta = await configuracaoItemService.obterHabilidadesCompetencia(param);
+                    if (parametroValido)
+                        resposta = await configuracaoItemService.obterHabilidadesCompetencia(param);
                     break;
                 case Campos.assunto:
-                    //resposta = await configuracaoItemService.obterAssuntos();
-                    resposta = mockAssuntos;
+                    resposta = await configuracaoItemService.obterAssuntos();
                     break;
                 case Campos.subAssunto:
-                    //resposta = await configuracaoItemService.obterSubAssuntos(param);
-                    if (!validarCampoForm(param))
-                        resposta = mockSubAssuntos;
+                    if (parametroValido)
+                        resposta = await configuracaoItemService.obterSubAssuntos(param);
                     break;
                 case Campos.situacaoItem:
-                    //resposta = await configuracaoItemService.obterSituacoesItem();
-                    resposta = mockSituacoesItem;
+                    resposta = await configuracaoItemService.obterSituacoesItem();
                     break;
                 case Campos.tipoItem:
-                    //resposta = await configuracaoItemService.obterTiposItem();
-                    resposta = tiposItem;
+                    resposta = await configuracaoItemService.obterTiposItem();
                     break;
                 case Campos.quantidadeAlternativas:
-                    //resposta = await configuracaoItemService.obterQuantidadeAlternativas();
-                    resposta = mockQuantidadeAlternativas;
+                    resposta = await configuracaoItemService.obterQuantidadeAlternativas();
                     break;
                 default:
                     break;
@@ -301,12 +300,7 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
                     <Form.Item
                         label='Dificuldade sugerida'
                         name={campoDificuldadeSugerida}
-                        rules={[
-                            {
-                                required: validarCampoForm(dificuldadeSugeridaIdForm),
-                                message: 'Campo obrigatório',
-                            }
-                        ]}>
+                        rules={ruleCampoObrigatorioForm(dificuldadeSugeridaIdForm)}>
                         <Spin size='small' spinning={carregandoDificuldadeSugerida}>
                             <Radio.Group
                                 className='dificuldadeSugerida'
@@ -403,7 +397,7 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
                         name={campoPalavraChave}
                         rules={ruleCampoObrigatorioForm(palavrasChaveForm)}
                     >
-                        <Input />
+                        <InputTag />
                     </Form.Item>
                 </Col>
             </Row>

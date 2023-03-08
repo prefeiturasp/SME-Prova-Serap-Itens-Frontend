@@ -3365,6 +3365,11 @@ react-router@6.3.0:
   dependencies:
     history "^5.2.0"
 
+react-tag-input-component@2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/react-tag-input-component/-/react-tag-input-component-2.0.0.tgz#892416ece62e919586c70c38c8e04d29b960a648"
+  integrity sha512-gjcG12//D0SBIlNpN07YF14WXDA93j6ltzthG8tibdLvXvThYJ7aho4HTxLGQBf1vZEB9Chbixtzr5ulkH0LXA==
+
 react@^18.2.0:
   version "18.2.0"
   resolved "https://registry.yarnpkg.com/react/-/react-18.2.0.tgz#555bd98592883255fa00de14f1151a917b5d77d5"
