@@ -20,6 +20,7 @@ import {
 import { Title } from '~/components/cadastro-item/elementos';
 import TabForm from '~/components/cadastro-item/tab-form';
 import { DadosIniciais } from '~/domain/enums/campos-cadastro-item';
+import { validarCampoForm, validarCampoArrayStringForm } from '~/utils/funcoes';
 
 const ItemCadastro: React.FC = () => {
   const dispatch = useDispatch();
@@ -44,26 +45,20 @@ const ItemCadastro: React.FC = () => {
   const [itemSalvar, setItemSalvar] = useState<ItemDto>({} as ItemDto);
 
   const bloquearSalvar =
-    configuracaoItem.disciplina == undefined ||
-    !configuracaoItem.disciplina ||
-    !configuracaoItem.areaConhecimento ||
-    configuracaoItem.areaConhecimento == undefined ||
-    !configuracaoItem.matriz ||
-    configuracaoItem.matriz == undefined ||
-    componentesItem.competencia == undefined ||
-    !componentesItem.competencia ||
-    componentesItem.habilidade == undefined ||
-    !componentesItem.habilidade ||
-    componentesItem.anoMatriz == undefined ||
-    !componentesItem.anoMatriz ||
-    componentesItem.dificuldadeSugerida == undefined ||
-    !componentesItem.dificuldadeSugerida;
+    validarCampoForm(configuracaoItem.disciplina) ||
+    validarCampoForm(configuracaoItem.areaConhecimento) ||
+    validarCampoForm(configuracaoItem.matriz) ||
+    validarCampoForm(componentesItem.competencia) ||
+    validarCampoForm(componentesItem.habilidade) ||
+    validarCampoForm(componentesItem.anoMatriz) ||
+    validarCampoForm(componentesItem.dificuldadeSugerida) ||
+    validarCampoForm(componentesItem.situacaoItem) ||
+    validarCampoForm(componentesItem.quantidadeAlternativas) ||
+    validarCampoArrayStringForm(componentesItem.palavrasChave ?? []);
 
   const bloquearSalvarRascunho =
-    configuracaoItem.disciplina == undefined ||
-    !configuracaoItem.disciplina ||
-    !configuracaoItem.areaConhecimento ||
-    configuracaoItem.areaConhecimento == undefined ||
+    validarCampoForm(configuracaoItem.disciplina) ||
+    validarCampoForm(configuracaoItem.areaConhecimento) ||
     !bloquearSalvar;
 
   const [bloquearBtnSalvar, setBloquearBtnSalvar] = useState<boolean>(bloquearSalvar);
@@ -111,18 +106,18 @@ const ItemCadastro: React.FC = () => {
       competenciaId: componentesItem.competencia,
       habilidadeId: componentesItem.habilidade,
       anoMatrizId: componentesItem.anoMatriz,
-      assunto: componentesItem.assunto,
-      subAssunto: componentesItem.subAssunto,
-      situacaoItem: componentesItem.situacaoItem,
-      tipoItem: componentesItem.tipoItem,
-      quantidadeAlternativas: componentesItem.quantidadeAlternativas,
+      assuntoId: componentesItem.assunto,
+      subAssuntoId: componentesItem.subAssunto,
+      situacao: componentesItem.situacaoItem,
+      tipo: componentesItem.tipoItem,
+      quantidadeAlternativasId: componentesItem.quantidadeAlternativas,
       dificuldadeSugeridaId: componentesItem.dificuldadeSugerida,
       discriminacao: componentesItem.discriminacao !== '' ? componentesItem.discriminacao : null,
       dificuldade: componentesItem.dificuldade !== '' ? componentesItem.dificuldade : null,
       acertoCasual: componentesItem.acertoCasual !== '' ? componentesItem.acertoCasual : null,
       palavrasChave: componentesItem.palavrasChave,
       parametroBTransformado: componentesItem.parametroBTransformado,
-      mediaDesvioPadrao: componentesItem.mediaDesvioPadrao,
+      mediaEhDesvio: componentesItem.mediaDesvioPadrao,
       observacao: componentesItem.observacao,
       textoBase: elaboracaoItem?.textoBase ?? '',
     };

@@ -12,13 +12,9 @@ import { setComponentesItem } from '~/redux/modules/cadastro-item/item/actions';
 import { SelectValueType } from '~/domain/type/select';
 import {
     validarCampoForm,
+    ruleCampoArrayStringObrigatorioForm,
     ruleCampoObrigatorioForm,
     converterListaParaCheckboxOption,
-    tiposItem,
-    mockAssuntos,
-    mockSubAssuntos,
-    mockSituacoesItem,
-    mockQuantidadeAlternativas,
 } from '~/utils/funcoes';
 import { CampoNumero } from '~/components/cadastro-item/campo-numero';
 import './tabComponentesItemStyles.css';
@@ -95,6 +91,7 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
     const [discriminacao, setDiscriminacao] = useState<string>('');
     const [dificuldade, setDificuldade] = useState<string>('');
     const [acertoCasual, setAcertoCasual] = useState<string>('');
+    const [palavrasChave, setPalavrasChave] = useState<string[] | undefined>([]);
     const [parametroBTransformado, setParametroBTransformado] = useState<string>('');
 
     const obterListaDificuldadeSugerida = useCallback(async () => {
@@ -215,6 +212,10 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
     useEffect(() => {
         popularCampoSelectForm(assuntoIdForm, campoSubAssunto, setListaSubAssuntos);
     }, [assuntoIdForm, campoSubAssunto, popularCampoSelectForm]);
+
+    useEffect(() => {
+        form?.setFieldValue(campoPalavraChave, palavrasChave);
+    }, [form, palavrasChave, campoPalavraChave]);
 
     useEffect(() => {
         const novoObj: ComponentesItemProps = {
@@ -393,17 +394,6 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
             <Row gutter={10}>
                 <Col span={8}>
                     <Form.Item
-                        label='Palavra-chave'
-                        name={campoPalavraChave}
-                        rules={ruleCampoObrigatorioForm(palavrasChaveForm)}
-                    >
-                        <InputTag />
-                    </Form.Item>
-                </Col>
-            </Row>
-            <Row gutter={10}>
-                <Col span={8}>
-                    <Form.Item
                         label='Parâmetro b transformado'
                         name={campoParametroBTransformado}
                     >
@@ -416,6 +406,18 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
                         name={campoMediaDesvioPadrao}
                     >
                         <Input />
+                    </Form.Item>
+                </Col>
+            </Row>
+            <Separador />
+            <Row gutter={10}>
+                <Col span={8}>
+                    <Form.Item
+                        label='Palavra-chave'
+                        name={campoPalavraChave}
+                        rules={ruleCampoArrayStringObrigatorioForm(palavrasChaveForm)}
+                    >
+                        <InputTag valueForm={palavrasChaveForm} tags={palavrasChave} setTags={setPalavrasChave} />
                     </Form.Item>
                 </Col>
             </Row>

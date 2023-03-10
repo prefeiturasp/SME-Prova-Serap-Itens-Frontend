@@ -38,7 +38,7 @@ export interface ComponentesItemProps {
   discriminacao: number | string | null;
   dificuldade: number | string | null;
   acertoCasual: number | string | null;
-  palavrasChave: string | null;
+  palavrasChave: string[] | null;
   parametroBTransformado: number | string | null;
   mediaDesvioPadrao: string | null;
   observacao: string | null;

@@ -9,18 +9,18 @@ export interface ItemDto {
   competenciaId: SelectValueType;
   habilidadeId: SelectValueType;
   anoMatrizId: SelectValueType;
-  assunto: SelectValueType;
-  subAssunto: SelectValueType;
-  situacaoItem: SelectValueType;
-  tipoItem: SelectValueType;
-  quantidadeAlternativas: SelectValueType;
+  assuntoId: SelectValueType;
+  subAssuntoId: SelectValueType;
+  situacao: SelectValueType;
+  tipo: SelectValueType;
+  quantidadeAlternativasId: SelectValueType;
   dificuldadeSugeridaId: SelectValueType;
   discriminacao: number | string | null;
   dificuldade: number | string | null;
   acertoCasual: number | string | null;
-  palavrasChave: string | null;
+  palavrasChave: string[] | null;
   parametroBTransformado: number | string | null;
-  mediaDesvioPadrao: string | null;
+  mediaEhDesvio: string | null;
   observacao: string | null;
   textoBase: string;
 }
