@@ -1,41 +1,28 @@
 import { Form, FormProps } from 'antd';
 import { DefaultOptionType } from 'antd/lib/select';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Campos } from '~/domain/enums/campos-cadastro-item';
 import Select from '~/components/select';
 import { validarCampoForm } from '~/utils/funcoes';
 
 interface SelectProps extends FormProps {
-    label: string;
-    nomeCampo: Campos;
     options: DefaultOptionType[];
-    campoObrigatorio: boolean;
 }
 
-const SelectForm: React.FC<SelectProps> = ({
+const TipoItem: React.FC<SelectProps> = ({
     form,
     options,
-    nomeCampo,
-    label,
-    campoObrigatorio,
 }) => {
-    const campo = nomeCampo;
+    const campo = Campos.tipoItem;
     const valorCampoForm = Form.useWatch(campo, form);
     const validacaoCampo = validarCampoForm(valorCampoForm);
-
-    useEffect(() => {
-        if (options?.length > 1 || options?.length == 1) {
-            form?.resetFields([campo]);
-            form?.setFieldValue(campo, options?.length == 1 ? options[0].value : null);
-        }
-    }, [form, options, campo]);
 
     return (
         <Form.Item
             name={campo}
-            label={label}
+            label={'Tipo de Item'}
             rules={[{
-                required: campoObrigatorio && validacaoCampo,
+                required: validacaoCampo,
                 message: 'Campo obrigatório'
             }]}
         >
@@ -50,4 +37,4 @@ const SelectForm: React.FC<SelectProps> = ({
     );
 };
 
-export default SelectForm;
+export default TipoItem;
