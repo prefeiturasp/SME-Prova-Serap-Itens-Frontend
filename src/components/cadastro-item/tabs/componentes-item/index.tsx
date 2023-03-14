@@ -46,6 +46,7 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
     const campoMediaDesvioPadrao = Campos.mediaDesvioPadrao;
     const campoObservacao = Campos.observacao;
 
+    const disciplinaidForm = Form.useWatch(Campos.disciplinas, form);
     const matrizIdForm = Form.useWatch(Campos.matriz, form);
     const competenciaIdForm = Form.useWatch(Campos.competencia, form);
     const anoMatrizIdForm = Form.useWatch(campoAnoMatriz, form);
@@ -128,7 +129,8 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
                         resposta = await configuracaoItemService.obterHabilidadesCompetencia(param);
                     break;
                 case Campos.assunto:
-                    resposta = await configuracaoItemService.obterAssuntos();
+                    if (parametroValido)
+                        resposta = await configuracaoItemService.obterAssuntos(param);
                     break;
                 case Campos.subAssunto:
                     if (parametroValido)
@@ -178,8 +180,8 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
     }, [popularCampoSelectForm, campoTipoItem]);
 
     const obterAssuntos = useCallback(() => {
-        popularCampoSelectForm(null, campoAssunto, setListaAssuntos);
-    }, [popularCampoSelectForm, campoAssunto]);
+        popularCampoSelectForm(disciplinaidForm, campoAssunto, setListaAssuntos);
+    }, [popularCampoSelectForm, campoAssunto, disciplinaidForm]);
 
     const obterSituacoesItem = useCallback(() => {
         popularCampoSelectForm(null, campoSituacaoItem, setListaSituacoesItem);
@@ -188,6 +190,15 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
     const obterQuantidadeAlternativas = useCallback(() => {
         popularCampoSelectForm(null, campoQuantidadeAlternativas, setListaQuantidadeAlternativas);
     }, [popularCampoSelectForm, campoQuantidadeAlternativas]);
+
+    useEffect(() => {
+        if (
+            listaQuantidadeAlternativas !== null &&
+            listaQuantidadeAlternativas !== undefined &&
+            listaQuantidadeAlternativas?.length > 0
+        )
+            form?.setFieldValue(campoQuantidadeAlternativas, listaQuantidadeAlternativas[0].value);
+    }, [form, campoQuantidadeAlternativas, listaQuantidadeAlternativas]);
 
     useEffect(() => {
         obterTiposItem();

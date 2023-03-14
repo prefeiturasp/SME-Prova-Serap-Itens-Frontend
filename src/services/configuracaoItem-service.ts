@@ -43,8 +43,8 @@ const obterAnosMatriz = (matrizId: SelectValueType): Promise<DefaultOptionType[]
 const obterDificuldadeSugerida = (): Promise<DefaultOptionType[]> =>
   geralService.getDefaultSelect(`${URL_DEFAULT}/dificuldade`);
 
-const obterAssuntos = (): Promise<DefaultOptionType[]> =>
-  geralService.getDefaultSelect(`${URL_DEFAULT}/assuntos`);
+const obterAssuntos = (disciplinaId: SelectValueType): Promise<DefaultOptionType[]> =>
+  geralService.getDefaultSelect(`${URL_DEFAULT}/assuntos/${disciplinaId}`);
 
 const obterSubAssuntos = (assuntoId: SelectValueType): Promise<DefaultOptionType[]> =>
   geralService.getDefaultSelect(`${URL_DEFAULT}/assuntos/subassuntos/${assuntoId}`);
