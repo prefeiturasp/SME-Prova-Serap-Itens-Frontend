@@ -341,7 +341,7 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
                         form={form}
                         options={listaSubAssuntos}
                         nomeCampo={campoSubAssunto}
-                        label={'Sub assunto'}
+                        label={'Subassunto'}
                         campoObrigatorio={false}
                     ></SelectForm>
                 </Col>
