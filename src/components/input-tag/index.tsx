@@ -31,14 +31,13 @@ const InputTag: React.FC<InputTagProps> = ({ setTags, tags, valueForm }) => {
       <div className={erro === true ? 'error' : ''}>
         <TagsInput
           classNames={{
-            input: 'ant-input',
+            input: 'ant-input input-t',
             tag: 'tag-input',
-
           }}
           value={tags ?? []}
           onChange={setValorTags}
           name='Palavra-chave'
-          placeHolder='Digite'
+          placeHolder='Palavras-chave'
         />
       </div>
       <div className='requered'>
