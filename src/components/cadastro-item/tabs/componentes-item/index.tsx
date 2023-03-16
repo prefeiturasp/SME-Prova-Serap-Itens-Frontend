@@ -341,7 +341,7 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
                         form={form}
                         options={listaSubAssuntos}
                         nomeCampo={campoSubAssunto}
-                        label={'Sub-Assunto'}
+                        label={'Sub assunto'}
                         campoObrigatorio={false}
                     ></SelectForm>
                 </Col>
@@ -353,7 +353,7 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
                         form={form}
                         options={listaSituacoesItem}
                         nomeCampo={campoSituacaoItem}
-                        label={'Situação do Item'}
+                        label={'Situação do item'}
                         campoObrigatorio={true}
                     ></SelectForm>
                 </Col>
@@ -413,7 +413,7 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
                 </Col>
                 <Col span={8}>
                     <Form.Item
-                        label='Média e Desvio Padrão'
+                        label='Média e desvio padrão'
                         name={campoMediaDesvioPadrao}
                     >
                         <Input />
