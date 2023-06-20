@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction, useCallback, useEffect } from "react";
+import React, { Dispatch, SetStateAction, useCallback, useEffect } from 'react';
 import { Form, FormProps } from 'antd';
 import { DefaultOptionType } from 'antd/lib/select';
 import Select from '~/components/select';
@@ -11,6 +11,7 @@ interface AreaConhecimentoProps extends FormProps {
 
 const AreaConhecimento: React.FC<AreaConhecimentoProps> = ({ form, setArea, options }) => {
   const nomeCampo = 'AreaConhecimento';
+  const area = Form.useWatch(nomeCampo, form);
 
   const obterArea = useCallback(async () => {
     const resposta = await configuracaoItemService.obterAreaConhecimento();
@@ -34,7 +35,11 @@ const AreaConhecimento: React.FC<AreaConhecimentoProps> = ({ form, setArea, opti
 
 
   return (
-    <Form.Item name={nomeCampo} label="Área de conhecimento">
+    <Form.Item
+      name={nomeCampo}
+      label="Área de conhecimento"
+      rules={[{ required: (!area || area == undefined || area == null), message: 'Campo obrigatório' }]}
+    >
       <Select
         options={options}
         disabled={options?.length === 1}
@@ -46,4 +51,4 @@ const AreaConhecimento: React.FC<AreaConhecimentoProps> = ({ form, setArea, opti
   );
 };
 
-export default AreaConhecimento;
+export default React.memo(AreaConhecimento);
