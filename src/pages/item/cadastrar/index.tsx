@@ -116,7 +116,7 @@ const ItemCadastro: React.FC = () => {
       dificuldade: componentesItem.dificuldade !== '' ? componentesItem.dificuldade : null,
       acertoCasual: componentesItem.acertoCasual !== '' ? componentesItem.acertoCasual : null,
       palavrasChave: componentesItem.palavrasChave,
-      parametroBTransformado: componentesItem.parametroBTransformado,
+      parametroBTransformado: componentesItem.parametroBTransformado  !== '' ? componentesItem.parametroBTransformado  : null ,
       mediaEhDesvio: componentesItem.mediaDesvioPadrao,
       observacao: componentesItem.observacao,
       textoBase: elaboracaoItem?.textoBase ?? '',
@@ -132,17 +132,16 @@ const ItemCadastro: React.FC = () => {
       await configuracaoItemService
         .obterItem(id)
         .then((resp) => {
-          const configuracaoItem: ConfiguracaoItemProps = {
-            ...objTabConfiguracaoItem,
-            codigo: resp?.data?.codigoItem,
-          };
-          const itemAtual: ItemProps = {
-            ...item,
-            id: id,
-            configuracao: configuracaoItem,
-          };
-          setObjTabConfiguracaoItem(configuracaoItem);
-          dispatch(setItem(itemAtual));
+          const configuracaoItemRetorno: ConfiguracaoItemProps = {
+            ...objTabConfiguracaoItem, 
+                      codigo: resp?.data?.codigoItem,
+                  };
+                  const itemAtual: ItemProps = { ...item,
+                                                  id: id,
+                                  configuracao: configuracaoItemRetorno, };
+                                  setObjTabConfiguracaoItem(configuracaoItemRetorno); 
+                                  dispatch(setConfiguracaoItem(configuracaoItemRetorno)); 
+                  dispatch(setItem(itemAtual));
         })
         .catch((err) => {
           console.log('Erro', err.message);

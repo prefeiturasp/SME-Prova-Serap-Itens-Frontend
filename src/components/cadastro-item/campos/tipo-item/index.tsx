@@ -20,7 +20,7 @@ const TipoItem: React.FC<SelectProps> = ({
     return (
         <Form.Item
             name={campo}
-            label={'Tipo de Item'}
+            label={'Tipo de item'}
             rules={[{
                 required: validacaoCampo,
                 message: 'Campo obrigatório'
