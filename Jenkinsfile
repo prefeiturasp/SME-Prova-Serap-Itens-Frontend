@@ -6,9 +6,11 @@ pipeline {
       namespace = "${env.branchname == 'develop' ? 'serap-itens-dev' : env.branchname == 'release' ? 'serap-itens-hom' : env.branchname == 'release-r2' ? 'serap-itens-hom2' : 'sme-serap-itens' }"
     }
   
-    agent {
-      node { label 'AGENT-NODES' }
-    }
+    agent { kubernetes { 
+              label 'builder'
+              defaultContainer 'builder'
+            }
+          }
 
     options {
       buildDiscarder(logRotator(numToKeepStr: '5', artifactNumToKeepStr: '5'))
