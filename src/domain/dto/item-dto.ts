@@ -1,4 +1,5 @@
 import { SelectValueType } from '~/domain/type/select';
+import { AltenativaDto } from '~/domain/dto/AltenativaDto';
 
 export interface ItemDto {
   id: number;
@@ -23,4 +24,9 @@ export interface ItemDto {
   mediaEhDesvio: string | null;
   observacao: string | null;
   textoBase: string;
+  fonte: string;
+  enunciado: string;
+  alternativasDto?: AltenativaDto[];
+  arquivoItemId?: number;
+  arquivoAudioId?: number;
 }

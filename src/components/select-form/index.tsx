@@ -10,6 +10,7 @@ interface SelectProps extends FormProps {
     nomeCampo: Campos;
     options: DefaultOptionType[];
     campoObrigatorio: boolean;
+    labelInValue?: boolean;
 }
 
 const SelectForm: React.FC<SelectProps> = ({
@@ -18,6 +19,7 @@ const SelectForm: React.FC<SelectProps> = ({
     nomeCampo,
     label,
     campoObrigatorio,
+    labelInValue = false,
 }) => {
     const campo = nomeCampo;
     const valorCampoForm = Form.useWatch(campo, form);
@@ -26,7 +28,11 @@ const SelectForm: React.FC<SelectProps> = ({
     useEffect(() => {
         if (options?.length > 1 || options?.length == 1) {
             form?.resetFields([campo]);
-            form?.setFieldValue(campo, options?.length == 1 ? options[0].value : null);
+            let newValue = null;
+            if (options?.length === 1) {
+              newValue = labelInValue ? options[0] : options[0].value;
+            }
+            form?.setFieldValue(campo, newValue);
         }
     }, [form, options, campo]);
 
@@ -40,6 +46,7 @@ const SelectForm: React.FC<SelectProps> = ({
             }]}
         >
             <Select
+                labelInValue={labelInValue}
                 options={options}
                 disabled={options?.length === 1}
                 placeholder='Selecione'

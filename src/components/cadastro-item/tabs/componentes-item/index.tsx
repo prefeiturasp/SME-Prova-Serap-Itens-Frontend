@@ -55,7 +55,7 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
     const subAssuntoIdForm = Form.useWatch(campoSubAssunto, form);
     const situacaoItemIdForm = Form.useWatch(campoSituacaoItem, form);
     const tipoItemIdForm = Form.useWatch(campoTipoItem, form);
-    const quantidadeAlternativasIdForm = Form.useWatch(campoQuantidadeAlternativas, form);
+    const quantidadeAlternativasForm = Form.useWatch(campoQuantidadeAlternativas, form);
 
     const dificuldadeSugeridaIdForm = Form.useWatch(campoDificuldadeSugerida, form);
     const habilidadeIdForm = Form.useWatch(campoHabilidade, form);
@@ -151,7 +151,13 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
 
             if (resposta?.length) {
                 setLista(resposta);
-                if (resposta.length === 1) form?.setFieldValue(nomeCampo, resposta[0].value);
+                if (resposta.length === 1) {
+                    if (Campos.quantidadeAlternativas === nomeCampo) {
+                      form?.setFieldValue(nomeCampo, resposta[0]);
+                    } else {
+                      form?.setFieldValue(nomeCampo, resposta[0]?.value);
+                    }
+                }
             } else {
                 setLista([]);
                 form?.setFieldValue(nomeCampo, null);
@@ -197,7 +203,7 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
             listaQuantidadeAlternativas !== undefined &&
             listaQuantidadeAlternativas?.length > 0
         )
-            form?.setFieldValue(campoQuantidadeAlternativas, listaQuantidadeAlternativas[0].value);
+            form?.setFieldValue(campoQuantidadeAlternativas, listaQuantidadeAlternativas[0]);
     }, [form, campoQuantidadeAlternativas, listaQuantidadeAlternativas]);
 
     useEffect(() => {
@@ -237,7 +243,7 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
             subAssunto: subAssuntoIdForm,
             situacaoItem: situacaoItemIdForm,
             tipoItem: tipoItemIdForm,
-            quantidadeAlternativas: quantidadeAlternativasIdForm,
+            quantidadeAlternativas: quantidadeAlternativasForm?.value,
             dificuldadeSugerida: dificuldadeSugeridaIdForm,
             discriminacao: discriminacaoForm,
             dificuldade: dificuldadeForm,
@@ -255,7 +261,7 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
         subAssuntoIdForm,
         situacaoItemIdForm,
         tipoItemIdForm,
-        quantidadeAlternativasIdForm,
+        quantidadeAlternativasForm,
         dificuldadeSugeridaIdForm,
         habilidadeIdForm,
         discriminacaoForm,
@@ -365,9 +371,10 @@ const ComponentesItem: React.FC<FormProps> = ({ form }) => {
                         form={form}
                         options={listaQuantidadeAlternativas}
                         nomeCampo={campoQuantidadeAlternativas}
-                        label={'Quantidade de alternativas / categorias'}
-                        campoObrigatorio={true}
-                    ></SelectForm>
+                        label="Quantidade de alternativas / categorias"
+                        campoObrigatorio
+                        labelInValue
+                    />
                 </Col>
             </Row>
             <Separador />
