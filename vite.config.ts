@@ -1,12 +1,8 @@
-import ckeditor5 from '@ckeditor/vite-plugin-ckeditor5';
-import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
-import vitePluginImp from 'vite-plugin-imp';
+import react from '@vitejs/plugin-react';
 import tsconfigPaths from 'vite-tsconfig-paths';
+import vitePluginImp from 'vite-plugin-imp';
 import { Colors } from './src/styles/colors';
-
-import { createRequire } from 'node:module';
-const require = createRequire(import.meta.url);
 
 export default defineConfig({
   plugins: [
@@ -22,7 +18,6 @@ export default defineConfig({
         },
       ],
     }),
-    ckeditor5({ theme: require.resolve('@ckeditor/ckeditor5-theme-lark') }),
   ],
   css: {
     preprocessorOptions: {
