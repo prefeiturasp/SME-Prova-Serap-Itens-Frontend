@@ -1,26 +1,28 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, Col, Form, Row, Space, notification, Spin } from 'antd';
+import { Button, Col, Form, Row, Spin, notification } from 'antd';
+import { cloneDeep } from 'lodash';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { AppState } from '~/redux';
-import { ItemDto } from '~/domain/dto/item-dto';
-import configuracaoItemService from '~/services/configuracaoItem-service';
-import './cadastroItemStyles.css';
-import {
-  setItem,
-  setConfiguracaoItem,
-  setComponentesItem,
-  setElaboracaoItem,
-} from '~/redux/modules/cadastro-item/item/actions';
-import {
-  ItemProps,
-  ConfiguracaoItemProps,
-  ComponentesItemProps,
-  ElaboracaoItemProps,
-} from '~/redux/modules/cadastro-item/item/reducers';
 import { Title } from '~/components/cadastro-item/elementos';
 import TabForm from '~/components/cadastro-item/tab-form';
+import { AltenativaDto } from '~/domain/dto/AltenativaDto';
+import { ItemDto } from '~/domain/dto/item-dto';
 import { DadosIniciais } from '~/domain/enums/campos-cadastro-item';
-import { validarCampoForm, validarCampoArrayStringForm } from '~/utils/funcoes';
+import { AppState } from '~/redux';
+import {
+  setComponentesItem,
+  setConfiguracaoItem,
+  setElaboracaoItem,
+  setItem,
+} from '~/redux/modules/cadastro-item/item/actions';
+import {
+  ComponentesItemProps,
+  ConfiguracaoItemProps,
+  ElaboracaoItemProps,
+  ItemProps,
+} from '~/redux/modules/cadastro-item/item/reducers';
+import configuracaoItemService from '~/services/configuracaoItem-service';
+import { validarCampoArrayStringForm, validarCampoForm } from '~/utils/funcoes';
+import './cadastroItemStyles.css';
 
 const ItemCadastro: React.FC = () => {
   const dispatch = useDispatch();
@@ -41,8 +43,6 @@ const ItemCadastro: React.FC = () => {
     parametroBTransformado: '',
     tipoItem: DadosIniciais.tipoItemIdPadrao,
   };
-
-  const [itemSalvar, setItemSalvar] = useState<ItemDto>({} as ItemDto);
 
   const bloquearSalvar =
     validarCampoForm(configuracaoItem.disciplina) ||
@@ -91,12 +91,13 @@ const ItemCadastro: React.FC = () => {
     dispatch(setConfiguracaoItem({} as ConfiguracaoItemProps));
     dispatch(setComponentesItem({} as ComponentesItemProps));
     dispatch(setElaboracaoItem({} as ElaboracaoItemProps));
-    setItemSalvar({} as ItemDto);
     form.resetFields();
     setCarregando(false);
   };
 
   const gerarItemSalvar = useCallback(() => {
+    const values = cloneDeep(form.getFieldsValue(true));
+
     const dto: ItemDto = {
       id: item.id,
       codigoItem: configuracaoItem.codigo,
@@ -116,15 +117,25 @@ const ItemCadastro: React.FC = () => {
       dificuldade: componentesItem.dificuldade !== '' ? componentesItem.dificuldade : null,
       acertoCasual: componentesItem.acertoCasual !== '' ? componentesItem.acertoCasual : null,
       palavrasChave: componentesItem.palavrasChave,
-      parametroBTransformado: componentesItem.parametroBTransformado  !== '' ? componentesItem.parametroBTransformado  : null ,
+      parametroBTransformado: componentesItem?.parametroBTransformado || null,
       mediaEhDesvio: componentesItem.mediaDesvioPadrao,
       observacao: componentesItem.observacao,
-      textoBase: elaboracaoItem?.textoBase ?? '',
+      textoBase: values?.textoBase || '',
+      fonte: values?.fonte || '',
+      enunciado: values?.enunciado || '',
+      alternativasDto: values?.alternativasDto?.length ? values?.alternativasDto : [],
     };
-    setItemSalvar(dto);
-  }, [item, configuracaoItem, componentesItem, elaboracaoItem]);
 
-  const dadosItemSalvar = useMemo(() => gerarItemSalvar(), [gerarItemSalvar]);
+    if (values?.alternativasDto?.length) {
+      dto.alternativasDto = values?.alternativasDto.map((item: AltenativaDto) => {
+        const ehAlternativaCorreta = item.numeracao === values.alternativaCorreta;
+        item.correta = ehAlternativaCorreta;
+        return item;
+      });
+    }
+
+    return dto;
+  }, [item, configuracaoItem, componentesItem, elaboracaoItem, form]);
 
   const obterDadosItem = useCallback(
     async (id: number) => {
@@ -133,15 +144,13 @@ const ItemCadastro: React.FC = () => {
         .obterItem(id)
         .then((resp) => {
           const configuracaoItemRetorno: ConfiguracaoItemProps = {
-            ...objTabConfiguracaoItem, 
-                      codigo: resp?.data?.codigoItem,
-                  };
-                  const itemAtual: ItemProps = { ...item,
-                                                  id: id,
-                                  configuracao: configuracaoItemRetorno, };
-                                  setObjTabConfiguracaoItem(configuracaoItemRetorno); 
-                                  dispatch(setConfiguracaoItem(configuracaoItemRetorno)); 
-                  dispatch(setItem(itemAtual));
+            ...objTabConfiguracaoItem,
+            codigo: resp?.data?.codigoItem,
+          };
+          const itemAtual: ItemProps = { ...item, id: id, configuracao: configuracaoItemRetorno };
+          setObjTabConfiguracaoItem(configuracaoItemRetorno);
+          dispatch(setConfiguracaoItem(configuracaoItemRetorno));
+          dispatch(setItem(itemAtual));
         })
         .catch((err) => {
           console.log('Erro', err.message);
@@ -183,51 +192,45 @@ const ItemCadastro: React.FC = () => {
     [mensagem, obterDadosItem],
   );
 
-  const salvarItem = useCallback(async () => {
-    setCarregando(true);
-    dadosItemSalvar;
-    if (item?.id > 0) {
-      mensagem('info', 'Atenção', `Item já cadastrado, id:${item.id}`);
-    } else {
-      if (!bloquearBtnSalvar) {
-        await inserirItem(itemSalvar);
+  const salvarItem = useCallback(
+    async (rascunho = false) => {
+      setCarregando(true);
+      const itemSalvar = gerarItemSalvar();
+
+      if (item?.id > 0) {
+        mensagem('info', 'Atenção', `Item já cadastrado, id:${item.id}`);
       } else {
-        await inserirRascunhoItem(itemSalvar);
+        if (rascunho) {
+          await inserirItem(itemSalvar);
+        } else {
+          await inserirRascunhoItem(itemSalvar);
+        }
       }
+      setCarregando(false);
+    },
+    [item.id, mensagem, inserirItem, inserirRascunhoItem, gerarItemSalvar],
+  );
+
+  const bloquearBtnSalvarRascunhoDadosTabElaboracaoItem = (): boolean => {
+    const values = cloneDeep(form.getFieldsValue(true));
+
+    let algumaDescricaoSemValor = false;
+
+    if (values?.alternativasDto?.length) {
+      algumaDescricaoSemValor = values.alternativasDto.find(
+        (item: AltenativaDto) => !item?.descricao,
+      );
     }
-    setCarregando(false);
-  }, [
-    item.id,
-    itemSalvar,
-    bloquearBtnSalvar,
-    mensagem,
-    inserirItem,
-    inserirRascunhoItem,
-    dadosItemSalvar,
-  ]);
+
+    if (!values?.enunciado || !values?.alternativaCorreta || algumaDescricaoSemValor) return true;
+
+    return false;
+  };
 
   return (
     <>
       <Spin size='small' spinning={carregando}>
         {contextHolder}
-        <Title>
-          <Row gutter={2}>
-            <Col span={12}>
-              <h1>Cadastrar novo item</h1>
-            </Col>
-            <Col span={12}>
-              <Space wrap className='botoesCadastro'>
-                <Button onClick={voltar}>Voltar</Button>
-                <Button type='primary' onClick={salvarItem} disabled={bloquearBtnSalvarRascunho}>
-                  Salvar rascunho
-                </Button>
-                <Button type='primary' onClick={salvarItem} disabled={bloquearBtnSalvar}>
-                  Salvar
-                </Button>
-              </Space>
-            </Col>
-          </Row>
-        </Title>
 
         <Form
           className='form'
@@ -235,7 +238,51 @@ const ItemCadastro: React.FC = () => {
           layout='vertical'
           autoComplete='off'
           initialValues={initialValuesForm}
+          style={{
+            margin: 0,
+          }}
         >
+          <Title>
+            <Row gutter={2}>
+              <Col span={12}>
+                <h1>Cadastrar novo item</h1>
+              </Col>
+              <Col span={12} style={{ marginTop: 24 }}>
+                <Row gutter={[8, 8]} justify='end'>
+                  <Col>
+                    <Button onClick={voltar}>Voltar</Button>
+                  </Col>
+                  <Col>
+                    <Button
+                      type='primary'
+                      onClick={() => salvarItem(true)}
+                      disabled={bloquearBtnSalvarRascunho}
+                    >
+                      Salvar rascunho
+                    </Button>
+                  </Col>
+                  <Col>
+                    <Form.Item shouldUpdate style={{ marginBottom: 0 }}>
+                      {() => {
+                        const desabilitar =
+                          bloquearBtnSalvar || bloquearBtnSalvarRascunhoDadosTabElaboracaoItem();
+
+                        return (
+                          <Button
+                            type='primary'
+                            onClick={() => salvarItem()}
+                            disabled={desabilitar}
+                          >
+                            Salvar
+                          </Button>
+                        );
+                      }}
+                    </Form.Item>
+                  </Col>
+                </Row>
+              </Col>
+            </Row>
+          </Title>
           <TabForm form={form} />
         </Form>
       </Spin>
@@ -243,4 +290,4 @@ const ItemCadastro: React.FC = () => {
   );
 };
 
-export default React.memo(ItemCadastro);
+export default ItemCadastro;

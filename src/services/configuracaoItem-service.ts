@@ -6,6 +6,7 @@ import { MatrizObj } from '~/components/cadastro-item/modelo-matriz';
 import { AxiosResponse } from 'axios';
 import { DisciplinaProps } from '~/redux/modules/cadastro-item/disciplina/reducers';
 import { ItemDto } from '~/domain/dto/item-dto';
+import { FileTypeEnum } from '~/domain/enums/FileType';
 const URL_DEFAULT = '/api/v1';
 
 const obterAreaConhecimento = (): Promise<DefaultOptionType[]> =>
@@ -60,6 +61,16 @@ const obterQuantidadeAlternativas = (): Promise<DefaultOptionType[]> =>
 
 const obterItem = (id: number): Promise<AxiosResponse<any>> => api.get(`${URL_DEFAULT}/Item/${id}`);
 
+const uploadVideo = (formData: FormData, configuracaoHeader: any) => {
+  formData.append('fileType', FileTypeEnum.Video.toString());
+  return api.post(URL_DEFAULT, formData, configuracaoHeader);
+};
+
+const uploadAudio = (formData: FormData, configuracaoHeader: any) => {
+  formData.append('fileType', FileTypeEnum.Audio.toString());
+  return api.post(URL_DEFAULT, formData, configuracaoHeader);
+};
+
 export default {
   obterAreaConhecimento,
   obterDisciplinas,
@@ -78,4 +89,6 @@ export default {
   obterHabilidadesCompetencia,
   obterAnosMatriz,
   obterDificuldadeSugerida,
+  uploadVideo,
+  uploadAudio,
 };
