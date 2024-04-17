@@ -201,9 +201,9 @@ const ItemCadastro: React.FC = () => {
         mensagem('info', 'Atenção', `Item já cadastrado, id:${item.id}`);
       } else {
         if (rascunho) {
-          await inserirItem(itemSalvar);
-        } else {
           await inserirRascunhoItem(itemSalvar);
+        } else {
+          await inserirItem(itemSalvar);
         }
       }
       setCarregando(false);
