@@ -9,10 +9,9 @@ import ButtonPrimary from '~/components/lib/button/primary';
 import { TextEditor } from '~/components/lib/editor';
 import UploadArquivosSME from '~/components/lib/upload';
 import { AltenativaDto } from '~/domain/dto/AltenativaDto';
-import configuracaoItemService from '~/services/configuracaoItem-service';
+import arquivoService from '~/services/arquivo-service';
 import { Colors } from '~/styles/colors';
 import { Separador } from '../../elementos';
-
 type ContainerItemPros = {
   ehAlternativaCorreta: boolean;
 };
@@ -30,6 +29,11 @@ const ElaboracaoItem: React.FC<FormProps> = () => {
   const quantidadeAlternativas = useWatch('quantidadeAlternativas', form);
 
   const alternativaCorreta = useWatch('alternativaCorreta', form);
+  const video = useWatch('video', form);
+  const audio = useWatch('audio', form);
+
+  const desabilitarUploadVideo = !!video?.length;
+  const desabilitarUploadAudio = !!audio?.length;
 
   const [alternativas, setAlternativas] = useState<AltenativaDto[]>([]);
 
@@ -184,16 +188,23 @@ const ElaboracaoItem: React.FC<FormProps> = () => {
           <Row justify='space-between' gutter={16}>
             <Col>
               <UploadArquivosSME
-                isDraggerUpload={false}
                 form={form}
+                isDraggerUpload={false}
+                uploadService={arquivoService.uploadVideo}
                 formItemProps={{
                   name: 'video',
                   label: 'Vídeo',
                 }}
-                uploadService={configuracaoItemService.uploadVideo}
+                uploadProps={{
+                  maxCount: 1,
+                  showUploadList: {
+                    downloadIcon: false,
+                  },
+                }}
               >
                 <ButtonPrimary
                   icon={<FontAwesomeIcon icon={faCloudUpload} style={{ marginRight: 5 }} />}
+                  disabled={desabilitarUploadVideo}
                 >
                   UPLOAD VÍDEO
                 </ButtonPrimary>
@@ -203,16 +214,23 @@ const ElaboracaoItem: React.FC<FormProps> = () => {
 
             <Col>
               <UploadArquivosSME
-                isDraggerUpload={false}
                 form={form}
+                isDraggerUpload={false}
+                uploadService={arquivoService.uploadAudio}
                 formItemProps={{
                   name: 'audio',
                   label: 'Áudio',
                 }}
-                uploadService={configuracaoItemService.uploadAudio}
+                uploadProps={{
+                  maxCount: 1,
+                  showUploadList: {
+                    downloadIcon: false,
+                  },
+                }}
               >
                 <ButtonPrimary
                   icon={<FontAwesomeIcon icon={faCloudUpload} style={{ marginRight: 5 }} />}
+                  disabled={desabilitarUploadAudio}
                 >
                   UPLOAD ÁUDIO
                 </ButtonPrimary>
