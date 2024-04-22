@@ -27,7 +27,7 @@ const salvarItem = (item: ItemDto): Promise<AxiosResponse<number>> =>
   api.post(`${URL_DEFAULT}/Item/salvar`, item);
 
 const salvarRascunhoItem = (item: ItemDto): Promise<AxiosResponse<number>> =>
-  api.post(`${URL_DEFAULT}/Item/salvar-rascunhasdasdasdo`, item);
+  api.post(`${URL_DEFAULT}/Item/salvar-rascunho`, item);
 
 const obterCompetenciasMatriz = (matrizId: SelectValueType): Promise<DefaultOptionType[]> =>
   geralService.getDefaultSelect(`${URL_DEFAULT}/competencia/matriz/${matrizId}`);
