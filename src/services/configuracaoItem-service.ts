@@ -1,12 +1,11 @@
 import { DefaultOptionType } from 'antd/lib/select';
-import api from './api';
-import { SelectValueType } from '~/domain/type/select';
-import geralService from '~/services/geral-service';
-import { MatrizObj } from '~/components/cadastro-item/modelo-matriz';
 import { AxiosResponse } from 'axios';
-import { DisciplinaProps } from '~/redux/modules/cadastro-item/disciplina/reducers';
+import { MatrizObj } from '~/components/cadastro-item/modelo-matriz';
 import { ItemDto } from '~/domain/dto/item-dto';
-import { FileTypeEnum } from '~/domain/enums/FileType';
+import { SelectValueType } from '~/domain/type/select';
+import { DisciplinaProps } from '~/redux/modules/cadastro-item/disciplina/reducers';
+import geralService from '~/services/geral-service';
+import api from './api';
 const URL_DEFAULT = '/api/v1';
 
 const obterAreaConhecimento = (): Promise<DefaultOptionType[]> =>
@@ -28,7 +27,7 @@ const salvarItem = (item: ItemDto): Promise<AxiosResponse<number>> =>
   api.post(`${URL_DEFAULT}/Item/salvar`, item);
 
 const salvarRascunhoItem = (item: ItemDto): Promise<AxiosResponse<number>> =>
-  api.post(`${URL_DEFAULT}/Item/salvar-rascunho`, item);
+  api.post(`${URL_DEFAULT}/Item/salvar-rascunhasdasdasdo`, item);
 
 const obterCompetenciasMatriz = (matrizId: SelectValueType): Promise<DefaultOptionType[]> =>
   geralService.getDefaultSelect(`${URL_DEFAULT}/competencia/matriz/${matrizId}`);
@@ -61,16 +60,6 @@ const obterQuantidadeAlternativas = (): Promise<DefaultOptionType[]> =>
 
 const obterItem = (id: number): Promise<AxiosResponse<any>> => api.get(`${URL_DEFAULT}/Item/${id}`);
 
-const uploadVideo = (formData: FormData, configuracaoHeader: any) => {
-  formData.append('fileType', FileTypeEnum.Video.toString());
-  return api.post(URL_DEFAULT, formData, configuracaoHeader);
-};
-
-const uploadAudio = (formData: FormData, configuracaoHeader: any) => {
-  formData.append('fileType', FileTypeEnum.Audio.toString());
-  return api.post(URL_DEFAULT, formData, configuracaoHeader);
-};
-
 export default {
   obterAreaConhecimento,
   obterDisciplinas,
@@ -89,6 +78,4 @@ export default {
   obterHabilidadesCompetencia,
   obterAnosMatriz,
   obterDificuldadeSugerida,
-  uploadVideo,
-  uploadAudio,
 };

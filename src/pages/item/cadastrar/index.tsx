@@ -134,6 +134,13 @@ const ItemCadastro: React.FC = () => {
       });
     }
 
+    if (values?.video?.length) {
+      dto.arquivoItemId = values?.video?.[0]?.idFile;
+    }
+    if (values?.audio?.length) {
+      dto.arquivoAudioId = values?.audio?.[0]?.idFile;
+    }
+
     return dto;
   }, [item, configuracaoItem, componentesItem, elaboracaoItem, form]);
 

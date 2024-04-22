@@ -63,7 +63,7 @@ export const ContainerUpload = styled.div`
 type UploadArquivosProps = {
   isDraggerUpload?: boolean;
   form: FormInstance;
-  draggerProps?: DraggerProps;
+  uploadProps?: DraggerProps;
   formItemProps: FormItemProps & { name: string };
   tiposArquivosPermitidos?: string;
   tamanhoMaxUploadPorArquivo?: number;
@@ -78,7 +78,7 @@ const UploadArquivosSME: React.FC<UploadArquivosProps> = (props) => {
     children,
     isDraggerUpload = true,
     form,
-    draggerProps,
+    uploadProps,
     formItemProps,
     uploadService,
     downloadService,
@@ -141,10 +141,9 @@ const UploadArquivosSME: React.FC<UploadArquivosProps> = (props) => {
     uploadService(fmData, config)
       .then((resposta: any) => {
         if (resposta?.status === HttpStatusCode.Ok) {
-          file.idArquivo = resposta?.data?.idArquivo;
-          file.linkarquivo = resposta?.data?.linkarquivo;
-          file.tipo = resposta?.data?.tipo;
-          onSuccess(file, file.idArquivo);
+          file.idFile = resposta?.data?.idFile;
+          file.fileLink = resposta?.data?.fileLink;
+          onSuccess(file, file.idFile);
         } else {
           notification.error({
             message: 'Erro',
@@ -247,12 +246,12 @@ const UploadArquivosSME: React.FC<UploadArquivosProps> = (props) => {
           listType='text'
           fileList={listaDeArquivos}
           showUploadList={{ showDownloadIcon: true }}
-          onRemove={draggerProps?.onRemove || onRemoveDefault}
-          onChange={draggerProps?.onChange || onChangeDefault}
-          onDownload={draggerProps?.onDownload || onDownloadDefault}
-          beforeUpload={draggerProps?.beforeUpload || beforeUploadDefault}
-          customRequest={draggerProps?.customRequest || customRequestDefault}
-          {...draggerProps}
+          onRemove={uploadProps?.onRemove || onRemoveDefault}
+          onChange={uploadProps?.onChange || onChangeDefault}
+          onDownload={uploadProps?.onDownload || onDownloadDefault}
+          beforeUpload={uploadProps?.beforeUpload || beforeUploadDefault}
+          customRequest={uploadProps?.customRequest || customRequestDefault}
+          {...uploadProps}
         >
           {isDraggerUpload ? (
             <>
