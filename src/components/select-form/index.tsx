@@ -1,4 +1,4 @@
-import { Form, FormProps } from 'antd';
+import { Form, FormItemProps, FormProps } from 'antd';
 import { DefaultOptionType } from 'antd/lib/select';
 import React, { useEffect } from 'react';
 import { Campos } from '~/domain/enums/campos-cadastro-item';
@@ -36,6 +36,12 @@ const SelectForm: React.FC<SelectProps> = ({
         }
     }, [form, options, campo]);
 
+    const customFormItemProps: FormItemProps = {};
+
+    if (labelInValue) {
+      customFormItemProps.getValueFromEvent = (_, value) => value;
+    }
+
     return (
         <Form.Item
             name={campo}
@@ -44,7 +50,7 @@ const SelectForm: React.FC<SelectProps> = ({
                 required: campoObrigatorio && validacaoCampo,
                 message: 'Campo obrigatório'
             }]}
-            getValueFromEvent={(_, value) => value}
+            {...customFormItemProps}
         >
             <Select
                 labelInValue={labelInValue}
