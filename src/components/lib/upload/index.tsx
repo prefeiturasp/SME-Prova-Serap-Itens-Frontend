@@ -12,27 +12,12 @@ enum HttpStatusCode {
   Ok = 200,
 }
 
-export const permiteInserirFormato = (arquivo: any, tiposArquivosPermitidos: string) => {
-  if (tiposArquivosPermitidos?.trim()) {
-    const listaPermitidos = tiposArquivosPermitidos
-      .split(',')
-      .map((tipo) => tipo?.trim()?.toLowerCase());
-
-    const tamanhoNome = arquivo?.name?.length;
-
-    const permiteTipo = listaPermitidos.find((tipo) => {
-      const nomeTipoAtual = arquivo.name.substring(tamanhoNome, tamanhoNome - tipo.length);
-
-      if (nomeTipoAtual) {
-        return tipo?.toLowerCase() === nomeTipoAtual?.toLowerCase();
-      }
-
-      return false;
-    });
-
+export const permiteInserirFormato = (arquivo: any, tiposArquivosPermitidos: string[]) => {
+  if (tiposArquivosPermitidos?.length) {
+    const permiteTipo = tiposArquivosPermitidos.find((tipo) => tipo === arquivo?.type);
     return !!permiteTipo;
   }
-  return true;
+  return false;
 };
 
 const downloadBlob = (data: any, fileName: string) => {
@@ -58,6 +43,11 @@ export const ContainerUpload = styled.div`
     .ant-upload-list-item-action {
     opacity: 1;
   }
+
+  .ant-upload-list-item,
+  .ant-upload-list-item-done {
+    width: min-content !important;
+  }
 `;
 
 type UploadArquivosProps = {
@@ -65,7 +55,7 @@ type UploadArquivosProps = {
   form: FormInstance;
   uploadProps?: DraggerProps;
   formItemProps: FormItemProps & { name: string };
-  tiposArquivosPermitidos?: string;
+  tiposArquivosPermitidos: string[];
   tamanhoMaxUploadPorArquivo?: number;
   downloadService?: (codigosArquivo: string) => any;
   uploadService: (formData: FormData, configuracaoHeader: any) => any;
@@ -82,7 +72,7 @@ const UploadArquivosSME: React.FC<UploadArquivosProps> = (props) => {
     formItemProps,
     uploadService,
     downloadService,
-    tiposArquivosPermitidos = '',
+    tiposArquivosPermitidos = [],
     tamanhoMaxUploadPorArquivo = TAMANHO_PADRAO_MAXIMO_UPLOAD,
   } = props;
 
