@@ -62,13 +62,13 @@ const ElaboracaoItem: React.FC<FormProps> = () => {
   return (
     <>
       <Row>
-        <Col sm={24} md={12}>
+        <Col sm={24}>
           <Typography.Title level={2}>Elaboração do item</Typography.Title>
         </Col>
       </Row>
 
       <Row>
-        <Col sm={24} md={12}>
+        <Col sm={24}>
           <Form.Item name='textoBase' label='Texto base' style={{ marginBottom: 4 }}>
             <TextEditor />
           </Form.Item>
@@ -76,7 +76,7 @@ const ElaboracaoItem: React.FC<FormProps> = () => {
       </Row>
 
       <Row>
-        <Col sm={24} md={12}>
+        <Col sm={24}>
           <Form.Item name='fonte' label='Fonte'>
             <Input placeholder='Fonte' />
           </Form.Item>
@@ -84,13 +84,13 @@ const ElaboracaoItem: React.FC<FormProps> = () => {
       </Row>
 
       <Row style={{ marginBottom: 24 }}>
-        <Col sm={24} md={12}>
+        <Col sm={24}>
           <Separador />
         </Col>
       </Row>
 
       <Row>
-        <Col sm={24} md={12}>
+        <Col sm={24}>
           <Form.Item
             name='enunciado'
             label='Enunciado'
@@ -103,13 +103,13 @@ const ElaboracaoItem: React.FC<FormProps> = () => {
       {alternativas?.length ? (
         <>
           <Row style={{ marginBottom: 24 }}>
-            <Col sm={24} md={12}>
+            <Col sm={24}>
               <Separador />
             </Col>
           </Row>
 
           <Row>
-            <Col sm={24} md={12}>
+            <Col sm={24}>
               <Row gutter={[0, 16]}>
                 {alternativas.map((item, index) => {
                   const ehAlternativaCorreta = item?.numeracao === alternativaCorreta;
@@ -172,72 +172,89 @@ const ElaboracaoItem: React.FC<FormProps> = () => {
       )}
 
       <Row style={{ marginTop: 24 }}>
-        <Col sm={24} md={12}>
+        <Col sm={24}>
           <Separador />
         </Col>
       </Row>
 
       <Row>
-        <Col sm={24} md={12}>
+        <Col sm={24}>
           <Typography.Title level={3}>Recurso de Acessibilidade</Typography.Title>
         </Col>
       </Row>
 
       <Row>
-        <Col sm={24} md={12}>
-          <Row justify='space-between' gutter={16}>
-            <Col>
-              <UploadArquivosSME
-                form={form}
-                isDraggerUpload={false}
-                uploadService={arquivoService.uploadVideo}
-                formItemProps={{
-                  name: 'video',
-                  label: 'Vídeo',
-                }}
-                uploadProps={{
-                  maxCount: 1,
-                  showUploadList: {
-                    downloadIcon: false,
-                  },
-                }}
-              >
-                <ButtonPrimary
-                  icon={<FontAwesomeIcon icon={faCloudUpload} style={{ marginRight: 5 }} />}
-                  disabled={desabilitarUploadVideo}
-                >
-                  UPLOAD VÍDEO
-                </ButtonPrimary>
-                <Typography.Text>Tamanho máximo 10MB</Typography.Text>
-              </UploadArquivosSME>
-            </Col>
+        <Col sm={24}>
+          <UploadArquivosSME
+            form={form}
+            isDraggerUpload={false}
+            uploadService={arquivoService.uploadVideo}
+            formItemProps={{
+              name: 'video',
+              label: 'Vídeo',
+            }}
+            uploadProps={{
+              maxCount: 1,
+              showUploadList: {
+                downloadIcon: false,
+              },
+            }}
+            tiposArquivosPermitidos={[
+              'video/mp4',
+              'video/webm',
+              'video/ogg',
+              'application/ogg',
+              'video/x-flv',
+              'application/x-mpegURL',
+              'video/MP2T',
+              'video/3gpp',
+              'video/quicktime',
+              'video/x-msvideo',
+              'video/x-ms-wmv',
+            ]}
+          >
+            <ButtonPrimary
+              icon={<FontAwesomeIcon icon={faCloudUpload} style={{ marginRight: 5 }} />}
+              disabled={desabilitarUploadVideo}
+            >
+              UPLOAD VÍDEO
+            </ButtonPrimary>
+            <Typography.Text>Tamanho máximo 10MB</Typography.Text>
+          </UploadArquivosSME>
+        </Col>
 
-            <Col>
-              <UploadArquivosSME
-                form={form}
-                isDraggerUpload={false}
-                uploadService={arquivoService.uploadAudio}
-                formItemProps={{
-                  name: 'audio',
-                  label: 'Áudio',
-                }}
-                uploadProps={{
-                  maxCount: 1,
-                  showUploadList: {
-                    downloadIcon: false,
-                  },
-                }}
-              >
-                <ButtonPrimary
-                  icon={<FontAwesomeIcon icon={faCloudUpload} style={{ marginRight: 5 }} />}
-                  disabled={desabilitarUploadAudio}
-                >
-                  UPLOAD ÁUDIO
-                </ButtonPrimary>
-                <Typography.Text>Tamanho máximo 10MB</Typography.Text>
-              </UploadArquivosSME>
-            </Col>
-          </Row>
+        <Col sm={12}>
+          <UploadArquivosSME
+            form={form}
+            isDraggerUpload={false}
+            uploadService={arquivoService.uploadAudio}
+            formItemProps={{
+              name: 'audio',
+              label: 'Áudio',
+            }}
+            uploadProps={{
+              maxCount: 1,
+              showUploadList: {
+                downloadIcon: false,
+              },
+            }}
+            tiposArquivosPermitidos={[
+              'audio/mpeg',
+              'audio/mp4',
+              'audio/mp3',
+              'audio/vnd.wav',
+              'audio/x-ms-wma',
+              'audio/ogg',
+            ]}
+          >
+            <ButtonPrimary
+              icon={<FontAwesomeIcon icon={faCloudUpload} style={{ marginRight: 5 }} />}
+              disabled={desabilitarUploadAudio}
+            >
+              UPLOAD ÁUDIO
+            </ButtonPrimary>
+            <Typography.Text>Tamanho máximo 10MB</Typography.Text>
+          </UploadArquivosSME>
         </Col>
       </Row>
     </>

@@ -44,6 +44,7 @@ const SelectForm: React.FC<SelectProps> = ({
                 required: campoObrigatorio && validacaoCampo,
                 message: 'Campo obrigatório'
             }]}
+            getValueFromEvent={(_, value) => value}
         >
             <Select
                 labelInValue={labelInValue}

@@ -7,6 +7,7 @@ import ItemCadastro from './pages/item/cadastrar/index';
 import { persistor, store } from './redux';
 
 import NotificationStorage from './components/lib/notification/index';
+import GlobalStyle from './styles/global';
 
 moment.locale('pt-br');
 
@@ -15,7 +16,8 @@ const App = () => (
     <NotificationStorage />
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
-        <ItemCadastro></ItemCadastro>
+        <GlobalStyle />
+        <ItemCadastro />
       </PersistGate>
     </Provider>
   </AppAntd>
