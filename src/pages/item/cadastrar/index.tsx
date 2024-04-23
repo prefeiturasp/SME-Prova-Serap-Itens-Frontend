@@ -1,4 +1,4 @@
-import { Button, Col, Form, Row, Spin, notification } from 'antd';
+import { Affix, Button, Col, Form, Row, Spin, notification } from 'antd';
 import { cloneDeep } from 'lodash';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -249,47 +249,49 @@ const ItemCadastro: React.FC = () => {
             margin: 0,
           }}
         >
-          <Title>
-            <Row gutter={2}>
-              <Col span={12}>
-                <h1>Cadastrar novo item</h1>
-              </Col>
-              <Col span={12} style={{ marginTop: 24 }}>
-                <Row gutter={[8, 8]} justify='end'>
-                  <Col>
-                    <Button onClick={voltar}>Voltar</Button>
-                  </Col>
-                  <Col>
-                    <Button
-                      type='primary'
-                      onClick={() => salvarItem(true)}
-                      disabled={bloquearBtnSalvarRascunho}
-                    >
-                      Salvar rascunho
-                    </Button>
-                  </Col>
-                  <Col>
-                    <Form.Item shouldUpdate style={{ marginBottom: 0 }}>
-                      {() => {
-                        const desabilitar =
-                          bloquearBtnSalvar || bloquearBtnSalvarRascunhoDadosTabElaboracaoItem();
+          <Affix offsetTop={0.1} style={{ marginBottom: 30 }}>
+            <Title>
+              <Row gutter={2}>
+                <Col span={12}>
+                  <h1>Cadastrar novo item</h1>
+                </Col>
+                <Col span={12} style={{ marginTop: 24 }}>
+                  <Row gutter={[8, 8]} justify='end'>
+                    <Col>
+                      <Button onClick={voltar}>Voltar</Button>
+                    </Col>
+                    <Col>
+                      <Button
+                        type='primary'
+                        onClick={() => salvarItem(true)}
+                        disabled={bloquearBtnSalvarRascunho}
+                      >
+                        Salvar rascunho
+                      </Button>
+                    </Col>
+                    <Col>
+                      <Form.Item shouldUpdate style={{ marginBottom: 0 }}>
+                        {() => {
+                          const desabilitar =
+                            bloquearBtnSalvar || bloquearBtnSalvarRascunhoDadosTabElaboracaoItem();
 
-                        return (
-                          <Button
-                            type='primary'
-                            onClick={() => salvarItem()}
-                            disabled={desabilitar}
-                          >
-                            Salvar
-                          </Button>
-                        );
-                      }}
-                    </Form.Item>
-                  </Col>
-                </Row>
-              </Col>
-            </Row>
-          </Title>
+                          return (
+                            <Button
+                              type='primary'
+                              onClick={() => salvarItem()}
+                              disabled={desabilitar}
+                            >
+                              Salvar
+                            </Button>
+                          );
+                        }}
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                </Col>
+              </Row>
+            </Title>
+          </Affix>
           <TabForm form={form} />
         </Form>
       </Spin>
