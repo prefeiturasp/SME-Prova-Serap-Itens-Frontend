@@ -19,6 +19,7 @@ const ContainerItem = styled.div<ContainerItemPros>`
   border: 1px solid ${Colors.CinzaBorda};
   border-radius: 4px;
   padding: 12px;
+  margin-bottom: 16px;
   background-color: ${({ ehAlternativaCorreta = false }) =>
     ehAlternativaCorreta ? '#edf2ff' : 'transparent'};
 `;
@@ -62,13 +63,13 @@ const ElaboracaoItem: React.FC<FormProps> = () => {
   return (
     <>
       <Row>
-        <Col sm={24}>
+        <Col xs={24}>
           <Typography.Title level={2}>Elaboração do item</Typography.Title>
         </Col>
       </Row>
 
       <Row>
-        <Col sm={24}>
+        <Col xs={24}>
           <Form.Item name='textoBase' label='Texto base' style={{ marginBottom: 4 }}>
             <TextEditor />
           </Form.Item>
@@ -76,7 +77,7 @@ const ElaboracaoItem: React.FC<FormProps> = () => {
       </Row>
 
       <Row>
-        <Col sm={24}>
+        <Col xs={24}>
           <Form.Item name='fonte' label='Fonte'>
             <Input placeholder='Fonte' />
           </Form.Item>
@@ -84,13 +85,13 @@ const ElaboracaoItem: React.FC<FormProps> = () => {
       </Row>
 
       <Row style={{ marginBottom: 24 }}>
-        <Col sm={24}>
+        <Col xs={24}>
           <Separador />
         </Col>
       </Row>
 
       <Row>
-        <Col sm={24}>
+        <Col xs={24}>
           <Form.Item
             name='enunciado'
             label='Enunciado'
@@ -100,91 +101,86 @@ const ElaboracaoItem: React.FC<FormProps> = () => {
           </Form.Item>
         </Col>
       </Row>
+
       {alternativas?.length ? (
         <>
           <Row style={{ marginBottom: 24 }}>
-            <Col sm={24}>
+            <Col xs={24}>
               <Separador />
             </Col>
           </Row>
 
-          <Row>
-            <Col sm={24}>
-              <Row gutter={[0, 16]}>
-                {alternativas.map((item, index) => {
-                  const ehAlternativaCorreta = item?.numeracao === alternativaCorreta;
+          {alternativas.map((item, index) => {
+            const ehAlternativaCorreta = item?.numeracao === alternativaCorreta;
 
-                  return (
-                    <ContainerItem ehAlternativaCorreta={ehAlternativaCorreta} key={item?.id}>
-                      <Row>
-                        <Col xs={24}>
-                          <Form.Item
-                            name={['alternativasDto', index, 'descricao']}
-                            label={
-                              <Form.Item
-                                name='alternativaCorreta'
-                                style={{ marginBottom: 4 }}
-                                rules={[
-                                  {
-                                    required: true,
-                                    message: 'Campo obrigatório',
-                                  },
-                                ]}
-                              >
-                                <Radio.Group>
-                                  <Radio
-                                    value={item.numeracao}
-                                  >{`${item.numeracao}) Alternativa correta`}</Radio>
-                                </Radio.Group>
-                              </Form.Item>
-                            }
-                            style={{ marginBottom: 4 }}
-                            rules={[
-                              {
-                                required: true,
-                                message: 'Campo obrigatório',
-                              },
-                            ]}
-                          >
-                            <TextEditor />
-                          </Form.Item>
-                        </Col>
+            return (
+              <ContainerItem ehAlternativaCorreta={ehAlternativaCorreta} key={item?.id}>
+                <Row gutter={[0, 16]}>
+                  <Col xs={24}>
+                    <Form.Item
+                      name={['alternativasDto', index, 'descricao']}
+                      label={
+                        <Form.Item
+                          name='alternativaCorreta'
+                          style={{ marginBottom: 4 }}
+                          rules={[
+                            {
+                              required: true,
+                              message: 'Campo obrigatório',
+                            },
+                          ]}
+                        >
+                          <Radio.Group>
+                            <Radio
+                              value={item.numeracao}
+                            >{`${item.numeracao}) Alternativa correta`}</Radio>
+                          </Radio.Group>
+                        </Form.Item>
+                      }
+                      style={{ marginBottom: 4 }}
+                      rules={[
+                        {
+                          required: true,
+                          message: 'Campo obrigatório',
+                        },
+                      ]}
+                    >
+                      <TextEditor />
+                    </Form.Item>
+                  </Col>
 
-                        <Col xs={24}>
-                          <Form.Item
-                            name={['alternativasDto', index, 'justificativa']}
-                            label='Justificativa'
-                            style={{ marginBottom: 4 }}
-                          >
-                            <TextEditor />
-                          </Form.Item>
-                        </Col>
-                      </Row>
-                    </ContainerItem>
-                  );
-                })}
-              </Row>
-            </Col>
-          </Row>
+                  <Col xs={24}>
+                    <Form.Item
+                      name={['alternativasDto', index, 'justificativa']}
+                      label='Justificativa'
+                      style={{ marginBottom: 4 }}
+                    >
+                      <TextEditor />
+                    </Form.Item>
+                  </Col>
+                </Row>
+              </ContainerItem>
+            );
+          })}
         </>
       ) : (
         <></>
       )}
 
       <Row style={{ marginTop: 24 }}>
-        <Col sm={24}>
+        <Col xs={24}>
           <Separador />
         </Col>
       </Row>
 
       <Row>
-        <Col sm={24}>
+        <Col xs={24}>
           <Typography.Title level={3}>Recurso de Acessibilidade</Typography.Title>
         </Col>
       </Row>
 
       <Row>
-        <Col sm={24}>
+        <Col xs={24}>
           <UploadArquivosSME
             form={form}
             isDraggerUpload={false}
@@ -223,7 +219,7 @@ const ElaboracaoItem: React.FC<FormProps> = () => {
           </UploadArquivosSME>
         </Col>
 
-        <Col sm={12}>
+        <Col xs={24}>
           <UploadArquivosSME
             form={form}
             isDraggerUpload={false}
