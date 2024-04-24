@@ -39,6 +39,10 @@ export const TextEditor: React.FC<TextEditorProps> = ({ value, onChange }) => {
       }}
       onReady={(editor) => {
         editor.editing.view.change((writer: any) => {
+          if (editor?.ui?.view?.stickyPanel) {
+            editor.ui.view.stickyPanel.unbind('isActive');
+            editor.ui.view.stickyPanel.isActive = false;
+          }
           writer?.setStyle('min-height', '180px', editor?.editing?.view?.document?.getRoot());
           writer?.setStyle('max-height', '500px', editor?.editing?.view?.document?.getRoot());
         });
