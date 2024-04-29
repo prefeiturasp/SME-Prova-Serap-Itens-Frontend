@@ -27,6 +27,6 @@ export interface ItemDto {
   fonte: string;
   enunciado: string;
   alternativasDto?: AltenativaDto[];
-  arquivoItemId?: number;
+  arquivoVideoId?: number;
   arquivoAudioId?: number;
 }
