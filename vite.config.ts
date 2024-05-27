@@ -32,8 +32,18 @@ export default defineConfig({
       },
     },
   },
+  optimizeDeps: {
+    include: ['ckeditor5'],
+  },
   build: {
     chunkSizeWarningLimit: 1600,
     outDir: 'build',
+    commonjsOptions: {
+      include: [/ckeditor5/, /node_modules/],
+    },
+  },
+  server: {
+    host: 'localhost',
+    port: 3000,
   },
 });
