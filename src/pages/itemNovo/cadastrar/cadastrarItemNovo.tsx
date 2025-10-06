@@ -1,14 +1,16 @@
-import { Affix, Breadcrumb, Col, Form, Row, Spin } from 'antd';
+import { Col, Form, FormProps, Row } from 'antd';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import './cadastrarItemNovo.css';
+import IdentificacaoComponent from '~/components/cadastro-item-novo/cards/identificacaoComponent/identificacaoComponent';
 
 
-const CadastrarItemNovo: React.FC = () => {
-
+const CadastrarItemNovo: React.FC<FormProps> = () => { 
 
     const linkRetorno = "https://serap.sme.prefeitura.sp.gov.br/";
+    const [form] = Form.useForm();
+
 
     return (
         <>
@@ -19,7 +21,7 @@ const CadastrarItemNovo: React.FC = () => {
 
             <Form
                 className='form'
-                // form={form}
+                form={form}
                 layout='vertical'
                 autoComplete='off'
                 // initialValues={initialValuesForm}
@@ -69,49 +71,21 @@ const CadastrarItemNovo: React.FC = () => {
                         </div>
                     </div>
                 </div>
-                {/* <Title>
-                            <Row gutter={2}>
-                                <Col span={12}>
-                                    <h1>Cadastrar novo item</h1>
-                                </Col>
-                                <Col span={12} style={{ marginTop: 24 }}>
-                                    <Row gutter={[8, 8]} justify='end'>
-                                        <Col>
-                                            <Button onClick={voltar}>Voltar</Button>
-                                        </Col>
-                                        <Col>
-                                            <Button
-                                                type='primary'
-                                                onClick={() => salvarItem(true)}
-                                                disabled={bloquearBtnSalvarRascunho}
-                                            >
-                                                Salvar rascunho
-                                            </Button>
-                                        </Col>
-                                        <Col>
-                                            <Form.Item shouldUpdate style={{ marginBottom: 0 }}>
-                                                {() => {
-                                                    const desabilitar =
-                                                        bloquearBtnSalvar || bloquearBtnSalvarRascunhoDadosTabElaboracaoItem();
 
-                                                    return (
-                                                        <Button
-                                                            type='primary'
-                                                            onClick={() => salvarItem()}
-                                                            disabled={desabilitar}
-                                                        >
-                                                            Salvar
-                                                        </Button>
-                                                    );
-                                                }}
-                                            </Form.Item>
-                                        </Col>
-                                    </Row>
-                                </Col>
-                            </Row>
-                        </Title> */}
                 {/* </Affix> */}
                 {/* <TabForm form={form} /> */}
+                <div className='cadastrarItem-corpo'>
+                    <div className='cadastrarItem-titulo-corpo'>
+                        <div className='cadastrarItem-titulo'>
+                            Configure o novo item
+                        </div>
+                        <div className='cadastrarItem-subtitulo'>
+                            Preencha as informações abaixo para criar e cadastrar um novo item. Esses dados garantem que ele esteja alinhado à matriz de avaliação e possa ser aplicado corretamente.
+                        </div>
+                    </div>
+
+                    <IdentificacaoComponent form={form} />
+                </div>
             </Form>
             {/* </Spin> */}
         </>

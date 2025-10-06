@@ -2,7 +2,6 @@
 
 .cadastrarItemHeader {
     color: #595959;
-    padding: 0em 1em 2em 1em;
 }
 
 .cadastrarItemHeader .ant-row {
@@ -44,7 +43,7 @@
 
 .cadastrarItemHeader-rota {
     text-align: left;
-    background: #5A94D8;    
+    background: #5A94D8;
     color: #ffffff;
     font-family: Roboto, sans-serif;
     padding: 1em 3em 1em 3em;
@@ -65,7 +64,7 @@
 }
 
 .cadastrarItemHeader-Breadcrumb-corpo {
-    padding: 1em 3em 1em 3em;
+    padding: 1em 3em 1em 2.6em;
     background: #327ACB;
     color: #FFFFFF;
     display: flex;
@@ -86,8 +85,8 @@
 .cadastrarItemHeader-Breadcrumb-item01-index,
 .cadastrarItemHeader-Breadcrumb-item02-index {
     margin: 0 0.5em 0 0.5em;
-    padding: 0 0.3em 0.4em 0.3em;
-    border-radius: 2px;
+    padding: 0 0.4em 0.4em 0.4em;
+    border-radius: 4px;
     width: 8px;
     height: 16px;
     background: #FFFFFF;
@@ -95,7 +94,68 @@
     text-align: center;
 }
 
-.cadastrarItemHeader-Breadcrumb-separator{
+.cadastrarItemHeader-Breadcrumb-separator {
     margin: 0 0.5em 0 0.5em;
     color: #FFFFFF;
+}
+.cadastrarItem-corpo {
+    background: #EDEDED;
+    padding: 2em 3em 3em 3em;
+}
+.cadastrarItem-titulo-corpo {
+    
+    color: #595959;
+    background: #EDEDED;
+    font-family: roboto, sans-serif;
+}
+
+.cadastrarItem-titulo {
+    font-size: 24px;
+    font-weight: 700;
+    font-style: Bold;    
+}
+
+.cadastrarItem-subtitulo {
+    font-size: 14px;
+    font-weight: 400;
+    font-style: Regular;
+    margin-top: 0.5em;
+    margin-bottom: 2em;
+}
+
+/* outras classes */
+.card{
+    font-family: Roboto, sans-serif;
+    background: #FFFFFF;
+    border-radius: 4px;
+    padding: 1em 2.3em 1em 2.3em;
+    color: #595959;
+}
+
+.card-titulo {
+   font-size: 24px;
+   font-weight: 700;
+   font-style: Bold;
+   margin-bottom: 0.5em;
+}
+
+.card-subtitulo {
+    font-size: 14px;
+    font-weight: 400;
+    font-style: Regular;
+    margin-bottom: 0.5em;    
+}   
+
+.card-campo{
+    padding: 0em 1em 0em 0em;
+}
+
+@media (max-width: 768px) {
+  .card-campo {
+    padding: 0em 0em 0em 0em;
+  }
+}
+
+.card-campo label{
+    color: #595959 !important;
 }
