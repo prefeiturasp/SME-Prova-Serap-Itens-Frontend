@@ -17,10 +17,21 @@ import { AppState } from '~/redux';
 
 const IdentificacaoComponent: React.FC<FormProps> = ({ form }) => {
 
+    const campoAreaConhecimento = Campos.areaConhecimento;
+    const campoDisciplina = Campos.disciplinas;
+    const campoMatriz = Campos.matriz;
+    const campoAnoMatriz = Campos.anoMatriz;
+
+    const areaConhecimentoIdForm = Form.useWatch(Campos.areaConhecimento, form);
+    const disciplinaIdForm = Form.useWatch(Campos.disciplinas, form);
+    const matrizIdForm = Form.useWatch(Campos.matriz, form);
+    const anoMatrizIdForm = Form.useWatch(Campos.anoMatriz, form);
+
     const [listaAreaConhecimento, setListaAreaConhecimento] = useState<DefaultOptionType[]>([]);
     const [listaDisciplinas, setListaDisciplinas] = useState<DefaultOptionType[]>([]);
     const [listaMatriz, setListaMatriz] = useState<DefaultOptionType[]>([]);
-    const [listaAnoEscolares, setListaAnoEscolares] = useState<DefaultOptionType[]>([]);
+    const [listaAnosMatriz, setListaAnosMatriz] = useState<DefaultOptionType[]>([]);
+
 
     //verificar se é possivel reaproveitar esse redux dentro do novo contexto de pagina, porq a tab morreu.
     const dispatch = useDispatch();
@@ -29,14 +40,22 @@ const IdentificacaoComponent: React.FC<FormProps> = ({ form }) => {
         useState<ConfiguracaoItemProps>(configuracaoItem);
     //fim verificar se é possivel reaproveitar esse redux dentro do novo contexto de pagina, porq a tab morreu.
 
-    const areaConhecimentoIdForm = Form.useWatch(Campos.areaConhecimento, form);
-    const disciplinaidForm = Form.useWatch(Campos.disciplinas, form);
-    const matrizIdForm = Form.useWatch(Campos.matriz, form);
+    const obterAnosMatriz = useCallback(async () => {
+        if (!matrizIdForm || matrizIdForm == null || matrizIdForm == undefined) {
+            setListaAnosMatriz([]);
+            return false;
+        }
+        const resposta = await configuracaoItemService.obterAnosMatriz(matrizIdForm);
+        console.log('resposta anos matriz', resposta);
+        if (resposta?.length) {
+            setListaAnosMatriz(resposta);
+            if (resposta.length === 1) form?.setFieldValue(campoAnoMatriz, resposta[0].value);
+        } else {
+            setListaAnosMatriz([]);
+            form?.setFieldValue(campoAnoMatriz, null);
+        }
+    }, [form, matrizIdForm, campoAnoMatriz]);
 
-    const campoAreaConhecimento = Campos.areaConhecimento;
-    const campoDisciplina = Campos.disciplinas;
-    const campoMatriz = Campos.matriz;
-    const campoAnoEscolar = Campos.anoEscolar;
 
     useEffect(() => {
         form?.resetFields();
@@ -53,16 +72,12 @@ const IdentificacaoComponent: React.FC<FormProps> = ({ form }) => {
             switch (nomeCampo) {
                 case Campos.areaConhecimento:
                     resposta = await configuracaoItemService.obterAreaConhecimento();
-                    console.log('resposta', resposta);
                     break;
                 case Campos.disciplinas:
                     resposta = await configuracaoItemService.obterDisciplinas(param);
                     break;
                 case Campos.matriz:
                     resposta = await configuracaoItemService.obterMatriz(param);
-                    break;
-                case Campos.anoEscolar:
-                    resposta = await configuracaoItemService.obterAnoEscolares();
                     break;
                 default:
                     break;
@@ -92,12 +107,12 @@ const IdentificacaoComponent: React.FC<FormProps> = ({ form }) => {
     }, [areaConhecimentoIdForm, campoDisciplina, popularCampoSelectForm]);
 
     useEffect(() => {
-        popularCampoSelectForm(disciplinaidForm, campoMatriz, setListaMatriz);
-    }, [disciplinaidForm, campoMatriz, popularCampoSelectForm]);
+        popularCampoSelectForm(disciplinaIdForm, campoMatriz, setListaMatriz);
+    }, [disciplinaIdForm, campoMatriz, popularCampoSelectForm]);
 
     useEffect(() => {
-        popularCampoSelectForm(matrizIdForm, campoAnoEscolar, setListaAnoEscolares);
-    }, [matrizIdForm, campoAnoEscolar, popularCampoSelectForm]);
+        obterAnosMatriz();
+    }, [matrizIdForm, campoAnoMatriz, obterAnosMatriz]);
 
 
     //verificar se é possivel reaproveitar esse redux dentro do novo contexto de pagina, porq a tab morreu.
@@ -105,16 +120,25 @@ const IdentificacaoComponent: React.FC<FormProps> = ({ form }) => {
         const novoObj: ConfiguracaoItemProps = {
             codigo: configuracaoItem.codigo,
             areaConhecimento: areaConhecimentoIdForm,
-            disciplina: disciplinaidForm,
+            disciplina: disciplinaIdForm,
             matriz: matrizIdForm,
+            anoMatriz: anoMatrizIdForm,
         };
         setObjTabConfiguracaoItem(novoObj);
-    }, [disciplinaidForm, areaConhecimentoIdForm, matrizIdForm, configuracaoItem]);
+    }, [
+        configuracaoItem,
+        areaConhecimentoIdForm,
+        disciplinaIdForm,
+        matrizIdForm,
+        anoMatrizIdForm,
+    ]);
 
     useEffect(() => {
         dispatch(setConfiguracaoItem(objTabConfiguracaoItem));
     }, [objTabConfiguracaoItem, dispatch]);
     //fim verificar se é possivel reaproveitar esse redux dentro do novo contexto de pagina, porq a tab morreu.
+
+
 
     return (
         <>
@@ -159,8 +183,8 @@ const IdentificacaoComponent: React.FC<FormProps> = ({ form }) => {
                         <Col xs={24} md={12} className='card-campo'>
                             <SelectForm
                                 form={form}
-                                options={listaAnoEscolares}
-                                nomeCampo={campoAnoEscolar}
+                                options={listaAnosMatriz}
+                                nomeCampo={campoAnoMatriz}
                                 label={'Ano (ano escolar)'}
                                 campoObrigatorio={true}
                             />

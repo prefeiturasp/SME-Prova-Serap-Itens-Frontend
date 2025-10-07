@@ -42,6 +42,11 @@ const SelectForm: React.FC<SelectProps> = ({
       customFormItemProps.getValueFromEvent = (_, value) => value;
     }
 
+    const isSelectDisabled = () => {
+        if (!campoObrigatorio) return false;
+        return options?.length === 1 || options?.length === 0;
+    };
+
     return (
         <Form.Item
             name={campo}
@@ -55,7 +60,7 @@ const SelectForm: React.FC<SelectProps> = ({
             <Select
                 labelInValue={labelInValue}
                 options={options}
-                disabled={options?.length === 1}
+                disabled={isSelectDisabled()}
                 placeholder='Selecione'
                 allowClear
                 showSearch={false}

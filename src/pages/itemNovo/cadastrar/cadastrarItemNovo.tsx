@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import './cadastrarItemNovo.css';
 import IdentificacaoComponent from '~/components/cadastro-item-novo/cards/identificacaoComponent/identificacaoComponent';
+import CompetenciaHabilidade from '~/components/cadastro-item-novo/cards/competenciaHabilidade/competenciaHabilidade';
 
 
 const CadastrarItemNovo: React.FC<FormProps> = () => { 
@@ -85,6 +86,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                     </div>
 
                     <IdentificacaoComponent form={form} />
+                    <CompetenciaHabilidade form={form} />
                 </div>
             </Form>
             {/* </Spin> */}

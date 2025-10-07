@@ -17,12 +17,14 @@ export interface ConfiguracaoItemProps {
   areaConhecimento: SelectValueType;
   disciplina: SelectValueType;
   matriz: SelectValueType;
+  anoMatriz: SelectValueType;
 }
 const initialValuesConfiguracaoItemProps = {
   codigo: 0,
   areaConhecimento: null,
   disciplina: null,
   matriz: null,
+  anoMatriz: null,
 };
 
 export interface ComponentesItemProps {

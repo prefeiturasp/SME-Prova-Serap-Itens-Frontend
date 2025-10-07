@@ -17,10 +17,6 @@ const obterDisciplinas = (idAreaConhecimento: SelectValueType): Promise<DefaultO
 const obterMatriz = (disciplinaId: SelectValueType): Promise<DefaultOptionType[]> =>
   geralService.getDefaultSelect(`${URL_DEFAULT}/matriz/disciplina/${disciplinaId}`);
 
-//Ainda não foi criado no backend
-const obterAnoEscolares = (): Promise<DefaultOptionType[]> =>
-  geralService.getDefaultSelect(`${URL_DEFAULT}/anosEscolares`);
-
 const obterModeloMatriz = (matrizId: SelectValueType): Promise<AxiosResponse<MatrizObj>> =>
   api.get(`${URL_DEFAULT}/matriz/${matrizId}`);
 
@@ -68,7 +64,6 @@ export default {
   obterAreaConhecimento,
   obterDisciplinas,
   obterMatriz,
-  obterAnoEscolares,
   obterAssuntos,
   obterSubAssuntos,
   obterSituacoesItem,
