@@ -13,17 +13,13 @@ import {
 const CompetenciaHabilidade: React.FC<FormProps> = ({ form }) => {
 
     const [listaCompetencias, setListaCompetencias] = useState<DefaultOptionType[]>([]);
-    const [listaHabilidades, setListaHabilidades] = useState<DefaultOptionType[]>([]);
-    const [listaAnosMatriz, setListaAnosMatriz] = useState<DefaultOptionType[]>([]);
+    const [listaHabilidades, setListaHabilidades] = useState<DefaultOptionType[]>([]);    
 
     const campoCompetencia = Campos.competencia;
-    const campoHabilidade = Campos.habilidade;
-    const campoAnoMatriz = Campos.anoMatriz;
-
-    const disciplinaidForm = Form.useWatch(Campos.disciplinas, form);
+    const campoHabilidade = Campos.habilidade;    
+    
     const matrizIdForm = Form.useWatch(Campos.matriz, form);
-    const competenciaIdForm = Form.useWatch(Campos.competencia, form);
-    const anoMatrizIdForm = Form.useWatch(campoAnoMatriz, form);
+    const competenciaIdForm = Form.useWatch(Campos.competencia, form);    
 
     const popularCampoSelectForm = useCallback(
         async (
@@ -36,8 +32,8 @@ const CompetenciaHabilidade: React.FC<FormProps> = ({ form }) => {
             const parametroValido = !validarCampoForm(param);
             switch (nomeCampo) {
                 case Campos.competencia:
-                    if (parametroValido)
-                        resposta = await configuracaoItemService.obterCompetenciasMatriz(param);
+                    if (parametroValido)                        
+                        resposta = await configuracaoItemService.obterCompetenciasMatriz(param);                        
                     break;
                 case Campos.habilidade:
                     if (parametroValido)

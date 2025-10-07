@@ -4,6 +4,7 @@ import React, { useEffect } from 'react';
 import { Campos } from '~/domain/enums/campos-cadastro-item';
 import Select from '~/components/select';
 import { validarCampoForm } from '~/utils/funcoes';
+import './select-form.css';
 
 interface SelectProps extends FormProps {
     label: string;
@@ -30,7 +31,7 @@ const SelectForm: React.FC<SelectProps> = ({
             form?.resetFields([campo]);
             let newValue = null;
             if (options?.length === 1) {
-              newValue = labelInValue ? options[0] : options[0].value;
+                newValue = labelInValue ? options[0] : options[0].value;
             }
             form?.setFieldValue(campo, newValue);
         }
@@ -39,7 +40,7 @@ const SelectForm: React.FC<SelectProps> = ({
     const customFormItemProps: FormItemProps = {};
 
     if (labelInValue) {
-      customFormItemProps.getValueFromEvent = (_, value) => value;
+        customFormItemProps.getValueFromEvent = (_, value) => value;
     }
 
     const isSelectDisabled = () => {
@@ -60,6 +61,7 @@ const SelectForm: React.FC<SelectProps> = ({
             <Select
                 labelInValue={labelInValue}
                 options={options}
+                className="select-custom"
                 disabled={isSelectDisabled()}
                 placeholder='Selecione'
                 allowClear

@@ -46,7 +46,7 @@ const IdentificacaoComponent: React.FC<FormProps> = ({ form }) => {
             return false;
         }
         const resposta = await configuracaoItemService.obterAnosMatriz(matrizIdForm);
-        console.log('resposta anos matriz', resposta);
+        // console.log('resposta anos matriz', resposta);
         if (resposta?.length) {
             setListaAnosMatriz(resposta);
             if (resposta.length === 1) form?.setFieldValue(campoAnoMatriz, resposta[0].value);
