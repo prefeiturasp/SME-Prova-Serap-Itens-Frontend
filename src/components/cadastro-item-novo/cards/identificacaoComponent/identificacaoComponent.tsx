@@ -158,6 +158,7 @@ const IdentificacaoComponent: React.FC<FormProps> = ({ form }) => {
                                 nomeCampo={campoAreaConhecimento}
                                 label={'Área de conhecimento'}
                                 campoObrigatorio={true}
+                                disabled={false}
                             />
                         </Col>
                         <Col xs={24} md={12} className='card-campo'>

@@ -8,7 +8,7 @@ import { validarCampoForm } from '~/utils/funcoes';
 interface SelectProps extends FormProps {
     options: DefaultOptionType[];
     disabled?: boolean;
-    campoObrigatorio: boolean;
+    campoObrigatorio?: boolean;
 }
 
 const TipoItem: React.FC<SelectProps> = ({

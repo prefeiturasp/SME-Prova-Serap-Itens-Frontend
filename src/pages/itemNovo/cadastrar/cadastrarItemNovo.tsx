@@ -6,6 +6,7 @@ import './cadastrarItemNovo.css';
 import IdentificacaoComponent from '~/components/cadastro-item-novo/cards/identificacaoComponent/identificacaoComponent';
 import CompetenciaHabilidade from '~/components/cadastro-item-novo/cards/competenciaHabilidadeComponent/competenciaHabilidadeComponent';
 import CaracteristicasItemComponent from '~/components/cadastro-item-novo/cards/caracteristicasItemComponet/caracteristicasItemComponent';
+import ClassificacaoTemaComponent from '~/components/cadastro-item-novo/cards/classificacaoTemaComponent/classificacaoTemaComponent';
 
 
 const CadastrarItemNovo: React.FC<FormProps> = () => { 
@@ -89,6 +90,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                     <IdentificacaoComponent form={form} />
                     <CompetenciaHabilidade form={form} />
                     <CaracteristicasItemComponent form={form} />
+                    <ClassificacaoTemaComponent form={form} />
                 </div>
             </Form>
             {/* </Spin> */}

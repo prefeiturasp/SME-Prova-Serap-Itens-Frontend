@@ -149,6 +149,7 @@
 
 .card-campo{
     padding: 0em 1em 0em 0em;
+    margin-bottom: 24px;
 }
 
 @media (max-width: 768px) {
@@ -159,4 +160,8 @@
 
 .card-campo label{
     color: #595959 !important;
+}
+
+:where(.ant-form-item) {
+    margin-bottom: 0.5em !important;
 }
