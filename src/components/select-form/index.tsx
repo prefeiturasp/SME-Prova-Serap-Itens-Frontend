@@ -12,6 +12,7 @@ interface SelectProps extends FormProps {
     options: DefaultOptionType[];
     campoObrigatorio: boolean;
     labelInValue?: boolean;
+    disabled?: boolean;
 }
 
 const SelectForm: React.FC<SelectProps> = ({
@@ -21,6 +22,7 @@ const SelectForm: React.FC<SelectProps> = ({
     label,
     campoObrigatorio,
     labelInValue = false,
+    disabled,
 }) => {
     const campo = nomeCampo;
     const valorCampoForm = Form.useWatch(campo, form);
@@ -62,7 +64,7 @@ const SelectForm: React.FC<SelectProps> = ({
                 labelInValue={labelInValue}
                 options={options}
                 className="select-custom"
-                disabled={isSelectDisabled()}
+                disabled={disabled ?? isSelectDisabled()}
                 placeholder='Selecione'
                 allowClear
                 showSearch={false}

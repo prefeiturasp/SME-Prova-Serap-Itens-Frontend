@@ -18,6 +18,7 @@ export enum Campos {
     parametroBTransformado = 'parametroBTransformado',
     mediaDesvioPadrao = 'mediaDesvioPadrao',
     observacao = 'observacao',
+    nivelItem = 'nivelItem',
 }
 
 export enum DadosIniciais {

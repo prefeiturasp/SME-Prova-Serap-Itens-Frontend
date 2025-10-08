@@ -7,15 +7,24 @@ import { validarCampoForm } from '~/utils/funcoes';
 
 interface SelectProps extends FormProps {
     options: DefaultOptionType[];
+    disabled?: boolean;
+    campoObrigatorio: boolean;
 }
 
 const TipoItem: React.FC<SelectProps> = ({
     form,
     options,
+    disabled,
+    campoObrigatorio,
 }) => {
     const campo = Campos.tipoItem;
     const valorCampoForm = Form.useWatch(campo, form);
     const validacaoCampo = validarCampoForm(valorCampoForm);
+
+    const isSelectDisabled = () => {
+        if (!campoObrigatorio) return false;
+        return options?.length === 1 || options?.length === 0;
+    };
 
     return (
         <Form.Item
@@ -27,11 +36,11 @@ const TipoItem: React.FC<SelectProps> = ({
             }]}
         >
             <Select
-                options={options}
-                disabled={options?.length === 1}
+                options={options}                
                 placeholder='Selecione'
                 allowClear
                 showSearch={false}
+                disabled={disabled ?? isSelectDisabled()}
             />
         </Form.Item>
     );

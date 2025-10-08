@@ -4,7 +4,8 @@ import { Link } from 'react-router-dom';
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import './cadastrarItemNovo.css';
 import IdentificacaoComponent from '~/components/cadastro-item-novo/cards/identificacaoComponent/identificacaoComponent';
-import CompetenciaHabilidade from '~/components/cadastro-item-novo/cards/competenciaHabilidade/competenciaHabilidade';
+import CompetenciaHabilidade from '~/components/cadastro-item-novo/cards/competenciaHabilidadeComponent/competenciaHabilidadeComponent';
+import CaracteristicasItemComponent from '~/components/cadastro-item-novo/cards/caracteristicasItemComponet/caracteristicasItemComponent';
 
 
 const CadastrarItemNovo: React.FC<FormProps> = () => { 
@@ -87,6 +88,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
 
                     <IdentificacaoComponent form={form} />
                     <CompetenciaHabilidade form={form} />
+                    <CaracteristicasItemComponent form={form} />
                 </div>
             </Form>
             {/* </Spin> */}
