@@ -45,7 +45,7 @@ const CaracteristicasItemComponent: React.FC<FormProps> = ({ form }) => {
             let resposta: DefaultOptionType[] = [];
             switch (nomeCampo) {
                 case Campos.quantidadeAlternativas:
-                    resposta = await configuracaoItemService.obterQuantidadeAlternativas();                    
+                    resposta = await configuracaoItemService.obterQuantidadeAlternativas();
                     break;
                 case Campos.tipoItem:
                     resposta = await configuracaoItemService.obterTiposItem();
@@ -90,6 +90,16 @@ const CaracteristicasItemComponent: React.FC<FormProps> = ({ form }) => {
     useEffect(() => {
         popularCampoSelectForm(null, campoSituacaoItem, setListaSituacoesItem);
     }, [popularCampoSelectForm, campoSituacaoItem]);
+
+    useEffect(() => {
+        if (
+            listaQuantidadeAlternativas !== null &&
+            listaQuantidadeAlternativas !== undefined &&
+            listaQuantidadeAlternativas?.length > 0
+        )
+            form?.setFieldValue(campoQuantidadeAlternativas, listaQuantidadeAlternativas[0]);
+    }, [form, campoQuantidadeAlternativas, listaQuantidadeAlternativas]);
+
 
 
 
@@ -212,11 +222,6 @@ const CaracteristicasItemComponent: React.FC<FormProps> = ({ form }) => {
                                 label={'Situação do item'}
                                 campoObrigatorio={true}
                             ></SelectForm>
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col xs={24} md={24} className='card-campo'>
-
                         </Col>
                     </Row>
                 </div>

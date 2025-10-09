@@ -75,7 +75,11 @@ const ClassificacaoTemaComponent: React.FC<FormProps> = ({ form }) => {
     useEffect(() => {
         popularCampoSelectForm(assuntoIdForm, campoSubAssunto, setListaSubAssuntos);
     }, [assuntoIdForm, campoSubAssunto, popularCampoSelectForm]);
-    
+
+    useEffect(() => {
+        form?.setFieldValue(campoPalavraChave, palavrasChave);
+    }, [form, palavrasChave, campoPalavraChave]);
+
 
     return (
         <>

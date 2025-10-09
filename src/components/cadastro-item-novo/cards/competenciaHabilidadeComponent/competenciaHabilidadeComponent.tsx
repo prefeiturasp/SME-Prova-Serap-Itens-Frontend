@@ -73,10 +73,10 @@ const CompetenciaHabilidade: React.FC<FormProps> = ({ form }) => {
         <>
             <div className='card'>
                 <div className='card-titulo'>
-                    Identificação
+                    Competências e habilidades
                 </div>
                 <div className='card-subtitulo'>
-                    Defina a localização desta questão na matriz curricular.
+                    Vincule o item às competências e habilidades.
                 </div>
                 <div className='card-corpo'>
                     <Row>
