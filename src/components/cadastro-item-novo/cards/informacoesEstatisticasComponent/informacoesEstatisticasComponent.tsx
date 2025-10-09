@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Col, Form, FormProps, Input, Row } from "antd";
-import SelectForm from "~/components/select-form";
+import { Col, Form, FormProps, Row } from "antd";
 import { Campos } from "~/domain/enums/campos-cadastro-item";
 import { CampoNumero } from "~/components/cadastro-item/campo-numero";
 

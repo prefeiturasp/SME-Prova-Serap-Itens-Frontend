@@ -98,12 +98,14 @@
     margin: 0 0.5em 0 0.5em;
     color: #FFFFFF;
 }
+
 .cadastrarItem-corpo {
     background: #EDEDED;
-    padding: 2em 3em 3em 3em;
+    padding: 2em 3em 0em 3em;
 }
+
 .cadastrarItem-titulo-corpo {
-    
+
     color: #595959;
     background: #EDEDED;
     font-family: roboto, sans-serif;
@@ -112,7 +114,7 @@
 .cadastrarItem-titulo {
     font-size: 24px;
     font-weight: 700;
-    font-style: Bold;    
+    font-style: Bold;
 }
 
 .cadastrarItem-subtitulo {
@@ -124,7 +126,7 @@
 }
 
 /* outras classes */
-.card{
+.card {
     font-family: Roboto, sans-serif;
     background: #FFFFFF;
     border-radius: 4px;
@@ -134,34 +136,107 @@
 }
 
 .card-titulo {
-   font-size: 24px;
-   font-weight: 700;
-   font-style: Bold;
-   margin-bottom: 0.5em;
+    font-size: 24px;
+    font-weight: 700;
+    font-style: Bold;
+    margin-bottom: 0.5em;
 }
 
 .card-subtitulo {
     font-size: 14px;
     font-weight: 400;
     font-style: Regular;
-    margin-bottom: 0.5em;    
-}   
+    margin-bottom: 0.5em;
+}
 
-.card-campo{
+.card-campo {
     padding: 0em 1em 0em 0em;
     margin-bottom: 24px;
 }
 
 @media (max-width: 768px) {
-  .card-campo {
-    padding: 0em 0em 0em 0em;
-  }
+    .card-campo {
+        padding: 0em 0em 0em 0em;
+    }
 }
 
-.card-campo label{
+.card-campo label {
     color: #595959 !important;
 }
 
 :where(.ant-form-item) {
     margin-bottom: 0.5em !important;
+}
+
+/* Botão que salva */
+
+.cadastrarItem-botoes {
+    font-family: Roboto, sans-serif;
+    background: #EDEDED;
+    padding: 1em 0em 2em 2.3em;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.cadastrarItem-btn {
+    padding-left: 0.5em;
+}
+
+.cadastrarItem-btn button.btnRascunho,
+.cadastrarItem-btn button.btnAvancar {
+    background: #5A94D6;
+    color: #FFFFFF;
+}
+
+.cadastrarItem-btn button.btnVoltar {
+    background: #FFFFFF;
+    color: #5A94D8;
+}
+
+.cadastrarItem-btn button.btnVoltar,
+.cadastrarItem-btn button.btnAvancar {
+    width: 87px;
+    height: 38px;
+}
+
+.cadastrarItem-btn button.btnRascunho {
+    width: 139px;
+    height: 38px;
+}
+
+.cadastrarItem-btn button.btnRascunho:hover,
+.cadastrarItem-btn button.btnAvancar:hover {
+    background: #327ACB;
+    color: #FFFFFF !important;
+}
+
+.cadastrarItem-btn button.btnVoltar:hover {
+    color: #5A94D8 !important;
+}
+
+.cadastrarItem-btn button:disabled {
+    background: #B2C9E4;
+    color: #FFFFFF;
+    border: none;
+    cursor: not-allowed;
+}
+
+.cadastrarItem-footer {
+    background: #E6E6E6;
+    padding: 2em 1em 2em 1em;
+}
+
+.cadastrarItem-footer-conteudo {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 2em;
+}
+
+.footer-item1,
+.footer-item2 {
+    color: #B3B3B3;
+    font-size: 14px;
+    font-weight: 400;
+    font-family: Roboto, sans-serif;
+
 }
