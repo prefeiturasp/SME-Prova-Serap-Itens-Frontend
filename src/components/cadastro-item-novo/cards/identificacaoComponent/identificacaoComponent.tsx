@@ -36,8 +36,6 @@ const IdentificacaoComponent: React.FC<FormProps> = ({ form }) => {
     //redux
     const dispatch = useDispatch();
     const configuracaoItemNovo = useSelector((state: AppState) => state.configuracaoItemNovo);
-    const [objTabConfiguracaoItemNovo, setObjTabConfiguracaoItemNovo] =
-        useState<Partial<ConfiguracaoItemNovoProps>>({});
     //fim redux
 
     const obterAnosMatriz = useCallback(async () => {
@@ -122,19 +120,17 @@ const IdentificacaoComponent: React.FC<FormProps> = ({ form }) => {
             disciplina: disciplinaIdForm,
             matriz: matrizIdForm,
             anoMatriz: anoMatrizIdForm,
-        }
-        setObjTabConfiguracaoItemNovo(novoObj);
+        };
+        dispatch(setConfiguracaoItemNovo(novoObj));
     }, [
-        configuracaoItemNovo,
+        configuracaoItemNovo.codigo,
         areaConhecimentoIdForm,
         disciplinaIdForm,
         matrizIdForm,
         anoMatrizIdForm,
+        dispatch,
     ]);
 
-    useEffect(() => {
-        dispatch(setConfiguracaoItemNovo(objTabConfiguracaoItemNovo));
-    }, [objTabConfiguracaoItemNovo, dispatch]);
     //fim redux
 
 

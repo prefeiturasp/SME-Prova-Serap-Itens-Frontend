@@ -1,14 +1,13 @@
 import React, { Dispatch, SetStateAction, useCallback, useEffect, useState } from "react";
 import { CheckboxOptionType, Col, Form, FormProps, Radio, Row, Spin } from "antd";
 import SelectForm from "~/components/select-form";
-import { converterListaParaCheckboxOption, ruleCampoObrigatorioForm, validarCampoForm } from "~/utils/funcoes";
+import { converterListaParaCheckboxOption, ruleCampoObrigatorioForm } from "~/utils/funcoes";
 import configuracaoItemService from "~/services/configuracaoItem-service";
 import { Campos } from "~/domain/enums/campos-cadastro-item";
 import { DefaultOptionType } from "antd/es/select";
 import TipoItem from "~/components/cadastro-item/campos/tipo-item";
 import { NivelItem } from "~/domain/enums/nivelItem";
 import "./caracteristicaItemComponent.css"
-import { SelectValueType } from "~/domain/type/select";
 import { useDispatch, useSelector } from "react-redux";
 import { AppState } from "~/redux";
 import { ConfiguracaoItemNovoProps } from "~/redux/modules/cadastroItem-novo/itemNovo/reducers";
@@ -46,7 +45,6 @@ const CaracteristicasItemComponent: React.FC<FormProps> = ({ form }) => {
 
     const popularCampoSelectForm = useCallback(
         async (
-            param: SelectValueType,
             nomeCampo: Campos,
             setLista: Dispatch<SetStateAction<DefaultOptionType[]>>,
         ) => {
@@ -84,7 +82,7 @@ const CaracteristicasItemComponent: React.FC<FormProps> = ({ form }) => {
     );
 
     useEffect(() => {
-        popularCampoSelectForm(nivelItemIdForm, campoQuantidadeAlternativas, setListaQuantidadeAlternativas);
+        popularCampoSelectForm(campoQuantidadeAlternativas, setListaQuantidadeAlternativas);
     }, [nivelItemIdForm, campoQuantidadeAlternativas, popularCampoSelectForm]);
 
     useEffect(() => {
@@ -93,11 +91,11 @@ const CaracteristicasItemComponent: React.FC<FormProps> = ({ form }) => {
     }, []);
 
     useEffect(() => {
-        popularCampoSelectForm(null, campoTipoItem, setListaTiposItem);
+        popularCampoSelectForm(campoTipoItem, setListaTiposItem);
     }, [campoQuantidadeAlternativas, campoTipoItem, popularCampoSelectForm]);
 
     useEffect(() => {
-        popularCampoSelectForm(null, campoSituacaoItem, setListaSituacoesItem);
+        popularCampoSelectForm(campoSituacaoItem, setListaSituacoesItem);
     }, [popularCampoSelectForm, campoSituacaoItem]);
 
     useEffect(() => {

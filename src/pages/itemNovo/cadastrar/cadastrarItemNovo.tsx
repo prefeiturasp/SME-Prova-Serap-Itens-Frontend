@@ -1,4 +1,4 @@
-import { Button, Col, Form, FormProps, notification, Row } from 'antd';
+import { Button, Col, Form, FormProps, notification, Row, Spin } from 'antd';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeftOutlined } from "@ant-design/icons";
@@ -8,25 +8,24 @@ import CompetenciaHabilidade from '~/components/cadastro-item-novo/cards/compete
 import CaracteristicasItemComponent from '~/components/cadastro-item-novo/cards/caracteristicasItemComponet/caracteristicasItemComponent';
 import ClassificacaoTemaComponent from '~/components/cadastro-item-novo/cards/classificacaoTemaComponent/classificacaoTemaComponent';
 import InformacoesEstatisticasComponent from '~/components/cadastro-item-novo/cards/informacoesEstatisticasComponent/informacoesEstatisticasComponent';
-import { validarCampoArrayStringForm, validarCampoForm } from '~/utils/funcoes';
+import { validarCampoForm } from '~/utils/funcoes'; //validarCampoArrayStringForm
 import { useDispatch, useSelector } from 'react-redux';
 import { AppState } from '~/redux';
 import { cloneDeep } from 'lodash';
 import { AltenativaDto } from '~/domain/dto/AltenativaDto';
 import { DadosIniciais } from '~/domain/enums/campos-cadastro-item';
 
-
 import configuracaoItemService from '~/services/configuracaoItem-service';
 
 import {
-  setConfiguracaoItemNovo,
-  setElaboracaoItemNovo,
-  setItemNovo,
+    setConfiguracaoItemNovo,
+    setElaboracaoItemNovo,
+    setItemNovo,
 } from '~/redux/modules/cadastroItem-novo/itemNovo/actions';
 import {
-  ConfiguracaoItemNovoProps,
-  ElaboracaoItemNovoProps,
-  ItemNovoProps,
+    ConfiguracaoItemNovoProps,
+    ElaboracaoItemNovoProps,
+    ItemNovoProps,
 } from '~/redux/modules/cadastroItem-novo/itemNovo/reducers';
 import { ItemNovoDto } from '~/domain/dto/itemNovo-dto';
 
@@ -52,31 +51,31 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
         tipoItem: DadosIniciais.tipoItemIdPadrao,
     };
 
-    const bloquearSalvar =
-        validarCampoForm(configuracaoItemNovo.disciplina) ||
-        validarCampoForm(configuracaoItemNovo.areaConhecimento) ||
-        validarCampoForm(configuracaoItemNovo.matriz) ||
-        validarCampoForm(configuracaoItemNovo.competencia) ||
-        validarCampoForm(configuracaoItemNovo.habilidade) ||
-        validarCampoForm(configuracaoItemNovo.anoMatriz) ||
-        validarCampoForm(configuracaoItemNovo.dificuldadeSugerida) ||
-        validarCampoForm(configuracaoItemNovo.situacaoItem) ||
-        validarCampoForm(configuracaoItemNovo.quantidadeAlternativas) ||
-        validarCampoArrayStringForm(configuracaoItemNovo.palavrasChave ?? []);
+    // const bloquearSalvar =
+    //     validarCampoForm(configuracaoItemNovo.disciplina) ||
+    //     validarCampoForm(configuracaoItemNovo.areaConhecimento) ||
+    //     validarCampoForm(configuracaoItemNovo.matriz) ||
+    //     validarCampoForm(configuracaoItemNovo.competencia) ||
+    //     validarCampoForm(configuracaoItemNovo.habilidade) ||
+    //     validarCampoForm(configuracaoItemNovo.anoMatriz) ||
+    //     validarCampoForm(configuracaoItemNovo.dificuldadeSugerida) ||
+    //     validarCampoForm(configuracaoItemNovo.situacaoItem) ||
+    //     validarCampoForm(configuracaoItemNovo.quantidadeAlternativas) ||
+    //     validarCampoArrayStringForm(configuracaoItemNovo.palavrasChave ?? []);
 
-    const bloquearSalvarRascunho =
-        validarCampoForm(configuracaoItemNovo.disciplina) ||
-        validarCampoForm(configuracaoItemNovo.areaConhecimento) ||
-        !bloquearSalvar;
-
-    const [bloquearBtnSalvar, setBloquearBtnSalvar] = useState<boolean>(bloquearSalvar);
+    // const [bloquearBtnSalvar, setBloquearBtnSalvar] = useState<boolean>(bloquearSalvar);
     const [bloquearBtnSalvarRascunho, setBloquearBtnSalvarRascunho] =
-        useState<boolean>(bloquearSalvarRascunho);
+        useState<boolean>(true);
+
 
     useEffect(() => {
-        setBloquearBtnSalvar(bloquearSalvar);
-        setBloquearBtnSalvarRascunho(bloquearSalvarRascunho);
-    }, [bloquearSalvar, bloquearSalvarRascunho]);
+        const bloquear =
+            validarCampoForm(configuracaoItemNovo.disciplina) ||
+            validarCampoForm(configuracaoItemNovo.areaConhecimento);
+
+        setBloquearBtnSalvarRascunho(bloquear);
+    }, [configuracaoItemNovo.disciplina, configuracaoItemNovo.areaConhecimento]);
+
 
     type tipoMsg = 'success' | 'info' | 'warning' | 'error';
     const [api, contextHolder] = notification.useNotification();
@@ -226,132 +225,132 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
         [item.id, mensagem, inserirItem, inserirRascunhoItem, gerarItemSalvar],
     );
 
-    const bloquearBtnSalvarRascunhoDadosTabElaboracaoItem = (): boolean => {
-        const values = cloneDeep(form.getFieldsValue(true));
+    // const bloquearBtnSalvarRascunhoDadosTabElaboracaoItem = (): boolean => {
+    //     const values = cloneDeep(form.getFieldsValue(true));
 
-        let algumaDescricaoSemValor = false;
+    //     let algumaDescricaoSemValor = false;
 
-        if (values?.alternativasDto?.length) {
-            algumaDescricaoSemValor = values.alternativasDto.find(
-                (item: AltenativaDto) => !item?.descricao,
-            );
-        }
+    //     if (values?.alternativasDto?.length) {
+    //         algumaDescricaoSemValor = values.alternativasDto.find(
+    //             (item: AltenativaDto) => !item?.descricao,
+    //         );
+    //     }
 
-        if (!values?.enunciado || !values?.alternativaCorreta || algumaDescricaoSemValor) return true;
+    //     if (!values?.enunciado || !values?.alternativaCorreta || algumaDescricaoSemValor) return true;
 
-        return false;
-    };
+    //     return false;
+    // };
 
 
 
     return (
         <>
-            {/* <Spin size='small'
-            // spinning={carregando}
-            > */}
-            {/* {contextHolder} */}
-
-            <Form
-                className='form'
-                form={form}
-                layout='vertical'
-                autoComplete='off'
-                initialValues={initialValuesForm}
-                style={{
-                    margin: 0,
-                }}
+            <Spin size='small'
+                spinning={carregando}
             >
-                {/* <Affix offsetTop={0.1} style={{ marginBottom: 30 }}> */}
-                <div className='cadastrarItemHeader'>
-                    <Row className="cadastrarItemHeader-corpo">
-                        <Col xs={12} md={6}>
-                            <Link to={linkRetorno} className="cadastrarItemHeader-retornar">
-                                <ArrowLeftOutlined className="cadastrarItemHeader-icone-retornar" />
-                                <span className="cadastrarItemHeader-texto-retornar">Retornar à tela inicial</span>
-                            </Link>
-                        </Col>
-                        <Col xs={12} md={12} className='cadastrarItemHeader-titulo'>
-                            Cadastrar novo item
-                        </Col>
-                        <Col xs={0} md={6} />
-                    </Row>
-                    <div className='cadastrarItemHeader-rota'>
-                        <div className='cadastrarItemHeader-rota-texto'>
-                            Home / Itens/ Cadastrar novo item
-                        </div>
-                        <div className='cadastrarItemHeader-rota-titulo'>
-                            Cadastrar novo item
-                        </div>
-                    </div>
-                    <div className='cadastrarItemHeader-Breadcrumb-corpo'>
-                        <div className='cadastrarItemHeader-Breadcrumb-item01'>
-                            <div className='cadastrarItemHeader-Breadcrumb-item01-index'>
-                                1
-                            </div>
-                            <div className='cadastrarItemHeader-Breadcrumb-item01-texto'>
-                                Configuração
-                            </div>
-                        </div>
-                        <p className='cadastrarItemHeader-Breadcrumb-separator'>{'>'}</p>
-                        <div className='cadastrarItemHeader-Breadcrumb-item02'>
-                            <div className='cadastrarItemHeader-Breadcrumb-item02-index'>
-                                2
-                            </div>
-                            <div className='cadastrarItemHeader-Breadcrumb-item02-texto'>
-                                Elaboração do item
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                {contextHolder}
 
-                {/* </Affix> */}
-                {/* <TabForm form={form} /> */}
-                <div className='cadastrarItem-corpo'>
-                    <div className='cadastrarItem-titulo-corpo'>
-                        <div className='cadastrarItem-titulo'>
-                            Configure o novo item
+                <Form
+                    className='form'
+                    form={form}
+                    layout='vertical'
+                    autoComplete='off'
+                    initialValues={initialValuesForm}
+                    style={{
+                        margin: 0,
+                    }}
+                >
+                    {/* <Affix offsetTop={0.1} style={{ marginBottom: 30 }}> */}
+                    <div className='cadastrarItemHeader'>
+                        <Row className="cadastrarItemHeader-corpo">
+                            <Col xs={12} md={6}>
+                                <Link to={linkRetorno} className="cadastrarItemHeader-retornar">
+                                    <ArrowLeftOutlined className="cadastrarItemHeader-icone-retornar" />
+                                    <span className="cadastrarItemHeader-texto-retornar">Retornar à tela inicial</span>
+                                </Link>
+                            </Col>
+                            <Col xs={12} md={12} className='cadastrarItemHeader-titulo'>
+                                Cadastrar novo item
+                            </Col>
+                            <Col xs={0} md={6} />
+                        </Row>
+                        <div className='cadastrarItemHeader-rota'>
+                            <div className='cadastrarItemHeader-rota-texto'>
+                                Home / Itens/ Cadastrar novo item
+                            </div>
+                            <div className='cadastrarItemHeader-rota-titulo'>
+                                Cadastrar novo item
+                            </div>
                         </div>
-                        <div className='cadastrarItem-subtitulo'>
-                            Preencha as informações abaixo para criar e cadastrar um novo item. Esses dados garantem que ele esteja alinhado à matriz de avaliação e possa ser aplicado corretamente.
+                        <div className='cadastrarItemHeader-Breadcrumb-corpo'>
+                            <div className='cadastrarItemHeader-Breadcrumb-item01'>
+                                <div className='cadastrarItemHeader-Breadcrumb-item01-index'>
+                                    1
+                                </div>
+                                <div className='cadastrarItemHeader-Breadcrumb-item01-texto'>
+                                    Configuração
+                                </div>
+                            </div>
+                            <p className='cadastrarItemHeader-Breadcrumb-separator'>{'>'}</p>
+                            <div className='cadastrarItemHeader-Breadcrumb-item02'>
+                                <div className='cadastrarItemHeader-Breadcrumb-item02-index'>
+                                    2
+                                </div>
+                                <div className='cadastrarItemHeader-Breadcrumb-item02-texto'>
+                                    Elaboração do item
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <IdentificacaoComponent form={form} />
-                    <CompetenciaHabilidade form={form} />
-                    <CaracteristicasItemComponent form={form} />
-                    <ClassificacaoTemaComponent form={form} />
-                    <InformacoesEstatisticasComponent form={form} />
-                    <div className='cadastrarItem-botoes'>
-                        <div className='cadastrarItem-btn'>
-                            <Button className='btnVoltar' onClick={voltar}>Voltar</Button>
+                    {/* </Affix> */}
+                    
+                    <div className='cadastrarItem-corpo'>
+                        <div className='cadastrarItem-titulo-corpo'>
+                            <div className='cadastrarItem-titulo'>
+                                Configure o novo item
+                            </div>
+                            <div className='cadastrarItem-subtitulo'>
+                                Preencha as informações abaixo para criar e cadastrar um novo item. Esses dados garantem que ele esteja alinhado à matriz de avaliação e possa ser aplicado corretamente.
+                            </div>
                         </div>
-                        <div className='cadastrarItem-btn'>
-                            <Button
-                                type='primary'
-                                onClick={() => salvarItem(true)}
-                                disabled={bloquearBtnSalvarRascunho}
-                                className='btnRascunho'
-                            >
-                                Salvar rascunho
-                            </Button>
-                        </div>
-                        <div className='cadastrarItem-btn'>
-                            <Button className='btnAvancar' onClick={voltar}>Avançar</Button>
+
+                        <IdentificacaoComponent form={form} />
+                        <CompetenciaHabilidade form={form} />
+                        <CaracteristicasItemComponent form={form} />
+                        <ClassificacaoTemaComponent form={form} />
+                        <InformacoesEstatisticasComponent form={form} />
+                        <div className='cadastrarItem-botoes'>
+                            <div className='cadastrarItem-btn'>
+                                <Button className='btnVoltar' onClick={voltar}>Voltar</Button>
+                            </div>
+                            <div className='cadastrarItem-btn'>
+                                <Button
+                                    type='primary'
+                                    onClick={() => salvarItem(true)}
+                                    disabled={bloquearBtnSalvarRascunho}
+                                    className='btnRascunho'
+                                >
+                                    Salvar rascunho
+                                </Button>
+                            </div>
+                            <div className='cadastrarItem-btn'>
+                                <Button className='btnAvancar' onClick={voltar}>Avançar</Button>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div className='cadastrarItem-footer'>
-                    <div className='cadastrarItem-footer-conteudo'>
-                        <div className='footer-item1'>
-                            SERAp - Versão: 1.30.9.2
-                        </div>
-                        <div className='footer-item2'>
-                            Todos os direitos reservados
+                    <div className='cadastrarItem-footer'>
+                        <div className='cadastrarItem-footer-conteudo'>
+                            <div className='footer-item1'>
+                                SERAp - Versão: 1.30.9.2
+                            </div>
+                            <div className='footer-item2'>
+                                Todos os direitos reservados
+                            </div>
                         </div>
                     </div>
-                </div>
-            </Form>
-            {/* </Spin> */}
+                </Form>
+            </Spin>
         </>
     );
 }
