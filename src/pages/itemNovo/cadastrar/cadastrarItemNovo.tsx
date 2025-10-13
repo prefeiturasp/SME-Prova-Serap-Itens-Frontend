@@ -15,10 +15,20 @@ import { cloneDeep } from 'lodash';
 import { AltenativaDto } from '~/domain/dto/AltenativaDto';
 import { DadosIniciais } from '~/domain/enums/campos-cadastro-item';
 
-import { ComponentesItemProps, ConfiguracaoItemProps, ElaboracaoItemProps, ItemProps } from '~/redux/modules/cadastro-item/item/reducers';
-import { ItemDto } from '~/domain/dto/item-dto';
-import { setComponentesItem, setConfiguracaoItem, setElaboracaoItem, setItem } from '~/redux/modules/cadastro-item/item/actions';
+
 import configuracaoItemService from '~/services/configuracaoItem-service';
+
+import {
+  setConfiguracaoItemNovo,
+  setElaboracaoItemNovo,
+  setItemNovo,
+} from '~/redux/modules/cadastroItem-novo/itemNovo/actions';
+import {
+  ConfiguracaoItemNovoProps,
+  ElaboracaoItemNovoProps,
+  ItemNovoProps,
+} from '~/redux/modules/cadastroItem-novo/itemNovo/reducers';
+import { ItemNovoDto } from '~/domain/dto/itemNovo-dto';
 
 
 const CadastrarItemNovo: React.FC<FormProps> = () => {
@@ -27,12 +37,11 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
     const dispatch = useDispatch();
     const [carregando, setCarregando] = useState<boolean>(false);
     const item = useSelector((state: AppState) => state.item);
-    const configuracaoItem = useSelector((state: AppState) => state.configuracaoItem);
-    const componentesItem = useSelector((state: AppState) => state.componentesItem);
-    const elaboracaoItem = useSelector((state: AppState) => state.elaboracaoItem);
+    const configuracaoItemNovo = useSelector((state: AppState) => state.configuracaoItemNovo);
+    const elaboracaoItemNovo = useSelector((state: AppState) => state.elaboracaoItemNovo);
 
     const [objTabConfiguracaoItem, setObjTabConfiguracaoItem] =
-        useState<ConfiguracaoItemProps>(configuracaoItem);
+        useState<ConfiguracaoItemNovoProps>(configuracaoItemNovo);
 
     const [form] = Form.useForm();
     const initialValuesForm = {
@@ -44,20 +53,20 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
     };
 
     const bloquearSalvar =
-        validarCampoForm(configuracaoItem.disciplina) ||
-        validarCampoForm(configuracaoItem.areaConhecimento) ||
-        validarCampoForm(configuracaoItem.matriz) ||
-        validarCampoForm(componentesItem.competencia) ||
-        validarCampoForm(componentesItem.habilidade) ||
-        validarCampoForm(componentesItem.anoMatriz) ||
-        validarCampoForm(componentesItem.dificuldadeSugerida) ||
-        validarCampoForm(componentesItem.situacaoItem) ||
-        validarCampoForm(componentesItem.quantidadeAlternativas) ||
-        validarCampoArrayStringForm(componentesItem.palavrasChave ?? []);
+        validarCampoForm(configuracaoItemNovo.disciplina) ||
+        validarCampoForm(configuracaoItemNovo.areaConhecimento) ||
+        validarCampoForm(configuracaoItemNovo.matriz) ||
+        validarCampoForm(configuracaoItemNovo.competencia) ||
+        validarCampoForm(configuracaoItemNovo.habilidade) ||
+        validarCampoForm(configuracaoItemNovo.anoMatriz) ||
+        validarCampoForm(configuracaoItemNovo.dificuldadeSugerida) ||
+        validarCampoForm(configuracaoItemNovo.situacaoItem) ||
+        validarCampoForm(configuracaoItemNovo.quantidadeAlternativas) ||
+        validarCampoArrayStringForm(configuracaoItemNovo.palavrasChave ?? []);
 
     const bloquearSalvarRascunho =
-        validarCampoForm(configuracaoItem.disciplina) ||
-        validarCampoForm(configuracaoItem.areaConhecimento) ||
+        validarCampoForm(configuracaoItemNovo.disciplina) ||
+        validarCampoForm(configuracaoItemNovo.areaConhecimento) ||
         !bloquearSalvar;
 
     const [bloquearBtnSalvar, setBloquearBtnSalvar] = useState<boolean>(bloquearSalvar);
@@ -80,16 +89,14 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
 
     const voltar = () => {
         setCarregando(true);
-        const itemAtual: ItemProps = {
+        const itemAtual: ItemNovoProps = {
             id: 0,
-            configuracao: {} as ConfiguracaoItemProps,
-            componentes: {} as ComponentesItemProps,
-            elaboracao: {} as ElaboracaoItemProps,
+            configuracao: {} as ConfiguracaoItemNovoProps,
+            elaboracao: {} as ElaboracaoItemNovoProps,
         };
-        dispatch(setItem(itemAtual));
-        dispatch(setConfiguracaoItem({} as ConfiguracaoItemProps));
-        dispatch(setComponentesItem({} as ComponentesItemProps));
-        dispatch(setElaboracaoItem({} as ElaboracaoItemProps));
+        dispatch(setItemNovo(itemAtual));
+        dispatch(setConfiguracaoItemNovo({} as ConfiguracaoItemNovoProps));
+        dispatch(setElaboracaoItemNovo({} as ElaboracaoItemNovoProps));
         form.resetFields();
         setCarregando(false);
     };
@@ -97,28 +104,30 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
     const gerarItemSalvar = useCallback(() => {
         const values = cloneDeep(form.getFieldsValue(true));
 
-        const dto: ItemDto = {
+        const dto: ItemNovoDto = {
             id: item.id,
-            codigoItem: configuracaoItem.codigo,
-            areaConhecimentoId: configuracaoItem.areaConhecimento,
-            disciplinaId: configuracaoItem.disciplina,
-            matrizId: configuracaoItem.matriz,
-            competenciaId: componentesItem.competencia,
-            habilidadeId: componentesItem.habilidade,
-            anoMatrizId: componentesItem.anoMatriz,
-            assuntoId: componentesItem.assunto,
-            subAssuntoId: componentesItem.subAssunto,
-            situacao: componentesItem.situacaoItem,
-            tipo: componentesItem.tipoItem,
-            quantidadeAlternativasId: componentesItem.quantidadeAlternativas,
-            dificuldadeSugeridaId: componentesItem.dificuldadeSugerida,
-            discriminacao: componentesItem.discriminacao !== '' ? componentesItem.discriminacao : null,
-            dificuldade: componentesItem.dificuldade !== '' ? componentesItem.dificuldade : null,
-            acertoCasual: componentesItem.acertoCasual !== '' ? componentesItem.acertoCasual : null,
-            palavrasChave: componentesItem.palavrasChave,
-            parametroBTransformado: componentesItem?.parametroBTransformado || null,
-            mediaEhDesvio: componentesItem.mediaDesvioPadrao,
-            observacao: componentesItem.observacao,
+            codigoItem: configuracaoItemNovo.codigo,
+            areaConhecimentoId: configuracaoItemNovo.areaConhecimento,
+            disciplinaId: configuracaoItemNovo.disciplina,
+            matrizId: configuracaoItemNovo.matriz,
+            competenciaId: configuracaoItemNovo.competencia,
+            habilidadeId: configuracaoItemNovo.habilidade,
+            anoMatrizId: configuracaoItemNovo.anoMatriz,
+            assuntoId: configuracaoItemNovo.assunto,
+            subAssuntoId: configuracaoItemNovo.subAssunto,
+            situacao: configuracaoItemNovo.situacaoItem,
+            tipoItem: configuracaoItemNovo.tipoItem,
+            quantidadeAlternativasId: configuracaoItemNovo.quantidadeAlternativas,
+            dificuldadeSugeridaId: configuracaoItemNovo.dificuldadeSugerida,
+            discriminacao: configuracaoItemNovo.discriminacao !== '' ? configuracaoItemNovo.discriminacao : null,
+            dificuldade: configuracaoItemNovo.dificuldade !== '' ? configuracaoItemNovo.dificuldade : null,
+            nivelItem: configuracaoItemNovo.nivelItem,
+            acertoCasual: configuracaoItemNovo.acertoCasual !== '' ? configuracaoItemNovo.acertoCasual : null,
+            palavrasChave: configuracaoItemNovo.palavrasChave,
+            parametroBTransformado: configuracaoItemNovo?.parametroBTransformado || null,
+            mediaEhDesvio: configuracaoItemNovo.mediaDesvioPadrao,
+            sentencaDescritora: configuracaoItemNovo.sentencaDescritora,
+            observacao: configuracaoItemNovo.observacao,
             textoBase: values?.textoBase || '',
             fonte: values?.fonte || '',
             enunciado: values?.enunciado || '',
@@ -141,7 +150,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
         }
 
         return dto;
-    }, [item, configuracaoItem, componentesItem, elaboracaoItem, form]);
+    }, [item, configuracaoItemNovo, elaboracaoItemNovo, form]);
 
     const obterDadosItem = useCallback(
         async (id: number) => {
@@ -149,14 +158,14 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
             await configuracaoItemService
                 .obterItem(id)
                 .then((resp) => {
-                    const configuracaoItemRetorno: ConfiguracaoItemProps = {
+                    const configuracaoItemRetorno: ConfiguracaoItemNovoProps = {
                         ...objTabConfiguracaoItem,
                         codigo: resp?.data?.codigoItem,
                     };
-                    const itemAtual: ItemProps = { ...item, id: id, configuracao: configuracaoItemRetorno };
+                    const itemAtual: ItemNovoProps = { ...item, id: id, configuracao: configuracaoItemRetorno };
                     setObjTabConfiguracaoItem(configuracaoItemRetorno);
-                    dispatch(setConfiguracaoItem(configuracaoItemRetorno));
-                    dispatch(setItem(itemAtual));
+                    dispatch(setConfiguracaoItemNovo(configuracaoItemRetorno));
+                    dispatch(setItemNovo(itemAtual));
                 })
                 .catch((err) => {
                     console.log('Erro', err.message);
@@ -167,9 +176,9 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
     );
 
     const inserirItem = useCallback(
-        async (item: ItemDto) => {
+        async (item: ItemNovoDto) => {
             await configuracaoItemService
-                .salvarItem(item)
+                .salvarItemNovo(item)
                 .then((resp) => {
                     obterDadosItem(resp.data);
                     mensagem('success', 'Sucesso', 'Item cadastrado com sucesso');
@@ -183,9 +192,9 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
     );
 
     const inserirRascunhoItem = useCallback(
-        async (item: ItemDto) => {
+        async (item: ItemNovoDto) => {
             await configuracaoItemService
-                .salvarRascunhoItem(item)
+                .salvarRascunhoItemNovo(item)
                 .then((resp) => {
                     obterDadosItem(resp.data);
                     mensagem('success', 'Sucesso', 'Rascunho de item cadastrado com sucesso');
@@ -247,7 +256,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                 form={form}
                 layout='vertical'
                 autoComplete='off'
-                // initialValues={initialValuesForm}
+                initialValues={initialValuesForm}
                 style={{
                     margin: 0,
                 }}

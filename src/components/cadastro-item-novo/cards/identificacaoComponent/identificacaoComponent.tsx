@@ -9,8 +9,8 @@ import { SelectValueType } from '~/domain/type/select';
 import configuracaoItemService from '~/services/configuracaoItem-service';
 
 //verificar se é possivel reaproveitar esse redux dentro do novo contexto de pagina, porq a tab morreu.
-import { ConfiguracaoItemProps } from '~/redux/modules/cadastro-item/item/reducers';
-import { setConfiguracaoItem } from '~/redux/modules/cadastro-item/item/actions';
+import { ConfiguracaoItemNovoProps } from '~/redux/modules/cadastroItem-novo/itemNovo/reducers';
+import { setConfiguracaoItemNovo } from '~/redux/modules/cadastroItem-novo/itemNovo/actions';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppState } from '~/redux';
 
@@ -33,12 +33,12 @@ const IdentificacaoComponent: React.FC<FormProps> = ({ form }) => {
     const [listaAnosMatriz, setListaAnosMatriz] = useState<DefaultOptionType[]>([]);
 
 
-    //verificar se é possivel reaproveitar esse redux dentro do novo contexto de pagina, porq a tab morreu.
+    //redux
     const dispatch = useDispatch();
-    const configuracaoItem = useSelector((state: AppState) => state.configuracaoItem);
-    const [objTabConfiguracaoItem, setObjTabConfiguracaoItem] =
-        useState<ConfiguracaoItemProps>(configuracaoItem);
-    //fim verificar se é possivel reaproveitar esse redux dentro do novo contexto de pagina, porq a tab morreu.
+    const configuracaoItemNovo = useSelector((state: AppState) => state.configuracaoItemNovo);
+    const [objTabConfiguracaoItemNovo, setObjTabConfiguracaoItemNovo] =
+        useState<Partial<ConfiguracaoItemNovoProps>>({});
+    //fim redux
 
     const obterAnosMatriz = useCallback(async () => {
         if (!matrizIdForm || matrizIdForm == null || matrizIdForm == undefined) {
@@ -46,7 +46,6 @@ const IdentificacaoComponent: React.FC<FormProps> = ({ form }) => {
             return false;
         }
         const resposta = await configuracaoItemService.obterAnosMatriz(matrizIdForm);
-        // console.log('resposta anos matriz', resposta);
         if (resposta?.length) {
             setListaAnosMatriz(resposta);
             if (resposta.length === 1) form?.setFieldValue(campoAnoMatriz, resposta[0].value);
@@ -115,18 +114,18 @@ const IdentificacaoComponent: React.FC<FormProps> = ({ form }) => {
     }, [matrizIdForm, campoAnoMatriz, obterAnosMatriz]);
 
 
-    //verificar se é possivel reaproveitar esse redux dentro do novo contexto de pagina, porq a tab morreu.
+    //redux
     useEffect(() => {
-        const novoObj: ConfiguracaoItemProps = {
-            codigo: configuracaoItem.codigo,
+        const novoObj: Partial<ConfiguracaoItemNovoProps> = {
+            codigo: configuracaoItemNovo.codigo,
             areaConhecimento: areaConhecimentoIdForm,
             disciplina: disciplinaIdForm,
             matriz: matrizIdForm,
             anoMatriz: anoMatrizIdForm,
-        };
-        setObjTabConfiguracaoItem(novoObj);
+        }
+        setObjTabConfiguracaoItemNovo(novoObj);
     }, [
-        configuracaoItem,
+        configuracaoItemNovo,
         areaConhecimentoIdForm,
         disciplinaIdForm,
         matrizIdForm,
@@ -134,9 +133,9 @@ const IdentificacaoComponent: React.FC<FormProps> = ({ form }) => {
     ]);
 
     useEffect(() => {
-        dispatch(setConfiguracaoItem(objTabConfiguracaoItem));
-    }, [objTabConfiguracaoItem, dispatch]);
-    //fim verificar se é possivel reaproveitar esse redux dentro do novo contexto de pagina, porq a tab morreu.
+        dispatch(setConfiguracaoItemNovo(objTabConfiguracaoItemNovo));
+    }, [objTabConfiguracaoItemNovo, dispatch]);
+    //fim redux
 
 
 

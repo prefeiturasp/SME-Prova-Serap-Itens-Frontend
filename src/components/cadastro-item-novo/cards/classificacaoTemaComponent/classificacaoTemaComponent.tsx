@@ -8,6 +8,10 @@ import TextArea from "antd/es/input/TextArea";
 import { ruleCampoArrayStringObrigatorioForm, validarCampoForm } from "~/utils/funcoes";
 import configuracaoItemService from "~/services/configuracaoItem-service";
 import { SelectValueType } from "~/domain/type/select";
+import { useDispatch, useSelector } from "react-redux";
+import { AppState } from "~/redux";
+import { ConfiguracaoItemNovoProps } from "~/redux/modules/cadastroItem-novo/itemNovo/reducers";
+import { setConfiguracaoItemNovo } from "~/redux/modules/cadastroItem-novo/itemNovo/actions";
 
 
 const ClassificacaoTemaComponent: React.FC<FormProps> = ({ form }) => {
@@ -18,10 +22,19 @@ const ClassificacaoTemaComponent: React.FC<FormProps> = ({ form }) => {
     const campoSentencaDescritora = Campos.sentencaDescritora;
     const campoObservacao = Campos.observacao;
 
-
     const assuntoIdForm = Form.useWatch(campoAssunto, form);
+    const subAssuntoIdForm = Form.useWatch(campoSubAssunto, form);
     const palavrasChaveForm = Form.useWatch(campoPalavraChave, form);
     const disciplinaidForm = Form.useWatch(Campos.disciplinas, form);
+    const sentencaDescritoraForm = Form.useWatch(campoSentencaDescritora, form);
+    const observacaoForm = Form.useWatch(campoObservacao, form);
+
+    //redux
+    const dispatch = useDispatch();
+    const configuracaoItemNovo = useSelector((state: AppState) => state.configuracaoItemNovo);
+    const [objTabConfiguracaoItemNovo, setObjTabConfiguracaoItemNovo] =
+        useState<Partial<ConfiguracaoItemNovoProps>>({});
+    //fim redux
 
     const [listaAssuntos, setListaAssuntos] = useState<DefaultOptionType[]>([]);
     const [listaSubAssuntos, setListaSubAssuntos] = useState<DefaultOptionType[]>([]);
@@ -79,6 +92,30 @@ const ClassificacaoTemaComponent: React.FC<FormProps> = ({ form }) => {
     useEffect(() => {
         form?.setFieldValue(campoPalavraChave, palavrasChave);
     }, [form, palavrasChave, campoPalavraChave]);
+
+    //redux
+    useEffect(() => {
+        const novoObj: Partial<ConfiguracaoItemNovoProps> = {
+            assunto: assuntoIdForm,
+            subAssunto: subAssuntoIdForm,
+            palavrasChave: palavrasChaveForm ?? null,
+            sentencaDescritora: sentencaDescritoraForm,
+            observacao: observacaoForm,
+        }
+        setObjTabConfiguracaoItemNovo(novoObj);
+    }, [
+        configuracaoItemNovo,
+        assuntoIdForm,
+        subAssuntoIdForm,
+        palavrasChaveForm,
+        sentencaDescritoraForm,
+        observacaoForm,
+    ]);
+
+    useEffect(() => {
+        dispatch(setConfiguracaoItemNovo(objTabConfiguracaoItemNovo));
+    }, [objTabConfiguracaoItemNovo, dispatch]);
+    //fim redux
 
 
     return (

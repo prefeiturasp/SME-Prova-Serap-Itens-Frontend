@@ -1,14 +1,13 @@
 import sessionStorage from 'redux-persist/lib/storage/session';
 import { persistReducer, persistStore } from 'redux-persist';
 import thunk from 'redux-thunk';
+import rootReducer from './modules/reducers';
 import { applyMiddleware, legacy_createStore as createStore } from 'redux';
-import rootReducerNovo from './modules/reducersNovo';
 //import { composeWithDevTools } from '@redux-devtools/extension';
 
 const middlewares = [thunk];
 
-// export type AppState = ReturnType<typeof rootReducer>; antigo
-export type AppState = ReturnType<typeof rootReducerNovo>;
+export type AppStateOld = ReturnType<typeof rootReducer>;
 
 const persistedReducer = persistReducer(
   {
@@ -16,13 +15,12 @@ const persistedReducer = persistReducer(
     storage: sessionStorage,
     whitelist: ['auth', 'filtroPrincipal', 'areaConhecimento', 'disciplina', 'matriz', 'item'],
   },
-  rootReducerNovo,
-  // rootReducer, antigo
+  rootReducer,
   
 );
 
-const store = createStore(persistedReducer, applyMiddleware(...middlewares));
+const storeOld = createStore(persistedReducer, applyMiddleware(...middlewares));
 
-const persistor = persistStore(store);
+const persistorOld = persistStore(storeOld);
 
-export { store, persistor };
+export { storeOld, persistorOld };

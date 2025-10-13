@@ -9,6 +9,10 @@ import TipoItem from "~/components/cadastro-item/campos/tipo-item";
 import { NivelItem } from "~/domain/enums/nivelItem";
 import "./caracteristicaItemComponent.css"
 import { SelectValueType } from "~/domain/type/select";
+import { useDispatch, useSelector } from "react-redux";
+import { AppState } from "~/redux";
+import { ConfiguracaoItemNovoProps } from "~/redux/modules/cadastroItem-novo/itemNovo/reducers";
+import { setConfiguracaoItemNovo } from "~/redux/modules/cadastroItem-novo/itemNovo/actions";
 
 
 const CaracteristicasItemComponent: React.FC<FormProps> = ({ form }) => {
@@ -23,15 +27,20 @@ const CaracteristicasItemComponent: React.FC<FormProps> = ({ form }) => {
     const dificuldadeSugeridaIdForm = Form.useWatch(campoDificuldadeSugerida, form);
     const nivelItemIdForm = Form.useWatch(campoNivelItem, form);
     const quantidadeAlternativasForm = Form.useWatch(campoQuantidadeAlternativas, form);
+    const tipoItemIdForm = Form.useWatch(campoTipoItem, form);
+    const situacaoItemIdForm = Form.useWatch(campoSituacaoItem, form);
 
+    //redux
+    const dispatch = useDispatch();
+    const configuracaoItemNovo = useSelector((state: AppState) => state.configuracaoItemNovo);
+    const [objTabConfiguracaoItemNovo, setObjTabConfiguracaoItemNovo] =
+        useState<Partial<ConfiguracaoItemNovoProps>>({});
+    //fim redux
 
     const [listaDificuldadeSugerida, setListaDificuldadeSugerida] = useState<CheckboxOptionType[]>([]);
     const [carregandoDificuldadeSugerida, setCarregandoDificuldadeSugerida] = useState<boolean>(false);
-
     const [listaNivelItem, setListaNivelItem] = useState<DefaultOptionType[]>([]);
-
     const [listaQuantidadeAlternativas, setListaQuantidadeAlternativas] = useState<DefaultOptionType[]>([]);
-
     const [listaTiposItem, setListaTiposItem] = useState<DefaultOptionType[]>([]);
     const [listaSituacoesItem, setListaSituacoesItem] = useState<DefaultOptionType[]>([]);
 
@@ -100,24 +109,43 @@ const CaracteristicasItemComponent: React.FC<FormProps> = ({ form }) => {
             form?.setFieldValue(campoQuantidadeAlternativas, listaQuantidadeAlternativas[0]);
     }, [form, campoQuantidadeAlternativas, listaQuantidadeAlternativas]);
 
+    //redux
+    useEffect(() => {
+        const novoObj: Partial<ConfiguracaoItemNovoProps> = {
+            dificuldadeSugerida: dificuldadeSugeridaIdForm,
+            nivelItem: nivelItemIdForm,
+            quantidadeAlternativas: quantidadeAlternativasForm,
+            tipoItem: tipoItemIdForm,
+            situacaoItem: situacaoItemIdForm,
+        }
+        setObjTabConfiguracaoItemNovo(novoObj);
+    }, [
+        configuracaoItemNovo,
+        dificuldadeSugeridaIdForm,
+        nivelItemIdForm,
+        quantidadeAlternativasForm,
+        tipoItemIdForm,
+        situacaoItemIdForm,
+    ]);
+
+    useEffect(() => {
+        dispatch(setConfiguracaoItemNovo(objTabConfiguracaoItemNovo));
+    }, [objTabConfiguracaoItemNovo, dispatch]);
+    //fim redux
+
 
 
 
     const obterListaDificuldadeSugerida = useCallback(async () => {
         setCarregandoDificuldadeSugerida(true);
         const resposta = await configuracaoItemService.obterDificuldadeSugerida();
-        console.log('resposta dificuldade sugerida', resposta);
         if (resposta?.length > 0) {
-            console.log('Entrou no IF');
             setListaDificuldadeSugerida(converterListaParaCheckboxOption(resposta));
             if (resposta.length === 1) {
-                console.log('Selecionando único item', resposta[0]);
                 form?.setFieldValue(campoDificuldadeSugerida, resposta[0].value);
             } else {
                 const primeiroItem = resposta[0];
-                console.log('primeiroItem', primeiroItem);
                 if (primeiroItem?.descricao?.includes("1 - Muito Fácil")) {
-                    console.log('Selecionando primeiro item porque é "1 - Muito Fácil"');
                     form?.setFieldValue(campoDificuldadeSugerida, primeiroItem.value);
                 }
             }
