@@ -37,7 +37,7 @@ const InputTag: React.FC<InputTagProps> = ({ setTags, tags, valueForm }) => {
           value={tags ?? []}
           onChange={setValorTags}
           name='Palavra-chave'
-          placeHolder='Palavras-chave'
+          placeHolder={(!tags || tags.length === 0) ? 'Palavras-chave' : ''}
         />
       </div>
       <div className='requered'>

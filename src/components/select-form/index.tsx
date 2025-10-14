@@ -4,6 +4,7 @@ import React, { useEffect } from 'react';
 import { Campos } from '~/domain/enums/campos-cadastro-item';
 import Select from '~/components/select';
 import { validarCampoForm } from '~/utils/funcoes';
+import './select-form.css';
 
 interface SelectProps extends FormProps {
     label: string;
@@ -11,6 +12,7 @@ interface SelectProps extends FormProps {
     options: DefaultOptionType[];
     campoObrigatorio: boolean;
     labelInValue?: boolean;
+    disabled?: boolean;
 }
 
 const SelectForm: React.FC<SelectProps> = ({
@@ -20,6 +22,7 @@ const SelectForm: React.FC<SelectProps> = ({
     label,
     campoObrigatorio,
     labelInValue = false,
+    disabled,
 }) => {
     const campo = nomeCampo;
     const valorCampoForm = Form.useWatch(campo, form);
@@ -30,7 +33,7 @@ const SelectForm: React.FC<SelectProps> = ({
             form?.resetFields([campo]);
             let newValue = null;
             if (options?.length === 1) {
-              newValue = labelInValue ? options[0] : options[0].value;
+                newValue = labelInValue ? options[0] : options[0].value;
             }
             form?.setFieldValue(campo, newValue);
         }
@@ -39,8 +42,13 @@ const SelectForm: React.FC<SelectProps> = ({
     const customFormItemProps: FormItemProps = {};
 
     if (labelInValue) {
-      customFormItemProps.getValueFromEvent = (_, value) => value;
+        customFormItemProps.getValueFromEvent = (_, value) => value;
     }
+
+    const isSelectDisabled = () => {
+        if (!campoObrigatorio) return false;
+        return options?.length === 1 || options?.length === 0;
+    };
 
     return (
         <Form.Item
@@ -55,7 +63,8 @@ const SelectForm: React.FC<SelectProps> = ({
             <Select
                 labelInValue={labelInValue}
                 options={options}
-                disabled={options?.length === 1}
+                className="select-custom"
+                disabled={disabled ?? isSelectDisabled()}
                 placeholder='Selecione'
                 allowClear
                 showSearch={false}

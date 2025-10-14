@@ -4,9 +4,10 @@ import { Input } from 'antd';
 interface CampoNumeroProps {
     value: string;
     onChange: (value: string) => void;
+    placeholder?: string;
 }
 
-export const CampoNumero: React.FC<CampoNumeroProps> = ({ value, onChange }) => {
+export const CampoNumero: React.FC<CampoNumeroProps> = ({ value, onChange, placeholder }) => {
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const inputValue = e.target.value;
@@ -33,7 +34,7 @@ export const CampoNumero: React.FC<CampoNumeroProps> = ({ value, onChange }) => 
             style={{ width: '100%' }}
             value={value}
             onChange={handleChange}
-            placeholder='Digite'
+            placeholder={placeholder ? placeholder : 'Digite'}
         />
     );
 };

@@ -6,6 +6,7 @@ import { SelectValueType } from '~/domain/type/select';
 import { DisciplinaProps } from '~/redux/modules/cadastro-item/disciplina/reducers';
 import geralService from '~/services/geral-service';
 import api from './api';
+import { ItemNovoDto } from '~/domain/dto/itemNovo-dto';
 const URL_DEFAULT = '/api/v1';
 
 const obterAreaConhecimento = (): Promise<DefaultOptionType[]> =>
@@ -26,7 +27,13 @@ const obterNivelEnsino = (disciplinaId: SelectValueType): Promise<AxiosResponse<
 const salvarItem = (item: ItemDto): Promise<AxiosResponse<number>> =>
   api.post(`${URL_DEFAULT}/Item/salvar`, item);
 
+const salvarItemNovo = (item: ItemNovoDto): Promise<AxiosResponse<number>> =>
+  api.post(`${URL_DEFAULT}/Item/salvar`, item);
+
 const salvarRascunhoItem = (item: ItemDto): Promise<AxiosResponse<number>> =>
+  api.post(`${URL_DEFAULT}/Item/salvar-rascunho`, item);
+
+const salvarRascunhoItemNovo = (item: ItemNovoDto): Promise<AxiosResponse<number>> =>
   api.post(`${URL_DEFAULT}/Item/salvar-rascunho`, item);
 
 const obterCompetenciasMatriz = (matrizId: SelectValueType): Promise<DefaultOptionType[]> =>
@@ -72,10 +79,12 @@ export default {
   obterModeloMatriz,
   obterNivelEnsino,
   salvarItem,
+  salvarItemNovo,
   salvarRascunhoItem,
+  salvarRascunhoItemNovo,
   obterItem,
   obterCompetenciasMatriz,
   obterHabilidadesCompetencia,
   obterAnosMatriz,
-  obterDificuldadeSugerida,
+  obterDificuldadeSugerida,  
 };
