@@ -1,4 +1,3 @@
-
 import React, { Dispatch, SetStateAction, useCallback, useEffect, useState } from 'react';
 import { Col, Form, FormProps, Row } from 'antd';
 import './identificacaoComponent.css';
@@ -8,15 +7,13 @@ import { DefaultOptionType } from 'antd/lib/select';
 import { SelectValueType } from '~/domain/type/select';
 import configuracaoItemService from '~/services/configuracaoItem-service';
 
-//verificar se é possivel reaproveitar esse redux dentro do novo contexto de pagina, porq a tab morreu.
+// Redux
 import { ConfiguracaoItemNovoProps } from '~/redux/modules/cadastroItem-novo/itemNovo/reducers';
 import { setConfiguracaoItemNovo } from '~/redux/modules/cadastroItem-novo/itemNovo/actions';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppState } from '~/redux';
 
-
 const IdentificacaoComponent: React.FC<FormProps> = ({ form }) => {
-
     const campoAreaConhecimento = Campos.areaConhecimento;
     const campoDisciplina = Campos.disciplinas;
     const campoMatriz = Campos.matriz;
@@ -32,16 +29,17 @@ const IdentificacaoComponent: React.FC<FormProps> = ({ form }) => {
     const [listaMatriz, setListaMatriz] = useState<DefaultOptionType[]>([]);
     const [listaAnosMatriz, setListaAnosMatriz] = useState<DefaultOptionType[]>([]);
 
-
-    //redux
+    // Redux
     const dispatch = useDispatch();
     const configuracaoItemNovo = useSelector((state: AppState) => state.configuracaoItemNovo);
-    //fim redux
+    const [objTabConfiguracaoItemNovo, setObjTabConfiguracaoItemNovo] =
+        useState<Partial<ConfiguracaoItemNovoProps>>({});
+    // fim redux
 
     const obterAnosMatriz = useCallback(async () => {
-        if (!matrizIdForm || matrizIdForm == null || matrizIdForm == undefined) {
+        if (!matrizIdForm) {
             setListaAnosMatriz([]);
-            return false;
+            return;
         }
         const resposta = await configuracaoItemService.obterAnosMatriz(matrizIdForm);
         if (resposta?.length) {
@@ -53,7 +51,6 @@ const IdentificacaoComponent: React.FC<FormProps> = ({ form }) => {
         }
     }, [form, matrizIdForm, campoAnoMatriz]);
 
-
     useEffect(() => {
         form?.resetFields();
     }, [form, listaAreaConhecimento]);
@@ -64,8 +61,8 @@ const IdentificacaoComponent: React.FC<FormProps> = ({ form }) => {
             nomeCampo: Campos,
             setLista: Dispatch<SetStateAction<DefaultOptionType[]>>,
         ) => {
-
             let resposta: DefaultOptionType[] = [];
+
             switch (nomeCampo) {
                 case Campos.areaConhecimento:
                     resposta = await configuracaoItemService.obterAreaConhecimento();
@@ -111,8 +108,7 @@ const IdentificacaoComponent: React.FC<FormProps> = ({ form }) => {
         obterAnosMatriz();
     }, [matrizIdForm, campoAnoMatriz, obterAnosMatriz]);
 
-
-    //redux
+    // 🔹 Mantém o estado local atualizado com o form
     useEffect(() => {
         const novoObj: Partial<ConfiguracaoItemNovoProps> = {
             codigo: configuracaoItemNovo.codigo,
@@ -121,26 +117,28 @@ const IdentificacaoComponent: React.FC<FormProps> = ({ form }) => {
             matriz: matrizIdForm,
             anoMatriz: anoMatrizIdForm,
         };
-        dispatch(setConfiguracaoItemNovo(novoObj));
-    }, [
-        configuracaoItemNovo.codigo,
-        areaConhecimentoIdForm,
-        disciplinaIdForm,
-        matrizIdForm,
-        anoMatrizIdForm,
-        dispatch,
-    ]);
+        setObjTabConfiguracaoItemNovo(novoObj);
+    }, [areaConhecimentoIdForm, disciplinaIdForm, matrizIdForm, anoMatrizIdForm, configuracaoItemNovo.codigo]);
 
-    //fim redux
+    // 🔹 Sincroniza Redux apenas quando há mudanças reais
+    useEffect(() => {
+        if (!Object.keys(objTabConfiguracaoItemNovo).length) return;
 
+        const mudou = Object.keys(objTabConfiguracaoItemNovo).some(
+            key =>
+                objTabConfiguracaoItemNovo[key as keyof ConfiguracaoItemNovoProps] !==
+                configuracaoItemNovo[key as keyof ConfiguracaoItemNovoProps]
+        );
 
+        if (mudou) {
+            dispatch(setConfiguracaoItemNovo(objTabConfiguracaoItemNovo));
+        }
+    }, [objTabConfiguracaoItemNovo, configuracaoItemNovo, dispatch]);
 
     return (
         <>
             <div className='card'>
-                <div className='card-titulo'>
-                    Identificação
-                </div>
+                <div className='card-titulo'>Identificação</div>
                 <div className='card-subtitulo'>
                     Defina a localização desta questão na matriz curricular.
                 </div>
@@ -189,7 +187,7 @@ const IdentificacaoComponent: React.FC<FormProps> = ({ form }) => {
                 </div>
             </div>
         </>
-    )
-}
+    );
+};
 
 export default IdentificacaoComponent;

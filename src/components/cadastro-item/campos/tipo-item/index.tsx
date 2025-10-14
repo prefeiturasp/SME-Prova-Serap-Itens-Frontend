@@ -23,7 +23,7 @@ const TipoItem: React.FC<SelectProps> = ({
 
     const isSelectDisabled = () => {
         if (!campoObrigatorio) return false;
-        return options?.length === 1 || options?.length === 0;
+        return !options || options.length === 0 || options.length === 1;
     };
 
     return (
@@ -36,7 +36,9 @@ const TipoItem: React.FC<SelectProps> = ({
             }]}
         >
             <Select
-                options={options}                
+                options={options}
+                value={form?.getFieldValue(campo)}
+                onChange={(v) => form?.setFieldValue(campo, v)}   
                 placeholder='Selecione'
                 allowClear
                 showSearch={false}

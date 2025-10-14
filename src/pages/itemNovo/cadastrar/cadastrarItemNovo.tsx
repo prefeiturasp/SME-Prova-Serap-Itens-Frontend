@@ -15,6 +15,8 @@ import { cloneDeep } from 'lodash';
 import { AltenativaDto } from '~/domain/dto/AltenativaDto';
 import { DadosIniciais } from '~/domain/enums/campos-cadastro-item';
 
+// import { Campos } from '~/domain/enums/campos-cadastro-item';
+
 import configuracaoItemService from '~/services/configuracaoItem-service';
 
 import {
@@ -37,6 +39,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
     const [carregando, setCarregando] = useState<boolean>(false);
     const item = useSelector((state: AppState) => state.item);
     const configuracaoItemNovo = useSelector((state: AppState) => state.configuracaoItemNovo);
+    
     const elaboracaoItemNovo = useSelector((state: AppState) => state.elaboracaoItemNovo);
 
     const [objTabConfiguracaoItem, setObjTabConfiguracaoItem] =
@@ -50,6 +53,9 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
         parametroBTransformado: '',
         tipoItem: DadosIniciais.tipoItemIdPadrao,
     };
+
+    // const areaConhecimentoIdForm = Form.useWatch(Campos.areaConhecimento, form);
+    // const disciplinaIdForm = Form.useWatch(Campos.disciplinas, form);
 
     // const bloquearSalvar =
     //     validarCampoForm(configuracaoItemNovo.disciplina) ||
@@ -74,7 +80,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
             validarCampoForm(configuracaoItemNovo.areaConhecimento);
 
         setBloquearBtnSalvarRascunho(bloquear);
-    }, [configuracaoItemNovo.disciplina, configuracaoItemNovo.areaConhecimento]);
+    }, [configuracaoItemNovo.areaConhecimento, configuracaoItemNovo.disciplina]);
 
 
     type tipoMsg = 'success' | 'info' | 'warning' | 'error';
@@ -210,7 +216,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
         async (rascunho = false) => {
             setCarregando(true);
             const itemSalvar = gerarItemSalvar();
-
+            console.log('itemSalvar', itemSalvar);
             if (item?.id > 0) {
                 mensagem('info', 'Atenção', `Item já cadastrado, id:${item.id}`);
             } else {
@@ -304,7 +310,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                     </div>
 
                     {/* </Affix> */}
-                    
+
                     <div className='cadastrarItem-corpo'>
                         <div className='cadastrarItem-titulo-corpo'>
                             <div className='cadastrarItem-titulo'>

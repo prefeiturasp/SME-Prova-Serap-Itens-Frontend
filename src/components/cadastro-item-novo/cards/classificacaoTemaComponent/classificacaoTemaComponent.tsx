@@ -9,10 +9,8 @@ import { ruleCampoArrayStringObrigatorioForm, validarCampoForm } from "~/utils/f
 import configuracaoItemService from "~/services/configuracaoItem-service";
 import { SelectValueType } from "~/domain/type/select";
 import { useDispatch, useSelector } from "react-redux";
-import { AppState } from "~/redux";
-import { ConfiguracaoItemNovoProps } from "~/redux/modules/cadastroItem-novo/itemNovo/reducers";
 import { setConfiguracaoItemNovo } from "~/redux/modules/cadastroItem-novo/itemNovo/actions";
-
+import { AppState } from "~/redux";
 
 const ClassificacaoTemaComponent: React.FC<FormProps> = ({ form }) => {
 
@@ -22,6 +20,7 @@ const ClassificacaoTemaComponent: React.FC<FormProps> = ({ form }) => {
     const campoSentencaDescritora = Campos.sentencaDescritora;
     const campoObservacao = Campos.observacao;
 
+    // Campos observados
     const assuntoIdForm = Form.useWatch(campoAssunto, form);
     const subAssuntoIdForm = Form.useWatch(campoSubAssunto, form);
     const palavrasChaveForm = Form.useWatch(campoPalavraChave, form);
@@ -29,28 +28,25 @@ const ClassificacaoTemaComponent: React.FC<FormProps> = ({ form }) => {
     const sentencaDescritoraForm = Form.useWatch(campoSentencaDescritora, form);
     const observacaoForm = Form.useWatch(campoObservacao, form);
 
-    //redux
-    const dispatch = useDispatch();
     const configuracaoItemNovo = useSelector((state: AppState) => state.configuracaoItemNovo);
-    const [objTabConfiguracaoItemNovo, setObjTabConfiguracaoItemNovo] =
-        useState<Partial<ConfiguracaoItemNovoProps>>({});
-    //fim redux
+
+    const dispatch = useDispatch();
 
     const [listaAssuntos, setListaAssuntos] = useState<DefaultOptionType[]>([]);
     const [listaSubAssuntos, setListaSubAssuntos] = useState<DefaultOptionType[]>([]);
-    const [palavrasChave, setPalavrasChave] = useState<string[] | undefined>([]);
+    const [palavrasChave] = useState<string[] | undefined>([]);
 
+    // 🔹 Função genérica para popular selects
     const popularCampoSelectForm = useCallback(
         async (
             param: SelectValueType,
             nomeCampo: Campos,
             setLista: Dispatch<SetStateAction<DefaultOptionType[]>>,
         ) => {
-
             let resposta: DefaultOptionType[] = [];
             const parametroValido = !validarCampoForm(param);
-            switch (nomeCampo) {
 
+            switch (nomeCampo) {
                 case Campos.assunto:
                     if (parametroValido)
                         resposta = await configuracaoItemService.obterAssuntos(param);
@@ -76,35 +72,36 @@ const ClassificacaoTemaComponent: React.FC<FormProps> = ({ form }) => {
         [form],
     );
 
-
-    const obterAssuntos = useCallback(() => {
-        popularCampoSelectForm(disciplinaidForm, campoAssunto, setListaAssuntos);
-    }, [popularCampoSelectForm, campoAssunto, disciplinaidForm]);
+    // 🔹 Atualiza listas conforme dependências
+    useEffect(() => {
+        if (disciplinaidForm)
+            popularCampoSelectForm(disciplinaidForm, campoAssunto, setListaAssuntos);
+    }, [disciplinaidForm, popularCampoSelectForm, campoAssunto]);
 
     useEffect(() => {
-        obterAssuntos();
-    }, [disciplinaidForm, obterAssuntos]);
+        if (assuntoIdForm)
+            popularCampoSelectForm(assuntoIdForm, campoSubAssunto, setListaSubAssuntos);
+    }, [assuntoIdForm, popularCampoSelectForm, campoSubAssunto]);
 
-    useEffect(() => {
-        popularCampoSelectForm(assuntoIdForm, campoSubAssunto, setListaSubAssuntos);
-    }, [assuntoIdForm, campoSubAssunto, popularCampoSelectForm]);
-
+    // 🔹 Atualiza form de palavra-chave ao digitar
     useEffect(() => {
         form?.setFieldValue(campoPalavraChave, palavrasChave);
     }, [form, palavrasChave, campoPalavraChave]);
 
-    //redux
+    // 🔹 Redux - sincroniza estado do card
     useEffect(() => {
-        const novoObj: Partial<ConfiguracaoItemNovoProps> = {
-            assunto: assuntoIdForm,
-            subAssunto: subAssuntoIdForm,
-            palavrasChave: palavrasChaveForm ?? null,
-            sentencaDescritora: sentencaDescritoraForm,
-            observacao: observacaoForm,
-        }
-        setObjTabConfiguracaoItemNovo(novoObj);
+        dispatch(
+            setConfiguracaoItemNovo({
+                ...configuracaoItemNovo,
+                assunto: form?.getFieldValue(campoAssunto)?.valor ?? form?.getFieldValue(campoAssunto),
+                subAssunto: form?.getFieldValue(campoSubAssunto)?.valor ?? form?.getFieldValue(campoSubAssunto),
+                palavrasChave: form?.getFieldValue(campoPalavraChave)?.valor ?? form?.getFieldValue(campoPalavraChave),
+                sentencaDescritora: form?.getFieldValue(campoSentencaDescritora)?.valor ?? form?.getFieldValue(campoSentencaDescritora),
+                observacao: form?.getFieldValue(campoObservacao)?.valor ?? form?.getFieldValue(campoObservacao),
+            }),
+        );
     }, [
-        configuracaoItemNovo,
+        dispatch,
         assuntoIdForm,
         subAssuntoIdForm,
         palavrasChaveForm,
@@ -112,18 +109,10 @@ const ClassificacaoTemaComponent: React.FC<FormProps> = ({ form }) => {
         observacaoForm,
     ]);
 
-    useEffect(() => {
-        dispatch(setConfiguracaoItemNovo(objTabConfiguracaoItemNovo));
-    }, [objTabConfiguracaoItemNovo, dispatch]);
-    //fim redux
-
-
     return (
         <>
             <div className='card'>
-                <div className='card-titulo'>
-                    Classificação por tema
-                </div>
+                <div className='card-titulo'>Classificação por tema</div>
                 <div className='card-subtitulo'>
                     Organize o item por assuntos e palavras-chave para facilitar a busca
                 </div>
@@ -137,7 +126,8 @@ const ClassificacaoTemaComponent: React.FC<FormProps> = ({ form }) => {
                                 label={'Assunto'}
                                 campoObrigatorio={false}
                                 disabled={!disciplinaidForm}
-                            ></SelectForm>
+                                labelInValue={true}
+                            />
                         </Col>
                         <Col xs={24} md={8} className='card-campo'>
                             <SelectForm
@@ -147,21 +137,27 @@ const ClassificacaoTemaComponent: React.FC<FormProps> = ({ form }) => {
                                 label={'Subassunto'}
                                 campoObrigatorio={false}
                                 disabled={!assuntoIdForm}
-                            ></SelectForm>
+                                labelInValue={true}
+                            />
                         </Col>
                         <Col xs={24} md={8} className='card-campo'>
                             <Form.Item
                                 label='Palavra-chave'
                                 name={campoPalavraChave}
-                                rules={ruleCampoArrayStringObrigatorioForm(palavrasChaveForm)}
+                                rules={ruleCampoArrayStringObrigatorioForm(form?.getFieldValue(campoPalavraChave))}
                             >
-                                <InputTag valueForm={palavrasChaveForm} tags={palavrasChave} setTags={setPalavrasChave} />
+                                <InputTag
+                                    valueForm={form?.getFieldValue(campoPalavraChave)}
+                                    tags={form?.getFieldValue(campoPalavraChave)}
+                                    setTags={(v) => form?.setFieldValue(campoPalavraChave, v)}
+                                />
                             </Form.Item>
                             <div className="caracteristicasItemTexto">
                                 <p>Separe as palavras-chave usando vírgula.</p>
                             </div>
                         </Col>
                     </Row>
+
                     <Row>
                         <Col xs={24} md={12} className='card-campo'>
                             <Form.Item
@@ -178,6 +174,7 @@ const ClassificacaoTemaComponent: React.FC<FormProps> = ({ form }) => {
                                 <p>Insira até 100 caracteres</p>
                             </div>
                         </Col>
+
                         <Col xs={24} md={12} className='card-campo'>
                             <Form.Item
                                 label='Observação'
@@ -186,7 +183,8 @@ const ClassificacaoTemaComponent: React.FC<FormProps> = ({ form }) => {
                                 <TextArea
                                     rows={4}
                                     placeholder="Adicione observações sobre a questão, orientações para aplicação ou outras informações importantes..."
-                                    maxLength={100} />
+                                    maxLength={100}
+                                />
                             </Form.Item>
                             <div className="caracteristicasItemTexto">
                                 <p>Insira até 100 caracteres</p>
@@ -197,6 +195,6 @@ const ClassificacaoTemaComponent: React.FC<FormProps> = ({ form }) => {
             </div>
         </>
     );
-}
+};
 
 export default ClassificacaoTemaComponent;
