@@ -108,10 +108,10 @@
 .tag-input {
     background: #5A94D8;
     color: #ffffff;
-    padding: 0.5em 0 0.5em 0.5em;
+    padding: 0.3em 0 0.5em 0.5em;
 }
 
 .tag-input button{
     color: #ffffff;
-    padding-top: 0.5em;
+    padding-top: 0.9em;
 }

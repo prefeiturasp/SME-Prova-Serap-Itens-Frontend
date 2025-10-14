@@ -153,7 +153,7 @@ const ClassificacaoTemaComponent: React.FC<FormProps> = ({ form }) => {
                                 />
                             </Form.Item>
                             <div className="caracteristicasItemTexto">
-                                <p>Separe as palavras-chave usando vírgula.</p>
+                                <p>Digite uma palavra e pressione “Enter” para adicioná-la.</p>
                             </div>
                         </Col>
                     </Row>
