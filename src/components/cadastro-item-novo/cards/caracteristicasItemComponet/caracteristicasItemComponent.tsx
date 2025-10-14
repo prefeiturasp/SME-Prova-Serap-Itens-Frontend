@@ -89,20 +89,35 @@ const CaracteristicasItemComponent: React.FC<FormProps> = ({ form }) => {
         setCarregandoDificuldadeSugerida(false);
     }, [form, campoDificuldadeSugerida]);
 
+    // nivelitems
+    const obterListaNivelItem = useCallback(async () => {
+        setCarregandoDificuldadeSugerida(true);
+        const resposta = await configuracaoItemService.obterNivelItem();
+        console.log('resposta nivel item', resposta);
+        if (resposta?.length > 0) {
+            setListaNivelItem(resposta);
+        } else {
+            setListaNivelItem([]);
+            form?.setFieldValue(campoNivelItem, null);
+        }
+        setCarregandoDificuldadeSugerida(false);
+    }, [form, campoNivelItem]);
+
     // Carrega selects e listas iniciais
     useEffect(() => {
         obterListaDificuldadeSugerida();
+        obterListaNivelItem();
         popularCampoSelectForm(campoQuantidadeAlternativas, setListaQuantidadeAlternativas);
         popularCampoSelectForm(campoTipoItem, setListaTiposItem);
         popularCampoSelectForm(campoSituacaoItem, setListaSituacoesItem);
 
-        const opcoesNivel = Object.entries(NivelItem)
-            .filter(([_, value]) => typeof value === "number")
-            .map(([key, value]) => ({
-                label: <span style={{ color: "#595959" }}>{key.replace(/([A-Z])/g, " $1").trim()}</span>,
-                value,
-            }));
-        setListaNivelItem(opcoesNivel);
+        // const opcoesNivel = Object.entries(NivelItem)
+        //     .filter(([_, value]) => typeof value === "number")
+        //     .map(([key, value]) => ({
+        //         label: <span style={{ color: "#595959" }}>{key.replace(/([A-Z])/g, " $1").trim()}</span>,
+        //         value,
+        //     }));
+        // setListaNivelItem(opcoesNivel);
     }, [obterListaDificuldadeSugerida, popularCampoSelectForm, campoQuantidadeAlternativas, campoTipoItem, campoSituacaoItem]);
 
     // 🔹 Atualiza Redux direto (padrão novo)
@@ -113,7 +128,7 @@ const CaracteristicasItemComponent: React.FC<FormProps> = ({ form }) => {
                 dificuldadeSugerida: dificuldadeSugeridaIdForm ? Number(dificuldadeSugeridaIdForm) : null,
                 nivelItem: form?.getFieldValue(campoNivelItem)?.value ?? form?.getFieldValue(campoNivelItem),
                 quantidadeAlternativas: form?.getFieldValue(campoQuantidadeAlternativas)?.valor ?? form?.getFieldValue(campoQuantidadeAlternativas),
-                tipoItem: tipoItemIdForm,
+                tipoItem: form?.getFieldValue(campoTipoItem)?.valor ?? form?.getFieldValue(campoTipoItem),
                 situacaoItem: form?.getFieldValue(campoSituacaoItem)?.valor ?? form?.getFieldValue(campoSituacaoItem),
             }),
         );

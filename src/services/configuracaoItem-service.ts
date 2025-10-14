@@ -62,6 +62,9 @@ const obterSituacoesItem = (): Promise<DefaultOptionType[]> =>
 const obterTiposItem = (): Promise<DefaultOptionType[]> =>
   geralService.getDefaultSelect(`${URL_DEFAULT}/item/tipos`);
 
+const obterNivelItem = (): Promise<DefaultOptionType[]> =>
+  geralService.getDefaultSelect(`${URL_DEFAULT}/item/nivelitem`);
+
 const obterQuantidadeAlternativas = (): Promise<DefaultOptionType[]> =>
   geralService.getDefaultSelect(`${URL_DEFAULT}/quantidadealternativa`);
 
@@ -86,5 +89,6 @@ export default {
   obterCompetenciasMatriz,
   obterHabilidadesCompetencia,
   obterAnosMatriz,
-  obterDificuldadeSugerida,  
+  obterDificuldadeSugerida,
+  obterNivelItem,
 };
