@@ -1,7 +1,7 @@
 import { Button, Col, Form, FormProps, notification, Row, Spin } from 'antd';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeftOutlined } from "@ant-design/icons";
+import { ArrowLeftOutlined, RightOutlined } from "@ant-design/icons";
 import './cadastrarItemNovo.css';
 import IdentificacaoComponent from '~/components/cadastro-item-novo/cards/identificacaoComponent/identificacaoComponent';
 import CompetenciaHabilidade from '~/components/cadastro-item-novo/cards/competenciaHabilidadeComponent/competenciaHabilidadeComponent';
@@ -296,8 +296,8 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                                 <div className='cadastrarItemHeader-Breadcrumb-item01-texto'>
                                     Configuração
                                 </div>
-                            </div>
-                            <p className='cadastrarItemHeader-Breadcrumb-separator'>{'>'}</p>
+                            </div>                           
+                            <RightOutlined className='cadastrarItemHeader-Breadcrumb-separator' />
                             <div className='cadastrarItemHeader-Breadcrumb-item02'>
                                 <div className='cadastrarItemHeader-Breadcrumb-item02-index'>
                                     2

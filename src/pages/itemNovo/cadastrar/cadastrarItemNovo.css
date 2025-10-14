@@ -75,6 +75,10 @@
     font-family: Roboto, sans-serif;
 }
 
+.cadastrarItemHeader-Breadcrumb-item02{
+    opacity: 0.5;
+}
+
 .cadastrarItemHeader-Breadcrumb-item01,
 .cadastrarItemHeader-Breadcrumb-item02 {
     display: flex;
@@ -95,8 +99,9 @@
 }
 
 .cadastrarItemHeader-Breadcrumb-separator {
-    margin: 0 0.5em 0 0.5em;
+    margin: 0.3em 0.5em 0 0.5em;
     color: #FFFFFF;
+    opacity: 0.5;
 }
 
 .cadastrarItem-corpo {
