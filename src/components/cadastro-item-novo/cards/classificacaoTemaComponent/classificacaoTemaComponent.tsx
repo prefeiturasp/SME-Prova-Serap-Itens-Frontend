@@ -23,8 +23,8 @@ const ClassificacaoTemaComponent = ({ form, cardName }: Props) => {
     const campoObservacao = Campos.observacao;
 
     // Campos observados
-    const assuntoIdForm = Form.useWatch(campoAssunto, form);
-    const disciplinaidForm = Form.useWatch(Campos.disciplinas, form);
+    const assuntoIdForm = Form.useWatch([cardName, campoAssunto], form);
+    const disciplinaidForm = Form.useWatch([cardName, Campos.disciplinas], form);
 
     const [listaAssuntos, setListaAssuntos] = useState<DefaultOptionType[]>([]);
     const [listaSubAssuntos, setListaSubAssuntos] = useState<DefaultOptionType[]>([]);

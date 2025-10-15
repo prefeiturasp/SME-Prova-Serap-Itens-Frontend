@@ -231,7 +231,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
             >
                 {/* {contextHolder} */}
 
-                <Form
+                {/* <Form
                     className='form'
                     form={form}
                     layout='vertical'
@@ -240,7 +240,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                     style={{
                         margin: 0,
                     }}
-                >
+                > */}
                     {/* <Affix offsetTop={0.1} style={{ marginBottom: 30 }}> */}
                     <div className='cadastrarItemHeader'>
                         <Row className="cadastrarItemHeader-corpo">
@@ -296,8 +296,8 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                             </div>
                         </div>
 
-                        <IdentificacaoComponent form={form} cardName="identificacaoCard" />
-                        <CompetenciaHabilidade form={form} cardName='compHabiCard' />
+                        <IdentificacaoComponent form={form} cardName='identificacaoCard' />
+                        <CompetenciaHabilidade form={form} cardName='compHabiCard' cardName2='identificacaoCard' />
                         <CaracteristicasItemComponent form={form} cardName='caracteristicasCard' />
                         <ClassificacaoTemaComponent form={form} cardName='classificacaoCard' />
                         <InformacoesEstatisticasComponent form={form} cardName='informacoesCard' />
@@ -330,7 +330,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                             </div>
                         </div>
                     </div>
-                </Form>
+                {/* </Form> */}
             </Spin>
         </>
     );

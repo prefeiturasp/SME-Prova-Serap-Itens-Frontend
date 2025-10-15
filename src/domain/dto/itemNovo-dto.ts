@@ -4,31 +4,35 @@ import { AltenativaDto } from '~/domain/dto/AltenativaDto';
 export interface ItemNovoDto {
   id: number;
   codigoItem: number | null;
-  areaConhecimentoId: SelectValueType;
-  disciplinaId: SelectValueType;
-  matrizId: SelectValueType;
-  anoMatrizId: SelectValueType;
-  competenciaId: SelectValueType;
-  habilidadeId: SelectValueType;  
-  assuntoId: SelectValueType;
-  subAssuntoId: SelectValueType;
-  situacao: SelectValueType;
-  tipoItem: SelectValueType;
-  quantidadeAlternativasId: SelectValueType;
-  dificuldadeSugeridaId: SelectValueType;
-  discriminacao: number | string | null;
-  dificuldade: number | string | null;
-  nivelItem: SelectValueType;
-  acertoCasual: number | string | null;
-  palavrasChave: string[] | null;
-  parametroBTransformado: number | string | null;
-  mediaEhDesvio: string | null;
-  observacao: string | null;
-  sentencaDescritora: string | null;
-  textoBase: string;
-  fonte: string;
-  enunciado: string;
-  alternativasDto?: AltenativaDto[];
-  arquivoVideoId?: number;
-  arquivoAudioId?: number;
+
+  AreaConhecimentoId: SelectValueType;
+  DisciplinaId: SelectValueType;
+  MatrizId: SelectValueType;
+  AnoMatrizId: SelectValueType;
+
+  CompetenciaId: SelectValueType;
+  HabilidadeId: SelectValueType;
+
+  AssuntoId: SelectValueType;
+  SubAssuntoId: SelectValueType;
+  Situacao: SelectValueType;
+  TipoItem: SelectValueType;
+  QuantidadeAlternativasId: SelectValueType;
+
+  DificuldadeSugeridaId: SelectValueType;
+  Discriminacao: number | string | null;
+  Dificuldade: number | string | null;
+  NivelItem: SelectValueType;
+  AcertoCasual: number | string | null;
+  PalavrasChave: string[] | null;
+  ParametroBTransformado: number | string | null;
+  MediaEhDesvio: string | null;
+  Observacao: string | null;
+  SentencaDescritora: string | null;
+  TextoBase: string;
+  Fonte: string;
+  Enunciado: string;
+  AlternativasDto?: AltenativaDto[];
+  ArquivoVideoId?: number;
+  ArquivoAudioId?: number;
 }

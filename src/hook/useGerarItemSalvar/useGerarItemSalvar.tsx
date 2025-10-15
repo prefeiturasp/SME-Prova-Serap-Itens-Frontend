@@ -8,49 +8,50 @@ export function useGerarItemSalvar(form: FormInstance) {
     const gerarItemSalvar = useCallback(() => {
         const values = cloneDeep(form.getFieldsValue(true));
 
-        
+
         const dto: ItemNovoDto = {
             id: values?.id ?? 0,
-            codigoItem: values?.codigoItem ?? '',
+            codigoItem: values?.codigoItem ?? 0,
 
-            areaConhecimentoId: values?.identificacaoCard?.AreaConhecimento ?? null,
-            disciplinaId: values?.identificacaoCard?.disciplinas ?? null,
-            matrizId: values?.identificacaoCard?.matriz ?? null,
-            anoMatrizId: values?.identificacaoCard?.anoMatriz ?? null,
+            AreaConhecimentoId: values?.identificacaoCard?.AreaConhecimento ?? null,
+            DisciplinaId: values?.identificacaoCard?.disciplinas ?? null,
+            MatrizId: values?.identificacaoCard?.matriz ?? null,
+            AnoMatrizId: values?.identificacaoCard?.anoMatriz ?? null,
 
-            competenciaId: values?.compHabiCard?.competencia ?? null,
-            habilidadeId: values?.compHabiCard?.habilidade ?? null,
+            CompetenciaId: values?.compHabiCard?.competencia ?? null,
+            HabilidadeId: values?.compHabiCard?.habilidade ?? null,
 
-            dificuldadeSugeridaId: values?.caracteristicasCard?.dificuldadeSugerida ?? null,
-            nivelItem: values?.caracteristicasCard?.nivelItem ?? null,
-            quantidadeAlternativasId: values?.caracteristicasCard?.quantidadeAlternativas ?? null,
-            tipoItem: values?.caracteristicasCard?.tipoItem ?? null,
-            situacao: values?.caracteristicasCard?.situacaoItem ?? null,
+            DificuldadeSugeridaId: values?.caracteristicasCard?.dificuldadeSugerida ?? null,
+            NivelItem: values?.caracteristicasCard?.nivelItem ?? null,
+            QuantidadeAlternativasId: values?.caracteristicasCard?.quantidadeAlternativas ?? null,
+            TipoItem: values?.caracteristicasCard?.tipoItem ?? null,
+            Situacao: values?.caracteristicasCard?.situacaoItem ?? null,
 
-            assuntoId: values?.classificacaoCard?.assunto ?? null,
-            subAssuntoId: values?.classificacaoCard?.subAssunto ?? null,
-            palavrasChave: values?.classificacaoCard?.palavraChave ?? [],
-            sentencaDescritora: values?.classificacaoCard?.sentencaDescritora ?? '',
-            observacao: values?.classificacaoCard?.observacao ?? '',
+            AssuntoId: values?.classificacaoCard?.assunto ?? null,
+            SubAssuntoId: values?.classificacaoCard?.subAssunto ?? null,
+            PalavrasChave: values?.classificacaoCard?.palavraChave ?? [],
+            SentencaDescritora: values?.classificacaoCard?.sentencaDescritora ?? '',
+            Observacao: values?.classificacaoCard?.observacao ?? '',
 
-            discriminacao: values?.informacoesCard?.discriminacao || null,
-            dificuldade: values?.informacoesCard?.dificuldade || null,
-            acertoCasual: values?.informacoesCard?.acertoCasual || null,
-            parametroBTransformado: values?.informacoesCard?.parametroBTransformado || null,
-            mediaEhDesvio: values?.informacoesCard?.mediaDesvioPadrao || null,
+            Discriminacao: values?.informacoesCard?.discriminacao || null,
+            Dificuldade: values?.informacoesCard?.dificuldade || null,
+            AcertoCasual: values?.informacoesCard?.acertoCasual || null,
+            ParametroBTransformado: values?.informacoesCard?.parametroBTransformado || null,
+            MediaEhDesvio: values?.informacoesCard?.mediaDesvioPadrao || null,
 
-            textoBase: values?.textoBase ?? '',
-            fonte: values?.fonte ?? '',
-            enunciado: values?.enunciado ?? '',
+            TextoBase: values?.textoBase ?? '',
+            Fonte: values?.fonte ?? '',
+            Enunciado: values?.enunciado ?? '',
 
-            alternativasDto: [],
-            arquivoVideoId: values?.video?.[0]?.idFile ?? null,
-            arquivoAudioId: values?.audio?.[0]?.idFile ?? null,
+            AlternativasDto: [],
+            ArquivoVideoId: values?.video?.[0]?.idFile ? Number(values.video[0].idFile) : 0,
+            ArquivoAudioId: values?.audio?.[0]?.idFile ? Number(values.audio[0].idFile) : 0,
+
         };
 
         // 👇 Se tiver alternativas no form, trata aqui
         if (values?.alternativasDto?.length) {
-            dto.alternativasDto = values.alternativasDto.map((item: AltenativaDto) => {
+            dto.AlternativasDto = values.alternativasDto.map((item: AltenativaDto) => {
                 const correta = item.numeracao === values?.alternativaCorreta;
                 return { ...item, correta };
             });

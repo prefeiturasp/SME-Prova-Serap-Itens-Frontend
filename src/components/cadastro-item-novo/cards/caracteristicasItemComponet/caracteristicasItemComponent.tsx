@@ -20,10 +20,10 @@ const CaracteristicasItemComponent = ({ form, cardName }: Props) => {
     const campoNivelItem = Campos.nivelItem;
 
     // Form watchers
-    const dificuldadeSugeridaIdForm = Form.useWatch(campoDificuldadeSugerida, form);
-    const nivelItemIdForm = Form.useWatch(campoNivelItem, form);
-    const quantidadeAlternativasForm = Form.useWatch(campoQuantidadeAlternativas, form);
-    
+    const dificuldadeSugeridaIdForm = Form.useWatch([cardName, campoDificuldadeSugerida], form);
+    const nivelItemIdForm = Form.useWatch([cardName, campoNivelItem], form);
+    const quantidadeAlternativasForm = Form.useWatch([cardName, campoQuantidadeAlternativas], form);
+
     // Estados locais
     const [listaDificuldadeSugerida, setListaDificuldadeSugerida] = useState<CheckboxOptionType[]>([]);
     const [carregandoDificuldadeSugerida, setCarregandoDificuldadeSugerida] = useState<boolean>(false);

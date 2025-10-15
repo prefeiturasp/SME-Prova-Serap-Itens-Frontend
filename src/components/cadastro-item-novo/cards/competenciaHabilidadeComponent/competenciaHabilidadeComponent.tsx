@@ -9,18 +9,19 @@ import { validarCampoForm } from '~/utils/funcoes';
 interface Props {
   form: any;
   cardName: string;
+  cardName2: string;
 }
 
-const CompetenciaHabilidade = ({ form, cardName }: Props) => {
+const CompetenciaHabilidade = ({ form, cardName, cardName2 }: Props) => {
     const [listaCompetencias, setListaCompetencias] = useState<DefaultOptionType[]>([]);
     const [listaHabilidades, setListaHabilidades] = useState<DefaultOptionType[]>([]);
 
     const campoCompetencia = Campos.competencia;
     const campoHabilidade = Campos.habilidade;
 
-    const matrizIdForm = Form.useWatch(Campos.matriz, form);
-    const competenciaIdForm = Form.useWatch(Campos.competencia, form);    
-    
+    const matrizIdForm = Form.useWatch([cardName2, Campos.matriz], form);
+    const competenciaIdForm = Form.useWatch([cardName, Campos.competencia], form);
+
     const popularCampoSelectForm = useCallback(
         async (
             param: number | string | null,
