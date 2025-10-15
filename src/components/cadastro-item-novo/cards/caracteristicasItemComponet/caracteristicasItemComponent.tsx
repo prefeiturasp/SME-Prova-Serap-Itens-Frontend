@@ -6,7 +6,6 @@ import configuracaoItemService from "~/services/configuracaoItem-service";
 import { Campos } from "~/domain/enums/campos-cadastro-item";
 import { DefaultOptionType } from "antd/es/select";
 import TipoItem from "~/components/cadastro-item/campos/tipo-item";
-import { NivelItem } from "~/domain/enums/nivelItem";
 import "./caracteristicaItemComponent.css";
 import { useDispatch, useSelector } from "react-redux";
 import { AppState } from "~/redux";
