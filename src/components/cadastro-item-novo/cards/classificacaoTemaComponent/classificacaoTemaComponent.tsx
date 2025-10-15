@@ -1,5 +1,5 @@
 import React, { Dispatch, SetStateAction, useCallback, useEffect, useState } from "react";
-import { Col, Form, FormProps, Row } from "antd";
+import { Col, Form, Row } from "antd";
 import SelectForm from "~/components/select-form";
 import InputTag from "~/components/input-tag";
 import { Campos } from "~/domain/enums/campos-cadastro-item";
@@ -8,11 +8,13 @@ import TextArea from "antd/es/input/TextArea";
 import { ruleCampoArrayStringObrigatorioForm, validarCampoForm } from "~/utils/funcoes";
 import configuracaoItemService from "~/services/configuracaoItem-service";
 import { SelectValueType } from "~/domain/type/select";
-import { useDispatch, useSelector } from "react-redux";
-import { setConfiguracaoItemNovo } from "~/redux/modules/cadastroItem-novo/itemNovo/actions";
-import { AppState } from "~/redux";
 
-const ClassificacaoTemaComponent: React.FC<FormProps> = ({ form }) => {
+interface Props {
+    form: any;
+    cardName: string;
+}
+
+const ClassificacaoTemaComponent = ({ form, cardName }: Props) => {
 
     const campoAssunto = Campos.assunto;
     const campoSubAssunto = Campos.subAssunto;
@@ -22,21 +24,13 @@ const ClassificacaoTemaComponent: React.FC<FormProps> = ({ form }) => {
 
     // Campos observados
     const assuntoIdForm = Form.useWatch(campoAssunto, form);
-    const subAssuntoIdForm = Form.useWatch(campoSubAssunto, form);
-    const palavrasChaveForm = Form.useWatch(campoPalavraChave, form);
     const disciplinaidForm = Form.useWatch(Campos.disciplinas, form);
-    const sentencaDescritoraForm = Form.useWatch(campoSentencaDescritora, form);
-    const observacaoForm = Form.useWatch(campoObservacao, form);
-
-    const configuracaoItemNovo = useSelector((state: AppState) => state.configuracaoItemNovo);
-
-    const dispatch = useDispatch();
 
     const [listaAssuntos, setListaAssuntos] = useState<DefaultOptionType[]>([]);
     const [listaSubAssuntos, setListaSubAssuntos] = useState<DefaultOptionType[]>([]);
     const [palavrasChave] = useState<string[] | undefined>([]);
 
-    // 🔹 Função genérica para popular selects
+
     const popularCampoSelectForm = useCallback(
         async (
             param: SelectValueType,
@@ -72,7 +66,6 @@ const ClassificacaoTemaComponent: React.FC<FormProps> = ({ form }) => {
         [form],
     );
 
-    // 🔹 Atualiza listas conforme dependências
     useEffect(() => {
         if (disciplinaidForm)
             popularCampoSelectForm(disciplinaidForm, campoAssunto, setListaAssuntos);
@@ -88,26 +81,6 @@ const ClassificacaoTemaComponent: React.FC<FormProps> = ({ form }) => {
         form?.setFieldValue(campoPalavraChave, palavrasChave);
     }, [form, palavrasChave, campoPalavraChave]);
 
-    // 🔹 Redux - sincroniza estado do card
-    useEffect(() => {
-        dispatch(
-            setConfiguracaoItemNovo({
-                ...configuracaoItemNovo,
-                assunto: form?.getFieldValue(campoAssunto)?.valor ?? form?.getFieldValue(campoAssunto),
-                subAssunto: form?.getFieldValue(campoSubAssunto)?.valor ?? form?.getFieldValue(campoSubAssunto),
-                palavrasChave: form?.getFieldValue(campoPalavraChave)?.valor ?? form?.getFieldValue(campoPalavraChave),
-                sentencaDescritora: form?.getFieldValue(campoSentencaDescritora)?.valor ?? form?.getFieldValue(campoSentencaDescritora),
-                observacao: form?.getFieldValue(campoObservacao)?.valor ?? form?.getFieldValue(campoObservacao),
-            }),
-        );
-    }, [
-        dispatch,
-        assuntoIdForm,
-        subAssuntoIdForm,
-        palavrasChaveForm,
-        sentencaDescritoraForm,
-        observacaoForm,
-    ]);
 
     return (
         <>
@@ -122,7 +95,7 @@ const ClassificacaoTemaComponent: React.FC<FormProps> = ({ form }) => {
                             <SelectForm
                                 form={form}
                                 options={listaAssuntos}
-                                nomeCampo={campoAssunto}
+                                nomeCampo={[cardName, campoAssunto]}
                                 label={'Assunto'}
                                 campoObrigatorio={false}
                                 disabled={!disciplinaidForm}
@@ -133,7 +106,7 @@ const ClassificacaoTemaComponent: React.FC<FormProps> = ({ form }) => {
                             <SelectForm
                                 form={form}
                                 options={listaSubAssuntos}
-                                nomeCampo={campoSubAssunto}
+                                nomeCampo={[cardName, campoSubAssunto]}
                                 label={'Subassunto'}
                                 campoObrigatorio={false}
                                 disabled={!assuntoIdForm}
@@ -143,13 +116,15 @@ const ClassificacaoTemaComponent: React.FC<FormProps> = ({ form }) => {
                         <Col xs={24} md={8} className='card-campo'>
                             <Form.Item
                                 label='Palavra-chave'
-                                name={campoPalavraChave}
-                                rules={ruleCampoArrayStringObrigatorioForm(form?.getFieldValue(campoPalavraChave))}
+                                name={[cardName, campoPalavraChave]}
+                                rules={ruleCampoArrayStringObrigatorioForm(
+                                    form.getFieldValue([cardName, campoPalavraChave])
+                                )}
                             >
                                 <InputTag
-                                    valueForm={form?.getFieldValue(campoPalavraChave)}
-                                    tags={form?.getFieldValue(campoPalavraChave)}
-                                    setTags={(v) => form?.setFieldValue(campoPalavraChave, v)}
+                                    valueForm={form.getFieldValue([cardName, campoPalavraChave])}
+                                    tags={form.getFieldValue([cardName, campoPalavraChave])}
+                                    setTags={(v) => form.setFieldValue([cardName, campoPalavraChave], v)}
                                 />
                             </Form.Item>
                             <div className="caracteristicasItemTexto">
@@ -162,7 +137,7 @@ const ClassificacaoTemaComponent: React.FC<FormProps> = ({ form }) => {
                         <Col xs={24} md={12} className='card-campo'>
                             <Form.Item
                                 label='Sentença Descritora'
-                                name={campoSentencaDescritora}
+                                name={[cardName, campoSentencaDescritora]}
                             >
                                 <TextArea
                                     rows={4}
@@ -178,7 +153,7 @@ const ClassificacaoTemaComponent: React.FC<FormProps> = ({ form }) => {
                         <Col xs={24} md={12} className='card-campo'>
                             <Form.Item
                                 label='Observação'
-                                name={campoObservacao}
+                                name={[cardName, campoObservacao]}
                             >
                                 <TextArea
                                     rows={4}

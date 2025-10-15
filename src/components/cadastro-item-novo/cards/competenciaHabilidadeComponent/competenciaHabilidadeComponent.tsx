@@ -1,15 +1,17 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { DefaultOptionType } from "antd/es/select";
-import { Col, Form, FormProps, Row } from "antd";
+import { Col, Form, Row } from "antd";
 import SelectForm from "~/components/select-form";
 import { Campos } from "~/domain/enums/campos-cadastro-item";
 import configuracaoItemService from '~/services/configuracaoItem-service';
 import { validarCampoForm } from '~/utils/funcoes';
-import { useDispatch, useSelector } from 'react-redux';
-import { AppState } from '~/redux';
-import { setConfiguracaoItemNovo } from '~/redux/modules/cadastroItem-novo/itemNovo/actions';
 
-const CompetenciaHabilidade: React.FC<FormProps> = ({ form }) => {
+interface Props {
+  form: any;
+  cardName: string;
+}
+
+const CompetenciaHabilidade = ({ form, cardName }: Props) => {
     const [listaCompetencias, setListaCompetencias] = useState<DefaultOptionType[]>([]);
     const [listaHabilidades, setListaHabilidades] = useState<DefaultOptionType[]>([]);
 
@@ -17,14 +19,8 @@ const CompetenciaHabilidade: React.FC<FormProps> = ({ form }) => {
     const campoHabilidade = Campos.habilidade;
 
     const matrizIdForm = Form.useWatch(Campos.matriz, form);
-    const competenciaIdForm = Form.useWatch(Campos.competencia, form);
-    const habilidadeIdForm = Form.useWatch(Campos.habilidade, form);
-
-    // Redux
-    const dispatch = useDispatch();
-    const configuracaoItemNovo = useSelector((state: AppState) => state.configuracaoItemNovo);
-
-    // 🔹 Popular selects
+    const competenciaIdForm = Form.useWatch(Campos.competencia, form);    
+    
     const popularCampoSelectForm = useCallback(
         async (
             param: number | string | null,
@@ -69,19 +65,7 @@ const CompetenciaHabilidade: React.FC<FormProps> = ({ form }) => {
         popularCampoSelectForm(competenciaIdForm, campoHabilidade, setListaHabilidades);
     }, [competenciaIdForm, campoHabilidade, popularCampoSelectForm]);
 
-    // 🔹 Atualiza Redux diretamente (sem objeto intermediário)
-    useEffect(() => {
-        console.log("valor form:",competenciaIdForm, "valor campo: ", campoCompetencia,
-            "VALOR:-->",form?.getFieldValue(campoCompetencia)?.valor);
-        dispatch(            
-            setConfiguracaoItemNovo({
-                ...configuracaoItemNovo,
-                competencia: form?.getFieldValue(campoCompetencia)?.valor ?? form?.getFieldValue(campoCompetencia),
-                habilidade: form?.getFieldValue(campoHabilidade)?.valor ?? form?.getFieldValue(campoHabilidade),
-            }),
-        );
-    }, [competenciaIdForm, habilidadeIdForm, dispatch]);
-
+    
     return (
         <div className="card">
             <div className="card-titulo">Competências e habilidades</div>
@@ -94,7 +78,7 @@ const CompetenciaHabilidade: React.FC<FormProps> = ({ form }) => {
                         <SelectForm
                             form={form}
                             options={listaCompetencias}
-                            nomeCampo={campoCompetencia}
+                            nomeCampo={[cardName, campoCompetencia]}
                             label="Competência"
                             campoObrigatorio={true}
                         />
@@ -103,7 +87,7 @@ const CompetenciaHabilidade: React.FC<FormProps> = ({ form }) => {
                         <SelectForm
                             form={form}
                             options={listaHabilidades}
-                            nomeCampo={campoHabilidade}
+                            nomeCampo={[cardName,campoHabilidade]}
                             label="Habilidade"
                             campoObrigatorio={true}
                         />

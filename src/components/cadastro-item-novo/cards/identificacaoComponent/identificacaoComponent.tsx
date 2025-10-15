@@ -1,5 +1,5 @@
 import React, { Dispatch, SetStateAction, useCallback, useEffect, useState } from 'react';
-import { Col, Form, FormProps, Row } from 'antd';
+import { Col, Form, Row } from 'antd';
 import './identificacaoComponent.css';
 import SelectForm from '~/components/select-form';
 import { Campos } from '~/domain/enums/campos-cadastro-item';
@@ -7,35 +7,27 @@ import { DefaultOptionType } from 'antd/lib/select';
 import { SelectValueType } from '~/domain/type/select';
 import configuracaoItemService from '~/services/configuracaoItem-service';
 
-// Redux
-import { ConfiguracaoItemNovoProps } from '~/redux/modules/cadastroItem-novo/itemNovo/reducers';
-import { setConfiguracaoItemNovo } from '~/redux/modules/cadastroItem-novo/itemNovo/actions';
-import { useDispatch, useSelector } from 'react-redux';
-import { AppState } from '~/redux';
+interface Props {
+  form: any;
+  cardName: string;
+}
 
-const IdentificacaoComponent: React.FC<FormProps> = ({ form }) => {
+const IdentificacaoComponent = ({ form, cardName }: Props) => {
     const campoAreaConhecimento = Campos.areaConhecimento;
     const campoDisciplina = Campos.disciplinas;
     const campoMatriz = Campos.matriz;
     const campoAnoMatriz = Campos.anoMatriz;
 
-    const areaConhecimentoIdForm = Form.useWatch(Campos.areaConhecimento, form);
-    const disciplinaIdForm = Form.useWatch(Campos.disciplinas, form);
-    const matrizIdForm = Form.useWatch(Campos.matriz, form);
-    const anoMatrizIdForm = Form.useWatch(Campos.anoMatriz, form);
+    const areaConhecimentoIdForm = Form.useWatch([cardName, campoAreaConhecimento], form);
+    const disciplinaIdForm = Form.useWatch([cardName, campoDisciplina], form);
+    const matrizIdForm = Form.useWatch([cardName, campoMatriz], form);
 
     const [listaAreaConhecimento, setListaAreaConhecimento] = useState<DefaultOptionType[]>([]);
     const [listaDisciplinas, setListaDisciplinas] = useState<DefaultOptionType[]>([]);
     const [listaMatriz, setListaMatriz] = useState<DefaultOptionType[]>([]);
     const [listaAnosMatriz, setListaAnosMatriz] = useState<DefaultOptionType[]>([]);
 
-    // Redux
-    const dispatch = useDispatch();
-    const configuracaoItemNovo = useSelector((state: AppState) => state.configuracaoItemNovo);
-    const [objTabConfiguracaoItemNovo, setObjTabConfiguracaoItemNovo] =
-        useState<Partial<ConfiguracaoItemNovoProps>>({});
-    // fim redux
-
+    
     const obterAnosMatriz = useCallback(async () => {
         if (!matrizIdForm) {
             setListaAnosMatriz([]);
@@ -108,33 +100,7 @@ const IdentificacaoComponent: React.FC<FormProps> = ({ form }) => {
         obterAnosMatriz();
     }, [matrizIdForm, campoAnoMatriz, obterAnosMatriz]);
 
-    // 🔹 Mantém o estado local atualizado com o form
-    useEffect(() => {
-        const novoObj: Partial<ConfiguracaoItemNovoProps> = {
-            codigo: configuracaoItemNovo.codigo,
-            areaConhecimento: areaConhecimentoIdForm,
-            disciplina: disciplinaIdForm,
-            matriz: matrizIdForm,
-            anoMatriz: anoMatrizIdForm,
-        };
-        setObjTabConfiguracaoItemNovo(novoObj);
-    }, [areaConhecimentoIdForm, disciplinaIdForm, matrizIdForm, anoMatrizIdForm, configuracaoItemNovo.codigo]);
-
-    // 🔹 Sincroniza Redux apenas quando há mudanças reais
-    useEffect(() => {
-        if (!Object.keys(objTabConfiguracaoItemNovo).length) return;
-
-        const mudou = Object.keys(objTabConfiguracaoItemNovo).some(
-            key =>
-                objTabConfiguracaoItemNovo[key as keyof ConfiguracaoItemNovoProps] !==
-                configuracaoItemNovo[key as keyof ConfiguracaoItemNovoProps]
-        );
-
-        if (mudou) {
-            dispatch(setConfiguracaoItemNovo(objTabConfiguracaoItemNovo));
-        }
-    }, [objTabConfiguracaoItemNovo, configuracaoItemNovo, dispatch]);
-
+    
     return (
         <>
             <div className='card'>
@@ -148,7 +114,7 @@ const IdentificacaoComponent: React.FC<FormProps> = ({ form }) => {
                             <SelectForm
                                 form={form}
                                 options={listaAreaConhecimento}
-                                nomeCampo={campoAreaConhecimento}
+                                nomeCampo={[cardName, campoAreaConhecimento]}
                                 label={'Área de conhecimento'}
                                 campoObrigatorio={true}
                                 disabled={false}
@@ -158,7 +124,7 @@ const IdentificacaoComponent: React.FC<FormProps> = ({ form }) => {
                             <SelectForm
                                 form={form}
                                 options={listaDisciplinas}
-                                nomeCampo={campoDisciplina}
+                                nomeCampo={[cardName, campoDisciplina]}
                                 label={'Componente curricular'}
                                 campoObrigatorio={true}
                             />
@@ -169,7 +135,7 @@ const IdentificacaoComponent: React.FC<FormProps> = ({ form }) => {
                             <SelectForm
                                 form={form}
                                 options={listaMatriz}
-                                nomeCampo={campoMatriz}
+                                nomeCampo={[cardName, campoMatriz]}
                                 label={'Matriz de avaliação'}
                                 campoObrigatorio={true}
                             />
@@ -178,7 +144,7 @@ const IdentificacaoComponent: React.FC<FormProps> = ({ form }) => {
                             <SelectForm
                                 form={form}
                                 options={listaAnosMatriz}
-                                nomeCampo={campoAnoMatriz}
+                                nomeCampo={[cardName, campoAnoMatriz]}
                                 label={'Ano (ano escolar)'}
                                 campoObrigatorio={true}
                             />

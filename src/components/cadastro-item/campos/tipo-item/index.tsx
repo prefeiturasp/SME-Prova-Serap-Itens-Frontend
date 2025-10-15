@@ -9,6 +9,7 @@ interface SelectProps extends FormProps {
     options: DefaultOptionType[];
     disabled?: boolean;
     campoObrigatorio?: boolean;
+    nomeCampo: Campos | (string | number)[];
 }
 
 const TipoItem: React.FC<SelectProps> = ({
@@ -16,8 +17,9 @@ const TipoItem: React.FC<SelectProps> = ({
     options,
     disabled,
     campoObrigatorio,
+    nomeCampo,
 }) => {
-    const campo = Campos.tipoItem;
+    const campo = nomeCampo;
     const valorCampoForm = Form.useWatch(campo, form);
     const validacaoCampo = validarCampoForm(valorCampoForm);
 

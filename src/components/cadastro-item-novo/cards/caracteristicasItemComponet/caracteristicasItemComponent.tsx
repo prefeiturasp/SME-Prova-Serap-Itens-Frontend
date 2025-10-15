@@ -1,18 +1,18 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { CheckboxOptionType, Col, Form, FormProps, Radio, Row, Spin } from "antd";
+import { CheckboxOptionType, Col, Form, Radio, Row, Spin } from "antd";
 import SelectForm from "~/components/select-form";
 import { converterListaParaCheckboxOption, ruleCampoObrigatorioForm } from "~/utils/funcoes";
 import configuracaoItemService from "~/services/configuracaoItem-service";
 import { Campos } from "~/domain/enums/campos-cadastro-item";
 import { DefaultOptionType } from "antd/es/select";
 import TipoItem from "~/components/cadastro-item/campos/tipo-item";
-import { NivelItem } from "~/domain/enums/nivelItem";
-import "./caracteristicaItemComponent.css";
-import { useDispatch, useSelector } from "react-redux";
-import { AppState } from "~/redux";
-import { setConfiguracaoItemNovo } from "~/redux/modules/cadastroItem-novo/itemNovo/actions";
 
-const CaracteristicasItemComponent: React.FC<FormProps> = ({ form }) => {
+interface Props {
+    form: any;
+    cardName: string;
+}
+
+const CaracteristicasItemComponent = ({ form, cardName }: Props) => {
     const campoDificuldadeSugerida = Campos.dificuldadeSugerida;
     const campoQuantidadeAlternativas = Campos.quantidadeAlternativas;
     const campoSituacaoItem = Campos.situacaoItem;
@@ -23,13 +23,7 @@ const CaracteristicasItemComponent: React.FC<FormProps> = ({ form }) => {
     const dificuldadeSugeridaIdForm = Form.useWatch(campoDificuldadeSugerida, form);
     const nivelItemIdForm = Form.useWatch(campoNivelItem, form);
     const quantidadeAlternativasForm = Form.useWatch(campoQuantidadeAlternativas, form);
-    const tipoItemIdForm = Form.useWatch(campoTipoItem, form);
-    const situacaoItemIdForm = Form.useWatch(campoSituacaoItem, form);
-
-    // Redux
-    const dispatch = useDispatch();
-    const configuracaoItemNovo = useSelector((state: AppState) => state.configuracaoItemNovo);
-
+    
     // Estados locais
     const [listaDificuldadeSugerida, setListaDificuldadeSugerida] = useState<CheckboxOptionType[]>([]);
     const [carregandoDificuldadeSugerida, setCarregandoDificuldadeSugerida] = useState<boolean>(false);
@@ -110,37 +104,10 @@ const CaracteristicasItemComponent: React.FC<FormProps> = ({ form }) => {
         popularCampoSelectForm(campoQuantidadeAlternativas, setListaQuantidadeAlternativas);
         popularCampoSelectForm(campoTipoItem, setListaTiposItem);
         popularCampoSelectForm(campoSituacaoItem, setListaSituacoesItem);
-
-        // const opcoesNivel = Object.entries(NivelItem)
-        //     .filter(([_, value]) => typeof value === "number")
-        //     .map(([key, value]) => ({
-        //         label: <span style={{ color: "#595959" }}>{key.replace(/([A-Z])/g, " $1").trim()}</span>,
-        //         value,
-        //     }));
-        // setListaNivelItem(opcoesNivel);
+        
     }, [obterListaDificuldadeSugerida, popularCampoSelectForm, campoQuantidadeAlternativas, campoTipoItem, campoSituacaoItem]);
 
-    // 🔹 Atualiza Redux direto (padrão novo)
-    useEffect(() => {
-        dispatch(
-            setConfiguracaoItemNovo({
-                ...configuracaoItemNovo,
-                dificuldadeSugerida: dificuldadeSugeridaIdForm ? Number(dificuldadeSugeridaIdForm) : null,
-                nivelItem: form?.getFieldValue(campoNivelItem)?.value ?? form?.getFieldValue(campoNivelItem),
-                quantidadeAlternativas: form?.getFieldValue(campoQuantidadeAlternativas)?.valor ?? form?.getFieldValue(campoQuantidadeAlternativas),
-                tipoItem: form?.getFieldValue(campoTipoItem)?.valor ?? form?.getFieldValue(campoTipoItem),
-                situacaoItem: form?.getFieldValue(campoSituacaoItem)?.valor ?? form?.getFieldValue(campoSituacaoItem),
-            }),
-        );
-    }, [
-        dificuldadeSugeridaIdForm,
-        nivelItemIdForm,
-        quantidadeAlternativasForm,
-        tipoItemIdForm,
-        situacaoItemIdForm,
-        dispatch,
-    ]);
-
+    
     return (
         <div className="card">
             <div className="card-titulo">Características do item</div>
@@ -151,7 +118,7 @@ const CaracteristicasItemComponent: React.FC<FormProps> = ({ form }) => {
                     <Col xs={24} md={12} className="card-campo">
                         <Form.Item
                             label="Dificuldade sugerida"
-                            name={campoDificuldadeSugerida}
+                            name={[cardName, campoDificuldadeSugerida]}
                             rules={ruleCampoObrigatorioForm(dificuldadeSugeridaIdForm)}
                         >
                             <Spin size="small" spinning={carregandoDificuldadeSugerida}>
@@ -170,7 +137,7 @@ const CaracteristicasItemComponent: React.FC<FormProps> = ({ form }) => {
                         <SelectForm
                             form={form}
                             options={listaNivelItem}
-                            nomeCampo={campoNivelItem}
+                            nomeCampo={[cardName, campoNivelItem]}
                             label="Nível do Item"
                             campoObrigatorio={false}
                             labelInValue={true}
@@ -183,7 +150,7 @@ const CaracteristicasItemComponent: React.FC<FormProps> = ({ form }) => {
                         <SelectForm
                             form={form}
                             options={listaQuantidadeAlternativas}
-                            nomeCampo={campoQuantidadeAlternativas}
+                            nomeCampo={[cardName, campoQuantidadeAlternativas]}
                             label="Categoria do item e quantidade de alternativas*"
                             campoObrigatorio={true}
                             disabled={!nivelItemIdForm}
@@ -199,6 +166,7 @@ const CaracteristicasItemComponent: React.FC<FormProps> = ({ form }) => {
                             options={listaTiposItem}
                             campoObrigatorio={true}
                             disabled={!quantidadeAlternativasForm}
+                            nomeCampo={[cardName, campoTipoItem]}
                         />
                         <div className="caracteristicasItemTexto">
                             <p>
@@ -212,7 +180,7 @@ const CaracteristicasItemComponent: React.FC<FormProps> = ({ form }) => {
                         <SelectForm
                             form={form}
                             options={listaSituacoesItem}
-                            nomeCampo={campoSituacaoItem}
+                            nomeCampo={[cardName, campoSituacaoItem]}
                             label="Situação do item"
                             campoObrigatorio={true}
                             labelInValue={true}
