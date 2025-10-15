@@ -6,7 +6,6 @@ import configuracaoItemService from "~/services/configuracaoItem-service";
 import { Campos } from "~/domain/enums/campos-cadastro-item";
 import { DefaultOptionType } from "antd/es/select";
 import TipoItem from "~/components/cadastro-item/campos/tipo-item";
-import { NivelItem } from "~/domain/enums/nivelItem";
 import "./caracteristicaItemComponent.css";
 import { useDispatch, useSelector } from "react-redux";
 import { AppState } from "~/redux";
@@ -74,26 +73,37 @@ const CaracteristicasItemComponent: React.FC<FormProps> = ({ form }) => {
     const obterListaDificuldadeSugerida = useCallback(async () => {
         setCarregandoDificuldadeSugerida(true);
         const resposta = await configuracaoItemService.obterDificuldadeSugerida();
-
+        console.log("Resposta dificuldade sugerida:", resposta);
         if (resposta?.length > 0) {
             setListaDificuldadeSugerida(converterListaParaCheckboxOption(resposta));
 
-            // Define valor padrão
-            const primeiroItem = resposta.find(r => r.descricao?.includes("1 - Muito Fácil")) || resposta[0];
-            form?.setFieldValue(campoDificuldadeSugerida, primeiroItem.value);
-        } else {
-            setListaDificuldadeSugerida([]);
-            form?.setFieldValue(campoDificuldadeSugerida, null);
+            // Define valor padrão apenas se o campo estiver vazio
+            const valorAtualAPI = form?.getFieldValue(campoDificuldadeSugerida);
+            console.log("obterListaDificuldadeSugerida - valor atual:", valorAtualAPI);
+            if (!valorAtualAPI) {
+                console.log("API: Definindo valor padrão 5 para dificuldade sugerida");
+                form?.setFieldValue(campoDificuldadeSugerida, 5);
+            }
         }
 
         setCarregandoDificuldadeSugerida(false);
     }, [form, campoDificuldadeSugerida]);
 
+    // Define valor padrão inicial para dificuldade sugerida
+    useEffect(() => {
+        const valorAtual = form?.getFieldValue(campoDificuldadeSugerida);
+        console.log("useEffect valor padrão - valor atual:", valorAtual);
+        if (!valorAtual) {
+            console.log("Definindo valor padrão 5 para dificuldade sugerida");
+            form?.setFieldValue(campoDificuldadeSugerida, 5);
+        }
+    }, [form, campoDificuldadeSugerida]);
+
+
     // nivelitems
     const obterListaNivelItem = useCallback(async () => {
         setCarregandoDificuldadeSugerida(true);
         const resposta = await configuracaoItemService.obterNivelItem();
-        console.log('resposta nivel item', resposta);
         if (resposta?.length > 0) {
             setListaNivelItem(resposta);
         } else {
@@ -111,25 +121,28 @@ const CaracteristicasItemComponent: React.FC<FormProps> = ({ form }) => {
         popularCampoSelectForm(campoTipoItem, setListaTiposItem);
         popularCampoSelectForm(campoSituacaoItem, setListaSituacoesItem);
 
-        // const opcoesNivel = Object.entries(NivelItem)
-        //     .filter(([_, value]) => typeof value === "number")
-        //     .map(([key, value]) => ({
-        //         label: <span style={{ color: "#595959" }}>{key.replace(/([A-Z])/g, " $1").trim()}</span>,
-        //         value,
-        //     }));
-        // setListaNivelItem(opcoesNivel);
-    }, [obterListaDificuldadeSugerida, popularCampoSelectForm, campoQuantidadeAlternativas, campoTipoItem, campoSituacaoItem]);
+    }, [obterListaDificuldadeSugerida,
+        popularCampoSelectForm,
+        campoQuantidadeAlternativas,
+        campoTipoItem,
+        campoSituacaoItem,
+        obterListaNivelItem,
+        campoDificuldadeSugerida,
+        campoNivelItem
+    ]);
 
-    // 🔹 Atualiza Redux direto (padrão novo)
+    // 🔹 Atualiza Redux - SEM incluir configuracaoItemNovo nas dependências
     useEffect(() => {
+        console.log("Atualizando Redux - dificuldadeSugerida:", dificuldadeSugeridaIdForm);
+        
         dispatch(
             setConfiguracaoItemNovo({
                 ...configuracaoItemNovo,
-                dificuldadeSugerida: dificuldadeSugeridaIdForm ? Number(dificuldadeSugeridaIdForm) : null,
-                nivelItem: form?.getFieldValue(campoNivelItem)?.value ?? form?.getFieldValue(campoNivelItem),
-                quantidadeAlternativas: form?.getFieldValue(campoQuantidadeAlternativas)?.valor ?? form?.getFieldValue(campoQuantidadeAlternativas),
-                tipoItem: form?.getFieldValue(campoTipoItem)?.valor ?? form?.getFieldValue(campoTipoItem),
-                situacaoItem: form?.getFieldValue(campoSituacaoItem)?.valor ?? form?.getFieldValue(campoSituacaoItem),
+                dificuldadeSugerida: dificuldadeSugeridaIdForm,
+                nivelItem: nivelItemIdForm?.value ?? nivelItemIdForm,
+                quantidadeAlternativas: quantidadeAlternativasForm?.valor ?? quantidadeAlternativasForm,
+                tipoItem: tipoItemIdForm?.valor ?? tipoItemIdForm,
+                situacaoItem: situacaoItemIdForm?.valor ?? situacaoItemIdForm,
             }),
         );
     }, [
@@ -153,6 +166,7 @@ const CaracteristicasItemComponent: React.FC<FormProps> = ({ form }) => {
                             label="Dificuldade sugerida"
                             name={campoDificuldadeSugerida}
                             rules={ruleCampoObrigatorioForm(dificuldadeSugeridaIdForm)}
+                            initialValue={5}
                         >
                             <Spin size="small" spinning={carregandoDificuldadeSugerida}>
                                 <Radio.Group
@@ -161,6 +175,7 @@ const CaracteristicasItemComponent: React.FC<FormProps> = ({ form }) => {
                                     buttonStyle="solid"
                                     optionType="button"
                                     options={listaDificuldadeSugerida}
+                                    defaultValue={5}
                                 />
                             </Spin>
                         </Form.Item>

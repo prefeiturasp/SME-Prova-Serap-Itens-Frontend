@@ -13,9 +13,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppState } from '~/redux';
 import { cloneDeep } from 'lodash';
 import { AltenativaDto } from '~/domain/dto/AltenativaDto';
-import { DadosIniciais } from '~/domain/enums/campos-cadastro-item';
-
-// import { Campos } from '~/domain/enums/campos-cadastro-item';
+import { DadosIniciais, Campos } from '~/domain/enums/campos-cadastro-item';
 
 import configuracaoItemService from '~/services/configuracaoItem-service';
 
@@ -39,7 +37,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
     const [carregando, setCarregando] = useState<boolean>(false);
     const item = useSelector((state: AppState) => state.item);
     const configuracaoItemNovo = useSelector((state: AppState) => state.configuracaoItemNovo);
-    
+
     const elaboracaoItemNovo = useSelector((state: AppState) => state.elaboracaoItemNovo);
 
     const [objTabConfiguracaoItem, setObjTabConfiguracaoItem] =
@@ -53,6 +51,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
         parametroBTransformado: '',
         tipoItem: DadosIniciais.tipoItemIdPadrao,
     };
+
 
     // const areaConhecimentoIdForm = Form.useWatch(Campos.areaConhecimento, form);
     // const disciplinaIdForm = Form.useWatch(Campos.disciplinas, form);
@@ -109,6 +108,16 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
     const gerarItemSalvar = useCallback(() => {
         const values = cloneDeep(form.getFieldsValue(true));
 
+        console.log("Estado completo do configuracaoItemNovo:", configuracaoItemNovo);
+        console.log("configuracaoItemNovo.dificuldadeSugerida:", configuracaoItemNovo.dificuldadeSugerida);
+        
+        // Busca valores do formulário como fallback
+        const dificuldadeSugeridaForm = form.getFieldValue(Campos.dificuldadeSugerida);
+        console.log("Valor dificuldade do form:", dificuldadeSugeridaForm);
+        
+        const dificuldadeFinal = configuracaoItemNovo.dificuldadeSugerida ?? dificuldadeSugeridaForm;
+        console.log("Valor final dificuldade que será enviado:", dificuldadeFinal);
+
         const dto: ItemNovoDto = {
             id: item.id,
             codigoItem: configuracaoItemNovo.codigo,
@@ -123,7 +132,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
             situacao: configuracaoItemNovo.situacaoItem,
             tipoItem: configuracaoItemNovo.tipoItem,
             quantidadeAlternativasId: configuracaoItemNovo.quantidadeAlternativas,
-            dificuldadeSugeridaId: configuracaoItemNovo.dificuldadeSugerida,
+            dificuldadeSugeridaId: dificuldadeFinal,
             discriminacao: configuracaoItemNovo.discriminacao !== '' ? configuracaoItemNovo.discriminacao : null,
             dificuldade: configuracaoItemNovo.dificuldade !== '' ? configuracaoItemNovo.dificuldade : null,
             nivelItem: configuracaoItemNovo.nivelItem,
@@ -215,6 +224,10 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
     const salvarItem = useCallback(
         async (rascunho = false) => {
             setCarregando(true);
+            
+            // Aguarda um pouco para garantir que o Redux foi atualizado
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
             const itemSalvar = gerarItemSalvar();
             console.log('itemSalvar', itemSalvar);
             if (item?.id > 0) {
@@ -248,6 +261,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
     // };
 
 
+    
 
     return (
         <>
@@ -296,7 +310,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                                 <div className='cadastrarItemHeader-Breadcrumb-item01-texto'>
                                     Configuração
                                 </div>
-                            </div>                           
+                            </div>
                             <RightOutlined className='cadastrarItemHeader-Breadcrumb-separator' />
                             <div className='cadastrarItemHeader-Breadcrumb-item02'>
                                 <div className='cadastrarItemHeader-Breadcrumb-item02-index'>
