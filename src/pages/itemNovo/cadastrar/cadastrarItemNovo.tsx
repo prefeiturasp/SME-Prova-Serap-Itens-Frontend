@@ -12,8 +12,8 @@ import { useState } from 'react';
 
 const CadastrarItemNovo: React.FC<FormProps> = () => {
 
-    const { form, handleSalvarRascunho } = useOutletContext<any>();
-    //handleAvancar
+    const { form, handleSalvarRascunho, handleAvancar, handleVoltar } = useOutletContext<any>();
+
     const linkRetorno = "https://serap.sme.prefeitura.sp.gov.br/";
 
     const [carregando] = useState<boolean>(false);
@@ -223,6 +223,12 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
     //     return false;
     // };
 
+    const handleAvancarClick = async () => {
+        console.log("🔹 Dados atuais do form:", form.getFieldsValue());
+        await handleAvancar(); // chama a função que salva e avança
+    };
+
+
 
     return (
         <>
@@ -241,95 +247,95 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                         margin: 0,
                     }}
                 > */}
-                    {/* <Affix offsetTop={0.1} style={{ marginBottom: 30 }}> */}
-                    <div className='cadastrarItemHeader'>
-                        <Row className="cadastrarItemHeader-corpo">
-                            <Col xs={12} md={6}>
-                                <Link to={linkRetorno} className="cadastrarItemHeader-retornar">
-                                    <ArrowLeftOutlined className="cadastrarItemHeader-icone-retornar" />
-                                    <span className="cadastrarItemHeader-texto-retornar">Retornar à tela inicial</span>
-                                </Link>
-                            </Col>
-                            <Col xs={12} md={12} className='cadastrarItemHeader-titulo'>
-                                Cadastrar novo item
-                            </Col>
-                            <Col xs={0} md={6} />
-                        </Row>
-                        <div className='cadastrarItemHeader-rota'>
-                            <div className='cadastrarItemHeader-rota-texto'>
-                                Home / Itens/ Cadastrar novo item
+                {/* <Affix offsetTop={0.1} style={{ marginBottom: 30 }}> */}
+                <div className='cadastrarItemHeader'>
+                    <Row className="cadastrarItemHeader-corpo">
+                        <Col xs={12} md={6}>
+                            <Link to={linkRetorno} className="cadastrarItemHeader-retornar">
+                                <ArrowLeftOutlined className="cadastrarItemHeader-icone-retornar" />
+                                <span className="cadastrarItemHeader-texto-retornar">Retornar à tela inicial</span>
+                            </Link>
+                        </Col>
+                        <Col xs={12} md={12} className='cadastrarItemHeader-titulo'>
+                            Cadastrar novo item
+                        </Col>
+                        <Col xs={0} md={6} />
+                    </Row>
+                    <div className='cadastrarItemHeader-rota'>
+                        <div className='cadastrarItemHeader-rota-texto'>
+                            Home / Itens/ Cadastrar novo item
+                        </div>
+                        <div className='cadastrarItemHeader-rota-titulo'>
+                            Cadastrar novo item
+                        </div>
+                    </div>
+                    <div className='cadastrarItemHeader-Breadcrumb-corpo'>
+                        <div className='cadastrarItemHeader-Breadcrumb-item01'>
+                            <div className='cadastrarItemHeader-Breadcrumb-item01-index'>
+                                1
                             </div>
-                            <div className='cadastrarItemHeader-rota-titulo'>
-                                Cadastrar novo item
+                            <div className='cadastrarItemHeader-Breadcrumb-item01-texto'>
+                                Configuração
                             </div>
                         </div>
-                        <div className='cadastrarItemHeader-Breadcrumb-corpo'>
-                            <div className='cadastrarItemHeader-Breadcrumb-item01'>
-                                <div className='cadastrarItemHeader-Breadcrumb-item01-index'>
-                                    1
-                                </div>
-                                <div className='cadastrarItemHeader-Breadcrumb-item01-texto'>
-                                    Configuração
-                                </div>
+                        <RightOutlined className='cadastrarItemHeader-Breadcrumb-separator' />
+                        <div className='cadastrarItemHeader-Breadcrumb-item02'>
+                            <div className='cadastrarItemHeader-Breadcrumb-item02-index'>
+                                2
                             </div>
-                            <RightOutlined className='cadastrarItemHeader-Breadcrumb-separator' />
-                            <div className='cadastrarItemHeader-Breadcrumb-item02'>
-                                <div className='cadastrarItemHeader-Breadcrumb-item02-index'>
-                                    2
-                                </div>
-                                <div className='cadastrarItemHeader-Breadcrumb-item02-texto'>
-                                    Elaboração do item
-                                </div>
+                            <div className='cadastrarItemHeader-Breadcrumb-item02-texto'>
+                                Elaboração do item
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    {/* </Affix> */}
+                {/* </Affix> */}
 
-                    <div className='cadastrarItem-corpo'>
-                        <div className='cadastrarItem-titulo-corpo'>
-                            <div className='cadastrarItem-titulo'>
-                                Configure o novo item
-                            </div>
-                            <div className='cadastrarItem-subtitulo'>
-                                Preencha as informações abaixo para criar e cadastrar um novo item. Esses dados garantem que ele esteja alinhado à matriz de avaliação e possa ser aplicado corretamente.
-                            </div>
+                <div className='cadastrarItem-corpo'>
+                    <div className='cadastrarItem-titulo-corpo'>
+                        <div className='cadastrarItem-titulo'>
+                            Configure o novo item
                         </div>
-
-                        <IdentificacaoComponent form={form} cardName='identificacaoCard' />
-                        <CompetenciaHabilidade form={form} cardName='compHabiCard' cardName2='identificacaoCard' />
-                        <CaracteristicasItemComponent form={form} cardName='caracteristicasCard' />
-                        <ClassificacaoTemaComponent form={form} cardName='classificacaoCard' />
-                        <InformacoesEstatisticasComponent form={form} cardName='informacoesCard' />
-                        <div className='cadastrarItem-botoes'>
-                            {/* <div className='cadastrarItem-btn'>
-                                <Button className='btnVoltar' onClick={voltar}>Voltar</Button>
-                            </div> */}
-                            <div className='cadastrarItem-btn'>
-                                <Button
-                                    type='primary'
-                                    onClick={() => handleSalvarRascunho(true)}
-                                    // disabled={bloquearBtnSalvarRascunho}
-                                    className='btnRascunho'
-                                >
-                                    Salvar rascunho
-                                </Button>
-                            </div>
-                            {/* <div className='cadastrarItem-btn'>
-                                <Button className='btnAvancar' onClick={voltar}>Avançar</Button>
-                            </div> */}
+                        <div className='cadastrarItem-subtitulo'>
+                            Preencha as informações abaixo para criar e cadastrar um novo item. Esses dados garantem que ele esteja alinhado à matriz de avaliação e possa ser aplicado corretamente.
                         </div>
                     </div>
-                    <div className='cadastrarItem-footer'>
-                        <div className='cadastrarItem-footer-conteudo'>
-                            <div className='footer-item1'>
-                                SERAp - Versão: 1.30.9.2
-                            </div>
-                            <div className='footer-item2'>
-                                Todos os direitos reservados
-                            </div>
+
+                    <IdentificacaoComponent form={form} cardName='identificacaoCard' />
+                    <CompetenciaHabilidade form={form} cardName='compHabiCard' cardName2='identificacaoCard' />
+                    <CaracteristicasItemComponent form={form} cardName='caracteristicasCard' />
+                    <ClassificacaoTemaComponent form={form} cardName='classificacaoCard' />
+                    <InformacoesEstatisticasComponent form={form} cardName='informacoesCard' />
+                    <div className='cadastrarItem-botoes'>
+                        <div className='cadastrarItem-btn'>
+                            <Button className='btnVoltar' onClick={handleVoltar}>Voltar</Button>
+                        </div>
+                        <div className='cadastrarItem-btn'>
+                            <Button
+                                type='primary'
+                                onClick={() => handleSalvarRascunho(true)}
+                                // disabled={bloquearBtnSalvarRascunho}
+                                className='btnRascunho'
+                            >
+                                Salvar rascunho
+                            </Button>
+                        </div>
+                        <div className='cadastrarItem-btn'>
+                            <Button className='btnAvancar' onClick={handleAvancarClick}>Avançar</Button>
                         </div>
                     </div>
+                </div>
+                <div className='cadastrarItem-footer'>
+                    <div className='cadastrarItem-footer-conteudo'>
+                        <div className='footer-item1'>
+                            SERAp - Versão: 1.30.9.2
+                        </div>
+                        <div className='footer-item2'>
+                            Todos os direitos reservados
+                        </div>
+                    </div>
+                </div>
                 {/* </Form> */}
             </Spin>
         </>

@@ -42,13 +42,6 @@ const FormularioContainerComponent = () => {
         observacao: '',
     });
 
-
-    // const handleSalvarRascunho = async () => {
-    //     const dto = gerarItemSalvar();
-    //     console.log('DTO final pra enviar:', dto);
-    //     // Chamar backend
-    // };
-
     type tipoMsg = 'success' | 'info' | 'warning' | 'error';
     const [api, contextHolder] = notification.useNotification();
     const mensagem = useCallback(
@@ -150,7 +143,16 @@ const FormularioContainerComponent = () => {
 
     const handleAvancar = async () => {
         await handleSalvarRascunho();
-        navigate('/formulario/pagina2');
+        navigate('/itens/novo/pagina2');
+    };
+
+    const handleVoltar = () => {
+        navigate("/");
+    };
+
+    const handleVoltarPrimeiraPagina = () => {
+        console.log("🔙 Voltando para página 1 com form:", form.getFieldsValue());
+        navigate("/itens/novo/pagina1");
     };
 
     const { id } = useParams();
@@ -177,9 +179,13 @@ const FormularioContainerComponent = () => {
 
     return (
         <>
-        {contextHolder}
+            {contextHolder}
             <Form form={form} layout="vertical">
-                <Outlet context={{ form, handleSalvarRascunho, handleAvancar }} />
+                <Outlet context={{
+                    form, handleSalvarRascunho,
+                    handleAvancar, handleVoltar,
+                    handleVoltarPrimeiraPagina
+                }} />
             </Form>
         </>
     );

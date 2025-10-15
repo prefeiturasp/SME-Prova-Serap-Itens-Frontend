@@ -140,7 +140,7 @@ const CaracteristicasItemComponent = ({ form, cardName }: Props) => {
                             nomeCampo={[cardName, campoNivelItem]}
                             label="Nível do Item"
                             campoObrigatorio={false}
-                            labelInValue={true}
+                            labelInValue={false}
                         />
                     </Col>
                 </Row>
@@ -154,7 +154,7 @@ const CaracteristicasItemComponent = ({ form, cardName }: Props) => {
                             label="Categoria do item e quantidade de alternativas*"
                             campoObrigatorio={true}
                             disabled={!nivelItemIdForm}
-                            labelInValue={true}
+                            labelInValue={false}
                         />
                     </Col>
                 </Row>

@@ -22,7 +22,9 @@ export function useGerarItemSalvar(form: FormInstance) {
             HabilidadeId: values?.compHabiCard?.habilidade ?? null,
 
             DificuldadeSugeridaId: values?.caracteristicasCard?.dificuldadeSugerida ?? null,
-            NivelItem: values?.caracteristicasCard?.nivelItem ?? null,
+            NivelItem: values?.caracteristicasCard?.nivelItem
+                ? Number(values.caracteristicasCard.nivelItem)
+                : null,
             QuantidadeAlternativasId: values?.caracteristicasCard?.quantidadeAlternativas ?? null,
             TipoItem: values?.caracteristicasCard?.tipoItem ?? null,
             Situacao: values?.caracteristicasCard?.situacaoItem ?? null,
