@@ -3,21 +3,27 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeftOutlined, RightOutlined } from "@ant-design/icons";
 import './cadastrarItemNovo.css';
-import IdentificacaoComponent from '~/components/cadastro-item-novo/cards/identificacaoComponent/identificacaoComponent';
-import CompetenciaHabilidade from '~/components/cadastro-item-novo/cards/competenciaHabilidadeComponent/competenciaHabilidadeComponent';
-import CaracteristicasItemComponent from '~/components/cadastro-item-novo/cards/caracteristicasItemComponet/caracteristicasItemComponent';
-import ClassificacaoTemaComponent from '~/components/cadastro-item-novo/cards/classificacaoTemaComponent/classificacaoTemaComponent';
-import InformacoesEstatisticasComponent from '~/components/cadastro-item-novo/cards/informacoesEstatisticasComponent/informacoesEstatisticasComponent';
+
+// import IdentificacaoComponent from '~/components/cadastro-item-novo/cards/identificacaoComponent/identificacaoComponent';
+// import CompetenciaHabilidade from '~/components/cadastro-item-novo/cards/competenciaHabilidadeComponent/competenciaHabilidadeComponent';
+// import CaracteristicasItemComponent from '~/components/cadastro-item-novo/cards/caracteristicasItemComponet/caracteristicasItemComponent';
+// import ClassificacaoTemaComponent from '~/components/cadastro-item-novo/cards/classificacaoTemaComponent/classificacaoTemaComponent';
+// import InformacoesEstatisticasComponent from '~/components/cadastro-item-novo/cards/informacoesEstatisticasComponent/informacoesEstatisticasComponent';
+
+
+import FormularioUnico from '~/components/cadastro-item-novo/formularioUnicoComponent/formularioUnicoComponent';
+
 import { validarCampoForm } from '~/utils/funcoes'; //validarCampoArrayStringForm
+
+// import { Campos } from '~/domain/enums/campos-cadastro-item';
+import configuracaoItemService from '~/services/configuracaoItem-service';
+
+//redux
 import { useDispatch, useSelector } from 'react-redux';
 import { AppState } from '~/redux';
 import { cloneDeep } from 'lodash';
 import { AltenativaDto } from '~/domain/dto/AltenativaDto';
 import { DadosIniciais } from '~/domain/enums/campos-cadastro-item';
-
-// import { Campos } from '~/domain/enums/campos-cadastro-item';
-
-import configuracaoItemService from '~/services/configuracaoItem-service';
 
 import {
     setConfiguracaoItemNovo,
@@ -32,6 +38,8 @@ import {
 import { ItemNovoDto } from '~/domain/dto/itemNovo-dto';
 
 
+
+
 const CadastrarItemNovo: React.FC<FormProps> = () => {
     const linkRetorno = "https://serap.sme.prefeitura.sp.gov.br/";
 
@@ -39,7 +47,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
     const [carregando, setCarregando] = useState<boolean>(false);
     const item = useSelector((state: AppState) => state.item);
     const configuracaoItemNovo = useSelector((state: AppState) => state.configuracaoItemNovo);
-    
+
     const elaboracaoItemNovo = useSelector((state: AppState) => state.elaboracaoItemNovo);
 
     const [objTabConfiguracaoItem, setObjTabConfiguracaoItem] =
@@ -52,6 +60,9 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
         infoEstatisticasAcertoCasual: '',
         parametroBTransformado: '',
         tipoItem: DadosIniciais.tipoItemIdPadrao,
+        dificuldadeSugerida: 5,
+        quantidadeAlternativas: 23,
+        // dificuldadeSugerida: { value: 5, label: '1 - Muito Fácil', descricao: '1 - Muito Fácil', valor: 5 },
     };
 
     // const areaConhecimentoIdForm = Form.useWatch(Campos.areaConhecimento, form);
@@ -108,6 +119,8 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
 
     const gerarItemSalvar = useCallback(() => {
         const values = cloneDeep(form.getFieldsValue(true));
+
+        console.log('redux valor indo pro DTO', configuracaoItemNovo);
 
         const dto: ItemNovoDto = {
             id: item.id,
@@ -171,6 +184,10 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                     setObjTabConfiguracaoItem(configuracaoItemRetorno);
                     dispatch(setConfiguracaoItemNovo(configuracaoItemRetorno));
                     dispatch(setItemNovo(itemAtual));
+                    console.log('passando codigoItem para ->', resp?.data?.codigoItem);
+                    console.log('itemAtual', itemAtual);
+                    console.log('configuracaoItemRetorno', configuracaoItemRetorno);
+                    form?.setFieldValue("codigo", resp?.data?.codigoItem);
                 })
                 .catch((err) => {
                     console.log('Erro', err.message);
@@ -217,8 +234,14 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
             setCarregando(true);
             const itemSalvar = gerarItemSalvar();
             console.log('itemSalvar', itemSalvar);
+            // if (rascunho) {
+            //     await inserirRascunhoItem(itemSalvar);
+            // } else {
+            //     await inserirItem(itemSalvar);
+            // }
             if (item?.id > 0) {
-                mensagem('info', 'Atenção', `Item já cadastrado, id:${item.id}`);
+                mensagem('info', 'Atenção','Desenvolver regras.' );
+                //`Item já cadastrado, id:${item.id}`
             } else {
                 if (rascunho) {
                     await inserirRascunhoItem(itemSalvar);
@@ -296,7 +319,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                                 <div className='cadastrarItemHeader-Breadcrumb-item01-texto'>
                                     Configuração
                                 </div>
-                            </div>                           
+                            </div>
                             <RightOutlined className='cadastrarItemHeader-Breadcrumb-separator' />
                             <div className='cadastrarItemHeader-Breadcrumb-item02'>
                                 <div className='cadastrarItemHeader-Breadcrumb-item02-index'>
@@ -321,11 +344,14 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                             </div>
                         </div>
 
-                        <IdentificacaoComponent form={form} />
+                        {/* <IdentificacaoComponent form={form} />
                         <CompetenciaHabilidade form={form} />
                         <CaracteristicasItemComponent form={form} />
                         <ClassificacaoTemaComponent form={form} />
-                        <InformacoesEstatisticasComponent form={form} />
+                        <InformacoesEstatisticasComponent form={form} /> */}
+
+                        <FormularioUnico form={form} />
+
                         <div className='cadastrarItem-botoes'>
                             <div className='cadastrarItem-btn'>
                                 <Button className='btnVoltar' onClick={voltar}>Voltar</Button>
