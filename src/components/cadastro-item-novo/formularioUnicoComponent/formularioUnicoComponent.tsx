@@ -1,5 +1,5 @@
 import React, { Dispatch, SetStateAction, useCallback, useEffect, useState } from "react";
-import { CheckboxOptionType, Col, Form, FormProps, Row, Spin, Radio, Input } from 'antd';
+import { CheckboxOptionType, Col, Form, FormProps, Row, Spin, Radio } from 'antd';
 import { DefaultOptionType } from 'antd/lib/select';
 import { Campos } from "~/domain/enums/campos-cadastro-item";
 import { SelectValueType } from '~/domain/type/select';
