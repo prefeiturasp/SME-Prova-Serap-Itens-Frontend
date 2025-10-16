@@ -184,6 +184,10 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                     setObjTabConfiguracaoItem(configuracaoItemRetorno);
                     dispatch(setConfiguracaoItemNovo(configuracaoItemRetorno));
                     dispatch(setItemNovo(itemAtual));
+                    console.log('passando codigoItem para ->', resp?.data?.codigoItem);
+                    console.log('itemAtual', itemAtual);
+                    console.log('configuracaoItemRetorno', configuracaoItemRetorno);
+                    form?.setFieldValue("codigo", resp?.data?.codigoItem);
                 })
                 .catch((err) => {
                     console.log('Erro', err.message);
@@ -230,20 +234,21 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
             setCarregando(true);
             const itemSalvar = gerarItemSalvar();
             console.log('itemSalvar', itemSalvar);
-            if (rascunho) {
-                await inserirRascunhoItem(itemSalvar);
-            } else {
-                await inserirItem(itemSalvar);
-            }
-            // if (item?.id > 0) {
-            //     mensagem('info', 'Atenção', `Item já cadastrado, id:${item.id}`);
+            // if (rascunho) {
+            //     await inserirRascunhoItem(itemSalvar);
             // } else {
-            //     if (rascunho) {
-            //         await inserirRascunhoItem(itemSalvar);
-            //     } else {
-            //         await inserirItem(itemSalvar);
-            //     }
+            //     await inserirItem(itemSalvar);
             // }
+            if (item?.id > 0) {
+                mensagem('info', 'Atenção','Desenvolver regras.' );
+                //`Item já cadastrado, id:${item.id}`
+            } else {
+                if (rascunho) {
+                    await inserirRascunhoItem(itemSalvar);
+                } else {
+                    await inserirItem(itemSalvar);
+                }
+            }
             setCarregando(false);
         },
         [item.id, mensagem, inserirItem, inserirRascunhoItem, gerarItemSalvar],

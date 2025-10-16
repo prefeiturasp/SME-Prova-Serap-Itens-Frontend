@@ -1,5 +1,5 @@
 import React, { Dispatch, SetStateAction, useCallback, useEffect, useState } from "react";
-import { CheckboxOptionType, Col, Form, FormProps, Row, Spin, Radio } from 'antd';
+import { CheckboxOptionType, Col, Form, FormProps, Row, Spin, Radio, Input } from 'antd';
 import { DefaultOptionType } from 'antd/lib/select';
 import { Campos } from "~/domain/enums/campos-cadastro-item";
 import { SelectValueType } from '~/domain/type/select';
@@ -35,6 +35,7 @@ import '../cards/caracteristicasItemComponet/caracteristicaItemComponent.css';
 const FormularioUnico: React.FC<FormProps> = ({ form }) => {
 
   // campos
+  const campoCodigo = Campos.codigo;
   const campoAreaConhecimento = Campos.areaConhecimento;
   const campoDisciplina = Campos.disciplinas;
   const campoMatriz = Campos.matriz;
@@ -62,6 +63,7 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
   const campoMediaDesvioPadrao = Campos.mediaDesvioPadrao;
 
   // watchers
+  const codigoForm = Form.useWatch(campoCodigo, form);
   const areaConhecimentoIdForm = Form.useWatch(Campos.areaConhecimento, form);
   const disciplinaIdForm = Form.useWatch(Campos.disciplinas, form);
   const matrizIdForm = Form.useWatch(Campos.matriz, form);
@@ -206,14 +208,14 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
   const obterListaDificuldadeSugerida = useCallback(async () => {
     setCarregandoDificuldadeSugerida(true);
     const resposta = await configuracaoItemService.obterDificuldadeSugerida();
-console.log('resposta dificuldade sugerida', resposta);
+    console.log('resposta dificuldade sugerida', resposta);
     if (resposta?.length > 0) {
       setListaDificuldadeSugerida(converterListaParaCheckboxOption(resposta));
 
       // Define valor padrão
       const primeiroItem = resposta.find(r => r.descricao?.includes("1 - Muito Fácil")) || resposta[0];
       if (primeiroItem) {
-        form?.setFieldValue(campoDificuldadeSugerida, primeiroItem);
+        form?.setFieldValue(campoDificuldadeSugerida, primeiroItem.value);
         console.log('primeiroItem', primeiroItem);
       }
 
@@ -335,6 +337,7 @@ console.log('resposta dificuldade sugerida', resposta);
     };
     setObjTabConfiguracaoItemNovo(novoObj);
   }, [
+    codigoForm,
     configuracaoItemNovo.codigo,
     areaConhecimentoIdForm,
     disciplinaIdForm,
@@ -383,6 +386,24 @@ console.log('resposta dificuldade sugerida', resposta);
           Defina a localização desta questão na matriz curricular.
         </div>
         <div className='card-corpo'>
+          <div className="esconder">
+            {/* <Form.Item label='Código'>
+              <Input
+                disabled={true}
+                placeholder='Código Item'
+                value={configuracaoItem?.codigo > 0 ? configuracaoItem.codigo : ''}
+              />
+            </Form.Item> */}
+            <Form.Item
+                label='codigo'
+                name={campoCodigo}
+              >
+                <CampoNumero
+                  value={form?.getFieldValue(campoCodigo)}
+                  onChange={(valor) => form?.setFieldValue(campoCodigo, valor)}
+                  placeholder='codigo' />
+              </Form.Item>
+          </div>
           <Row>
             <Col xs={24} md={12} className='card-campo'>
               <SelectForm
