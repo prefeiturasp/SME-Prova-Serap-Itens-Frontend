@@ -6,7 +6,6 @@ import configuracaoItemService from "~/services/configuracaoItem-service";
 import { Campos } from "~/domain/enums/campos-cadastro-item";
 import { DefaultOptionType } from "antd/es/select";
 import TipoItem from "~/components/cadastro-item/campos/tipo-item";
-import { NivelItem } from "~/domain/enums/nivelItem";
 import "./caracteristicaItemComponent.css";
 import { useDispatch, useSelector } from "react-redux";
 import { AppState } from "~/redux";
@@ -25,6 +24,8 @@ const CaracteristicasItemComponent: React.FC<FormProps> = ({ form }) => {
     const quantidadeAlternativasForm = Form.useWatch(campoQuantidadeAlternativas, form);
     const tipoItemIdForm = Form.useWatch(campoTipoItem, form);
     const situacaoItemIdForm = Form.useWatch(campoSituacaoItem, form);
+
+    const [carregandoInicial, setCarregandoInicial] = useState(true);
 
     // Redux
     const dispatch = useDispatch();
@@ -45,7 +46,7 @@ const CaracteristicasItemComponent: React.FC<FormProps> = ({ form }) => {
 
             switch (nomeCampo) {
                 case Campos.quantidadeAlternativas:
-                    resposta = await configuracaoItemService.obterQuantidadeAlternativas();
+                    resposta = await configuracaoItemService.obterQuantidadeAlternativas();                    
                     break;
                 case Campos.tipoItem:
                     resposta = await configuracaoItemService.obterTiposItem();
@@ -59,12 +60,11 @@ const CaracteristicasItemComponent: React.FC<FormProps> = ({ form }) => {
 
             setLista(resposta || []);
 
-            if (resposta?.length) {
+            if (nomeCampo === campoQuantidadeAlternativas) {
                 if (resposta.length === 1) {
-                    form?.setFieldValue(nomeCampo, Campos.quantidadeAlternativas === nomeCampo ? resposta[0] : resposta[0]?.value);
+                    console.log('setando quantidade alternativas padrao', resposta[0]);
+                    form?.setFieldValue(campoQuantidadeAlternativas, resposta[0].value);
                 }
-            } else {
-                form?.setFieldValue(nomeCampo, null);
             }
         },
         [form],
@@ -80,7 +80,8 @@ const CaracteristicasItemComponent: React.FC<FormProps> = ({ form }) => {
 
             // Define valor padrão
             const primeiroItem = resposta.find(r => r.descricao?.includes("1 - Muito Fácil")) || resposta[0];
-            form?.setFieldValue(campoDificuldadeSugerida, primeiroItem.value);
+            form?.setFieldValue(campoDificuldadeSugerida, primeiroItem);
+            console.log('primeiroItem', primeiroItem);
         } else {
             setListaDificuldadeSugerida([]);
             form?.setFieldValue(campoDificuldadeSugerida, null);
@@ -93,7 +94,6 @@ const CaracteristicasItemComponent: React.FC<FormProps> = ({ form }) => {
     const obterListaNivelItem = useCallback(async () => {
         setCarregandoDificuldadeSugerida(true);
         const resposta = await configuracaoItemService.obterNivelItem();
-        console.log('resposta nivel item', resposta);
         if (resposta?.length > 0) {
             setListaNivelItem(resposta);
         } else {
@@ -105,29 +105,60 @@ const CaracteristicasItemComponent: React.FC<FormProps> = ({ form }) => {
 
     // Carrega selects e listas iniciais
     useEffect(() => {
-        obterListaDificuldadeSugerida();
-        obterListaNivelItem();
-        popularCampoSelectForm(campoQuantidadeAlternativas, setListaQuantidadeAlternativas);
-        popularCampoSelectForm(campoTipoItem, setListaTiposItem);
-        popularCampoSelectForm(campoSituacaoItem, setListaSituacoesItem);
+        const carregarDados = async () => {
+            obterListaDificuldadeSugerida();
+            obterListaNivelItem();
+            popularCampoSelectForm(campoQuantidadeAlternativas, setListaQuantidadeAlternativas);
+            popularCampoSelectForm(campoTipoItem, setListaTiposItem);
+            popularCampoSelectForm(campoSituacaoItem, setListaSituacoesItem);
+            setCarregandoInicial(false);
+        };
+        carregarDados();
+        console.log('useEffect de carregamento inicial executado');
 
-        // const opcoesNivel = Object.entries(NivelItem)
-        //     .filter(([_, value]) => typeof value === "number")
-        //     .map(([key, value]) => ({
-        //         label: <span style={{ color: "#595959" }}>{key.replace(/([A-Z])/g, " $1").trim()}</span>,
-        //         value,
-        //     }));
-        // setListaNivelItem(opcoesNivel);
-    }, [obterListaDificuldadeSugerida, popularCampoSelectForm, campoQuantidadeAlternativas, campoTipoItem, campoSituacaoItem]);
+    }, []);
 
-    // 🔹 Atualiza Redux direto (padrão novo)
+
     useEffect(() => {
+        
+        if (carregandoInicial) return;
+
+        console.log('dificuldadeSugeridaIdForm passando valor', dificuldadeSugeridaIdForm);
+        console.log('QUANTIDADE', form?.getFieldValue(campoQuantidadeAlternativas));
+
+        var quantidadeAlternativasValor = form?.getFieldValue(campoQuantidadeAlternativas)?.value;
+        if (quantidadeAlternativasValor) {
+            console.log('@fez dispach de quantidadeAlternativas', quantidadeAlternativasValor);
+            dispatch(
+            setConfiguracaoItemNovo({
+                ...configuracaoItemNovo,
+                quantidadeAlternativas: quantidadeAlternativasValor,
+            }),
+        );}
+
+        // var dificuldadeSugerida = form?.getFieldValue(campoDificuldadeSugerida)?.value;
+        // if (dificuldadeSugerida) {
+        //     console.log('@fez dispach de dificuldadeSugerida', dificuldadeSugerida.toString());
+        //     dispatch(
+        //     setConfiguracaoItemNovo({
+        //         ...configuracaoItemNovo,
+        //         dificuldadeSugerida: dificuldadeSugerida,
+        //     }));
+        // }else{
+        //     dispatch(
+        //     setConfiguracaoItemNovo({
+        //         ...configuracaoItemNovo,
+        //         dificuldadeSugerida: 5,
+        //     }));
+        // }
+
+
         dispatch(
             setConfiguracaoItemNovo({
                 ...configuracaoItemNovo,
-                dificuldadeSugerida: dificuldadeSugeridaIdForm ? Number(dificuldadeSugeridaIdForm) : null,
+                dificuldadeSugerida: dificuldadeSugeridaIdForm ? Number(dificuldadeSugeridaIdForm) : "5",
                 nivelItem: form?.getFieldValue(campoNivelItem)?.value ?? form?.getFieldValue(campoNivelItem),
-                quantidadeAlternativas: form?.getFieldValue(campoQuantidadeAlternativas)?.valor ?? form?.getFieldValue(campoQuantidadeAlternativas),
+                //quantidadeAlternativas: form?.getFieldValue(campoQuantidadeAlternativas)?.valor ? form?.getFieldValue(campoQuantidadeAlternativas): 1,
                 tipoItem: form?.getFieldValue(campoTipoItem)?.valor ?? form?.getFieldValue(campoTipoItem),
                 situacaoItem: form?.getFieldValue(campoSituacaoItem)?.valor ?? form?.getFieldValue(campoSituacaoItem),
             }),
@@ -139,13 +170,13 @@ const CaracteristicasItemComponent: React.FC<FormProps> = ({ form }) => {
         tipoItemIdForm,
         situacaoItemIdForm,
         dispatch,
+        carregandoInicial,
     ]);
 
     return (
         <div className="card">
             <div className="card-titulo">Características do item</div>
             <div className="card-subtitulo">Configure as propriedades técnicas do item</div>
-
             <div className="card-corpo">
                 <Row>
                     <Col xs={24} md={12} className="card-campo">
@@ -161,6 +192,7 @@ const CaracteristicasItemComponent: React.FC<FormProps> = ({ form }) => {
                                     buttonStyle="solid"
                                     optionType="button"
                                     options={listaDificuldadeSugerida}
+                                    defaultValue={5}
                                 />
                             </Spin>
                         </Form.Item>

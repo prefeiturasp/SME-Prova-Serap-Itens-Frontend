@@ -3,21 +3,27 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeftOutlined, RightOutlined } from "@ant-design/icons";
 import './cadastrarItemNovo.css';
-import IdentificacaoComponent from '~/components/cadastro-item-novo/cards/identificacaoComponent/identificacaoComponent';
-import CompetenciaHabilidade from '~/components/cadastro-item-novo/cards/competenciaHabilidadeComponent/competenciaHabilidadeComponent';
-import CaracteristicasItemComponent from '~/components/cadastro-item-novo/cards/caracteristicasItemComponet/caracteristicasItemComponent';
-import ClassificacaoTemaComponent from '~/components/cadastro-item-novo/cards/classificacaoTemaComponent/classificacaoTemaComponent';
-import InformacoesEstatisticasComponent from '~/components/cadastro-item-novo/cards/informacoesEstatisticasComponent/informacoesEstatisticasComponent';
+
+// import IdentificacaoComponent from '~/components/cadastro-item-novo/cards/identificacaoComponent/identificacaoComponent';
+// import CompetenciaHabilidade from '~/components/cadastro-item-novo/cards/competenciaHabilidadeComponent/competenciaHabilidadeComponent';
+// import CaracteristicasItemComponent from '~/components/cadastro-item-novo/cards/caracteristicasItemComponet/caracteristicasItemComponent';
+// import ClassificacaoTemaComponent from '~/components/cadastro-item-novo/cards/classificacaoTemaComponent/classificacaoTemaComponent';
+// import InformacoesEstatisticasComponent from '~/components/cadastro-item-novo/cards/informacoesEstatisticasComponent/informacoesEstatisticasComponent';
+
+
+import FormularioUnico from '~/components/cadastro-item-novo/formularioUnicoComponent/formularioUnicoComponent';
+
 import { validarCampoForm } from '~/utils/funcoes'; //validarCampoArrayStringForm
+
+// import { Campos } from '~/domain/enums/campos-cadastro-item';
+import configuracaoItemService from '~/services/configuracaoItem-service';
+
+//redux
 import { useDispatch, useSelector } from 'react-redux';
 import { AppState } from '~/redux';
 import { cloneDeep } from 'lodash';
 import { AltenativaDto } from '~/domain/dto/AltenativaDto';
 import { DadosIniciais } from '~/domain/enums/campos-cadastro-item';
-
-// import { Campos } from '~/domain/enums/campos-cadastro-item';
-
-import configuracaoItemService from '~/services/configuracaoItem-service';
 
 import {
     setConfiguracaoItemNovo,
@@ -30,6 +36,8 @@ import {
     ItemNovoProps,
 } from '~/redux/modules/cadastroItem-novo/itemNovo/reducers';
 import { ItemNovoDto } from '~/domain/dto/itemNovo-dto';
+
+
 
 
 const CadastrarItemNovo: React.FC<FormProps> = () => {
@@ -108,6 +116,8 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
 
     const gerarItemSalvar = useCallback(() => {
         const values = cloneDeep(form.getFieldsValue(true));
+
+        console.log('redux valor indo pro DTO', configuracaoItemNovo);
 
         const dto: ItemNovoDto = {
             id: item.id,
@@ -321,11 +331,14 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                             </div>
                         </div>
 
-                        <IdentificacaoComponent form={form} />
+                        {/* <IdentificacaoComponent form={form} />
                         <CompetenciaHabilidade form={form} />
                         <CaracteristicasItemComponent form={form} />
                         <ClassificacaoTemaComponent form={form} />
-                        <InformacoesEstatisticasComponent form={form} />
+                        <InformacoesEstatisticasComponent form={form} /> */}
+
+                        <FormularioUnico form={form} />
+
                         <div className='cadastrarItem-botoes'>
                             <div className='cadastrarItem-btn'>
                                 <Button className='btnVoltar' onClick={voltar}>Voltar</Button>

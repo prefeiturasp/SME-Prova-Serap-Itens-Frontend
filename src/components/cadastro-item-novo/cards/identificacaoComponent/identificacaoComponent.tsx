@@ -79,11 +79,12 @@ const IdentificacaoComponent: React.FC<FormProps> = ({ form }) => {
 
             if (resposta?.length) {
                 setLista(resposta);
-                if (resposta.length === 1) form?.setFieldValue(nomeCampo, resposta[0].value);
-            } else {
-                setLista([]);
-                form?.setFieldValue(nomeCampo, null);
-            }
+                // if (resposta.length === 1) form?.setFieldValue(nomeCampo, resposta[0].value);
+            } 
+            // else {
+            //     setLista([]);
+            //     form?.setFieldValue(nomeCampo, null);
+            // }
         },
         [form],
     );

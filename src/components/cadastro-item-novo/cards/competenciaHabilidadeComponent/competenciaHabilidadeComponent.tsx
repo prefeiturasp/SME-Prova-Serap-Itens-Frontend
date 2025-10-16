@@ -52,9 +52,9 @@ const CompetenciaHabilidade: React.FC<FormProps> = ({ form }) => {
             }
 
             setLista(resposta || []);
-            if (resposta?.length === 1) {
-                form?.setFieldValue(nomeCampo, resposta[0]?.value);
-            }
+            // if (resposta?.length === 1) {
+            //     form?.setFieldValue(nomeCampo, resposta[0]?.value);
+            // }
         },
         [form],
     );
@@ -71,8 +71,6 @@ const CompetenciaHabilidade: React.FC<FormProps> = ({ form }) => {
 
     // 🔹 Atualiza Redux diretamente (sem objeto intermediário)
     useEffect(() => {
-        console.log("valor form:",competenciaIdForm, "valor campo: ", campoCompetencia,
-            "VALOR:-->",form?.getFieldValue(campoCompetencia)?.valor);
         dispatch(            
             setConfiguracaoItemNovo({
                 ...configuracaoItemNovo,
