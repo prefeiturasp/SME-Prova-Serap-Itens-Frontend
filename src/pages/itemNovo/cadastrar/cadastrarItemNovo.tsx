@@ -47,7 +47,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
     const [carregando, setCarregando] = useState<boolean>(false);
     const item = useSelector((state: AppState) => state.item);
     const configuracaoItemNovo = useSelector((state: AppState) => state.configuracaoItemNovo);
-    
+
     const elaboracaoItemNovo = useSelector((state: AppState) => state.elaboracaoItemNovo);
 
     const [objTabConfiguracaoItem, setObjTabConfiguracaoItem] =
@@ -60,6 +60,9 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
         infoEstatisticasAcertoCasual: '',
         parametroBTransformado: '',
         tipoItem: DadosIniciais.tipoItemIdPadrao,
+        dificuldadeSugerida: 5,
+        quantidadeAlternativas: 23,
+        // dificuldadeSugerida: { value: 5, label: '1 - Muito Fácil', descricao: '1 - Muito Fácil', valor: 5 },
     };
 
     // const areaConhecimentoIdForm = Form.useWatch(Campos.areaConhecimento, form);
@@ -227,15 +230,20 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
             setCarregando(true);
             const itemSalvar = gerarItemSalvar();
             console.log('itemSalvar', itemSalvar);
-            if (item?.id > 0) {
-                mensagem('info', 'Atenção', `Item já cadastrado, id:${item.id}`);
+            if (rascunho) {
+                await inserirRascunhoItem(itemSalvar);
             } else {
-                if (rascunho) {
-                    await inserirRascunhoItem(itemSalvar);
-                } else {
-                    await inserirItem(itemSalvar);
-                }
+                await inserirItem(itemSalvar);
             }
+            // if (item?.id > 0) {
+            //     mensagem('info', 'Atenção', `Item já cadastrado, id:${item.id}`);
+            // } else {
+            //     if (rascunho) {
+            //         await inserirRascunhoItem(itemSalvar);
+            //     } else {
+            //         await inserirItem(itemSalvar);
+            //     }
+            // }
             setCarregando(false);
         },
         [item.id, mensagem, inserirItem, inserirRascunhoItem, gerarItemSalvar],
@@ -306,7 +314,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                                 <div className='cadastrarItemHeader-Breadcrumb-item01-texto'>
                                     Configuração
                                 </div>
-                            </div>                           
+                            </div>
                             <RightOutlined className='cadastrarItemHeader-Breadcrumb-separator' />
                             <div className='cadastrarItemHeader-Breadcrumb-item02'>
                                 <div className='cadastrarItemHeader-Breadcrumb-item02-index'>

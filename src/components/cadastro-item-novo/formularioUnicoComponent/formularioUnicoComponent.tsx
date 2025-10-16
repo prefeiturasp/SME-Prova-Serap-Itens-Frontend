@@ -487,7 +487,7 @@ console.log('resposta dificuldade sugerida', resposta);
                 nomeCampo={campoNivelItem}
                 label="Nível do Item"
                 campoObrigatorio={false}
-                labelInValue={true}
+                labelInValue={false}
               />
             </Col>
           </Row>
@@ -501,7 +501,7 @@ console.log('resposta dificuldade sugerida', resposta);
                 label="Categoria do item e quantidade de alternativas*"
                 campoObrigatorio={true}
                 disabled={!nivelItemIdForm}
-                labelInValue={true}
+                labelInValue={false}
               />
             </Col>
           </Row>
@@ -529,7 +529,7 @@ console.log('resposta dificuldade sugerida', resposta);
                 nomeCampo={campoSituacaoItem}
                 label="Situação do item"
                 campoObrigatorio={true}
-                labelInValue={true}
+                labelInValue={false}
               />
             </Col>
           </Row>
@@ -551,7 +551,7 @@ console.log('resposta dificuldade sugerida', resposta);
                 label={'Assunto'}
                 campoObrigatorio={false}
                 disabled={!disciplinaIdForm}
-                labelInValue={true}
+                labelInValue={false}
               />
             </Col>
             <Col xs={24} md={8} className='card-campo'>
@@ -562,7 +562,7 @@ console.log('resposta dificuldade sugerida', resposta);
                 label={'Subassunto'}
                 campoObrigatorio={false}
                 disabled={!assuntoIdForm}
-                labelInValue={true}
+                labelInValue={false}
               />
             </Col>
             <Col xs={24} md={8} className='card-campo'>
