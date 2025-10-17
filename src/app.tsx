@@ -9,6 +9,7 @@ import { persistor, store } from './redux';
 
 import NotificationStorage from './components/lib/notification/index';
 import { BrowserRouter } from 'react-router-dom';
+import CadastrarItemNovoElaboracao from './pages/itemNovo/cadastrar/cadastrarItemNovoElaboracao';
  //import GlobalStyle from './styles/global';
 
 moment.locale('pt-br');
@@ -21,7 +22,10 @@ const App = () => (
         {/* <GlobalStyle /> 
         <ItemCadastro /> */}
         <BrowserRouter>
-          <CadastrarItemNovo />
+          {/* <----Primeira pagina */}
+          <CadastrarItemNovo /> 
+          {/*<----Segunda pagina */}
+          {/* <CadastrarItemNovoElaboracao /> */}
         </BrowserRouter>
       </PersistGate>
     </Provider>
