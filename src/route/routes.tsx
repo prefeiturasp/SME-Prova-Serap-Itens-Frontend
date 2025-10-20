@@ -1,38 +1,18 @@
 import React from 'react';
-//import { useSelector } from 'react-redux';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
-//import NaoAutenticado from '~/pages/403';
-import PagNotFound from '~/pages/404';
-//import Autenticar from '~/pages/autenticar';
-import MainContent from '~/pages/main-content';
-//import { AppState } from '../redux';
+import { Route, Routes } from 'react-router-dom';
+import CadastrarItemNovo from '~/pages/itemNovo/cadastrar/cadastrarItemNovo';
+import CadastrarItemNovoElaboracao from '~/pages/itemNovo/cadastrar/cadastrarItemNovoElaboracao';
+import ListagemItens from '~/pages/listagemItens/listagemItens';
 
 const RoutesConfig: React.FC = () => {
- // const isAuthenticated = useSelector((state: AppState) => state.auth.isAuthenticated);
-
   return (
-    <BrowserRouter>
-      {/* {isAuthenticated ? ( */}
-        <Routes>
-          <Route
-            path='/'
-            element={
-              <MainContent>
-                <h1>Cadastro de Itens</h1>
-              </MainContent>
-            }
-          />
-          <Route path='*' element={<PagNotFound />} />
-        </Routes>
-      {/* // ) : (
-      //   <>
-      //     <Routes>
-      //       <Route path='/:codigoValidador' element={<Autenticar />} />
-      //       <Route path='*' element={<NaoAutenticado />} />
-      //     </Routes>
-      //   </>
-      // )} */}
-    </BrowserRouter>
+    <Routes>
+      <Route path='/' element={<CadastrarItemNovo />} />
+
+      <Route path='/criacao' element={<CadastrarItemNovo />} />
+      <Route path='/listagem' element={<ListagemItens />} />
+      <Route path='/elaboracao' element={<CadastrarItemNovoElaboracao />} />
+    </Routes>
   );
 };
 
