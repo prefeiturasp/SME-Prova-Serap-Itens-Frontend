@@ -15,7 +15,7 @@ import FormularioUnico from '~/components/cadastro-item-novo/formularioUnicoComp
 
 import { validarCampoForm } from '~/utils/funcoes'; //validarCampoArrayStringForm
 
-// import { Campos } from '~/domain/enums/campos-cadastro-item';
+import { Campos } from '~/domain/enums/campos-cadastro-item';
 import configuracaoItemService from '~/services/configuracaoItem-service';
 
 //redux
@@ -46,12 +46,12 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
     const dispatch = useDispatch();
     const [carregando, setCarregando] = useState<boolean>(false);
     const item = useSelector((state: AppState) => state.item);
-    const configuracaoItemNovo = useSelector((state: AppState) => state.configuracaoItemNovo);
+    //const configuracaoItemNovo = useSelector((state: AppState) => state.configuracaoItemNovo);
 
-    const elaboracaoItemNovo = useSelector((state: AppState) => state.elaboracaoItemNovo);
+    //const elaboracaoItemNovo = useSelector((state: AppState) => state.elaboracaoItemNovo);
 
     const [objTabConfiguracaoItem, setObjTabConfiguracaoItem] =
-        useState<ConfiguracaoItemNovoProps>(configuracaoItemNovo);
+        useState<ConfiguracaoItemNovoProps>({} as ConfiguracaoItemNovoProps);
 
     const [form] = Form.useForm();
     const initialValuesForm = {
@@ -65,8 +65,9 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
         // dificuldadeSugerida: { value: 5, label: '1 - Muito Fácil', descricao: '1 - Muito Fácil', valor: 5 },
     };
 
-    // const areaConhecimentoIdForm = Form.useWatch(Campos.areaConhecimento, form);
-    // const disciplinaIdForm = Form.useWatch(Campos.disciplinas, form);
+    // ✅ Watchers do formulário para validação
+    const areaConhecimentoIdForm = Form.useWatch(Campos.areaConhecimento, form);
+    const disciplinaIdForm = Form.useWatch(Campos.disciplinas, form);
 
     // const bloquearSalvar =
     //     validarCampoForm(configuracaoItemNovo.disciplina) ||
@@ -84,14 +85,14 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
     const [bloquearBtnSalvarRascunho, setBloquearBtnSalvarRascunho] =
         useState<boolean>(true);
 
-
+    // ✅ useEffect refatorado para usar valores do formulário ao invés do Redux
     useEffect(() => {
         const bloquear =
-            validarCampoForm(configuracaoItemNovo.disciplina) ||
-            validarCampoForm(configuracaoItemNovo.areaConhecimento);
+            validarCampoForm(disciplinaIdForm) ||
+            validarCampoForm(areaConhecimentoIdForm);
 
         setBloquearBtnSalvarRascunho(bloquear);
-    }, [configuracaoItemNovo.areaConhecimento, configuracaoItemNovo.disciplina]);
+    }, [areaConhecimentoIdForm, disciplinaIdForm]);
 
 
     type tipoMsg = 'success' | 'info' | 'warning' | 'error';
@@ -120,32 +121,32 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
     const gerarItemSalvar = useCallback(() => {
         const values = cloneDeep(form.getFieldsValue(true));
 
-        console.log('redux valor indo pro DTO', configuracaoItemNovo);
-
+        console.log('📋 Valores do formulário para DTO:', values);
+        
         const dto: ItemNovoDto = {
             id: item.id,
-            codigoItem: configuracaoItemNovo.codigo,
-            areaConhecimentoId: configuracaoItemNovo.areaConhecimento,
-            disciplinaId: configuracaoItemNovo.disciplina,
-            matrizId: configuracaoItemNovo.matriz,
-            competenciaId: configuracaoItemNovo.competencia,
-            habilidadeId: configuracaoItemNovo.habilidade,
-            anoMatrizId: configuracaoItemNovo.anoMatriz,
-            assuntoId: configuracaoItemNovo.assunto,
-            subAssuntoId: configuracaoItemNovo.subAssunto,
-            situacao: configuracaoItemNovo.situacaoItem,
-            tipoItem: configuracaoItemNovo.tipoItem,
-            quantidadeAlternativasId: configuracaoItemNovo.quantidadeAlternativas,
-            dificuldadeSugeridaId: configuracaoItemNovo.dificuldadeSugerida,
-            discriminacao: configuracaoItemNovo.discriminacao !== '' ? configuracaoItemNovo.discriminacao : null,
-            dificuldade: configuracaoItemNovo.dificuldade !== '' ? configuracaoItemNovo.dificuldade : null,
-            nivelItem: configuracaoItemNovo.nivelItem,
-            acertoCasual: configuracaoItemNovo.acertoCasual !== '' ? configuracaoItemNovo.acertoCasual : null,
-            palavrasChave: configuracaoItemNovo.palavrasChave,
-            parametroBTransformado: configuracaoItemNovo?.parametroBTransformado || null,
-            mediaEhDesvio: configuracaoItemNovo.mediaDesvioPadrao,
-            sentencaDescritora: configuracaoItemNovo.sentencaDescritora,
-            observacao: configuracaoItemNovo.observacao,
+            codigoItem: values?.codigo ? +values?.codigo : 0,
+            areaConhecimentoId: values?.AreaConhecimento || null,
+            disciplinaId: values?.disciplinas || null,
+            matrizId: values?.matriz || null,
+            competenciaId: values?.competencia || null,
+            habilidadeId: values?.habilidade || null,
+            anoMatrizId: values?.anoMatriz || null,
+            assuntoId: values?.assunto || null,
+            subAssuntoId: values?.subAssunto || null,
+            situacao: values?.situacaoItem || null,
+            tipoItem: values?.tipoItem || null,
+            quantidadeAlternativasId: values?.quantidadeAlternativas || null,
+            dificuldadeSugeridaId: values?.dificuldadeSugerida || null,
+            discriminacao: values?.infoEstatisticasDiscriminacao ? +values?.infoEstatisticasDiscriminacao : null,
+            dificuldade: values?.infoEstatisticasDificuldade ? +values?.infoEstatisticasDificuldade : null,
+            nivelItem: values?.nivelItem || null,
+            acertoCasual: values?.infoEstatisticasAcertoCasual ? +values?.infoEstatisticasAcertoCasual : null,
+            palavrasChave: values?.palavraChave || [],
+            parametroBTransformado: values?.parametroBTransformado ? +values?.parametroBTransformado : null,
+            mediaEhDesvio: values?.mediaDesvioPadrao || null,
+            sentencaDescritora: values?.sentencaDescritora || null,
+            observacao: values?.observacao || null,
             textoBase: values?.textoBase || '',
             fonte: values?.fonte || '',
             enunciado: values?.enunciado || '',
@@ -167,8 +168,11 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
             dto.arquivoAudioId = values?.audio?.[0]?.idFile;
         }
 
+        // 🔍 Log final do DTO antes de enviar
+        console.log('🚀 DTO Final sendo enviado:', dto);
+
         return dto;
-    }, [item, configuracaoItemNovo, elaboracaoItemNovo, form]);
+    }, [item.id, form]);
 
     const obterDadosItem = useCallback(
         async (id: number) => {

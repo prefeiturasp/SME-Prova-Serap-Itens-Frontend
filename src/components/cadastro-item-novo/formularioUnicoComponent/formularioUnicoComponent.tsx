@@ -12,10 +12,7 @@ import TipoItem from "~/components/cadastro-item/campos/tipo-item";
 import { CampoNumero } from "~/components/cadastro-item/campo-numero";
 
 // Redux
-import { ConfiguracaoItemNovoProps } from '~/redux/modules/cadastroItem-novo/itemNovo/reducers';
-import { setConfiguracaoItemNovo } from '~/redux/modules/cadastroItem-novo/itemNovo/actions';
-import { useDispatch, useSelector } from 'react-redux';
-import { AppState } from '~/redux';
+// import { ConfiguracaoItemNovoProps } from '~/redux/modules/cadastroItem-novo/itemNovo/reducers';
 
 //services
 import configuracaoItemService from '~/services/configuracaoItem-service';
@@ -63,32 +60,32 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
   const campoMediaDesvioPadrao = Campos.mediaDesvioPadrao;
 
   // watchers
-  const codigoForm = Form.useWatch(campoCodigo, form);
+  // const codigoForm = Form.useWatch(campoCodigo, form);
   const areaConhecimentoIdForm = Form.useWatch(Campos.areaConhecimento, form);
   const disciplinaIdForm = Form.useWatch(Campos.disciplinas, form);
   const matrizIdForm = Form.useWatch(Campos.matriz, form);
-  const anoMatrizIdForm = Form.useWatch(Campos.anoMatriz, form);
+  // const anoMatrizIdForm = Form.useWatch(Campos.anoMatriz, form);
 
   const competenciaIdForm = Form.useWatch(Campos.competencia, form);
-  const habilidadeIdForm = Form.useWatch(Campos.habilidade, form);
+  // const habilidadeIdForm = Form.useWatch(Campos.habilidade, form);
 
   const dificuldadeSugeridaIdForm = Form.useWatch(campoDificuldadeSugerida, form);
   const nivelItemIdForm = Form.useWatch(campoNivelItem, form);
   const quantidadeAlternativasForm = Form.useWatch(campoQuantidadeAlternativas, form);
-  const tipoItemIdForm = Form.useWatch(campoTipoItem, form);
-  const situacaoItemIdForm = Form.useWatch(campoSituacaoItem, form);
+  // const tipoItemIdForm = Form.useWatch(campoTipoItem, form);
+  // const situacaoItemIdForm = Form.useWatch(campoSituacaoItem, form);
 
   const assuntoIdForm = Form.useWatch(campoAssunto, form);
-  const subAssuntoIdForm = Form.useWatch(campoSubAssunto, form);
-  const palavrasChaveForm = Form.useWatch(campoPalavraChave, form);
-  const sentencaDescritoraForm = Form.useWatch(campoSentencaDescritora, form);
-  const observacaoForm = Form.useWatch(campoObservacao, form);
+  // const subAssuntoIdForm = Form.useWatch(campoSubAssunto, form);
+  // const palavrasChaveForm = Form.useWatch(campoPalavraChave, form);
+  // const sentencaDescritoraForm = Form.useWatch(campoSentencaDescritora, form);
+  // const observacaoForm = Form.useWatch(campoObservacao, form);
 
-  const discriminacaoForm = Form.useWatch(campoDiscriminacao, form);
-  const dificuldadeForm = Form.useWatch(campoDificuldade, form);
-  const acertoCasualForm = Form.useWatch(campoAcertoCasual, form);
-  const parametroBTransformadoForm = Form.useWatch(campoParametroBTransformado, form);
-  const mediaDesvioPadraoForm = Form.useWatch(campoMediaDesvioPadrao, form);
+  // const discriminacaoForm = Form.useWatch(campoDiscriminacao, form);
+  // const dificuldadeForm = Form.useWatch(campoDificuldade, form);
+  // const acertoCasualForm = Form.useWatch(campoAcertoCasual, form);
+  // const parametroBTransformadoForm = Form.useWatch(campoParametroBTransformado, form);
+  // const mediaDesvioPadraoForm = Form.useWatch(campoMediaDesvioPadrao, form);
 
 
   // listas
@@ -109,16 +106,14 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
 
   const [listaAssuntos, setListaAssuntos] = useState<DefaultOptionType[]>([]);
   const [listaSubAssuntos, setListaSubAssuntos] = useState<DefaultOptionType[]>([]);
-  const [palavrasChave] = useState<string[] | undefined>([]);
+  
+  // ✅ Estado local para palavras-chave (necessário para exibição das tags)
+  const [palavrasChave, setPalavrasChave] = useState<string[] | undefined>([]);
 
+  // const [objTabConfiguracaoItemNovo, setObjTabConfiguracaoItemNovo] =
+  //   useState<ConfiguracaoItemNovoProps>({} as ConfiguracaoItemNovoProps);
+ 
 
-
-  // Redux
-  const dispatch = useDispatch();
-  const configuracaoItemNovo = useSelector((state: AppState) => state.configuracaoItemNovo);
-  const [objTabConfiguracaoItemNovo, setObjTabConfiguracaoItemNovo] =
-    useState<Partial<ConfiguracaoItemNovoProps>>({});
-  // fim redux
 
   //carregamento dos selects
   const popularCampoSelectForm = useCallback(
@@ -129,12 +124,6 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
     ) => {
       let resposta: DefaultOptionType[] = [];
       const parametroValido = !validarCampoForm(param);
-
-      // if (!parametroValido) {
-      //   setLista([]);
-      //   form?.setFieldValue(nomeCampo, null);
-      //   return;
-      // }
 
       switch (nomeCampo) {
         case Campos.areaConhecimento:
@@ -178,13 +167,8 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
       }
 
       if (resposta?.length) {
-        setLista(resposta);
-        // if (resposta.length === 1) form?.setFieldValue(nomeCampo, resposta[0].value);
+        setLista(resposta);        
       }
-      // else {
-      //     setLista([]);
-      //     form?.setFieldValue(nomeCampo, null);
-      // }
     },
     [form],
   );
@@ -208,22 +192,13 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
   const obterListaDificuldadeSugerida = useCallback(async () => {
     setCarregandoDificuldadeSugerida(true);
     const resposta = await configuracaoItemService.obterDificuldadeSugerida();
-    console.log('resposta dificuldade sugerida', resposta);
     if (resposta?.length > 0) {
       setListaDificuldadeSugerida(converterListaParaCheckboxOption(resposta));
-
-      // Define valor padrão
-      const primeiroItem = resposta.find(r => r.descricao?.includes("1 - Muito Fácil")) || resposta[0];
-      if (primeiroItem) {
-        form?.setFieldValue(campoDificuldadeSugerida, primeiroItem.value);
-        console.log('primeiroItem', primeiroItem);
-      }
-
+     
     } else {
       setListaDificuldadeSugerida([]);
       form?.setFieldValue(campoDificuldadeSugerida, null);
     }
-
     setCarregandoDificuldadeSugerida(false);
   }, [form, campoDificuldadeSugerida]);
 
@@ -284,10 +259,12 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
       popularCampoSelectForm(assuntoIdForm, campoSubAssunto, setListaSubAssuntos);
   }, [assuntoIdForm, popularCampoSelectForm, campoSubAssunto]);
 
-  // 🔹 Atualiza form de palavra-chave ao digitar
   useEffect(() => {
-    form?.setFieldValue(campoPalavraChave, palavrasChave);
-  }, [form, palavrasChave, campoPalavraChave]);
+    const valorInicial = form?.getFieldValue(campoPalavraChave);
+    if (valorInicial && Array.isArray(valorInicial)) {
+      setPalavrasChave(valorInicial);
+    }
+  }, [form, campoPalavraChave]);
 
   //fim cascata dos selects
 
@@ -308,75 +285,6 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
 
   // Fim dos Efeitos
 
-
-  // 🔹 Mantém o estado local atualizado com o form
-  useEffect(() => {
-    const novoObj: Partial<ConfiguracaoItemNovoProps> = {
-      codigo: configuracaoItemNovo.codigo,
-      areaConhecimento: areaConhecimentoIdForm,
-      disciplina: disciplinaIdForm,
-      matriz: matrizIdForm,
-      anoMatriz: anoMatrizIdForm,
-      competencia: competenciaIdForm,
-      habilidade: habilidadeIdForm,
-      dificuldadeSugerida: dificuldadeSugeridaIdForm,
-      nivelItem: nivelItemIdForm,
-      quantidadeAlternativas: quantidadeAlternativasForm,
-      tipoItem: tipoItemIdForm,
-      situacaoItem: situacaoItemIdForm,
-      assunto: assuntoIdForm,
-      subAssunto: subAssuntoIdForm,
-      palavrasChave: palavrasChaveForm,
-      sentencaDescritora: sentencaDescritoraForm,
-      observacao: observacaoForm,
-      discriminacao: discriminacaoForm,
-      dificuldade: dificuldadeForm,
-      acertoCasual: acertoCasualForm,
-      parametroBTransformado: parametroBTransformadoForm,
-      mediaDesvioPadrao: mediaDesvioPadraoForm,
-    };
-    setObjTabConfiguracaoItemNovo(novoObj);
-  }, [
-    codigoForm,
-    configuracaoItemNovo.codigo,
-    areaConhecimentoIdForm,
-    disciplinaIdForm,
-    matrizIdForm,
-    anoMatrizIdForm,
-    competenciaIdForm,
-    habilidadeIdForm,
-    dificuldadeSugeridaIdForm,
-    nivelItemIdForm,
-    quantidadeAlternativasForm,
-    tipoItemIdForm,
-    situacaoItemIdForm,
-    assuntoIdForm,
-    subAssuntoIdForm,
-    palavrasChaveForm,
-    sentencaDescritoraForm,
-    observacaoForm,
-    discriminacaoForm,
-    dificuldadeForm,
-    acertoCasualForm,
-    parametroBTransformadoForm,
-    mediaDesvioPadraoForm,
-  ]);
-
-  // 🔹 Sincroniza Redux apenas quando há mudanças reais
-  useEffect(() => {
-    if (!Object.keys(objTabConfiguracaoItemNovo).length) return;
-
-    const mudou = Object.keys(objTabConfiguracaoItemNovo).some(
-      key =>
-        objTabConfiguracaoItemNovo[key as keyof ConfiguracaoItemNovoProps] !==
-        configuracaoItemNovo[key as keyof ConfiguracaoItemNovoProps]
-    );
-
-    if (mudou) {
-      console.log('Mudou:', objTabConfiguracaoItemNovo);
-      dispatch(setConfiguracaoItemNovo(objTabConfiguracaoItemNovo));
-    }
-  }, [objTabConfiguracaoItemNovo, configuracaoItemNovo, dispatch]);
 
   return (
     <>
@@ -590,16 +498,20 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
               <Form.Item
                 label='Palavra-chave'
                 name={campoPalavraChave}
-                rules={ruleCampoArrayStringObrigatorioForm(form?.getFieldValue(campoPalavraChave))}
+                rules={ruleCampoArrayStringObrigatorioForm(palavrasChave || [])}
               >
                 <InputTag
-                  valueForm={form?.getFieldValue(campoPalavraChave)}
-                  tags={form?.getFieldValue(campoPalavraChave)}
-                  setTags={(v) => form?.setFieldValue(campoPalavraChave, v)}
+                  valueForm={palavrasChave}
+                  tags={palavrasChave}
+                  setTags={(v) => {
+                    const novasTags = v || [];
+                    setPalavrasChave(novasTags);
+                    form?.setFieldValue(campoPalavraChave, novasTags);
+                  }}
                 />
               </Form.Item>
               <div className="caracteristicasItemTexto">
-                <p>Digite uma palavra e pressione “Enter” para adicioná-la.</p>
+                <p>Digite uma palavra e pressione "Enter" para adicioná-la.</p>
               </div>
             </Col>
           </Row>

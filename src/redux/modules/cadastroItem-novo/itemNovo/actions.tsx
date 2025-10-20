@@ -30,7 +30,7 @@ export const setItemNovo = (payload: ItemNovoProps): SetItemNovo => {
   };
 };
 
-export const setConfiguracaoItemNovo = (payload: Partial<ConfiguracaoItemNovoProps>) => ({
+export const setConfiguracaoItemNovo = (payload: ConfiguracaoItemNovoProps) => ({
   type: typeSetConfiguracaoItemNovo,
   payload,
 });
