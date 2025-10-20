@@ -8,7 +8,8 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "lint": "npx eslint src",
-    "prettier": "npx prettier src --check"
+    "prettier": "npx prettier src --check",
+    "test": "jest --watchAll"
   },
   "dependencies": {
     "@ckeditor/ckeditor5-build-classic": "^41.2.1",
@@ -38,7 +39,15 @@
     "styled-components": "^5.3.5"
   },
   "devDependencies": {
+    "@babel/core": "^7.28.4",
+    "@babel/preset-env": "^7.28.3",
+    "@babel/preset-react": "^7.27.1",
+    "@babel/preset-typescript": "^7.27.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
     "@types/antd": "^1.0.0",
+    "@types/jest": "^30.0.0",
     "@types/lodash": "^4.17.0",
     "@types/react": "^18.0.15",
     "@types/react-dom": "^18.0.6",
@@ -46,6 +55,7 @@
     "@typescript-eslint/eslint-plugin": "^5.26.0",
     "@typescript-eslint/parser": "^5.26.0",
     "@vitejs/plugin-react": "^2.0.0",
+    "babel-jest": "^30.2.0",
     "eslint": "^8.16.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-import": "^2.26.0",
@@ -53,9 +63,13 @@
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-react": "^7.30.0",
     "eslint-plugin-react-hooks": "^4.5.0",
+    "identity-obj-proxy": "^3.0.0",
+    "jest": "^30.2.0",
+    "jest-environment-jsdom": "^30.2.0",
     "less": "^4.1.3",
     "less-loader": "^11.0.0",
     "prettier": "^2.6.2",
+    "ts-jest": "^29.4.5",
     "typescript": "^4.6.4",
     "vite": "^3.0.0",
     "vite-plugin-imp": "^2.2.0",
