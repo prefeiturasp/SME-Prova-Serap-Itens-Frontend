@@ -47,11 +47,9 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
     const [carregando, setCarregando] = useState<boolean>(false);
     const item = useSelector((state: AppState) => state.item);
     //const configuracaoItemNovo = useSelector((state: AppState) => state.configuracaoItemNovo);
-
     //const elaboracaoItemNovo = useSelector((state: AppState) => state.elaboracaoItemNovo);
 
-    const [objTabConfiguracaoItem, setObjTabConfiguracaoItem] =
-        useState<ConfiguracaoItemNovoProps>({} as ConfiguracaoItemNovoProps);
+    // ❌ Removido: objTabConfiguracaoItem - não mais necessário
 
     const [form] = Form.useForm();
     const initialValuesForm = {
@@ -122,7 +120,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
         const values = cloneDeep(form.getFieldsValue(true));
 
         console.log('📋 Valores do formulário para DTO:', values);
-        
+
         const dto: ItemNovoDto = {
             id: item.id,
             codigoItem: values?.codigo ? +values?.codigo : 0,
@@ -177,28 +175,68 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
     const obterDadosItem = useCallback(
         async (id: number) => {
             setCarregando(true);
-            await configuracaoItemService
-                .obterItem(id)
-                .then((resp) => {
+
+            try {
+                const resp = await configuracaoItemService.obterItem(id);
+
+                if (resp?.data) {
+                    // ✅ 1. Mapear dados da API para o formato Redux
                     const configuracaoItemRetorno: ConfiguracaoItemNovoProps = {
-                        ...objTabConfiguracaoItem,
-                        codigo: resp?.data?.codigoItem,
+                        codigo: resp.data.codigoItem,
+                        areaConhecimento: resp.data.areaConhecimentoId,
+                        disciplina: resp.data.disciplinaId,
+                        matriz: resp.data.matrizId,
+                        competencia: resp.data.competenciaId,
+                        habilidade: resp.data.habilidadeId,
+                        anoMatriz: resp.data.anoMatrizId,
+                        assunto: resp.data.assuntoId,
+                        subAssunto: resp.data.subAssuntoId,
+                        situacaoItem: resp.data.situacao,
+                        tipoItem: resp.data.tipoItem,
+                        quantidadeAlternativas: resp.data.quantidadeAlternativasId,
+                        dificuldadeSugerida: resp.data.dificuldadeSugeridaId,
+                        discriminacao: resp.data.discriminacao,
+                        dificuldade: resp.data.dificuldade,
+                        nivelItem: resp.data.nivelItem,
+                        acertoCasual: resp.data.acertoCasual,
+                        palavrasChave: resp.data.palavrasChave,
+                        parametroBTransformado: resp.data.parametroBTransformado,
+                        mediaDesvioPadrao: resp.data.mediaEhDesvio,
+                        sentencaDescritora: resp.data.sentencaDescritora,
+                        observacao: resp.data.observacao,
                     };
-                    const itemAtual: ItemNovoProps = { ...item, id: id, configuracao: configuracaoItemRetorno };
-                    setObjTabConfiguracaoItem(configuracaoItemRetorno);
+
+                    // ✅ 2. Atualizar Redux (para navegação entre telas)
+                    const itemAtual: ItemNovoProps = {
+                        ...item,
+                        id: id,
+                        configuracao: configuracaoItemRetorno
+                    };
+
                     dispatch(setConfiguracaoItemNovo(configuracaoItemRetorno));
                     dispatch(setItemNovo(itemAtual));
-                    console.log('passando codigoItem para ->', resp?.data?.codigoItem);
-                    console.log('itemAtual', itemAtual);
-                    console.log('configuracaoItemRetorno', configuracaoItemRetorno);
-                    form?.setFieldValue("codigo", resp?.data?.codigoItem);
-                })
-                .catch((err) => {
-                    console.log('Erro', err.message);
-                });
+
+                    // ✅ 3. Atualizar formulário com os dados carregados
+                    Object.keys(configuracaoItemRetorno).forEach(key => {
+                        const value = configuracaoItemRetorno[key as keyof ConfiguracaoItemNovoProps];
+                        if (value !== undefined && value !== null) {
+                            form?.setFieldValue(key, value);
+                        }
+                    });
+
+                    console.log('✅ Item carregado com sucesso:', {
+                        id,
+                        configuracao: configuracaoItemRetorno
+                    });
+                }
+            } catch (err: any) {
+                console.error('❌ Erro ao carregar item:', err.message);
+                mensagem('error', 'Erro', 'Erro ao carregar dados do item');
+            }
+
             setCarregando(false);
         },
-        [dispatch, item, objTabConfiguracaoItem],
+        [dispatch, item, form, mensagem],
     );
 
     const inserirItem = useCallback(
@@ -238,21 +276,23 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
             setCarregando(true);
             const itemSalvar = gerarItemSalvar();
             console.log('itemSalvar', itemSalvar);
-            // if (rascunho) {
-            //     await inserirRascunhoItem(itemSalvar);
-            // } else {
-            //     await inserirItem(itemSalvar);
-            // }
-            if (item?.id > 0) {
-                mensagem('info', 'Atenção','Desenvolver regras.' );
-                //`Item já cadastrado, id:${item.id}`
+
+            if (rascunho) {
+                await inserirRascunhoItem(itemSalvar);
             } else {
-                if (rascunho) {
-                    await inserirRascunhoItem(itemSalvar);
-                } else {
-                    await inserirItem(itemSalvar);
-                }
+                await inserirItem(itemSalvar);
             }
+
+            // if (item?.id > 0) {
+            //     mensagem('info', 'Atenção','Desenvolver regras.' );
+            //     //`Item já cadastrado, id:${item.id}`
+            // } else {
+            //     // if (rascunho) {
+            //     //     await inserirRascunhoItem(itemSalvar);
+            //     // } else {
+            //     //     await inserirItem(itemSalvar);
+            //     // }
+            // }
             setCarregando(false);
         },
         [item.id, mensagem, inserirItem, inserirRascunhoItem, gerarItemSalvar],
