@@ -15,7 +15,7 @@ import FormularioUnico from '~/components/cadastro-item-novo/formularioUnicoComp
 
 import { validarCampoForm } from '~/utils/funcoes'; //validarCampoArrayStringForm
 
-// import { Campos } from '~/domain/enums/campos-cadastro-item';
+import { Campos } from '~/domain/enums/campos-cadastro-item';
 import configuracaoItemService from '~/services/configuracaoItem-service';
 
 //redux
@@ -46,12 +46,10 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
     const dispatch = useDispatch();
     const [carregando, setCarregando] = useState<boolean>(false);
     const item = useSelector((state: AppState) => state.item);
-    const configuracaoItemNovo = useSelector((state: AppState) => state.configuracaoItemNovo);
+    //const configuracaoItemNovo = useSelector((state: AppState) => state.configuracaoItemNovo);
+    //const elaboracaoItemNovo = useSelector((state: AppState) => state.elaboracaoItemNovo);
 
-    const elaboracaoItemNovo = useSelector((state: AppState) => state.elaboracaoItemNovo);
-
-    const [objTabConfiguracaoItem, setObjTabConfiguracaoItem] =
-        useState<ConfiguracaoItemNovoProps>(configuracaoItemNovo);
+    // ❌ Removido: objTabConfiguracaoItem - não mais necessário
 
     const [form] = Form.useForm();
     const initialValuesForm = {
@@ -65,8 +63,9 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
         // dificuldadeSugerida: { value: 5, label: '1 - Muito Fácil', descricao: '1 - Muito Fácil', valor: 5 },
     };
 
-    // const areaConhecimentoIdForm = Form.useWatch(Campos.areaConhecimento, form);
-    // const disciplinaIdForm = Form.useWatch(Campos.disciplinas, form);
+    // ✅ Watchers do formulário para validação
+    const areaConhecimentoIdForm = Form.useWatch(Campos.areaConhecimento, form);
+    const disciplinaIdForm = Form.useWatch(Campos.disciplinas, form);
 
     // const bloquearSalvar =
     //     validarCampoForm(configuracaoItemNovo.disciplina) ||
@@ -84,14 +83,14 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
     const [bloquearBtnSalvarRascunho, setBloquearBtnSalvarRascunho] =
         useState<boolean>(true);
 
-
+    // ✅ useEffect refatorado para usar valores do formulário ao invés do Redux
     useEffect(() => {
         const bloquear =
-            validarCampoForm(configuracaoItemNovo.disciplina) ||
-            validarCampoForm(configuracaoItemNovo.areaConhecimento);
+            validarCampoForm(disciplinaIdForm) ||
+            validarCampoForm(areaConhecimentoIdForm);
 
         setBloquearBtnSalvarRascunho(bloquear);
-    }, [configuracaoItemNovo.areaConhecimento, configuracaoItemNovo.disciplina]);
+    }, [areaConhecimentoIdForm, disciplinaIdForm]);
 
 
     type tipoMsg = 'success' | 'info' | 'warning' | 'error';
@@ -120,32 +119,32 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
     const gerarItemSalvar = useCallback(() => {
         const values = cloneDeep(form.getFieldsValue(true));
 
-        console.log('redux valor indo pro DTO', configuracaoItemNovo);
+        console.log('📋 Valores do formulário para DTO:', values);
 
         const dto: ItemNovoDto = {
             id: item.id,
-            codigoItem: configuracaoItemNovo.codigo,
-            areaConhecimentoId: configuracaoItemNovo.areaConhecimento,
-            disciplinaId: configuracaoItemNovo.disciplina,
-            matrizId: configuracaoItemNovo.matriz,
-            competenciaId: configuracaoItemNovo.competencia,
-            habilidadeId: configuracaoItemNovo.habilidade,
-            anoMatrizId: configuracaoItemNovo.anoMatriz,
-            assuntoId: configuracaoItemNovo.assunto,
-            subAssuntoId: configuracaoItemNovo.subAssunto,
-            situacao: configuracaoItemNovo.situacaoItem,
-            tipoItem: configuracaoItemNovo.tipoItem,
-            quantidadeAlternativasId: configuracaoItemNovo.quantidadeAlternativas,
-            dificuldadeSugeridaId: configuracaoItemNovo.dificuldadeSugerida,
-            discriminacao: configuracaoItemNovo.discriminacao !== '' ? configuracaoItemNovo.discriminacao : null,
-            dificuldade: configuracaoItemNovo.dificuldade !== '' ? configuracaoItemNovo.dificuldade : null,
-            nivelItem: configuracaoItemNovo.nivelItem,
-            acertoCasual: configuracaoItemNovo.acertoCasual !== '' ? configuracaoItemNovo.acertoCasual : null,
-            palavrasChave: configuracaoItemNovo.palavrasChave,
-            parametroBTransformado: configuracaoItemNovo?.parametroBTransformado || null,
-            mediaEhDesvio: configuracaoItemNovo.mediaDesvioPadrao,
-            sentencaDescritora: configuracaoItemNovo.sentencaDescritora,
-            observacao: configuracaoItemNovo.observacao,
+            codigoItem: values?.codigo ? +values?.codigo : 0,
+            areaConhecimentoId: values?.AreaConhecimento || null,
+            disciplinaId: values?.disciplinas || null,
+            matrizId: values?.matriz || null,
+            competenciaId: values?.competencia || null,
+            habilidadeId: values?.habilidade || null,
+            anoMatrizId: values?.anoMatriz || null,
+            assuntoId: values?.assunto || null,
+            subAssuntoId: values?.subAssunto || null,
+            situacao: values?.situacaoItem || null,
+            tipoItem: values?.tipoItem || null,
+            quantidadeAlternativasId: values?.quantidadeAlternativas || null,
+            dificuldadeSugeridaId: values?.dificuldadeSugerida || null,
+            discriminacao: values?.infoEstatisticasDiscriminacao ? +values?.infoEstatisticasDiscriminacao : null,
+            dificuldade: values?.infoEstatisticasDificuldade ? +values?.infoEstatisticasDificuldade : null,
+            nivelItem: values?.nivelItem || null,
+            acertoCasual: values?.infoEstatisticasAcertoCasual ? +values?.infoEstatisticasAcertoCasual : null,
+            palavrasChave: values?.palavraChave || [],
+            parametroBTransformado: values?.parametroBTransformado ? +values?.parametroBTransformado : null,
+            mediaEhDesvio: values?.mediaDesvioPadrao || null,
+            sentencaDescritora: values?.sentencaDescritora || null,
+            observacao: values?.observacao || null,
             textoBase: values?.textoBase || '',
             fonte: values?.fonte || '',
             enunciado: values?.enunciado || '',
@@ -167,34 +166,77 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
             dto.arquivoAudioId = values?.audio?.[0]?.idFile;
         }
 
+        // 🔍 Log final do DTO antes de enviar
+        console.log('🚀 DTO Final sendo enviado:', dto);
+
         return dto;
-    }, [item, configuracaoItemNovo, elaboracaoItemNovo, form]);
+    }, [item.id, form]);
 
     const obterDadosItem = useCallback(
         async (id: number) => {
             setCarregando(true);
-            await configuracaoItemService
-                .obterItem(id)
-                .then((resp) => {
+
+            try {
+                const resp = await configuracaoItemService.obterItem(id);
+
+                if (resp?.data) {
+                    // ✅ 1. Mapear dados da API para o formato Redux
                     const configuracaoItemRetorno: ConfiguracaoItemNovoProps = {
-                        ...objTabConfiguracaoItem,
-                        codigo: resp?.data?.codigoItem,
+                        codigo: resp.data.codigoItem,
+                        areaConhecimento: resp.data.areaConhecimentoId,
+                        disciplina: resp.data.disciplinaId,
+                        matriz: resp.data.matrizId,
+                        competencia: resp.data.competenciaId,
+                        habilidade: resp.data.habilidadeId,
+                        anoMatriz: resp.data.anoMatrizId,
+                        assunto: resp.data.assuntoId,
+                        subAssunto: resp.data.subAssuntoId,
+                        situacaoItem: resp.data.situacao,
+                        tipoItem: resp.data.tipoItem,
+                        quantidadeAlternativas: resp.data.quantidadeAlternativasId,
+                        dificuldadeSugerida: resp.data.dificuldadeSugeridaId,
+                        discriminacao: resp.data.discriminacao,
+                        dificuldade: resp.data.dificuldade,
+                        nivelItem: resp.data.nivelItem,
+                        acertoCasual: resp.data.acertoCasual,
+                        palavrasChave: resp.data.palavrasChave,
+                        parametroBTransformado: resp.data.parametroBTransformado,
+                        mediaDesvioPadrao: resp.data.mediaEhDesvio,
+                        sentencaDescritora: resp.data.sentencaDescritora,
+                        observacao: resp.data.observacao,
                     };
-                    const itemAtual: ItemNovoProps = { ...item, id: id, configuracao: configuracaoItemRetorno };
-                    setObjTabConfiguracaoItem(configuracaoItemRetorno);
+
+                    // ✅ 2. Atualizar Redux (para navegação entre telas)
+                    const itemAtual: ItemNovoProps = {
+                        ...item,
+                        id: id,
+                        configuracao: configuracaoItemRetorno
+                    };
+
                     dispatch(setConfiguracaoItemNovo(configuracaoItemRetorno));
                     dispatch(setItemNovo(itemAtual));
-                    console.log('passando codigoItem para ->', resp?.data?.codigoItem);
-                    console.log('itemAtual', itemAtual);
-                    console.log('configuracaoItemRetorno', configuracaoItemRetorno);
-                    form?.setFieldValue("codigo", resp?.data?.codigoItem);
-                })
-                .catch((err) => {
-                    console.log('Erro', err.message);
-                });
+
+                    // ✅ 3. Atualizar formulário com os dados carregados
+                    Object.keys(configuracaoItemRetorno).forEach(key => {
+                        const value = configuracaoItemRetorno[key as keyof ConfiguracaoItemNovoProps];
+                        if (value !== undefined && value !== null) {
+                            form?.setFieldValue(key, value);
+                        }
+                    });
+
+                    console.log('✅ Item carregado com sucesso:', {
+                        id,
+                        configuracao: configuracaoItemRetorno
+                    });
+                }
+            } catch (err: any) {
+                console.error('❌ Erro ao carregar item:', err.message);
+                mensagem('error', 'Erro', 'Erro ao carregar dados do item');
+            }
+
             setCarregando(false);
         },
-        [dispatch, item, objTabConfiguracaoItem],
+        [dispatch, item, form, mensagem],
     );
 
     const inserirItem = useCallback(
@@ -234,21 +276,23 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
             setCarregando(true);
             const itemSalvar = gerarItemSalvar();
             console.log('itemSalvar', itemSalvar);
-            // if (rascunho) {
-            //     await inserirRascunhoItem(itemSalvar);
-            // } else {
-            //     await inserirItem(itemSalvar);
-            // }
-            if (item?.id > 0) {
-                mensagem('info', 'Atenção','Desenvolver regras.' );
-                //`Item já cadastrado, id:${item.id}`
+
+            if (rascunho) {
+                await inserirRascunhoItem(itemSalvar);
             } else {
-                if (rascunho) {
-                    await inserirRascunhoItem(itemSalvar);
-                } else {
-                    await inserirItem(itemSalvar);
-                }
+                await inserirItem(itemSalvar);
             }
+
+            // if (item?.id > 0) {
+            //     mensagem('info', 'Atenção','Desenvolver regras.' );
+            //     //`Item já cadastrado, id:${item.id}`
+            // } else {
+            //     // if (rascunho) {
+            //     //     await inserirRascunhoItem(itemSalvar);
+            //     // } else {
+            //     //     await inserirItem(itemSalvar);
+            //     // }
+            // }
             setCarregando(false);
         },
         [item.id, mensagem, inserirItem, inserirRascunhoItem, gerarItemSalvar],

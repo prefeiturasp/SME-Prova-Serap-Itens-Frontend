@@ -33,7 +33,7 @@ const IdentificacaoComponent: React.FC<FormProps> = ({ form }) => {
     const dispatch = useDispatch();
     const configuracaoItemNovo = useSelector((state: AppState) => state.configuracaoItemNovo);
     const [objTabConfiguracaoItemNovo, setObjTabConfiguracaoItemNovo] =
-        useState<Partial<ConfiguracaoItemNovoProps>>({});
+        useState<ConfiguracaoItemNovoProps>({} as ConfiguracaoItemNovoProps);
     // fim redux
 
     const obterAnosMatriz = useCallback(async () => {
@@ -110,16 +110,16 @@ const IdentificacaoComponent: React.FC<FormProps> = ({ form }) => {
     }, [matrizIdForm, campoAnoMatriz, obterAnosMatriz]);
 
     // 🔹 Mantém o estado local atualizado com o form
-    useEffect(() => {
-        const novoObj: Partial<ConfiguracaoItemNovoProps> = {
-            codigo: configuracaoItemNovo.codigo,
-            areaConhecimento: areaConhecimentoIdForm,
-            disciplina: disciplinaIdForm,
-            matriz: matrizIdForm,
-            anoMatriz: anoMatrizIdForm,
-        };
-        setObjTabConfiguracaoItemNovo(novoObj);
-    }, [areaConhecimentoIdForm, disciplinaIdForm, matrizIdForm, anoMatrizIdForm, configuracaoItemNovo.codigo]);
+    // useEffect(() => {
+    //     const novoObj: ConfiguracaoItemNovoProps = {
+    //         codigo: configuracaoItemNovo.codigo,
+    //         areaConhecimento: areaConhecimentoIdForm,
+    //         disciplina: disciplinaIdForm,
+    //         matriz: matrizIdForm,
+    //         anoMatriz: anoMatrizIdForm,
+    //     };
+    //     setObjTabConfiguracaoItemNovo(novoObj);
+    // }, [areaConhecimentoIdForm, disciplinaIdForm, matrizIdForm, anoMatrizIdForm, configuracaoItemNovo.codigo]);
 
     // 🔹 Sincroniza Redux apenas quando há mudanças reais
     useEffect(() => {

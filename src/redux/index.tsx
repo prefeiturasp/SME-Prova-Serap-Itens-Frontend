@@ -3,7 +3,7 @@ import { persistReducer, persistStore } from 'redux-persist';
 import thunk from 'redux-thunk';
 import { applyMiddleware, legacy_createStore as createStore } from 'redux';
 import rootReducerNovo from './modules/reducersNovo';
-//import { composeWithDevTools } from '@redux-devtools/extension';
+import { composeWithDevTools } from '@redux-devtools/extension';
 
 const middlewares = [thunk];
 
@@ -21,7 +21,15 @@ const persistedReducer = persistReducer(
   
 );
 
-const store = createStore(persistedReducer, applyMiddleware(...middlewares));
+const store = createStore(
+  persistedReducer, 
+  composeWithDevTools(applyMiddleware(...middlewares))
+);
+
+// 🔍 Disponibilizar store globalmente para debug no console
+if (typeof window !== 'undefined') {
+  (window as any).__REDUX_STORE__ = store;
+}
 
 const persistor = persistStore(store);
 
