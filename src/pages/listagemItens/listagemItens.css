@@ -1,0 +1,39 @@
+.listagem-pagina {
+  background-color: #ededed;
+}
+
+.uuu {
+  padding: 32px;
+}
+
+.listagem-titulo {
+  font-family: Roboto;
+  font-weight: 700;
+  font-size: 24px;
+}
+
+.listagem-subtitulo {
+  font-family: Roboto;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 100%;
+  letter-spacing: 0%;
+}
+
+.listagem-busca {
+
+  background-color: #ffffff;
+  margin: 32px;
+}
+
+.listagem-tabela {
+
+  background-color: #ffffff;
+  margin: 32px;
+  width: 50%;
+}
+
+.listagem-conteudo {
+    width: 100%;
+    display: flex;
+}
