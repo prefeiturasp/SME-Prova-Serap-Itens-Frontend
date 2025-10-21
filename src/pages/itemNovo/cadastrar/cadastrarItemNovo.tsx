@@ -1,7 +1,5 @@
 import { Button, Col, Form, FormProps, notification, Row, Spin } from 'antd';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowLeftOutlined, RightOutlined } from "@ant-design/icons";
 import './cadastrarItemNovo.css';
 
 // import IdentificacaoComponent from '~/components/cadastro-item-novo/cards/identificacaoComponent/identificacaoComponent';
@@ -36,6 +34,7 @@ import {
     ItemNovoProps,
 } from '~/redux/modules/cadastroItem-novo/itemNovo/reducers';
 import { ItemNovoDto } from '~/domain/dto/itemNovo-dto';
+import CadastrarItemHeaderComponent from './cadastrarItemHeaderComponent';
 
 
 
@@ -49,8 +48,6 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
     //const configuracaoItemNovo = useSelector((state: AppState) => state.configuracaoItemNovo);
     //const elaboracaoItemNovo = useSelector((state: AppState) => state.elaboracaoItemNovo);
 
-    // ❌ Removido: objTabConfiguracaoItem - não mais necessário
-
     const [form] = Form.useForm();
     const initialValuesForm = {
         infoEstatisticasDiscriminacao: '',
@@ -59,8 +56,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
         parametroBTransformado: '',
         tipoItem: DadosIniciais.tipoItemIdPadrao,
         dificuldadeSugerida: 5,
-        quantidadeAlternativas: 23,
-        // dificuldadeSugerida: { value: 5, label: '1 - Muito Fácil', descricao: '1 - Muito Fácil', valor: 5 },
+        quantidadeAlternativas: 23,        
     };
 
     // ✅ Watchers do formulário para validação
@@ -334,47 +330,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                     }}
                 >
                     {/* <Affix offsetTop={0.1} style={{ marginBottom: 30 }}> */}
-                    <div className='cadastrarItemHeader'>
-                        <Row className="cadastrarItemHeader-corpo">
-                            <Col xs={12} md={6}>
-                                <Link to={linkRetorno} className="cadastrarItemHeader-retornar">
-                                    <ArrowLeftOutlined className="cadastrarItemHeader-icone-retornar" />
-                                    <span className="cadastrarItemHeader-texto-retornar">Retornar à tela inicial</span>
-                                </Link>
-                            </Col>
-                            <Col xs={12} md={12} className='cadastrarItemHeader-titulo'>
-                                Cadastrar novo item
-                            </Col>
-                            <Col xs={0} md={6} />
-                        </Row>
-                        <div className='cadastrarItemHeader-rota'>
-                            <div className='cadastrarItemHeader-rota-texto'>
-                                Home / Itens/ Cadastrar novo item
-                            </div>
-                            <div className='cadastrarItemHeader-rota-titulo'>
-                                Cadastrar novo item
-                            </div>
-                        </div>
-                        <div className='cadastrarItemHeader-Breadcrumb-corpo'>
-                            <div className='cadastrarItemHeader-Breadcrumb-item01'>
-                                <div className='cadastrarItemHeader-Breadcrumb-item01-index'>
-                                    1
-                                </div>
-                                <div className='cadastrarItemHeader-Breadcrumb-item01-texto'>
-                                    Configuração
-                                </div>
-                            </div>
-                            <RightOutlined className='cadastrarItemHeader-Breadcrumb-separator' />
-                            <div className='cadastrarItemHeader-Breadcrumb-item02'>
-                                <div className='cadastrarItemHeader-Breadcrumb-item02-index'>
-                                    2
-                                </div>
-                                <div className='cadastrarItemHeader-Breadcrumb-item02-texto'>
-                                    Elaboração do item
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <CadastrarItemHeaderComponent pagina={1} />
 
                     {/* </Affix> */}
 
