@@ -3,26 +3,26 @@ import { Button, Form, FormProps, notification, Spin } from 'antd';
 
 //css
 import './cadastrarItemNovo.css';
-import './cadastrarItemNovoElaboracao.css';
 import CadastrarItemHeaderComponent from "./cadastrarItemHeaderComponent";
+import CadastrarItemRodapeComponent from "./cadastrarItemRodapeComponent";
 
-const CadastrarItemNovoElaboracao: React.FC<FormProps> = ({form}) => {
+const CadastrarItemNovoElaboracao: React.FC<FormProps> = ({ form }) => {
 
     const [carregando, setCarregando] = useState<boolean>(false);
 
     type tipoMsg = 'success' | 'info' | 'warning' | 'error';
     const [api, contextHolder] = notification.useNotification();
     const mensagem = useCallback(
-            async (tipo: tipoMsg, titulo: string, msg: string) => {
-                api[tipo]({ message: titulo, description: msg });
-            },
-            [api],
-        );
+        async (tipo: tipoMsg, titulo: string, msg: string) => {
+            api[tipo]({ message: titulo, description: msg });
+        },
+        [api],
+    );
 
     const initialValuesForm = {}
 
-  return (
-    <>
+    return (
+        <>
             <Spin size='small'
                 spinning={carregando}
             >
@@ -42,13 +42,13 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = ({form}) => {
                     <CadastrarItemHeaderComponent pagina={2} />
                     {/* </Affix> */}
 
-                     <div className='cadastrarItem-corpo'>
+                    <div className='cadastrarItem-corpo'>
                         <div className='cadastrarItem-titulo-corpo'>
                             <div className='cadastrarItem-titulo'>
-                                Configure o novo item
+                                Edite o item
                             </div>
                             <div className='cadastrarItem-subtitulo'>
-                                Preencha as informações abaixo para criar e cadastrar um novo item. Esses dados garantem que ele esteja alinhado à matriz de avaliação e possa ser aplicado corretamente.
+                                Esses dados garantem que o item esteja alinhado à matriz de avaliação e possa ser aplicado corretamente.
                             </div>
                         </div>
 
@@ -56,7 +56,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = ({form}) => {
 
                         <div className='cadastrarItem-botoes'>
                             <div className='cadastrarItem-btn'>
-                                <Button className='btnVoltar' 
+                                <Button className='btnVoltar'
                                 // onClick={voltar}
                                 >
                                     Voltar
@@ -73,26 +73,17 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = ({form}) => {
                                 </Button>
                             </div>
                             <div className='cadastrarItem-btn'>
-                                <Button className='btnAvancar' 
+                                <Button className='btnAvancar'
                                 // onClick={voltar}
                                 >Avançar</Button>
                             </div>
                         </div>
                     </div>
-                    <div className='cadastrarItem-footer'>
-                        <div className='cadastrarItem-footer-conteudo'>
-                            <div className='footer-item1'>
-                                SERAp - Versão: 1.30.9.2
-                            </div>
-                            <div className='footer-item2'>
-                                Todos os direitos reservados
-                            </div>
-                        </div>
-                    </div>
+                    <CadastrarItemRodapeComponent />
                 </Form>
             </Spin>
         </>
-  );
+    );
 };
 
 export default CadastrarItemNovoElaboracao;

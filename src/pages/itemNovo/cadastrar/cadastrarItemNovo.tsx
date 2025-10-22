@@ -35,6 +35,7 @@ import {
 } from '~/redux/modules/cadastroItem-novo/itemNovo/reducers';
 import { ItemNovoDto } from '~/domain/dto/itemNovo-dto';
 import CadastrarItemHeaderComponent from './cadastrarItemHeaderComponent';
+import CadastrarItemRodapeComponent from './cadastrarItemRodapeComponent';
 
 
 
@@ -434,16 +435,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                             </div>
                         </div>
                     </div>
-                    <div className='cadastrarItem-footer'>
-                        <div className='cadastrarItem-footer-conteudo'>
-                            <div className='footer-item1'>
-                                SERAp - Versão: 1.30.9.2
-                            </div>
-                            <div className='footer-item2'>
-                                Todos os direitos reservados
-                            </div>
-                        </div>
-                    </div>
+                    <CadastrarItemRodapeComponent />
                 </Form>
             </Spin>
         </>
