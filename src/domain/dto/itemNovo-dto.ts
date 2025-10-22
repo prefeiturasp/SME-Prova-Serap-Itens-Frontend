@@ -13,7 +13,7 @@ export interface ItemNovoDto {
   assuntoId: SelectValueType;
   subAssuntoId: SelectValueType;
   situacao: SelectValueType;
-  tipoItem: SelectValueType;
+  tipo: SelectValueType;
   quantidadeAlternativasId: SelectValueType;
   dificuldadeSugeridaId: SelectValueType;
   discriminacao: number | string | null;

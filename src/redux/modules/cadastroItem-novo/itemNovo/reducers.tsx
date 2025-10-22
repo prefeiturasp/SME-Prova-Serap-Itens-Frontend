@@ -61,15 +61,26 @@ const initialValuesConfiguracaoItemNovoProps = {
 
 export interface ElaboracaoItemNovoProps {
   textoBase?: string;
+  fonte?: string;
+  enunciado?: string;
+  alternativasDto?: any[]; // AlternativaRascunhoDto[]
+  arquivoVideoId?: number;
+  arquivoAudioId?: number;
 }
+
 const initialValuesElaboracaoItemNovoProps = {
   textoBase: undefined,
+  fonte: undefined,
+  enunciado: undefined,
+  alternativasDto: undefined,
+  arquivoVideoId: undefined,
+  arquivoAudioId: undefined,
 };
 
 export interface ItemNovoProps {
   id: number;
-  configuracao?: ConfiguracaoItemNovoProps;
-  elaboracao?: ElaboracaoItemNovoProps;
+  configuracao?: Partial<ConfiguracaoItemNovoProps>;
+  elaboracao?: Partial<ElaboracaoItemNovoProps>;
 }
 const initialValuesItemNovoProps = {
   id: 0,
@@ -92,34 +103,13 @@ export const itemPrincipalNovo = (state: ItemNovoProps = initialValuesItemNovoPr
 };
 
 export const configuracaoItemNovo = (
-  state: ConfiguracaoItemNovoProps = initialValuesConfiguracaoItemNovoProps,
+  state: Partial<ConfiguracaoItemNovoProps> = initialValuesConfiguracaoItemNovoProps,
   action: SetConfiguracaoItemNovo,
 ) => {
   return produce(state, (draft) => {
     switch (action.type) {
       case typeSetConfiguracaoItemNovo:
-        draft.codigo = action.payload.codigo;
-        draft.areaConhecimento = action.payload.areaConhecimento;
-        draft.disciplina = action.payload.disciplina;
-        draft.matriz = action.payload.matriz;
-        draft.anoMatriz = action.payload.anoMatriz;
-        draft.competencia = action.payload.competencia;
-        draft.habilidade = action.payload.habilidade;       
-        draft.dificuldadeSugerida = action.payload.dificuldadeSugerida;
-        draft.discriminacao = action.payload.discriminacao;
-        draft.dificuldade = action.payload.dificuldade;
-        draft.nivelItem = action.payload.nivelItem;
-        draft.acertoCasual = action.payload.acertoCasual;
-        draft.assunto = action.payload.assunto;
-        draft.subAssunto = action.payload.subAssunto;
-        draft.situacaoItem = action.payload.situacaoItem;
-        draft.tipoItem = action.payload.tipoItem;
-        draft.quantidadeAlternativas = action.payload.quantidadeAlternativas;
-        draft.palavrasChave = action.payload.palavrasChave;
-        draft.parametroBTransformado = action.payload.parametroBTransformado;
-        draft.mediaDesvioPadrao = action.payload.mediaDesvioPadrao;
-        draft.sentencaDescritora = action.payload.sentencaDescritora;
-        draft.observacao = action.payload.observacao;
+        Object.assign(draft, action.payload);
         break;
       default:
         break;
@@ -128,13 +118,13 @@ export const configuracaoItemNovo = (
 };
 
 export const elaboracaoItemNovo = (
-  state: ElaboracaoItemNovoProps = initialValuesElaboracaoItemNovoProps,
+  state: Partial<ElaboracaoItemNovoProps> = initialValuesElaboracaoItemNovoProps,
   action: SetElaboracaoItemNovo,
 ) => {
   return produce(state, (draft) => {
     switch (action.type) {
       case typeSetElaboracaoItemNovo:
-        draft.textoBase = action.payload.textoBase;
+        Object.assign(draft, action.payload);
         break;
       default:
         break;

@@ -60,33 +60,17 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
   const campoMediaDesvioPadrao = Campos.mediaDesvioPadrao;
 
   // watchers
-  // const codigoForm = Form.useWatch(campoCodigo, form);
   const areaConhecimentoIdForm = Form.useWatch(Campos.areaConhecimento, form);
   const disciplinaIdForm = Form.useWatch(Campos.disciplinas, form);
   const matrizIdForm = Form.useWatch(Campos.matriz, form);
-  // const anoMatrizIdForm = Form.useWatch(Campos.anoMatriz, form);
 
   const competenciaIdForm = Form.useWatch(Campos.competencia, form);
-  // const habilidadeIdForm = Form.useWatch(Campos.habilidade, form);
 
   const dificuldadeSugeridaIdForm = Form.useWatch(campoDificuldadeSugerida, form);
   const nivelItemIdForm = Form.useWatch(campoNivelItem, form);
   const quantidadeAlternativasForm = Form.useWatch(campoQuantidadeAlternativas, form);
-  // const tipoItemIdForm = Form.useWatch(campoTipoItem, form);
-  // const situacaoItemIdForm = Form.useWatch(campoSituacaoItem, form);
 
   const assuntoIdForm = Form.useWatch(campoAssunto, form);
-  // const subAssuntoIdForm = Form.useWatch(campoSubAssunto, form);
-  // const palavrasChaveForm = Form.useWatch(campoPalavraChave, form);
-  // const sentencaDescritoraForm = Form.useWatch(campoSentencaDescritora, form);
-  // const observacaoForm = Form.useWatch(campoObservacao, form);
-
-  // const discriminacaoForm = Form.useWatch(campoDiscriminacao, form);
-  // const dificuldadeForm = Form.useWatch(campoDificuldade, form);
-  // const acertoCasualForm = Form.useWatch(campoAcertoCasual, form);
-  // const parametroBTransformadoForm = Form.useWatch(campoParametroBTransformado, form);
-  // const mediaDesvioPadraoForm = Form.useWatch(campoMediaDesvioPadrao, form);
-
 
   // listas
   const [listaAreaConhecimento, setListaAreaConhecimento] = useState<DefaultOptionType[]>([]);
@@ -294,14 +278,7 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
           Defina a localização desta questão na matriz curricular.
         </div>
         <div className='card-corpo'>
-          <div className="esconder">
-            {/* <Form.Item label='Código'>
-              <Input
-                disabled={true}
-                placeholder='Código Item'
-                value={configuracaoItem?.codigo > 0 ? configuracaoItem.codigo : ''}
-              />
-            </Form.Item> */}
+          <div className="esconder">            
             <Form.Item
                 label='codigo'
                 name={campoCodigo}

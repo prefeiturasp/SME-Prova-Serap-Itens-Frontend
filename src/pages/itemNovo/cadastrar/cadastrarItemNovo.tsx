@@ -1,4 +1,4 @@
-import { Button, Col, Form, FormProps, notification, Row, Spin } from 'antd';
+import { Button, Form, FormProps, notification, Spin } from 'antd';
 import React, { useCallback, useEffect, useState } from 'react';
 import './cadastrarItemNovo.css';
 
@@ -40,7 +40,6 @@ import CadastrarItemHeaderComponent from './cadastrarItemHeaderComponent';
 
 
 const CadastrarItemNovo: React.FC<FormProps> = () => {
-    const linkRetorno = "https://serap.sme.prefeitura.sp.gov.br/";
 
     const dispatch = useDispatch();
     const [carregando, setCarregando] = useState<boolean>(false);
@@ -56,7 +55,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
         parametroBTransformado: '',
         tipoItem: DadosIniciais.tipoItemIdPadrao,
         dificuldadeSugerida: 5,
-        quantidadeAlternativas: 23,        
+        quantidadeAlternativas: 23,
     };
 
     // ✅ Watchers do formulário para validação
@@ -102,11 +101,11 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
         setCarregando(true);
         const itemAtual: ItemNovoProps = {
             id: 0,
-            configuracao: {} as ConfiguracaoItemNovoProps,
+            configuracao: {},
             elaboracao: {} as ElaboracaoItemNovoProps,
         };
         dispatch(setItemNovo(itemAtual));
-        dispatch(setConfiguracaoItemNovo({} as ConfiguracaoItemNovoProps));
+        dispatch(setConfiguracaoItemNovo({}));
         dispatch(setElaboracaoItemNovo({} as ElaboracaoItemNovoProps));
         form.resetFields();
         setCarregando(false);
@@ -129,7 +128,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
             assuntoId: values?.assunto || null,
             subAssuntoId: values?.subAssunto || null,
             situacao: values?.situacaoItem || null,
-            tipoItem: values?.tipoItem || null,
+            tipo: values?.tipoItem ? Number(values.tipoItem) : 1, // ← Corrigido: 'tipo' como no backend
             quantidadeAlternativasId: values?.quantidadeAlternativas || null,
             dificuldadeSugeridaId: values?.dificuldadeSugerida || null,
             discriminacao: values?.infoEstatisticasDiscriminacao ? +values?.infoEstatisticasDiscriminacao : null,
@@ -162,6 +161,8 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
             dto.arquivoAudioId = values?.audio?.[0]?.idFile;
         }
 
+
+
         // 🔍 Log final do DTO antes de enviar
         console.log('🚀 DTO Final sendo enviado:', dto);
 
@@ -176,10 +177,12 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                 const resp = await configuracaoItemService.obterItem(id);
 
                 if (resp?.data) {
+
+
                     // ✅ 1. Mapear dados da API para o formato Redux
                     const configuracaoItemRetorno: ConfiguracaoItemNovoProps = {
                         codigo: resp.data.codigoItem,
-                        areaConhecimento: resp.data.areaConhecimentoId,
+                        areaConhecimento: resp.data.areaconhecimentoId, // ← Corrigido: minúsculo "c"
                         disciplina: resp.data.disciplinaId,
                         matriz: resp.data.matrizId,
                         competencia: resp.data.competenciaId,
@@ -188,7 +191,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                         assunto: resp.data.assuntoId,
                         subAssunto: resp.data.subAssuntoId,
                         situacaoItem: resp.data.situacao,
-                        tipoItem: resp.data.tipoItem,
+                        tipoItem: resp.data.tipo,
                         quantidadeAlternativas: resp.data.quantidadeAlternativasId,
                         dificuldadeSugerida: resp.data.dificuldadeSugeridaId,
                         discriminacao: resp.data.discriminacao,
@@ -202,7 +205,10 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                         observacao: resp.data.observacao,
                     };
 
+
+
                     // ✅ 2. Atualizar Redux (para navegação entre telas)
+                    // 🔍 Agora Redux terá id e codigo - próximos salvamentos serão EDIÇÃO
                     const itemAtual: ItemNovoProps = {
                         ...item,
                         id: id,
@@ -237,6 +243,8 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
 
     const inserirItem = useCallback(
         async (item: ItemNovoDto) => {
+
+
             await configuracaoItemService
                 .salvarItemNovo(item)
                 .then((resp) => {
@@ -253,6 +261,8 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
 
     const inserirRascunhoItem = useCallback(
         async (item: ItemNovoDto) => {
+
+
             await configuracaoItemService
                 .salvarRascunhoItemNovo(item)
                 .then((resp) => {
@@ -267,11 +277,64 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
         [mensagem, obterDadosItem],
     );
 
+    // 🔒 Validação de campos obrigatórios antes de enviar para backend
+    const validarCamposObrigatorios = useCallback((dto: ItemNovoDto): boolean => {
+        // ✅ Campos SEMPRE obrigatórios (primeiro salvamento e edição)
+        const camposSempreObrigatorios = [
+            { campo: 'areaConhecimentoId', valor: dto.areaConhecimentoId, nome: 'Área de Conhecimento' },
+            { campo: 'disciplinaId', valor: dto.disciplinaId, nome: 'Disciplina' },
+        ];
+
+        // 🔍 Verifica se é edição (tem id e codigo no Redux)
+        const ehEdicao = item.id > 0 && item.configuracao?.codigo && item.configuracao?.codigo > 0;
+
+        console.log('🔍 Modo de operação:', {
+            ehEdicao,
+            itemReduxId: item.id,
+            itemReduxCodigo: item.configuracao?.codigo,
+            dtoId: dto.id,
+            dtoCodigo: dto.codigoItem
+        });
+
+        let camposObrigatorios = [...camposSempreObrigatorios];
+
+        // ✅ Se for edição, id e codigoItem também são obrigatórios
+        if (ehEdicao) {
+            camposObrigatorios.push(
+                { campo: 'id', valor: dto.id, nome: 'ID' },
+                { campo: 'codigoItem', valor: dto.codigoItem, nome: 'Código do Item' }
+            );
+        }
+
+        const camposFaltando = camposObrigatorios.filter(({ valor }) =>
+            valor === null || valor === undefined || valor === 0
+        );
+
+        if (camposFaltando.length > 0) {
+            const nomesCampos = camposFaltando.map(({ nome }) => nome).join(', ');
+            const tipoOperacao = ehEdicao ? 'edição' : 'criação';
+            mensagem('error', 'Campos Obrigatórios',
+                `Para ${tipoOperacao} do item, os seguintes campos são obrigatórios: ${nomesCampos}`
+            );
+            console.error(`❌ Campos obrigatórios faltando para ${tipoOperacao}:`, camposFaltando);
+            return false;
+        }
+
+        console.log(`✅ Validação passou! Modo: ${ehEdicao ? 'Edição' : 'Criação'}`);
+        return true;
+    }, [mensagem, item.id, item.configuracao?.codigo]);
+
     const salvarItem = useCallback(
         async (rascunho = false) => {
             setCarregando(true);
             const itemSalvar = gerarItemSalvar();
             console.log('itemSalvar', itemSalvar);
+
+            // 🔒 Validar campos obrigatórios antes de enviar
+            if (!validarCamposObrigatorios(itemSalvar)) {
+                setCarregando(false);
+                return;
+            }
 
             if (rascunho) {
                 await inserirRascunhoItem(itemSalvar);
@@ -386,6 +449,33 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
         </>
     );
 }
+
+/* 
+🔒 REDUX SIMPLIFICADO - Uma Validação, Todas as Situações
+
+✅ REDUX (simples):
+   dispatch(setConfiguracaoItemNovo({ dificuldade: 5 })); // Sempre Partial
+   dispatch(setElaboracaoItemNovo({ textoBase: "texto" })); // Sempre Partial
+
+🎯 VALIDAÇÃO INTELIGENTE:
+   A função validarCamposObrigatorios() detecta automaticamente:
+   
+   🆕 CRIAÇÃO (Redux: id=0): 
+      - Obrigatórios: disciplina, areaConhecimento
+      - Backend gera: id, codigoItem
+   
+   ✏️ EDIÇÃO (Redux: id>0 + codigo>0):
+      - Obrigatórios: id, codigo, disciplina, areaConhecimento  
+      - Backend atualiza: item existente
+
+🔄 FLUXO:
+   1️⃣ Primeira vez → disciplina+área → Backend gera ID/código → Redux atualizado
+   2️⃣ Navegação → Redux mantém ID/código
+   3️⃣ Voltar → Redux resetado (id=0)
+   4️⃣ Listagem→Edição → Redux carregado com ID/código
+
+🚀 SEM COMPLEXIDADE: Uma validação serve para tudo!
+*/
 
 export default CadastrarItemNovo;
 

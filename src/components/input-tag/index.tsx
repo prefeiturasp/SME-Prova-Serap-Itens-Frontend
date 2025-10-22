@@ -1,6 +1,6 @@
-import React, { Dispatch, SetStateAction, useCallback, useState, useEffect } from 'react';
+import React, { Dispatch, SetStateAction, useCallback } from 'react';
 import { TagsInput } from 'react-tag-input-component';
-import { validarCampoArrayStringForm } from '~/utils/funcoes';
+//import { validarCampoArrayStringForm } from '~/utils/funcoes';
 import './styles.css';
 
 interface InputTagProps {
@@ -9,26 +9,27 @@ interface InputTagProps {
   valueForm: string[] | undefined;
 }
 
-const InputTag: React.FC<InputTagProps> = ({ setTags, tags, valueForm }) => {
-
-  const [erro, setErro] = useState<boolean>(!(valueForm === undefined));
+const InputTag: React.FC<InputTagProps> = ({ setTags, tags }) => {
+  //valueForm
+  // const [erro, setErro] = useState<boolean>(!(valueForm === undefined));
 
   const setValorTags = useCallback(
     (valorTags: string[] | undefined) => {
       setTags(valorTags !== undefined ? valorTags : []);
-      setErro(validarCampoArrayStringForm(valorTags ?? []));
+      // setErro(validarCampoArrayStringForm(valorTags ?? []));
     },
     [setTags],
   );
 
-  useEffect(() => {
-    if (valueForm === undefined)
-      setErro(false);
-  }, [valueForm, tags]);
+  // useEffect(() => {
+  //   if (valueForm === undefined)
+  //     // setErro(false);
+  // }, [valueForm, tags]);
 
   return (
     <>
-      <div className={erro === true ? 'error' : ''}>
+      {/* className={erro === true ? 'error' : ''} */}
+      <div>
         <TagsInput
           classNames={{
             input: 'ant-input input-t',
@@ -46,9 +47,9 @@ const InputTag: React.FC<InputTagProps> = ({ setTags, tags, valueForm }) => {
           className='ant-form-item-explain ant-form-item-explain-connected css-dev-only-do-not-override-diro6f'
           role='alert'
         >
-          <div className='ant-form-item-explain-error'>
+          {/* <div className='ant-form-item-explain-error'>
             {erro === true ? 'Campo obrigatório' : ''}
-          </div>
+          </div> */}
         </div>
       </div>
     </>
