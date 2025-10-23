@@ -1,0 +1,166 @@
+import { Card, Pagination, Tag } from 'antd';
+import React from 'react';
+import './listagemTabelaComponent.css';
+
+interface Item {
+  codigo: string;
+  componente: string;
+  enunciado: string;
+  dificuldade: string;
+  situacao: string;
+  dataCriacao: string;
+}
+
+interface ListagemTabelaProps {
+  itensPagina: Item[];
+  inicio: number;
+  fim: number;
+  dados: Item[];
+  pagina: number;
+  setPagina: (p: number) => void;
+  ITENS_POR_PAGINA: number;
+}
+
+const ListagemTabela: React.FC<ListagemTabelaProps> = ({
+  itensPagina,
+  inicio,
+  fim,
+  dados,
+  pagina,
+  setPagina,
+  ITENS_POR_PAGINA,
+}) => {
+  const corDificuldade = (nivel: string) => {
+    switch (nivel) {
+      case 'Muito fácil':
+        return { color: '#595959', background: '#86E97A', border: '0' };
+      case 'Fácil':
+        return { color: '#FFFFFF', background: '#21C45D', border: '0' };
+      case 'Médio':
+        return { color: '#595959', background: '#F9C74F', border: '0' };
+      case 'Difícil':
+        return { color: '#FFFFFF', background: '#F3722C', border: '0' };
+      case 'Muito difícil':
+        return { color: '#FFFFFF', background: '#D62828', border: '0' };
+      default:
+        return {};
+    }
+  };
+
+  const corSituacao = (status: string) => {
+    switch (status) {
+      case 'Ativo':
+        return { color: '#FFFFFF', background: '#21C45D', border: '0' };
+      case 'Pendente':
+        return { color: '#595959', background: '#F9C74F', border: '0' };
+      case 'Rascunho':
+        return { color: '#FFFFFF', background: '#B0B0B0', border: '0' };
+      case 'Inativo':
+        return { color: '#FFFFFF', background: '#D62828', border: '0' };
+      default:
+        return {};
+    }
+  };
+  return (
+    <>
+      <Card className='listagem-tabela'>
+        <div className='listagem-tabela-head'>
+          <div className='listagem-tabela-texto'>
+            <div className='listagem-tabela-titulo'>Lista de itens</div>
+            <div className='listagem-tabela-subtitulo'>
+              Selecione um item para conferir mais detalhes ao lado.
+            </div>
+          </div>
+          <div className='listagem-tabela-filtrar'>
+            {/* <Button type='link' icon={<FilterOutlined />}></Button> */}
+            FILTRAR
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', marginTop: 16 }}>
+          {itensPagina.map((item, index) => (
+            <div className='listagem-item-tabela' key={index}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  <div className='listagem-item-tabela-head'>
+                    <div className='listagem-item-tabela-flex'>
+                      <b>Código do item: </b>
+                      {item.codigo}
+                    </div>
+                    <div className='listagem-item-tabela-auto'>
+                      <b>Componente curricular: </b>
+                      {item.componente}
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <b>Enunciado do item:</b>
+                  <br></br>
+                  {item.enunciado}
+                </div>
+
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  <div style={{ marginTop: 4 }}>
+                    <Tag
+                      style={{
+                        borderRadius: '8px',
+                        marginRight: 8,
+                        ...corDificuldade(item.dificuldade),
+                      }}
+                    >
+                      <b>Dificuldade: </b> {item.dificuldade}
+                    </Tag>
+                    <Tag
+                      style={{
+                        borderRadius: '8px',
+                        ...corSituacao(item.situacao),
+                      }}
+                    >
+                      <b>Situação: </b> {item.situacao}
+                    </Tag>
+                  </div>
+                  <div>
+                    <b>Data de criação: </b>
+                    {item.dataCriacao}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 24 }}>
+          <div className='listagem-item-tabela-auto'>{`${inicio + 1}-${Math.min(
+            fim,
+            dados.length,
+          )} de ${dados.length} itens`}</div>
+
+          <div>
+            <Pagination
+              current={pagina}
+              total={dados.length}
+              pageSize={ITENS_POR_PAGINA}
+              onChange={(p) => setPagina(p)}
+              showSizeChanger={false}
+            />
+          </div>
+        </div>
+      </Card>
+    </>
+  );
+};
+
+export default ListagemTabela;

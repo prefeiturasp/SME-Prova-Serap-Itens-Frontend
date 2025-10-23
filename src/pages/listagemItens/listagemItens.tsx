@@ -1,28 +1,173 @@
-import { Col, Row } from 'antd';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { Button, Card, Col, Pagination, Row, Table, Tag, Typography } from 'antd';
 import { Link } from 'react-router-dom';
-import { ArrowLeftOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, FilterOutlined } from '@ant-design/icons';
 import './listagemItens.css';
+import ListagemTabela from '~/components/listagem-itens/tabela/listagemTabelaComponent';
+import ListagemSelectComponent from '~/components/listagem-itens/select/listagemSelectComponent';
+import ListagemResumoItemComponent from '~/components/listagem-itens/resumoItem/listagemResumoItemComponent';
+import ListagemVersaoItemComponent from '~/components/listagem-itens/versaoItem/listagemVersaoItemComponent';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+
+const { Text } = Typography; // ✅ corrigido: define o Text do Ant Design
+interface Item {
+  codigo: string;
+  componente: string;
+  enunciado: string;
+  dificuldade: string;
+  situacao: string;
+  dataCriacao: string;
+}
+
+const ITENS_POR_PAGINA = 8;
 
 const ListagemItens: React.FC = () => {
   const linkRetorno = 'https://serap.sme.prefeitura.sp.gov.br/';
+  const navigate = useNavigate();
+
+  const [pagina, setPagina] = useState(1);
+  const [selectItemLista, setSelectItemLista] = useState<AntDesignDto[]>([
+    {
+      value: '0',
+      label: 'Todas',
+    },
+  ]);
+  const [selectItemSelecionado, setSelectItemSelecionado] = useState<AntDesignDto>({
+    value: '0',
+    label: 'Todas',
+  });
+
+  const [tabelaItens, setTabelaItens] = useState<Item[]>([]);
+
+  useEffect(() => {
+    buscaDadosSelectItens();
+    buscaDadosTabela();
+  }, []);
+
+  useEffect(() => {
+    buscaDadosTabela();
+  }, [selectItemSelecionado]);
+
+  const buscaDadosSelectItens = async () => {
+    try {
+      /**const retorno = CAIQUE CRIE O SERVICO NA PASTA SERVICO E CHAME A API AQUI SUBSTITUINDO O VALOR MOCKADO ABAIXO */
+      const retorno = [
+        {
+          value: '0',
+          label: 'Todas',
+        },
+      ];
+      setSelectItemLista(retorno);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const buscaDadosTabela = async () => {
+    try {
+      /**const retorno = MARIO CRIE O SERVICO NA PASTA SERVICO E CHAME A API AQUI SUBSTITUINDO O VALOR MOCKADO ABAIXO */
+      const retorno: Item[] = Array.from({ length: 50 }).map((_, i) => ({
+        codigo: `_LPT_EF4_SAEB_00_${i + 1}`,
+        componente: 'Língua Portuguesa',
+        enunciado:
+          'O trecho a seguir foi retirado de uma crônica de Rubem Braga: "Há pessoas que têm o dom d..."',
+        dificuldade: ['Muito fácil', 'Fácil', 'Médio', 'Difícil'][Math.floor(Math.random() * 4)],
+        situacao: ['Ativo', 'Inativo', 'Pendente'][Math.floor(Math.random() * 3)],
+        dataCriacao: '29/05/2025',
+      }));
+      setTabelaItens(retorno);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const selecionaItemOnChange = async (value: string, option: any) => {
+    const obj: AntDesignDto = {
+      label: option.label,
+      value: value,
+    };
+    setSelectItemSelecionado(obj);
+  };
+
+  const inicio = (pagina - 1) * ITENS_POR_PAGINA;
+  const fim = inicio + ITENS_POR_PAGINA;
+  const itensPagina = tabelaItens.slice(inicio, fim);
+
   return (
-    <div className='cadastrarItemHeader'>
-      <Row className='cadastrarItemHeader-corpo'>
-        <Col xs={12} md={6}>
-          <Link to={linkRetorno} className='cadastrarItemHeader-retornar'>
-            <ArrowLeftOutlined className='cadastrarItemHeader-icone-retornar' />
-            <span className='cadastrarItemHeader-texto-retornar'>Retornar à tela inicial</span>
-          </Link>
-        </Col>
-        <Col xs={12} md={12} className='cadastrarItemHeader-titulo'>
-          Cadastrar novo item
-        </Col>
-        <Col xs={0} md={6} />
-      </Row>
-      <div className='cadastrarItemHeader-rota'>
-        <div className='cadastrarItemHeader-rota-texto'>Home / Itens/ Cadastrar novo item</div>
-        <div className='cadastrarItemHeader-rota-titulo'>Cadastrar novo item</div>
+    <div className='listagem-pagina'>
+      <div className='cadastrarItemHeader'>
+        <Row className='cadastrarItemHeader-corpo'>
+          <Col xs={12} md={6}>
+            <Link to={linkRetorno} className='cadastrarItemHeader-retornar'>
+              <ArrowLeftOutlined className='cadastrarItemHeader-icone-retornar' />
+              <span className='cadastrarItemHeader-texto-retornar'>Retornar à tela inicial</span>
+            </Link>
+          </Col>
+          <Col xs={12} md={12} className='cadastrarItemHeader-titulo'>
+            Cadastrar novo item
+          </Col>
+          <Col xs={0} md={6} />
+        </Row>
+        <div className='cadastrarItemHeader-rota'>
+          <div className='cadastrarItemHeader-rota-texto'>Home / Itens / Cadastrar novo item</div>
+          <div className='cadastrarItemHeader-rota-titulo'>Cadastrar novo item</div>
+        </div>
+      </div>
+
+      <div className='listagem-head'>
+        <div className='listagem-head-texto'>
+          <Row className='listagem-titulo'>
+            <Col xs={12} md={12}>
+              Lista de itens
+            </Col>
+          </Row>
+
+          <Row className='listagem-subtitulo'>
+            <Col xs={12} md={12}>
+              Sua lista de itens criados. Você pode conferir detalhes, fazer edições ou usar os
+              filtros para encontrar o que precisa.
+            </Col>
+          </Row>
+        </div>
+        <div className='listagem-head-botao'>
+          <Button
+            onClick={() => {
+              navigate(`/criacao`);
+              window.scrollTo(0, 0);
+            }}
+          >
+            CRIAR NOVO ITEM
+          </Button>
+        </div>
+      </div>
+
+      <div>
+        <ListagemSelectComponent
+          dados={selectItemLista}
+          itemSelecionado={selectItemSelecionado}
+          selecionaItemOnChange={selecionaItemOnChange}
+        ></ListagemSelectComponent>
+      </div>
+
+      <div className='listagem-conteudo'>
+        <ListagemTabela
+          itensPagina={itensPagina}
+          inicio={inicio}
+          fim={fim}
+          dados={tabelaItens}
+          pagina={pagina}
+          setPagina={setPagina}
+          ITENS_POR_PAGINA={ITENS_POR_PAGINA}
+        ></ListagemTabela>
+
+        <Card className='listagem-tabela'>
+          <div>
+            <ListagemResumoItemComponent></ListagemResumoItemComponent>
+          </div>
+          <div>
+            <ListagemVersaoItemComponent></ListagemVersaoItemComponent>
+          </div>
+        </Card>
       </div>
     </div>
   );

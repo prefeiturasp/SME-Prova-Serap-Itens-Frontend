@@ -7,7 +7,7 @@ import ListagemItens from '~/pages/listagemItens/listagemItens';
 const RoutesConfig: React.FC = () => {
   return (
     <Routes>
-      <Route path='/' element={<CadastrarItemNovo />} />
+      <Route path='/' element={<ListagemItens />} />
 
       <Route path='/criacao' element={<CadastrarItemNovo />} />
       <Route path='/listagem' element={<ListagemItens />} />
