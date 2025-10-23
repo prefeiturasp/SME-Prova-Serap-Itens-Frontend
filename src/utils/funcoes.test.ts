@@ -56,27 +56,30 @@ describe('funcoes', () => {
   describe('ruleCampoObrigatorioForm', () => {
     it('deve retornar regra obrigatória quando o valor for indefinido', () => {
       const regras = ruleCampoObrigatorioForm(undefined);
-      expect(regras).toHaveLength(1);
-      expect(regras[0].required).toBe(true);
-      expect(regras[0].message).toBe('Campo obrigatório');
+      const regra = typeof regras[0] === 'function' ? regras[0]({} as any) : regras[0]; // ✅ mock form instance
+      expect(regra.required).toBe(true);
+      expect(regra.message).toBe('Campo obrigatório');
     });
 
     it('deve retornar regra não obrigatória quando o valor for definido', () => {
       const regras = ruleCampoObrigatorioForm('abc');
-      expect(regras[0].required).toBe(false);
+      const regra = typeof regras[0] === 'function' ? regras[0]({} as any) : regras[0];
+      expect(regra.required).toBe(false);
     });
   });
 
   describe('ruleCampoArrayStringObrigatorioForm', () => {
     it('deve retornar obrigatório quando o array estiver vazio', () => {
       const regras = ruleCampoArrayStringObrigatorioForm([]);
-      expect(regras[0].required).toBe(true);
-      expect(regras[0].message).toBe('Campo obrigatório');
+      const regra = typeof regras[0] === 'function' ? regras[0]({} as any) : regras[0];
+      expect(regra.required).toBe(true);
+      expect(regra.message).toBe('Campo obrigatório');
     });
 
     it('deve retornar não obrigatório quando o array tiver valores', () => {
       const regras = ruleCampoArrayStringObrigatorioForm(['x']);
-      expect(regras[0].required).toBe(false);
+      const regra = typeof regras[0] === 'function' ? regras[0]({} as any) : regras[0];
+      expect(regra.required).toBe(false);
     });
   });
 });

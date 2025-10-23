@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Card, Col, Pagination, Row, Table, Tag, Typography } from 'antd';
+import { Button, Card, Col, Row } from 'antd';
 import { Link } from 'react-router-dom';
-import { ArrowLeftOutlined, FilterOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined } from '@ant-design/icons';
 import './listagemItens.css';
 import ListagemTabela from '~/components/listagem-itens/tabela/listagemTabelaComponent';
 import ListagemSelectComponent from '~/components/listagem-itens/select/listagemSelectComponent';
 import ListagemResumoItemComponent from '~/components/listagem-itens/resumoItem/listagemResumoItemComponent';
 import ListagemVersaoItemComponent from '~/components/listagem-itens/versaoItem/listagemVersaoItemComponent';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { AntDesignDto } from '~/domain/dto/ant-design-dto';
 
-const { Text } = Typography; // ✅ corrigido: define o Text do Ant Design
+
 interface Item {
   codigo: string;
   componente: string;

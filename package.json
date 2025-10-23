@@ -9,7 +9,9 @@
     "preview": "vite preview",
     "lint": "npx eslint src",
     "prettier": "npx prettier src --check",
-    "test": "jest --watchAll"
+    "test": "jest --watchAll",
+    "testfile": "npm run test src/utils/funcoes.test.ts --coverage",
+    "testcoverage": "jest --coverage"
   },
   "dependencies": {
     "@ckeditor/ckeditor5-build-classic": "^41.2.1",
