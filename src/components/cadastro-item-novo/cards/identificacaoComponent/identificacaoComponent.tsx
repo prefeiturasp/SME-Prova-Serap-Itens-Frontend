@@ -22,7 +22,7 @@ const IdentificacaoComponent: React.FC<FormProps> = ({ form }) => {
     const areaConhecimentoIdForm = Form.useWatch(Campos.areaConhecimento, form);
     const disciplinaIdForm = Form.useWatch(Campos.disciplinas, form);
     const matrizIdForm = Form.useWatch(Campos.matriz, form);
-    const anoMatrizIdForm = Form.useWatch(Campos.anoMatriz, form);
+    //const anoMatrizIdForm = Form.useWatch(Campos.anoMatriz, form);
 
     const [listaAreaConhecimento, setListaAreaConhecimento] = useState<DefaultOptionType[]>([]);
     const [listaDisciplinas, setListaDisciplinas] = useState<DefaultOptionType[]>([]);
