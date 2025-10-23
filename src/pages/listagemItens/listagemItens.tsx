@@ -50,7 +50,8 @@ const ListagemItens: React.FC = () => {
 
   const buscaDadosSelectItens = async () => {
     try {
-      /**const retorno = CAIQUE CRIE O SERVICO NA PASTA SERVICO E CHAME A API AQUI SUBSTITUINDO O VALOR MOCKADO ABAIXO */
+      /*const retorno = CAIQUE CRIE O SERVICO NA PASTA SERVICO E CHAME A API AQUI SUBSTITUINDO O VALOR MOCKADO ABAIXO 
+      EXEMPLO const resposta: any[] = await MetododaPastaServicoQueVoceCriou(Number(aplicacaoSelecionada?.value),Number(componenteSelecionado?.value),Number(anoSelecionado?.value));*/
       const retorno = [
         {
           value: '0',
@@ -65,7 +66,8 @@ const ListagemItens: React.FC = () => {
 
   const buscaDadosTabela = async () => {
     try {
-      /**const retorno = MARIO CRIE O SERVICO NA PASTA SERVICO E CHAME A API AQUI SUBSTITUINDO O VALOR MOCKADO ABAIXO */
+      /*const retorno = MARIO CRIE O SERVICO NA PASTA SERVICO E CHAME A API AQUI SUBSTITUINDO O VALOR MOCKADO ABAIXO
+      EXEMPLO const resposta: any[] = await MetododaPastaServicoQueVoceCriou(Number(aplicacaoSelecionada?.value),Number(componenteSelecionado?.value),Number(anoSelecionado?.value));*/
       const retorno: Item[] = Array.from({ length: 50 }).map((_, i) => ({
         codigo: `_LPT_EF4_SAEB_00_${i + 1}`,
         componente: 'Língua Portuguesa',
