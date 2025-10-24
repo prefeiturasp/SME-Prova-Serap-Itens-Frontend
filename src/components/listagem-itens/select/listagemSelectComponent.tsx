@@ -1,6 +1,7 @@
-import { Card, Select } from 'antd';
+import { Card } from 'antd';
 import React from 'react';
 import './listagemSelectComponent.css';
+import { AntDesignDto } from '~/domain/dto/ant-design-dto';
 
 export interface ListagemSelectProps {
   dados: AntDesignDto[];
@@ -16,7 +17,7 @@ const ListagemSelectComponent: React.FC<ListagemSelectProps> = ({
   console.log(dados);
   return (
     <>
-      {/* SEGUE UM EXEMPLO QUE PODE TE AJUDAR, ESTE COMPONENTE AQUI VAI CHAMAR O ONCHANGE NO COMPONENTE PAI selecionaItemOnChange QUE FOI PASSADO PARA ELE POR REFERENCIA
+      {/* CAIQUE SEGUE UM EXEMPLO QUE PODE TE AJUDAR, ESTE COMPONENTE AQUI VAI CHAMAR O ONCHANGE NO COMPONENTE PAI selecionaItemOnChange QUE FOI PASSADO PARA ELE POR REFERENCIA
   <Select
                         data-testid="select-aplicacao"
                         showSearch
