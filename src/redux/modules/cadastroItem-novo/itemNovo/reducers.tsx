@@ -63,7 +63,19 @@ export interface ElaboracaoItemNovoProps {
   textoBase?: string;
   fonte?: string;
   enunciado?: string;
-  alternativasDto?: any[]; // AlternativaRascunhoDto[]
+  codigoItem?: string;
+  video?: any; // Arquivo de vídeo do upload
+  audio?: any; // Arquivo de áudio do upload
+  alternativaA?: string;
+  justificativaA?: string;
+  alternativaB?: string;
+  justificativaB?: string;
+  alternativaC?: string;
+  justificativaC?: string;
+  alternativaD?: string;
+  justificativaD?: string;
+  alternativaCorreta?: string; // "A", "B", "C" ou "D"
+  alternativasDto?: any[]; // AlternativaRascunhoDto[] - será montado baseado nos campos acima
   arquivoVideoId?: number;
   arquivoAudioId?: number;
 }
@@ -72,6 +84,18 @@ const initialValuesElaboracaoItemNovoProps = {
   textoBase: undefined,
   fonte: undefined,
   enunciado: undefined,
+  codigoItem: undefined,
+  video: undefined,
+  audio: undefined,
+  alternativaA: undefined,
+  justificativaA: undefined,
+  alternativaB: undefined,
+  justificativaB: undefined,
+  alternativaC: undefined,
+  justificativaC: undefined,
+  alternativaD: undefined,
+  justificativaD: undefined,
+  alternativaCorreta: undefined,
   alternativasDto: undefined,
   arquivoVideoId: undefined,
   arquivoAudioId: undefined,

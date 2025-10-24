@@ -1,5 +1,6 @@
 import { Button, Form, FormProps, notification, Spin } from 'antd';
 import React, { useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './cadastrarItemNovo.css';
 
 // import IdentificacaoComponent from '~/components/cadastro-item-novo/cards/identificacaoComponent/identificacaoComponent';
@@ -42,10 +43,11 @@ import CadastrarItemRodapeComponent from './cadastrarItemRodapeComponent';
 
 const CadastrarItemNovo: React.FC<FormProps> = () => {
 
+    const navigate = useNavigate();
     const dispatch = useDispatch();
     const [carregando, setCarregando] = useState<boolean>(false);
     const item = useSelector((state: AppState) => state.item);
-    //const configuracaoItemNovo = useSelector((state: AppState) => state.configuracaoItemNovo);
+    const configuracaoItemNovo = useSelector((state: AppState) => state.configuracaoItemNovo);
     //const elaboracaoItemNovo = useSelector((state: AppState) => state.elaboracaoItemNovo);
 
     const [form] = Form.useForm();
@@ -78,6 +80,40 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
     // const [bloquearBtnSalvar, setBloquearBtnSalvar] = useState<boolean>(bloquearSalvar);
     const [bloquearBtnSalvarRascunho, setBloquearBtnSalvarRascunho] =
         useState<boolean>(true);
+    const [bloquearBtnAvancar, setBloquearBtnAvancar] = useState<boolean>(true);
+
+    // 💾 Funções para gerenciar localStorage
+    const salvarItemNoLocalStorage = useCallback((itemData: { id: number, codigo: number, configuracao: any }) => {
+        try {
+            localStorage.setItem('itemAtual', JSON.stringify(itemData));
+            console.log('💾 Item salvo no localStorage:', itemData);
+        } catch (error) {
+            console.error('❌ Erro ao salvar no localStorage:', error);
+        }
+    }, []);
+
+    const carregarItemDoLocalStorage = useCallback((): { id: number, codigo: number, configuracao: any } | null => {
+        try {
+            const itemSalvo = localStorage.getItem('itemAtual');
+            if (itemSalvo) {
+                const item = JSON.parse(itemSalvo);
+                console.log('📂 Item carregado do localStorage:', item);
+                return item;
+            }
+        } catch (error) {
+            console.error('❌ Erro ao carregar do localStorage:', error);
+        }
+        return null;
+    }, []);
+
+    const limparItemDoLocalStorage = useCallback(() => {
+        try {
+            localStorage.removeItem('itemAtual');
+            console.log('🗑️ Item removido do localStorage');
+        } catch (error) {
+            console.error('❌ Erro ao limpar localStorage:', error);
+        }
+    }, []);
 
     // ✅ useEffect refatorado para usar valores do formulário ao invés do Redux
     useEffect(() => {
@@ -87,6 +123,48 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
 
         setBloquearBtnSalvarRascunho(bloquear);
     }, [areaConhecimentoIdForm, disciplinaIdForm]);
+
+    // ✅ useEffect para carregar dados do localStorage na inicialização
+    useEffect(() => {
+        // Se Redux estiver vazio, tenta carregar do localStorage
+        if ((!item.id || item.id === 0) && (!configuracaoItemNovo?.codigo || configuracaoItemNovo.codigo === 0)) {
+            const itemSalvo = carregarItemDoLocalStorage();
+            if (itemSalvo && itemSalvo.id > 0 && itemSalvo.codigo > 0) {
+                console.log('🔄 Restaurando dados do localStorage para o Redux...');
+                
+                // Restaura no Redux
+                const itemAtual: ItemNovoProps = {
+                    id: itemSalvo.id,
+                    configuracao: itemSalvo.configuracao,
+                    elaboracao: {} as ElaboracaoItemNovoProps,
+                };
+                
+                dispatch(setItemNovo(itemAtual));
+                dispatch(setConfiguracaoItemNovo(itemSalvo.configuracao));
+                
+                // Popula o formulário
+                Object.keys(itemSalvo.configuracao).forEach(key => {
+                    const value = itemSalvo.configuracao[key];
+                    if (value !== undefined && value !== null) {
+                        form?.setFieldValue(key, value);
+                    }
+                });
+            }
+        }
+    }, [carregarItemDoLocalStorage, dispatch, form]); // Executa apenas uma vez na inicialização
+
+    // ✅ useEffect para controlar bloqueio do botão avançar baseado no Redux
+    useEffect(() => {
+        const temIdECodigo = item.id > 0 && configuracaoItemNovo?.codigo && configuracaoItemNovo.codigo > 0;
+        
+        console.log('🔍 Verificando condições para habilitar botão Avançar:', {
+            itemId: item.id,
+            codigoItem: configuracaoItemNovo?.codigo,
+            podeAvancar: temIdECodigo
+        });
+        
+        setBloquearBtnAvancar(!temIdECodigo);
+    }, [item.id, configuracaoItemNovo?.codigo]);
 
 
     type tipoMsg = 'success' | 'info' | 'warning' | 'error';
@@ -98,8 +176,12 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
         [api],
     );
 
-    const voltar = () => {
+    const cancelar = () => {
         setCarregando(true);
+        
+        // Limpa localStorage
+        limparItemDoLocalStorage();
+        
         const itemAtual: ItemNovoProps = {
             id: 0,
             configuracao: {},
@@ -110,6 +192,29 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
         dispatch(setElaboracaoItemNovo({} as ElaboracaoItemNovoProps));
         form.resetFields();
         setCarregando(false);
+        
+        // Navega para a tela de listagem de itens
+        navigate('/listagem');
+    };
+
+    const avancar = () => {
+        // Validação adicional antes de navegar
+        if (!item.id || item.id === 0) {
+            mensagem('error', 'Erro', 'É necessário salvar o item antes de avançar');
+            return;
+        }
+        
+        if (!configuracaoItemNovo?.codigo || configuracaoItemNovo.codigo === 0) {
+            mensagem('error', 'Erro', 'É necessário que o item tenha um código antes de avançar');
+            return;
+        }
+        
+        console.log('✅ Navegando para elaboração com:', {
+            id: item.id,
+            codigo: configuracaoItemNovo.codigo
+        });
+        
+        navigate('/elaboracao');
     };
 
     const gerarItemSalvar = useCallback(() => {
@@ -219,7 +324,14 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                     dispatch(setConfiguracaoItemNovo(configuracaoItemRetorno));
                     dispatch(setItemNovo(itemAtual));
 
-                    // ✅ 3. Atualizar formulário com os dados carregados
+                    // ✅ 3. Salvar no localStorage para persistir dados
+                    salvarItemNoLocalStorage({
+                        id: id,
+                        codigo: configuracaoItemRetorno.codigo,
+                        configuracao: configuracaoItemRetorno
+                    });
+
+                    // ✅ 4. Atualizar formulário com os dados carregados
                     Object.keys(configuracaoItemRetorno).forEach(key => {
                         const value = configuracaoItemRetorno[key as keyof ConfiguracaoItemNovoProps];
                         if (value !== undefined && value !== null) {
@@ -418,7 +530,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
 
                         <div className='cadastrarItem-botoes'>
                             <div className='cadastrarItem-btn'>
-                                <Button className='btnVoltar' onClick={voltar}>Voltar</Button>
+                                <Button className='btnVoltar' onClick={cancelar}>Cancelar</Button>
                             </div>
                             <div className='cadastrarItem-btn'>
                                 <Button
@@ -431,7 +543,14 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                                 </Button>
                             </div>
                             <div className='cadastrarItem-btn'>
-                                <Button className='btnAvancar' onClick={voltar}>Avançar</Button>
+                                <Button 
+                                    className='btnAvancar' 
+                                    onClick={avancar}
+                                    disabled={bloquearBtnAvancar}
+                                    type={bloquearBtnAvancar ? 'default' : 'primary'}
+                                >
+                                    Avançar
+                                </Button>
                             </div>
                         </div>
                     </div>

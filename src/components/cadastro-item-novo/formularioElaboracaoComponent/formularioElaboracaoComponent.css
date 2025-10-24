@@ -1,0 +1,73 @@
+/* Estilo para as labels do formulário de elaboração */
+.card-campo-elaboracao .ant-form-item-label>label {
+    color: #595959 !important;
+}
+
+/* Caso precise aplicar a todos os campos de elaboração */
+.card-elaboracao .ant-form-item-label>label {
+    color: #595959 !important;
+}
+
+/* Estilos para as alternativas */
+.alternativa-corpo-elaboracao {
+    border: 1px solid #d9d9d9;
+    border-radius: 6px;
+    padding: 16px;
+    margin-bottom: 16px;
+    background-color: #fafafa;
+}
+
+.alternativa-corpo-elaboracao:last-child {
+    margin-bottom: 0;
+}
+
+.ck-powered-by {
+    display: none !important;
+}
+
+/* Ou se aparecer com outros nomes */
+.ck-powered-by-balloon,
+.ck-balloon-panel_powered-by {
+    display: none !important;
+}
+
+.card-elaboracao {
+    font-family: Roboto, sans-serif;
+    background: #FFFFFF;
+    border-radius: 4px;
+    padding: 1em 2.3em 1em 2.3em;
+    color: #595959;
+    margin-bottom: 1em;
+}
+
+.card-titulo-elaboracao {
+    font-size: 24px;
+    font-weight: 700;
+    font-style: Bold;
+    margin-top: 0.5em;
+}
+
+.card-subtitulo-elaboracao {
+    font-size: 14px;
+    font-weight: 400;
+    font-style: Regular;
+    margin-bottom: 0.5em;
+}
+
+.card-campo-elaboracao {
+    padding: 0em 0em 0em 0em;
+    margin-bottom: 0px;
+    color: #595959;
+}
+
+.card-campo-elaboracao label {
+    color: #595959;
+}
+
+.alternativa-corpo-elaboracao {
+    background: #F5F5F5;
+    padding: 0em 1em;
+    border-radius: 4px;
+    color: #595959;
+    margin-bottom: 1em;
+}

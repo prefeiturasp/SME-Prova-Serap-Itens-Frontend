@@ -21,6 +21,23 @@ export enum Campos {
     observacao = 'observacao',
     nivelItem = 'nivelItem',
     sentencaDescritora = 'sentencaDescritora',
+    
+    // ✅ Novos campos para FormularioElaboracaoComponent
+    textoBase = 'textoBase',
+    fonte = 'fonte',
+    enunciado = 'enunciado',
+    codigoItem = 'codigoItem',
+    video = 'video',
+    audio = 'audio',
+    alternativaA = 'alternativaA',
+    justificativaA = 'justificativaA',
+    alternativaB = 'alternativaB',
+    justificativaB = 'justificativaB',
+    alternativaC = 'alternativaC',
+    justificativaC = 'justificativaC',
+    alternativaD = 'alternativaD',
+    justificativaD = 'justificativaD',
+    alternativaCorreta = 'alternativaCorreta',
 }
 
 export enum DadosIniciais {
