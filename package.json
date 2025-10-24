@@ -10,8 +10,9 @@
     "lint": "npx eslint src",
     "prettier": "npx prettier src --check",
     "test": "jest --watchAll",
-    "testfile": "npm run test src/utils/funcoes.test.ts --coverage",
-    "testcoverage": "jest --coverage"
+    "testfile": "npm run test src/pages/listagemItens/listagemItens.test.tsx --coverage",
+    "testcoverage": "jest --coverage",
+    "testpipeline": "yarn tsc --noEmit"
   },
   "dependencies": {
     "@ckeditor/ckeditor5-build-classic": "^41.2.1",
@@ -45,6 +46,7 @@
     "@babel/preset-env": "^7.28.3",
     "@babel/preset-react": "^7.27.1",
     "@babel/preset-typescript": "^7.27.1",
+    "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
