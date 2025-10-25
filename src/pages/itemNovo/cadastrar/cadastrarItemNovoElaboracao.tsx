@@ -38,6 +38,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
     const dispatch = useDispatch();
     // const [messageApi, contextHolder] = message.useMessage();
     const [carregando, setCarregando] = useState(false);
+    const [verificacaoInicialFeita, setVerificacaoInicialFeita] = useState(false);
 
     const elaboracaoItemNovo = useSelector((state: AppState) => state.elaboracaoItemNovo);
     const configuracaoItemNovo = useSelector((state: AppState) => state.configuracaoItemNovo);
@@ -60,6 +61,17 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
             const itemSalvo = localStorage.getItem('itemAtual');
             if (itemSalvo) {
                 const item = JSON.parse(itemSalvo);
+
+                // 🔧 Normaliza palavrasChave - converte string separada por ';' em array
+                if (item.configuracao && item.configuracao.palavrasChave) {
+                    if (typeof item.configuracao.palavrasChave === 'string') {
+                        item.configuracao.palavrasChave = item.configuracao.palavrasChave
+                            .split(';')
+                            .filter((p: string) => p && p.trim());
+                        console.log('🔧 palavrasChave convertida de string para array na elaboração:', item.configuracao.palavrasChave);
+                    }
+                }
+
                 console.log('📂 Item carregado do localStorage na elaboração:', item);
                 return item;
             }
@@ -72,15 +84,126 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
     const limparItemDoLocalStorage = useCallback(() => {
         try {
             localStorage.removeItem('itemAtual');
-            console.log('🗑️ Item removido do localStorage na elaboração');
+            localStorage.removeItem('itemNovo'); // 🧹 Remove também chave antiga para limpeza completa
+            localStorage.removeItem('voltandoParaPrimeiraTela'); // 🧹 Remove flag de navegação
+            console.log('🗑️ Todas as chaves do item removidas do localStorage na elaboração');
         } catch (error) {
             console.error('❌ Erro ao limpar localStorage:', error);
         }
     }, []);
 
-    const voltar = () => {
-        navigate('/criacao');
+    const voltar = async () => {
+        console.log('🔙 Voltando para primeira tela - recarregando dados via service...');
+
+        if (item.id && item.id > 0) {
+            try {
+                setCarregando(true);
+
+                // 🔄 Usa o service para recarregar dados completos (igual ao que funciona no salvar)
+                const resp = await configuracaoItemService.obterItem(item.id);
+
+                // 🏷️ MARCA que estamos vindo do "Voltar" para o FormularioUnico saber como agir
+                localStorage.setItem('voltandoParaPrimeiraTela', 'true');
+
+                if (resp.data) {
+                    // ✅ 1. Mapear dados da API para o formato Redux
+                    const configuracaoItemRetorno = {
+                        codigo: resp.data.codigoItem,
+                        areaConhecimento: resp.data.areaconhecimentoId, // ← Corrigido: minúsculo "c"
+                        disciplina: resp.data.disciplinaId,
+                        matriz: resp.data.matrizId,
+                        competencia: resp.data.competenciaId,
+                        habilidade: resp.data.habilidadeId,
+                        anoMatriz: resp.data.anoMatrizId,
+                        assunto: resp.data.assuntoId,
+                        subAssunto: resp.data.subAssuntoId,
+                        situacaoItem: resp.data.situacao,
+                        tipoItem: resp.data.tipo,
+                        quantidadeAlternativas: resp.data.quantidadeAlternativasId,
+                        dificuldadeSugerida: resp.data.dificuldadeSugeridaId,
+                        discriminacao: resp.data.discriminacao,
+                        dificuldade: resp.data.dificuldade,
+                        nivelItem: resp.data.nivelItem,
+                        acertoCasual: resp.data.acertoCasual,
+                        palavrasChave: resp.data.palavrasChave
+                            ? resp.data.palavrasChave.split(';').filter((p: string) => p && p.trim())
+                            : [],
+                        parametroBTransformado: resp.data.parametroBTransformado,
+                        mediaDesvioPadrao: resp.data.mediaEhDesvio,
+                        sentencaDescritora: resp.data.sentencaDescritora,
+                        observacao: resp.data.observacao,
+                    };
+
+                    console.log('🔧 Dados mapeados do backend para Redux:', configuracaoItemRetorno);
+
+                    // ✅ 2. Atualiza Redux com dados mapeados corretamente
+                    dispatch(setConfiguracaoItemNovo(configuracaoItemRetorno));
+                    dispatch(setItemNovo({ id: item.id, configuracao: configuracaoItemRetorno }));
+
+                    // ✅ 3. Atualiza localStorage para persistir
+                    try {
+                        localStorage.setItem('itemAtual', JSON.stringify({
+                            id: item.id,
+                            codigo: configuracaoItemRetorno.codigo,
+                            configuracao: configuracaoItemRetorno
+                        }));
+                        console.log('✅ Dados atualizados no localStorage antes de voltar');
+                    } catch (error) {
+                        console.error('❌ Erro ao salvar no localStorage:', error);
+                    }
+
+                    console.log('✅ Dados recarregados com sucesso, navegando para primeira tela...');
+                } else {
+                    console.log('⚠️ Sem dados retornados do service, navegando mesmo assim...');
+                }
+            } catch (error) {
+                console.error('❌ Erro ao recarregar dados:', error);
+                mensagem('error', 'Erro', 'Erro ao recarregar dados do item');
+            } finally {
+                setCarregando(false);
+            }
+        } else {
+            console.log('⚠️ ID do item não disponível, navegando sem recarregar...');
+        }
+
+        // 🔄 Pequeno delay para garantir que dados sejam processados antes de navegar
+        setTimeout(() => {
+            navigate('/criacao');
+        }, 100);
     };
+
+    // ✅ useEffect para limpar localStorage no primeiro acesso direto à segunda página (sem navegação válida)
+    useEffect(() => {
+        if (!verificacaoInicialFeita) {
+            // Detecta acesso direto inválido: sem dados obrigatórios no Redux E sem localStorage válido
+            const temDadosObrigatorios = item.id > 0 && configuracaoItemNovo?.codigo && configuracaoItemNovo.codigo > 0;
+            const localStorageItem = carregarItemDoLocalStorage();
+            const temLocalStorageValido = localStorageItem && localStorageItem.id > 0 && localStorageItem.codigo > 0;
+
+            if (!temDadosObrigatorios && !temLocalStorageValido) {
+                console.log('🧹 Acesso direto inválido à segunda página - limpando localStorage e redirecionando');
+                limparItemDoLocalStorage();
+
+                // Limpa Redux também
+                const itemLimpo: ItemNovoProps = {
+                    id: 0,
+                    configuracao: {},
+                    elaboracao: {} as ElaboracaoItemNovoProps,
+                };
+                dispatch(setItemNovo(itemLimpo));
+                dispatch(setConfiguracaoItemNovo({}));
+                dispatch(setElaboracaoItemNovo({} as ElaboracaoItemNovoProps));
+
+                // Redireciona para primeira página
+                setTimeout(() => {
+                    navigate('/item-novo');
+                }, 100);
+                return;
+            }
+
+            setVerificacaoInicialFeita(true);
+        }
+    }, [verificacaoInicialFeita, item.id, configuracaoItemNovo, carregarItemDoLocalStorage, limparItemDoLocalStorage, dispatch, navigate, setVerificacaoInicialFeita]);
 
     // Validação dos parâmetros obrigatórios para acessar esta tela
     useEffect(() => {
@@ -92,13 +215,13 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
         };
 
         // Se Redux estiver vazio, tenta carregar do localStorage
-        if ((!parametrosObrigatorios.id || parametrosObrigatorios.id === 0) || 
+        if ((!parametrosObrigatorios.id || parametrosObrigatorios.id === 0) ||
             (!parametrosObrigatorios.codigoItem || parametrosObrigatorios.codigoItem === 0)) {
-            
+
             const itemSalvo = carregarItemDoLocalStorage();
             if (itemSalvo && itemSalvo.id > 0 && itemSalvo.codigo > 0) {
                 console.log('🔄 Dados do Redux vazios, restaurando do localStorage...');
-                
+
                 // Restaura no Redux
                 dispatch(setConfiguracaoItemNovo(itemSalvo.configuracao));
                 dispatch(setItemNovo({
@@ -260,7 +383,30 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
             dificuldade: configuracaoItemNovo?.dificuldade ? +configuracaoItemNovo?.dificuldade : null,
             nivelItem: configuracaoItemNovo?.nivelItem || null,
             acertoCasual: configuracaoItemNovo?.acertoCasual ? +configuracaoItemNovo?.acertoCasual : null,
-            palavrasChave: configuracaoItemNovo?.palavrasChave || [],
+            // Conversão segura do palavrasChave para elaboração (campo não obrigatório)
+            palavrasChave: (() => {
+                let palavrasChaveConvertido = '';
+
+                if (configuracaoItemNovo?.palavrasChave) {
+                    if (Array.isArray(configuracaoItemNovo.palavrasChave)) {
+                        // Filtra valores vazios e junta com ';'
+                        const palavrasValidas = configuracaoItemNovo.palavrasChave.filter((p: string) => p && p.trim());
+                        palavrasChaveConvertido = palavrasValidas.length > 0 ? palavrasValidas.join(';') : '';
+                    } else if (typeof configuracaoItemNovo.palavrasChave === 'string') {
+                        const palavraString = (configuracaoItemNovo.palavrasChave as string).trim();
+                        if (palavraString) {
+                            palavrasChaveConvertido = palavraString;
+                        }
+                    }
+                }
+
+                console.log('🔧 palavrasChave convertido na elaboração:', {
+                    original: configuracaoItemNovo?.palavrasChave,
+                    convertido: palavrasChaveConvertido,
+                    isEmpty: !palavrasChaveConvertido
+                });
+                return palavrasChaveConvertido || null; // null se vazio
+            })(),
             parametroBTransformado: configuracaoItemNovo?.parametroBTransformado ? +configuracaoItemNovo?.parametroBTransformado : null,
             mediaEhDesvio: configuracaoItemNovo?.mediaDesvioPadrao || null,
             sentencaDescritora: configuracaoItemNovo?.sentencaDescritora || null,
@@ -278,7 +424,35 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
             dto.arquivoAudioId = values[campoAudio]?.[0]?.idFile;
         }
 
+        // 🔍 Debug específico para palavrasChave
+        console.log('🔍 Debug palavrasChave:', {
+            original: configuracaoItemNovo?.palavrasChave,
+            tipo: typeof configuracaoItemNovo?.palavrasChave,
+            isArray: Array.isArray(configuracaoItemNovo?.palavrasChave),
+            final: dto.palavrasChave,
+            tipoFinal: typeof dto.palavrasChave,
+            formatoBackend: 'String separada por ";" ex: "escola;livro"'
+        });
+
         console.log('🚀 DTO Final da elaboração sendo enviado:', dto);
+
+        // 🧪 Teste de serialização para detectar referências circulares
+        try {
+            const testeSerializacao = JSON.stringify(dto);
+            console.log('✅ DTO da elaboração serializa corretamente - tamanho:', testeSerializacao.length);
+        } catch (error) {
+            console.error('❌ ERRO na serialização do DTO da elaboração:', error);
+            console.log('🔍 Analisando cada propriedade do DTO da elaboração:');
+            Object.keys(dto).forEach(key => {
+                try {
+                    JSON.stringify((dto as any)[key]);
+                    console.log(`✅ ${key}: OK`);
+                } catch (err) {
+                    console.error(`❌ ${key}: ERRO -`, err);
+                }
+            });
+        }
+
         return dto;
     }, [item.id, configuracaoItemNovo, form, campoTextoBase, campoFonte, campoEnunciado,
         campoVideo, campoAudio, campoAlternativaA, campoJustificativaA, campoAlternativaB,
@@ -312,9 +486,9 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
                         justificativaD: values[campoJustificativaD],
                         alternativaCorreta: values[campoAlternativaCorreta],
                     };
-                    
+
                     dispatch(setElaboracaoItemNovo(elaboracaoAtualizada));
-                    
+
                     // ✅ 2.2 - Salvar dados do Redux no localStorage após salvar rascunho
                     try {
                         const itemParaLocalStorage = {
@@ -353,7 +527,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
     );
 
     const cancelar = () => {
-        setCarregando(true);        
+        setCarregando(true);
         limparItemDoLocalStorage();
         const itemAtual: ItemNovoProps = {
             id: 0,

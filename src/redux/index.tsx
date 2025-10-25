@@ -7,7 +7,6 @@ import { composeWithDevTools } from '@redux-devtools/extension';
 
 const middlewares = [thunk];
 
-// export type AppState = ReturnType<typeof rootReducer>; antigo
 export type AppState = ReturnType<typeof rootReducerNovo>;
 
 const persistedReducer = persistReducer(
@@ -17,7 +16,6 @@ const persistedReducer = persistReducer(
     whitelist: ['auth', 'filtroPrincipal', 'areaConhecimento', 'disciplina', 'matriz', 'item'],
   },
   rootReducerNovo,
-  // rootReducer, antigo
   
 );
 
