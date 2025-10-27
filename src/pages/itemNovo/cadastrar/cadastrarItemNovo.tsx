@@ -98,7 +98,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
             const itemSalvo = localStorage.getItem('itemAtual');
             if (itemSalvo) {
                 const item = JSON.parse(itemSalvo);
-                
+
                 // 🔧 Normaliza palavrasChave - converte string separada por ';' em array
                 if (item.configuracao && item.configuracao.palavrasChave) {
                     if (typeof item.configuracao.palavrasChave === 'string') {
@@ -108,7 +108,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                         console.log('🔧 palavrasChave convertida de string para array:', item.configuracao.palavrasChave);
                     }
                 }
-                
+
                 console.log('📂 Item carregado do localStorage:', item);
                 return item;
             }
@@ -143,11 +143,11 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
             // Detecta se é primeiro acesso: Redux vazio E não está voltando de navegação
             const isReduxVazio = (!item.id || item.id === 0) && (!configuracaoItemNovo?.codigo || configuracaoItemNovo.codigo === 0);
             const isLocalStorageVazio = !localStorage.getItem('itemAtual');
-            
+
             if (isReduxVazio && isLocalStorageVazio) {
                 console.log('🧹 Primeiro acesso à primeira página - limpando localStorage');
                 limparItemDoLocalStorage();
-                
+
                 // Limpa Redux também para garantir estado limpo
                 const itemLimpo: ItemNovoProps = {
                     id: 0,
@@ -158,7 +158,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                 dispatch(setConfiguracaoItemNovo({}));
                 dispatch(setElaboracaoItemNovo({} as ElaboracaoItemNovoProps));
             }
-            
+
             setLimpezaInicialFeita(true);
         }
     }, [limpezaInicialFeita, item.id, configuracaoItemNovo, limparItemDoLocalStorage, dispatch, setLimpezaInicialFeita]);
@@ -181,24 +181,33 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                 // Define flag para evitar conflitos
                 localStorage.setItem('carregandoViaLocalStorage', 'true');
 
-                // 0️⃣ Garantir que área de conhecimento está carregada
-                console.log('📝 Garantindo que área de conhecimento esteja carregada...');
+                // 0️⃣ Garantir que listas básicas estão carregadas
+                console.log('📝 Garantindo que área de conhecimento e dificuldade sugerida estejam carregadas...');
                 localStorage.setItem('aguardandoAreaConhecimento', 'true');
-                
+                localStorage.setItem('aguardandoDificuldadeSugerida', 'true');
+
                 let tentativas = 0;
                 while (tentativas < 25 && localStorage.getItem('aguardandoAreaConhecimento') === 'true') {
                     await new Promise(resolve => setTimeout(resolve, 200));
                     tentativas++;
                 }
                 console.log('✅ Área de conhecimento carregada (tentativas:', tentativas, ')');
-                
+
+                // Aguarda dificuldade sugerida
+                tentativas = 0;
+                while (tentativas < 25 && localStorage.getItem('aguardandoDificuldadeSugerida') === 'true') {
+                    await new Promise(resolve => setTimeout(resolve, 200));
+                    tentativas++;
+                }
+                console.log('✅ Dificuldade sugerida carregada (tentativas:', tentativas, ')');
+
                 // 1️⃣ Área → Disciplinas + Assuntos
                 if (itemSalvo.configuracao.areaConhecimento) {
                     console.log('📝 Setando área e aguardando disciplinas + assuntos carregarem...');
                     localStorage.setItem('aguardandoDisciplinas', 'true');
                     localStorage.setItem('aguardandoAssuntos', 'true');
                     form?.setFieldValue(Campos.areaConhecimento, itemSalvo.configuracao.areaConhecimento);
-                    
+
                     // Aguarda disciplinas
                     tentativas = 0;
                     while (tentativas < 25 && localStorage.getItem('aguardandoDisciplinas') === 'true') {
@@ -206,7 +215,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                         tentativas++;
                     }
                     console.log('✅ Disciplinas carregaram (tentativas:', tentativas, ')');
-                    
+
                     // Aguarda assuntos
                     tentativas = 0;
                     while (tentativas < 25 && localStorage.getItem('aguardandoAssuntos') === 'true') {
@@ -221,7 +230,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                     console.log('📝 Setando disciplina e aguardando matriz carregarem...');
                     localStorage.setItem('aguardandoMatriz', 'true');
                     form?.setFieldValue(Campos.disciplinas, itemSalvo.configuracao.disciplina);
-                    
+
                     tentativas = 0;
                     while (tentativas < 25 && localStorage.getItem('aguardandoMatriz') === 'true') {
                         await new Promise(resolve => setTimeout(resolve, 200));
@@ -235,7 +244,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                     console.log('� Setando assunto e aguardando subassuntos carregarem...');
                     localStorage.setItem('aguardandoSubAssuntos', 'true');
                     form?.setFieldValue(Campos.assunto, itemSalvo.configuracao.assunto);
-                    
+
                     tentativas = 0;
                     while (tentativas < 25 && localStorage.getItem('aguardandoSubAssuntos') === 'true') {
                         await new Promise(resolve => setTimeout(resolve, 200));
@@ -249,7 +258,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                     console.log('📝 Setando matriz e aguardando competências carregarem...');
                     localStorage.setItem('aguardandoCompetencias', 'true');
                     form?.setFieldValue(Campos.matriz, itemSalvo.configuracao.matriz);
-                    
+
                     tentativas = 0;
                     while (tentativas < 25 && localStorage.getItem('aguardandoCompetencias') === 'true') {
                         await new Promise(resolve => setTimeout(resolve, 200));
@@ -260,14 +269,14 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
 
                 // 5️⃣ Popula todos os outros campos
                 console.log('📝 Populando campos restantes...');
-                
+
                 // Restaura no Redux
                 const itemAtual: ItemNovoProps = {
                     id: itemSalvo.id,
                     configuracao: itemSalvo.configuracao,
                     elaboracao: {} as ElaboracaoItemNovoProps,
                 };
-                
+
                 dispatch(setItemNovo(itemAtual));
                 dispatch(setConfiguracaoItemNovo(itemSalvo.configuracao));
 
@@ -287,9 +296,9 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                     quantidadeAlternativas: Campos.quantidadeAlternativas,
                     dificuldadeSugerida: Campos.dificuldadeSugerida,
                     nivelItem: Campos.nivelItem,
-                    discriminacao: Campos.discriminacao,
-                    dificuldade: Campos.dificuldade,
-                    acertoCasual: Campos.acertoCasual,
+                    discriminacao: Campos.discriminacao,        // ← 'infoEstatisticasDiscriminacao'
+                    dificuldade: Campos.dificuldade,            // ← 'infoEstatisticasDificuldade'
+                    acertoCasual: Campos.acertoCasual,          // ← 'infoEstatisticasAcertoCasual'
                     palavrasChave: Campos.palavraChave,
                     parametroBTransformado: Campos.parametroBTransformado,
                     mediaDesvioPadrao: Campos.mediaDesvioPadrao,
@@ -297,15 +306,29 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                     observacao: Campos.observacao,
                 };
 
+                // 📝 Popula campos após cascata completa
+                console.log('📝 Populando todos os campos após cascata completa...');
+
+                // Aguarda um pouco para garantir que todas as listas estão prontas
+                await new Promise(resolve => setTimeout(resolve, 300));
+
                 Object.keys(itemSalvo.configuracao).forEach(key => {
                     const value = itemSalvo.configuracao[key];
                     const formFieldName = mapeamentoCampos[key as keyof typeof mapeamentoCampos];
-                    
+
                     if (value !== undefined && value !== null && formFieldName) {
                         form?.setFieldValue(formFieldName, value);
                         console.log(`📝 Campo ${formFieldName} (${key}) restaurado:`, value);
                     }
                 });
+
+                // 🎯 Force um re-render especial para dificuldade sugerida (Radio Button)
+                if (itemSalvo.configuracao.dificuldadeSugerida) {
+                    setTimeout(() => {
+                        form?.setFieldValue(Campos.dificuldadeSugerida, itemSalvo.configuracao.dificuldadeSugerida);
+                        console.log('🎯 Dificuldade sugerida forçada:', itemSalvo.configuracao.dificuldadeSugerida);
+                    }, 500);
+                }
 
                 localStorage.removeItem('carregandoViaLocalStorage');
                 console.log('✅ Carregamento localStorage com cascata finalizado');
@@ -320,104 +343,88 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
         [dispatch, form, setCarregando]
     );
 
-    // ✅ useEffect para carregar dados do localStorage (na inicialização E após F5)
+    // ✅ useEffect SIMPLIFICADO: SEMPRE verifica localStorage quando tela carrega
     useEffect(() => {
         // � Detecta se Redux está vazio mas localStorage tem dados
-        const reduxVazio = (!item.id || item.id === 0) && 
-                          (!configuracaoItemNovo?.codigo || configuracaoItemNovo.codigo === 0 ||
-                           Object.keys(configuracaoItemNovo).length === 0);
+
+
+        // 🎯 LÓGICA SIMPLIFICADA: Se tem dados no localStorage, carrega com cascata SEMPRE
+        const itemSalvo = carregarItemDoLocalStorage();
         
-        const voltandoParaPrimeiraTela = localStorage.getItem('voltandoParaPrimeiraTela') === 'true';
-        const carregandoViaVoltar = localStorage.getItem('carregandoViaVoltar') === 'true';
-        const carregandoViaLocalStorage = localStorage.getItem('carregandoViaLocalStorage') === 'true';
-        
-        // 🚫 NÃO carregar se estiver fazendo algum processo especial
-        if (voltandoParaPrimeiraTela || carregandoViaVoltar || carregandoViaLocalStorage) {
-            console.log('🚫 Pulando carregamento localStorage - processo especial em andamento');
-            return;
-        }
-        
-        if (reduxVazio) {
-            const itemSalvo = carregarItemDoLocalStorage();
-            if (itemSalvo && itemSalvo.id > 0 && itemSalvo.codigo > 0) {
-                console.log('🔄 Detectado dados válidos no localStorage - usando cascata inteligente...');
-                carregarLocalStorageComCascata(itemSalvo);
-            } else {
-                console.log('📂 localStorage vazio ou inválido - formulário ficará limpo (cascata funciona normalmente em modo manual)');
-                // ✅ Mesmo sem dados no localStorage, as cascatas funcionam normalmente quando usuário seleciona campos
-                // ✅ FormularioUnico já carrega listas básicas (área, tipos, etc.) automaticamente
-            }
+        if (itemSalvo && itemSalvo.id > 0 && itemSalvo.codigo > 0) {
+            console.log('� SEMPRE: Detectado dados válidos no localStorage - carregando com cascata inteligente...');
+            console.log('📋 Dados encontrados:', { id: itemSalvo.id, codigo: itemSalvo.codigo });
+            carregarLocalStorageComCascata(itemSalvo);
         } else {
-            console.log('📋 Redux já tem dados - não precisa verificar localStorage');
+            console.log('📂 localStorage vazio - formulário ficará limpo para novo cadastro');
         }
-    }, [item.id, configuracaoItemNovo, carregarItemDoLocalStorage, carregarLocalStorageComCascata]);
+    }, []); // 🎯 SEM dependências - roda só quando componente monta (F5, primeira vez, etc.)
 
     // ✅ useEffect para sincronizar dados do Redux com os campos do formulário
     useEffect(() => {
-        // 🚫 NÃO sincronizar se estiver carregando via "Voltar" - deixar o obterDadosItemComListas lidar
-        const carregandoViaVoltar = localStorage.getItem('carregandoViaVoltar') === 'true';
-        const voltandoParaPrimeiraTela = localStorage.getItem('voltandoParaPrimeiraTela') === 'true';
-        
-        if (carregandoViaVoltar || voltandoParaPrimeiraTela) {
-            console.log('🚫 Pulando sincronização - carregamento via "Voltar" em andamento');
+        // 🚫 NÃO sincronizar apenas se estiver carregando cascata no momento
+        const carregandoViaLocalStorage = localStorage.getItem('carregandoViaLocalStorage') === 'true';
+
+        if (carregandoViaLocalStorage) {
+            console.log('🚫 Pulando sincronização - cascata localStorage em andamento');
             return;
         }
-        
+
         if (configuracaoItemNovo && Object.keys(configuracaoItemNovo).length > 0) {
             console.log('🔄 Sincronizando dados do Redux com os campos do formulário (modo normal)...');
-            
+
             // Pequeno delay para garantir que o formulário esteja renderizado
             const timeoutId = setTimeout(() => {
-            
-            // Mapeamento correto entre Redux e campos do formulário
-            const mapeamentoCampos = {
-                codigo: Campos.codigoItem,
-                areaConhecimento: Campos.areaConhecimento,
-                disciplina: Campos.disciplinas,
-                matriz: Campos.matriz,
-                competencia: Campos.competencia,
-                habilidade: Campos.habilidade,
-                anoMatriz: Campos.anoMatriz,
-                assunto: Campos.assunto,
-                subAssunto: Campos.subAssunto,
-                situacaoItem: Campos.situacaoItem,
-                tipoItem: Campos.tipoItem,
-                quantidadeAlternativas: Campos.quantidadeAlternativas,
-                dificuldadeSugerida: Campos.dificuldadeSugerida,
-                nivelItem: Campos.nivelItem,
-                discriminacao: Campos.discriminacao,        // ← 'infoEstatisticasDiscriminacao'
-                dificuldade: Campos.dificuldade,            // ← 'infoEstatisticasDificuldade'
-                acertoCasual: Campos.acertoCasual,          // ← 'infoEstatisticasAcertoCasual'
-                palavrasChave: Campos.palavraChave,
-                parametroBTransformado: Campos.parametroBTransformado,
-                mediaDesvioPadrao: Campos.mediaDesvioPadrao,
-                sentencaDescritora: Campos.sentencaDescritora,
-                observacao: Campos.observacao,
-            };
-            
-            // Prepara objeto com todos os valores para setar de uma vez
-            const valoresParaFormulario: Record<string, any> = {};
-            
-            Object.keys(configuracaoItemNovo).forEach(reduxKey => {
-                const value = configuracaoItemNovo[reduxKey as keyof typeof configuracaoItemNovo];
-                const formFieldName = mapeamentoCampos[reduxKey as keyof typeof mapeamentoCampos];
-                
-                if (value !== undefined && value !== null && formFieldName) {
-                    valoresParaFormulario[formFieldName] = value;
-                    console.log(`📝 Campo ${formFieldName} (${reduxKey}) será carregado com valor:`, value);
-                }
-            });
-            
+
+                // Mapeamento correto entre Redux e campos do formulário
+                const mapeamentoCampos = {
+                    codigo: Campos.codigoItem,
+                    areaConhecimento: Campos.areaConhecimento,
+                    disciplina: Campos.disciplinas,
+                    matriz: Campos.matriz,
+                    competencia: Campos.competencia,
+                    habilidade: Campos.habilidade,
+                    anoMatriz: Campos.anoMatriz,
+                    assunto: Campos.assunto,
+                    subAssunto: Campos.subAssunto,
+                    situacaoItem: Campos.situacaoItem,
+                    tipoItem: Campos.tipoItem,
+                    quantidadeAlternativas: Campos.quantidadeAlternativas,
+                    dificuldadeSugerida: Campos.dificuldadeSugerida,
+                    nivelItem: Campos.nivelItem,
+                    discriminacao: Campos.discriminacao,        // ← 'infoEstatisticasDiscriminacao'
+                    dificuldade: Campos.dificuldade,            // ← 'infoEstatisticasDificuldade'
+                    acertoCasual: Campos.acertoCasual,          // ← 'infoEstatisticasAcertoCasual'
+                    palavrasChave: Campos.palavraChave,
+                    parametroBTransformado: Campos.parametroBTransformado,
+                    mediaDesvioPadrao: Campos.mediaDesvioPadrao,
+                    sentencaDescritora: Campos.sentencaDescritora,
+                    observacao: Campos.observacao,
+                };
+
+                // Prepara objeto com todos os valores para setar de uma vez
+                const valoresParaFormulario: Record<string, any> = {};
+
+                Object.keys(configuracaoItemNovo).forEach(reduxKey => {
+                    const value = configuracaoItemNovo[reduxKey as keyof typeof configuracaoItemNovo];
+                    const formFieldName = mapeamentoCampos[reduxKey as keyof typeof mapeamentoCampos];
+
+                    if (value !== undefined && value !== null && formFieldName) {
+                        valoresParaFormulario[formFieldName] = value;
+                        console.log(`📝 Campo ${formFieldName} (${reduxKey}) será carregado com valor:`, value);
+                    }
+                });
+
                 // Seta todos os valores de uma vez e força re-render
                 if (Object.keys(valoresParaFormulario).length > 0) {
                     form?.setFieldsValue(valoresParaFormulario);
                     console.log('✅ Todos os campos foram atualizados no formulário:', valoresParaFormulario);
-                    
+
                     // ✅ Removed validateFields() - não é necessário validar automaticamente
                     // Validação acontece apenas quando usuário submete o form
                 }
             }, 50); // Delay de 50ms para garantir que o formulário esteja renderizado
-            
+
             return () => clearTimeout(timeoutId);
         }
     }, [configuracaoItemNovo, form]); // Executa sempre que configuracaoItemNovo mudar
@@ -425,13 +432,13 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
     // ✅ useEffect para controlar bloqueio do botão avançar baseado no Redux
     useEffect(() => {
         const temIdECodigo = item.id > 0 && configuracaoItemNovo?.codigo && configuracaoItemNovo.codigo > 0;
-        
+
         console.log('🔍 Verificando condições para habilitar botão Avançar:', {
             itemId: item.id,
             codigoItem: configuracaoItemNovo?.codigo,
             podeAvancar: temIdECodigo
         });
-        
+
         setBloquearBtnAvancar(!temIdECodigo);
     }, [item.id, configuracaoItemNovo?.codigo]);
 
@@ -447,10 +454,10 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
 
     const cancelar = () => {
         setCarregando(true);
-        
+
         // Limpa localStorage
         limparItemDoLocalStorage();
-        
+
         const itemAtual: ItemNovoProps = {
             id: 0,
             configuracao: {},
@@ -461,7 +468,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
         dispatch(setElaboracaoItemNovo({} as ElaboracaoItemNovoProps));
         form.resetFields();
         setCarregando(false);
-        
+
         // Navega para a tela de listagem de itens
         navigate('/listagem');
     };
@@ -472,17 +479,17 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
             mensagem('error', 'Erro', 'É necessário salvar o item antes de avançar');
             return;
         }
-        
+
         if (!configuracaoItemNovo?.codigo || configuracaoItemNovo.codigo === 0) {
             mensagem('error', 'Erro', 'É necessário que o item tenha um código antes de avançar');
             return;
         }
-        
+
         console.log('✅ Navegando para elaboração com:', {
             id: item.id,
             codigo: configuracaoItemNovo.codigo
         });
-        
+
         navigate('/elaboracao');
     };
 
@@ -505,7 +512,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
 
         // Conversão segura do palavrasChave (campo não obrigatório)
         let palavrasChaveConvertido = '';
-        
+
         if (values?.palavraChave) {
             if (Array.isArray(values.palavraChave)) {
                 // Filtra valores vazios e junta com ';'
@@ -515,7 +522,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                 palavrasChaveConvertido = values.palavraChave.trim();
             }
         }
-        
+
         console.log('✅ palavrasChave convertido:', {
             original: values?.palavraChave,
             convertido: palavrasChaveConvertido,
@@ -571,7 +578,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
 
         // 🔍 Log final do DTO antes de enviar
         console.log('🚀 DTO Final sendo enviado:', dto);
-        
+
         // 🧪 Teste de serialização para detectar referências circulares
         try {
             const testeSerializacao = JSON.stringify(dto);
@@ -621,7 +628,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                         dificuldade: resp.data.dificuldade,
                         nivelItem: resp.data.nivelItem,
                         acertoCasual: resp.data.acertoCasual,
-                        palavrasChave: resp.data.palavrasChave 
+                        palavrasChave: resp.data.palavrasChave
                             ? resp.data.palavrasChave.split(';').filter((p: string) => p && p.trim())
                             : [],
                         parametroBTransformado: resp.data.parametroBTransformado,
@@ -682,7 +689,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
             try {
                 // 1️⃣ Primeiro busca os dados do backend
                 const resp = await configuracaoItemService.obterItem(id);
-                
+
                 if (!resp?.data) {
                     throw new Error('Nenhum dado retornado do backend');
                 }
@@ -699,13 +706,14 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
 
                 // 3️⃣ Simular carregamento cascata forçando mudanças nos campos (FormularioUnico vai reagir)
                 // Isso força a cascata a carregar as listas na ordem certa
-                
+
                 // ⏳ Estratégia melhorada: usar localStorage para comunicação entre componentes
-                
-                // 0️⃣ Primeiro, garantir que área de conhecimento está carregada
-                console.log('📝 Garantindo que área de conhecimento esteja carregada...');
+
+                // 0️⃣ Primeiro, garantir que listas básicas estão carregadas
+                console.log('📝 Garantindo que área de conhecimento e dificuldade sugerida estejam carregadas...');
                 localStorage.setItem('aguardandoAreaConhecimento', 'true');
-                
+                localStorage.setItem('aguardandoDificuldadeSugerida', 'true');
+
                 // Aguarda área de conhecimento carregar
                 let tentativas = 0;
                 while (tentativas < 25 && localStorage.getItem('aguardandoAreaConhecimento') === 'true') {
@@ -713,13 +721,21 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                     tentativas++;
                 }
                 console.log('✅ Área de conhecimento carregada (tentativas:', tentativas, ')');
-                
+
+                // Aguarda dificuldade sugerida carregar
+                tentativas = 0;
+                while (tentativas < 25 && localStorage.getItem('aguardandoDificuldadeSugerida') === 'true') {
+                    await new Promise(resolve => setTimeout(resolve, 200));
+                    tentativas++;
+                }
+                console.log('✅ Dificuldade sugerida carregada (tentativas:', tentativas, ')');
+
                 // 1️⃣ Área → Disciplinas
                 if (resp.data.areaconhecimentoId) {
                     console.log('📝 Setando área e aguardando disciplinas carregarem...');
                     localStorage.setItem('aguardandoDisciplinas', 'true');
                     form?.setFieldValue(Campos.areaConhecimento, resp.data.areaconhecimentoId);
-                    
+
                     // Aguarda FormularioUnico sinalizar que disciplinas carregaram
                     let tentativas = 0;
                     while (tentativas < 25 && localStorage.getItem('aguardandoDisciplinas') === 'true') {
@@ -735,7 +751,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                     localStorage.setItem('aguardandoMatriz', 'true');
                     localStorage.setItem('aguardandoAssuntos', 'true');
                     form?.setFieldValue(Campos.disciplinas, resp.data.disciplinaId);
-                    
+
                     // Aguarda FormularioUnico sinalizar que matriz carregou
                     let tentativas = 0;
                     while (tentativas < 25 && localStorage.getItem('aguardandoMatriz') === 'true') {
@@ -743,7 +759,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                         tentativas++;
                     }
                     console.log('✅ Matriz carregou (tentativas:', tentativas, ')');
-                    
+
                     // Aguarda FormularioUnico sinalizar que assuntos carregaram
                     tentativas = 0;
                     while (tentativas < 25 && localStorage.getItem('aguardandoAssuntos') === 'true') {
@@ -758,7 +774,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                     console.log('📝 Setando assunto e aguardando subassuntos carregarem...');
                     localStorage.setItem('aguardandoSubAssuntos', 'true');
                     form?.setFieldValue(Campos.assunto, resp.data.assuntoId);
-                    
+
                     // Aguarda subassuntos carregarem
                     let tentativas = 0;
                     while (tentativas < 25 && localStorage.getItem('aguardandoSubAssuntos') === 'true') {
@@ -775,7 +791,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                     console.log('📝 Setando matriz e aguardando competências carregarem...');
                     localStorage.setItem('aguardandoCompetencias', 'true');
                     form?.setFieldValue(Campos.matriz, resp.data.matrizId);
-                    
+
                     // Aguarda competências carregarem
                     let tentativas = 0;
                     while (tentativas < 25 && localStorage.getItem('aguardandoCompetencias') === 'true') {
@@ -809,14 +825,14 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
     // ✅ useEffect para detectar "Voltar" e recarregar dados via service
     useEffect(() => {
         const voltandoParaPrimeiraTela = localStorage.getItem('voltandoParaPrimeiraTela') === 'true';
-        
+
         if (voltandoParaPrimeiraTela && item.id > 0) {
             console.log('🔙 Detectado "Voltar" - recarregando dados via obterDadosItem...');
             console.log('⚠️ IMPORTANTE: obterDadosItem() precisa que as listas dos selects já estejam carregadas!');
-            
+
             // Remove a flag imediatamente para evitar loops
             localStorage.removeItem('voltandoParaPrimeiraTela');
-            
+
             // Chama a nova função que carrega listas E dados
             obterDadosItemComListas(item.id);
         }
@@ -1011,8 +1027,8 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                                 </Button>
                             </div>
                             <div className='cadastrarItem-btn'>
-                                <Button 
-                                    className='btnAvancar' 
+                                <Button
+                                    className='btnAvancar'
                                     onClick={avancar}
                                     disabled={bloquearBtnAvancar}
                                     type={bloquearBtnAvancar ? 'default' : 'primary'}

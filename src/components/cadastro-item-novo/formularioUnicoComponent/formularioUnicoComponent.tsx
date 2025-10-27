@@ -353,6 +353,14 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
     popularCampoSelectForm(null, campoSituacaoItem, setListaSituacoesItem);
   }, []);
 
+  // 📡 Sinaliza quando dificuldade sugerida carregou (para cascata automática)
+  useEffect(() => {
+    if (localStorage.getItem('aguardandoDificuldadeSugerida') === 'true' && listaDificuldadeSugerida.length > 0) {
+      console.log('📡 Sinalizando: dificuldade sugerida carregou!', listaDificuldadeSugerida.length, 'itens');
+      localStorage.removeItem('aguardandoDificuldadeSugerida');
+    }
+  }, [listaDificuldadeSugerida.length]);
+
   // ✅ UseEffect simples: carrega listas quando campos mudam (cascata normal)
   // ✅ UseEffect para carregar Área de Conhecimento quando componente monta
   useEffect(() => {
@@ -482,7 +490,7 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
                     buttonStyle="solid"
                     optionType="button"
                     options={listaDificuldadeSugerida}
-                    defaultValue={5}
+                    // ❌ Removido defaultValue={5} - deixar Form.Item controlar o valor
                   />
                 </Spin>
               </Form.Item>
