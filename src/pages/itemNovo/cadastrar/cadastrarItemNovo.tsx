@@ -607,12 +607,12 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                 const resp = await configuracaoItemService.obterItem(id);
 
                 if (resp?.data) {
-
+console.log('📋 Dados recebidos do backend para item ID----->>>>>>>>', id, ':', resp.data);
 
                     // ✅ 1. Mapear dados da API para o formato Redux
                     const configuracaoItemRetorno: ConfiguracaoItemNovoProps = {
                         codigo: resp.data.codigoItem,
-                        areaConhecimento: resp.data.areaconhecimentoId, // ← Corrigido: minúsculo "c"
+                        areaConhecimento: resp.data.areaconhecimentoId,
                         disciplina: resp.data.disciplinaId,
                         matriz: resp.data.matrizId,
                         competencia: resp.data.competenciaId,
