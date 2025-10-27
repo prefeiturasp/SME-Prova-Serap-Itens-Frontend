@@ -278,11 +278,27 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
     }
   }, [disciplinaIdForm, popularCampoSelectForm, campoAssunto]);
 
+  // ✅ Sinaliza quando assuntos carregam (para cascata automática)
+  useEffect(() => {
+    if (listaAssuntos?.length > 0) {
+      localStorage.removeItem('aguardandoAssuntos');
+      console.log('🔔 Assuntos carregaram - removendo flag aguardandoAssuntos');
+    }
+  }, [listaAssuntos]);
+
   useEffect(() => {
     if (assuntoIdForm) {
       popularCampoSelectForm(assuntoIdForm, campoSubAssunto, setListaSubAssuntos);
     }
   }, [assuntoIdForm, popularCampoSelectForm, campoSubAssunto]);
+
+  // ✅ Sinaliza quando subassuntos carregam (para cascata automática)
+  useEffect(() => {
+    if (listaSubAssuntos?.length > 0) {
+      localStorage.removeItem('aguardandoSubAssuntos');
+      console.log('🔔 SubAssuntos carregaram - removendo flag aguardandoSubAssuntos');
+    }
+  }, [listaSubAssuntos]);
 
   useEffect(() => {
     const valorInicial = form?.getFieldValue(campoPalavraChave);
@@ -295,12 +311,13 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
 
 
   // Os Efeitos
-  // ✅ Reset inteligente: só reseta se REALMENTE vazio E primeira vez carregando E NÃO vindo do "Voltar"
+  // ✅ Reset inteligente: só reseta se REALMENTE vazio E primeira vez carregando E NÃO vindo de processo especial
   useEffect(() => {
     const voltandoParaPrimeiraTela = localStorage.getItem('voltandoParaPrimeiraTela') === 'true';
     const carregandoViaVoltar = localStorage.getItem('carregandoViaVoltar') === 'true';
+    const carregandoViaLocalStorage = localStorage.getItem('carregandoViaLocalStorage') === 'true';
 
-    if (!voltandoParaPrimeiraTela && !carregandoViaVoltar) {
+    if (!voltandoParaPrimeiraTela && !carregandoViaVoltar && !carregandoViaLocalStorage) {
       const valores = form?.getFieldsValue();
       const formularioVazio = !valores || Object.keys(valores).length === 0 ||
         Object.values(valores).every(v => !v || (Array.isArray(v) && v.length === 0));
