@@ -10,6 +10,7 @@ import ListagemVersaoItemComponent from '~/components/listagem-itens/versaoItem/
 import { useNavigate } from 'react-router-dom';
 import { AntDesignDto } from '~/domain/dto/ant-design-dto';
 
+import type { VersaoDto } from '~/domain/dto/versao-dto';
 
 interface Item {
   codigo: string;
@@ -96,6 +97,11 @@ const ListagemItens: React.FC = () => {
   const fim = inicio + ITENS_POR_PAGINA;
   const itensPagina = tabelaItens.slice(inicio, fim);
 
+  const versoes: VersaoDto[] = [
+    { id: 1, codigoItem: '_LPT_EF4_SAEB_00', versaoItem: 1, dataCriacao: '05/10/2025', provas: [] },
+    { id: 2, codigoItem: '_LPT_EF4_SAEB_00', versaoItem: 2, dataCriacao: '30/11/2020', provas: [] },
+  ];
+
   return (
     <div className='listagem-pagina'>
       <div className='cadastrarItemHeader'>
@@ -168,7 +174,7 @@ const ListagemItens: React.FC = () => {
             <ListagemResumoItemComponent></ListagemResumoItemComponent>
           </div>
           <div>
-            <ListagemVersaoItemComponent></ListagemVersaoItemComponent>
+            <ListagemVersaoItemComponent versoes={versoes}></ListagemVersaoItemComponent>
           </div>
         </Card>
       </div>
