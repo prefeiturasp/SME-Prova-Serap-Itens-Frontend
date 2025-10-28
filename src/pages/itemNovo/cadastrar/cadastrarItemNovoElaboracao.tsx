@@ -93,74 +93,28 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
     }, []);
 
     const voltar = async () => {
-        console.log('🔙 Voltando para primeira tela - recarregando dados via service...');
+        console.log('🔙 Voltando para primeira tela - recarregando dados completos...');
 
         if (item.id && item.id > 0) {
             try {
                 setCarregando(true);
 
-                // 🔄 Usa o service para recarregar dados completos (igual ao que funciona no salvar)
-                const resp = await configuracaoItemService.obterItem(item.id);
-
                 // 🏷️ MARCA que estamos vindo do "Voltar" para o FormularioUnico saber como agir
                 localStorage.setItem('voltandoParaPrimeiraTela', 'true');
 
-                if (resp.data) {
-                    // ✅ 1. Mapear dados da API para o formato Redux
-                    const configuracaoItemRetorno = {
-                        codigo: resp.data.codigoItem,
-                        areaConhecimento: resp.data.areaconhecimentoId, // ← Corrigido: minúsculo "c"
-                        disciplina: resp.data.disciplinaId,
-                        matriz: resp.data.matrizId,
-                        competencia: resp.data.competenciaId,
-                        habilidade: resp.data.habilidadeId,
-                        anoMatriz: resp.data.anoMatrizId,
-                        assunto: resp.data.assuntoId,
-                        subAssunto: resp.data.subAssuntoId,
-                        situacaoItem: resp.data.situacao,
-                        tipoItem: resp.data.tipo,
-                        quantidadeAlternativas: resp.data.quantidadeAlternativasId,
-                        dificuldadeSugerida: resp.data.dificuldadeSugeridaId,
-                        discriminacao: resp.data.discriminacao,
-                        dificuldade: resp.data.dificuldade,
-                        nivelItem: resp.data.nivelItem,
-                        acertoCasual: resp.data.acertoCasual,
-                        palavrasChave: resp.data.palavrasChave
-                            ? resp.data.palavrasChave.split(';').filter((p: string) => p && p.trim())
-                            : [],
-                        parametroBTransformado: resp.data.parametroBTransformado,
-                        mediaDesvioPadrao: resp.data.mediaEhDesvio,
-                        sentencaDescritora: resp.data.sentencaDescritora,
-                        observacao: resp.data.observacao,
-                    };
+                // 🔄 Usa a nova função que carrega dados completos com alternativas
+                const dadosCompletos = await obterItemComAlternativasEPopular(item.id);
 
-                    console.log('🔧 Dados mapeados do backend para Redux:', configuracaoItemRetorno);
-
-                    // ✅ 2. Atualiza Redux com dados mapeados corretamente
-                    dispatch(setConfiguracaoItemNovo(configuracaoItemRetorno));
-                    dispatch(setItemNovo({ id: item.id, configuracao: configuracaoItemRetorno }));
-
-                    // ✅ 3. Atualiza localStorage para persistir
-                    try {
-                        localStorage.setItem('itemAtual', JSON.stringify({
-                            id: item.id,
-                            codigo: configuracaoItemRetorno.codigo,
-                            configuracao: configuracaoItemRetorno
-                        }));
-                        console.log('✅ Dados atualizados no localStorage antes de voltar');
-                    } catch (error) {
-                        console.error('❌ Erro ao salvar no localStorage:', error);
-                    }
-
-                    console.log('✅ Dados recarregados com sucesso, navegando para primeira tela...');
+                if (dadosCompletos) {
+                    console.log('✅ Dados completos recarregados com sucesso, navegando para primeira tela...');
                 } else {
-                    console.log('⚠️ Sem dados retornados do service, navegando mesmo assim...');
+                    console.log('⚠️ Falha ao recarregar dados, mas navegando mesmo assim...');
                 }
             } catch (error) {
                 console.error('❌ Erro ao recarregar dados:', error);
                 mensagem('error', 'Erro', 'Erro ao recarregar dados do item');
             } finally {
-                setCarregando(false);
+                //setCarregando(false);
             }
         } else {
             console.log('⚠️ ID do item não disponível, navegando sem recarregar...');
@@ -168,8 +122,9 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
 
         // 🔄 Pequeno delay para garantir que dados sejam processados antes de navegar
         setTimeout(() => {
+            setCarregando(false);
             navigate('/criacao');
-        }, 100);
+        }, 1000);
     };
 
     // ✅ useEffect para limpar localStorage no primeiro acesso direto à segunda página (sem navegação válida)
@@ -289,41 +244,153 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
     const campoJustificativaD = Campos.justificativaD;
     const campoAlternativaCorreta = Campos.alternativaCorreta;
 
-    // ✅ useEffect SIMPLIFICADO: SEMPRE verifica localStorage quando tela carrega (igual tela configuração)
-    useEffect(() => {
-        // 🎯 LÓGICA SIMPLIFICADA: Se tem dados no localStorage, carrega SEMPRE
-        const itemSalvo = carregarItemDoLocalStorage();
-        
-        if (itemSalvo && itemSalvo.id > 0 && itemSalvo.codigo > 0) {
-            console.log('💾 ELABORAÇÃO: Detectado dados válidos no localStorage - carregando...');
-            console.log('📋 Dados encontrados:', { 
-                id: itemSalvo.id, 
-                codigo: itemSalvo.codigo,
-                temConfiguracao: !!itemSalvo.configuracao,
-                temElaboracao: !!(itemSalvo as any).elaboracao
-            });
+    // 🎯 Função para carregar dados completos do backend via obterItemComAlternativas
+    const obterItemComAlternativasEPopular = useCallback(async (itemId: number) => {
+        try {
+            console.log('🔄 ELABORAÇÃO: Carregando dados completos do backend (id:', itemId, ')...');
+            const resposta = await configuracaoItemService.obterItemComAlternativas(itemId);
             
-            // Restaura configuração no Redux
-            if (itemSalvo.configuracao) {
-                dispatch(setConfiguracaoItemNovo(itemSalvo.configuracao));
+            if (resposta?.data) {
+                console.log('✅ Dados completos recebidos do backend:', resposta.data);
+                
+                // ✅ Mapeia dados de configuração do backend
+                const configuracaoItemRetorno = {
+                    codigo: resposta.data.codigoItem,
+                    areaConhecimento: resposta.data.areaconhecimentoId, // ← backend usa minúscula
+                    disciplina: resposta.data.disciplinaId,
+                    matriz: resposta.data.matrizId,
+                    competencia: resposta.data.competenciaId,
+                    habilidade: resposta.data.habilidadeId,
+                    anoMatriz: resposta.data.anoMatrizId,
+                    assunto: resposta.data.assuntoId,
+                    subAssunto: resposta.data.subAssuntoId,
+                    situacaoItem: resposta.data.situacao,
+                    tipoItem: resposta.data.tipo,
+                    quantidadeAlternativas: resposta.data.quantidadeAlternativasId,
+                    dificuldadeSugerida: resposta.data.dificuldadeSugeridaId,
+                    discriminacao: resposta.data.discriminacao,
+                    dificuldade: resposta.data.dificuldade,
+                    nivelItem: resposta.data.nivelItem,
+                    acertoCasual: resposta.data.acertoCasual,
+                    palavrasChave: Array.isArray(resposta.data.palavrasChave) 
+                        ? resposta.data.palavrasChave.filter((p: string) => p && p.trim())
+                        : resposta.data.palavrasChave 
+                            ? resposta.data.palavrasChave.split(';').filter((p: string) => p && p.trim())
+                            : [],
+                    parametroBTransformado: resposta.data.parametroBTransformado,
+                    mediaDesvioPadrao: resposta.data.mediaEhDesvio,
+                    sentencaDescritora: resposta.data.sentencaDescritora,
+                    observacao: resposta.data.observacao,
+                };
+
+                // ✅ Mapeia dados de elaboração do backend (incluindo alternativas)
+                const elaboracaoItemRetorno = {
+                    textoBase: resposta.data.textoBase || '',
+                    fonte: resposta.data.fonte || '',
+                    enunciado: resposta.data.enunciado || '',
+                    codigoItem: resposta.data.codigoItem,
+                    video: [], // TODO: mapear arquivos se necessário
+                    audio: [], // TODO: mapear arquivos se necessário 
+                    alternativaA: resposta.data.alternativas?.find((a: any) => a.numeracao === 'A')?.descricao || '',
+                    justificativaA: resposta.data.alternativas?.find((a: any) => a.numeracao === 'A')?.justificativa || '',
+                    alternativaB: resposta.data.alternativas?.find((a: any) => a.numeracao === 'B')?.descricao || '',
+                    justificativaB: resposta.data.alternativas?.find((a: any) => a.numeracao === 'B')?.justificativa || '',
+                    alternativaC: resposta.data.alternativas?.find((a: any) => a.numeracao === 'C')?.descricao || '',
+                    justificativaC: resposta.data.alternativas?.find((a: any) => a.numeracao === 'C')?.justificativa || '',
+                    alternativaD: resposta.data.alternativas?.find((a: any) => a.numeracao === 'D')?.descricao || '',
+                    justificativaD: resposta.data.alternativas?.find((a: any) => a.numeracao === 'D')?.justificativa || '',
+                    alternativaCorreta: resposta.data.alternativas?.find((a: any) => a.correta)?.numeracao || 'A',
+                    // 🆔 SALVANDO IDs DAS ALTERNATIVAS para update
+                    idAlternativaA: resposta.data.alternativas?.find((a: any) => a.numeracao === 'A')?.id || null,
+                    idAlternativaB: resposta.data.alternativas?.find((a: any) => a.numeracao === 'B')?.id || null,
+                    idAlternativaC: resposta.data.alternativas?.find((a: any) => a.numeracao === 'C')?.id || null,
+                    idAlternativaD: resposta.data.alternativas?.find((a: any) => a.numeracao === 'D')?.id || null,
+                };
+
+                console.log('🎯 Configuração mapeada:', configuracaoItemRetorno);
+                console.log('🎯 Elaboração mapeada com alternativas:', elaboracaoItemRetorno);
+
+                // ✅ Atualiza Redux com dados completos do backend
+                dispatch(setConfiguracaoItemNovo(configuracaoItemRetorno));
+                dispatch(setElaboracaoItemNovo(elaboracaoItemRetorno));
+                dispatch(setItemNovo({
+                    id: itemId,
+                    configuracao: configuracaoItemRetorno,
+                    elaboracao: elaboracaoItemRetorno
+                }));
+
+                // ✅ Salva dados completos no localStorage
+                const itemParaLocalStorage = {
+                    id: itemId,
+                    codigo: configuracaoItemRetorno.codigo,
+                    configuracao: configuracaoItemRetorno,
+                    elaboracao: elaboracaoItemRetorno
+                };
+                localStorage.setItem('itemAtual', JSON.stringify(itemParaLocalStorage));
+                console.log('💾 Dados completos salvos no localStorage:', itemParaLocalStorage);
+
+                return { configuracao: configuracaoItemRetorno, elaboracao: elaboracaoItemRetorno };
+            } else {
+                console.warn('⚠️ Backend não retornou dados para o item');
+                return null;
             }
-            
-            // Restaura elaboração no Redux
-            if ((itemSalvo as any).elaboracao) {
-                dispatch(setElaboracaoItemNovo((itemSalvo as any).elaboracao));
-                console.log('✅ Dados da elaboração restaurados no Redux:', (itemSalvo as any).elaboracao);
-            }
-            
-            // Restaura item no Redux
-            dispatch(setItemNovo({
-                id: itemSalvo.id,
-                configuracao: itemSalvo.configuracao || {},
-                elaboracao: (itemSalvo as any).elaboracao || {}
-            }));
-        } else {
-            console.log('📂 localStorage vazio na elaboração - sem dados para carregar');
+        } catch (error) {
+            console.error('❌ Erro ao carregar dados completos do backend:', error);
+            return null;
         }
-    }, []); // 🎯 SEM dependências - roda só quando componente monta (F5, primeira vez, etc.)
+    }, [dispatch]);
+
+    // ✅ useEffect INTELIGENTE: Prioriza backend, fallback para localStorage
+    useEffect(() => {
+        const executarCarregamento = async () => {
+            // 🎯 1ª PRIORIDADE: Se tem ID no Redux, busca dados completos do backend
+            if (item.id > 0) {
+                console.log('🎯 ELABORAÇÃO: ID disponível no Redux, carregando do backend...');
+                const dadosBackend = await obterItemComAlternativasEPopular(item.id);
+                
+                if (dadosBackend) {
+                    console.log('✅ Dados carregados do backend com sucesso');
+                    return; // ✅ Sucesso, não precisa fazer mais nada
+                }
+                console.log('⚠️ Falha ao carregar do backend, tentando localStorage...');
+            }
+
+            // 🎯 2ª PRIORIDADE: Fallback para localStorage se backend falhar
+            const itemSalvo = carregarItemDoLocalStorage();
+            
+            if (itemSalvo && itemSalvo.id > 0 && itemSalvo.codigo > 0) {
+                console.log('💾 ELABORAÇÃO: Carregando dados do localStorage como fallback...');
+                console.log('📋 Dados encontrados:', { 
+                    id: itemSalvo.id, 
+                    codigo: itemSalvo.codigo,
+                    temConfiguracao: !!itemSalvo.configuracao,
+                    temElaboracao: !!(itemSalvo as any).elaboracao
+                });
+                
+                // Restaura configuração no Redux
+                if (itemSalvo.configuracao) {
+                    dispatch(setConfiguracaoItemNovo(itemSalvo.configuracao));
+                }
+                
+                // Restaura elaboração no Redux
+                if ((itemSalvo as any).elaboracao) {
+                    dispatch(setElaboracaoItemNovo((itemSalvo as any).elaboracao));
+                    console.log('✅ Dados da elaboração restaurados do localStorage:', (itemSalvo as any).elaboracao);
+                }
+                
+                // Restaura item no Redux
+                dispatch(setItemNovo({
+                    id: itemSalvo.id,
+                    configuracao: itemSalvo.configuracao || {},
+                    elaboracao: (itemSalvo as any).elaboracao || {}
+                }));
+            } else {
+                console.log('📂 Nem backend nem localStorage têm dados válidos');
+            }
+        };
+
+        executarCarregamento();
+    }, []); // 🎯 SEM dependências - executa só quando componente monta
 
     // Carrega dados do Redux no form quando o componente monta
     useEffect(() => {
@@ -351,54 +418,153 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
         campoJustificativaB, campoAlternativaC, campoJustificativaC, campoAlternativaD,
         campoJustificativaD, campoAlternativaCorreta]);
 
+    // � Função para salvar dados atuais do formulário no localStorage
+    const salvarDadosFormularioNoLocalStorage = useCallback(() => {
+        try {
+            const values = form.getFieldsValue(true);
+            
+            // Cria objeto de elaboração com dados atuais do formulário
+            const elaboracaoAtual = {
+                textoBase: values[campoTextoBase] || '',
+                fonte: values[campoFonte] || '',
+                enunciado: values[campoEnunciado] || '',
+                codigoItem: values[campoCodigoItem] || configuracaoItemNovo?.codigo,
+                video: values[campoVideo] || [],
+                audio: values[campoAudio] || [],
+                alternativaA: values[campoAlternativaA] || '',
+                justificativaA: values[campoJustificativaA] || '',
+                alternativaB: values[campoAlternativaB] || '',
+                justificativaB: values[campoJustificativaB] || '',
+                alternativaC: values[campoAlternativaC] || '',
+                justificativaC: values[campoJustificativaC] || '',
+                alternativaD: values[campoAlternativaD] || '',
+                justificativaD: values[campoJustificativaD] || '',
+                alternativaCorreta: values[campoAlternativaCorreta] || 'A',
+                // 🆔 PRESERVA IDs DAS ALTERNATIVAS existentes do Redux (para update)
+                idAlternativaA: elaboracaoItemNovo?.idAlternativaA || null,
+                idAlternativaB: elaboracaoItemNovo?.idAlternativaB || null,
+                idAlternativaC: elaboracaoItemNovo?.idAlternativaC || null,
+                idAlternativaD: elaboracaoItemNovo?.idAlternativaD || null,
+            };
+
+            // Atualiza Redux com dados do formulário
+            dispatch(setElaboracaoItemNovo(elaboracaoAtual));
+
+            // Salva no localStorage dados atuais
+            const itemParaLocalStorage = {
+                id: item.id,
+                codigo: configuracaoItemNovo?.codigo,
+                configuracao: configuracaoItemNovo,
+                elaboracao: elaboracaoAtual // ← Dados atuais do formulário
+            };
+
+            localStorage.setItem('itemAtual', JSON.stringify(itemParaLocalStorage));
+            console.log('💾 Dados do formulário salvos no localStorage:', itemParaLocalStorage.elaboracao);
+            
+        } catch (error) {
+            console.error('❌ Erro ao salvar dados do formulário no localStorage:', error);
+        }
+    }, [form, item.id, configuracaoItemNovo, dispatch, 
+        campoTextoBase, campoFonte, campoEnunciado, campoCodigoItem,
+        campoVideo, campoAudio, campoAlternativaA, campoJustificativaA, 
+        campoAlternativaB, campoJustificativaB, campoAlternativaC, campoJustificativaC, 
+        campoAlternativaD, campoJustificativaD, campoAlternativaCorreta]);
+
+    // �🔄 Watch mudanças nos campos e salva automaticamente no localStorage
+    const watchedValues = Form.useWatch([], form);
+    useEffect(() => {
+        // Só salva se tem dados essenciais
+        if (item.id > 0 && configuracaoItemNovo?.codigo && watchedValues) {
+            // Debounce para não salvar muito frequentemente
+            const timeoutId = setTimeout(() => {
+                console.log('🔄 Campo alterado, salvando no localStorage...', Object.keys(watchedValues));
+                salvarDadosFormularioNoLocalStorage();
+            }, 1000); // 1 segundo de debounce
+
+            return () => clearTimeout(timeoutId);
+        }
+    }, [watchedValues, item.id, configuracaoItemNovo?.codigo, salvarDadosFormularioNoLocalStorage]);
+
     // Método para gerar o DTO para salvar
     const gerarItemSalvar = useCallback(() => {
         const values = cloneDeep(form.getFieldsValue(true));
 
         console.log('📋 Valores do formulário da elaboração:', values);
+        console.log('🆔 IDs das alternativas no Redux:', {
+            idA: elaboracaoItemNovo?.idAlternativaA,
+            idB: elaboracaoItemNovo?.idAlternativaB,
+            idC: elaboracaoItemNovo?.idAlternativaC,
+            idD: elaboracaoItemNovo?.idAlternativaD
+        });
 
         // Monta as alternativas com base nos campos individuais
         const alternativasDto: AltenativaDto[] = [];
 
         if (values[campoAlternativaA]) {
-            alternativasDto.push({
+            const alternativaA: any = {
                 numeracao: 'A',
                 descricao: values[campoAlternativaA],
                 justificativa: values[campoJustificativaA] || '',
                 correta: values[campoAlternativaCorreta] === 'A',
-                ordem: 1
-            });
+                ordem: 1,
+                itemId: item.id,
+            };
+            // 🆔 ADICIONA ID se existir (para update)
+            if (elaboracaoItemNovo?.idAlternativaA) {
+                alternativaA.id = elaboracaoItemNovo.idAlternativaA;
+            }
+            alternativasDto.push(alternativaA);
         }
 
         if (values[campoAlternativaB]) {
-            alternativasDto.push({
+            const alternativaB: any = {
                 numeracao: 'B',
                 descricao: values[campoAlternativaB],
                 justificativa: values[campoJustificativaB] || '',
                 correta: values[campoAlternativaCorreta] === 'B',
-                ordem: 2
-            });
+                ordem: 2,
+                itemId: item.id,
+            };
+            // 🆔 ADICIONA ID se existir (para update)
+            if (elaboracaoItemNovo?.idAlternativaB) {
+                alternativaB.id = elaboracaoItemNovo.idAlternativaB;
+            }
+            alternativasDto.push(alternativaB);
         }
 
         if (values[campoAlternativaC]) {
-            alternativasDto.push({
+            const alternativaC: any = {
                 numeracao: 'C',
                 descricao: values[campoAlternativaC],
                 justificativa: values[campoJustificativaC] || '',
                 correta: values[campoAlternativaCorreta] === 'C',
-                ordem: 3
-            });
+                ordem: 3,
+                itemId: item.id
+            };
+            // 🆔 ADICIONA ID se existir (para update)
+            if (elaboracaoItemNovo?.idAlternativaC) {
+                alternativaC.id = elaboracaoItemNovo.idAlternativaC;
+            }
+            alternativasDto.push(alternativaC);
         }
 
         if (values[campoAlternativaD]) {
-            alternativasDto.push({
+            const alternativaD: any = {
                 numeracao: 'D',
                 descricao: values[campoAlternativaD],
                 justificativa: values[campoJustificativaD] || '',
                 correta: values[campoAlternativaCorreta] === 'D',
-                ordem: 4
-            });
+                ordem: 4,
+                itemId: item.id,
+            };
+            // 🆔 ADICIONA ID se existir (para update)
+            if (elaboracaoItemNovo?.idAlternativaD) {
+                alternativaD.id = elaboracaoItemNovo.idAlternativaD;
+            }
+            alternativasDto.push(alternativaD);
         }
+
+        console.log('🎯 Alternativas montadas para envio:', alternativasDto);
 
         // 🔍 DEBUG: verificar dados da configuração
         console.log('🔍 CONFIGURAÇÃO REDUX PARA DTO:', configuracaoItemNovo);
@@ -410,7 +576,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
 
         const dto: ItemNovoDto = {
             id: item.id,
-            codigoItem: configuracaoItemNovo?.codigo || 0,
+            codigoItem: configuracaoItemNovo?.codigo ? String(configuracaoItemNovo?.codigo) : '',
             areaConhecimentoId: configuracaoItemNovo?.areaConhecimento || null,
             disciplinaId: configuracaoItemNovo?.disciplina || null,
             matrizId: configuracaoItemNovo?.matriz || null,
@@ -511,103 +677,38 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
                     mensagem('success', 'Sucesso', 'Rascunho de item salvo com sucesso');
                     console.log('✅ Rascunho salvo com ID:', resp.data);
 
-                    // 🔄 IGUAL CONFIGURAÇÃO: Consulta backend para pegar dados atualizados
+                    // 🔄 USA NOVA FUNÇÃO: Carrega dados completos atualizados do backend
                     try {
-                        console.log('🔄 Consultando backend para dados atualizados após salvar rascunho...');
-                        const resposta = await configuracaoItemService.obterItem(item.id);
+                        console.log('🔄 Recarregando dados completos após salvar rascunho...');
+                        const dadosAtualizados = await obterItemComAlternativasEPopular(item.id);
                         
-                        if (resposta?.data) {
-                            // ✅ Mapeia dados do backend (igual ao voltar)
-                            // ✅ DEBUG: Todos os campos da resposta
-                            console.log('🔍 MAPEAMENTO CONFIGURAÇÃO - CAMPOS BACKEND:', Object.keys(resposta.data));
-                            
-                            const configuracaoItemRetorno = {
-                                codigo: resposta.data.codigoItem,
-                                areaConhecimento: resposta.data.areaconhecimentoId,
-                                disciplina: resposta.data.disciplinaId,
-                                matriz: resposta.data.matrizId,
-                                competencia: resposta.data.competenciaId,
-                                habilidade: resposta.data.habilidadeId,
-                                anoMatriz: resposta.data.anoMatrizId,
-                                assunto: resposta.data.assuntoId,
-                                subAssunto: resposta.data.subAssuntoId,
-                                situacaoItem: resposta.data.situacao,
-                                tipoItem: resposta.data.tipo,
-                                quantidadeAlternativas: resposta.data.quantidadeAlternativasId,
-                                dificuldadeSugerida: resposta.data.dificuldadeSugeridaId,
-                                discriminacao: resposta.data.discriminacao,
-                                dificuldade: resposta.data.dificuldade,
-                                nivelItem: resposta.data.nivelItem,
-                                acertoCasual: resposta.data.acertoCasual,
-                                palavrasChave: Array.isArray(resposta.data.palavrasChave) 
-                                    ? resposta.data.palavrasChave.filter((p: string) => p && p.trim())
-                                    : resposta.data.palavrasChave 
-                                        ? resposta.data.palavrasChave.split(';').filter((p: string) => p && p.trim())
-                                        : [],
-                                parametroBTransformado: resposta.data.parametroBTransformado,
-                                mediaDesvioPadrao: resposta.data.mediaEhDesvio,
-                                sentencaDescritora: resposta.data.sentencaDescritora,
-                                observacao: resposta.data.observacao,
-                            };
-
-                            console.log('🔍 CONFIGURAÇÃO MAPEADA:', configuracaoItemRetorno);
-
-                            // ✅ DEBUG: Log completo da resposta do backend
-                            console.log('🔍 RESPOSTA COMPLETA DO BACKEND:', resposta.data);
-                            console.log('🔍 ALTERNATIVAS BACKEND:', resposta.data.alternativasDto);
-                            console.log('🔍 CAMPOS ELABORAÇÃO:', {
-                                textoBase: resposta.data.textoBase,
-                                fonte: resposta.data.fonte,
-                                enunciado: resposta.data.enunciado,
-                                temAlternativas: !!resposta.data.alternativasDto,
-                                qtdAlternativas: resposta.data.alternativasDto?.length || 0
-                            });
-
-                            // ✅ Mapeia dados da elaboração do backend
-                            const elaboracaoItemRetorno = {
-                                textoBase: resposta.data.textoBase || '',
-                                fonte: resposta.data.fonte || '',
-                                enunciado: resposta.data.enunciado || '',
-                                codigoItem: resposta.data.codigoItem,
-                                video: [], // TODO: mapear arquivos se necessário
-                                audio: [], // TODO: mapear arquivos se necessário
-                                alternativaA: resposta.data.alternativasDto?.find((a: any) => a.numeracao === 'A')?.descricao || '',
-                                justificativaA: resposta.data.alternativasDto?.find((a: any) => a.numeracao === 'A')?.justificativa || '',
-                                alternativaB: resposta.data.alternativasDto?.find((a: any) => a.numeracao === 'B')?.descricao || '',
-                                justificativaB: resposta.data.alternativasDto?.find((a: any) => a.numeracao === 'B')?.justificativa || '',
-                                alternativaC: resposta.data.alternativasDto?.find((a: any) => a.numeracao === 'C')?.descricao || '',
-                                justificativaC: resposta.data.alternativasDto?.find((a: any) => a.numeracao === 'C')?.justificativa || '',
-                                alternativaD: resposta.data.alternativasDto?.find((a: any) => a.numeracao === 'D')?.descricao || '',
-                                justificativaD: resposta.data.alternativasDto?.find((a: any) => a.numeracao === 'D')?.justificativa || '',
-                                alternativaCorreta: resposta.data.alternativasDto?.find((a: any) => a.correta)?.numeracao || 'A',
-                            };
-
-                            console.log('🔍 ELABORAÇÃO MAPEADA:', elaboracaoItemRetorno);
-
-                            // ✅ Atualiza Redux com dados do backend
-                            dispatch(setConfiguracaoItemNovo(configuracaoItemRetorno));
-                            dispatch(setElaboracaoItemNovo(elaboracaoItemRetorno));
-                            dispatch(setItemNovo({
-                                id: item.id,
-                                configuracao: configuracaoItemRetorno,
-                                elaboracao: elaboracaoItemRetorno
-                            }));
-
-                            // ✅ Salva no localStorage dados do backend (sempre atualizados)
-                            const itemParaLocalStorage = {
-                                id: item.id,
-                                codigo: configuracaoItemRetorno.codigo,
-                                configuracao: configuracaoItemRetorno,
-                                elaboracao: elaboracaoItemRetorno
-                            };
-                            localStorage.setItem('itemAtual', JSON.stringify(itemParaLocalStorage));
-                            console.log('💾 Dados atualizados do backend salvos no localStorage:', itemParaLocalStorage);
-
+                        if (dadosAtualizados) {
+                            console.log('✅ Dados completos recarregados com sucesso após salvar rascunho');
                         } else {
-                            console.warn('⚠️ Sem dados retornados do backend após salvar rascunho');
+                            console.warn('⚠️ Falha ao recarregar dados do backend após salvar rascunho');
+                            // Fallback: usar dados do formulário se consulta falhar
+                            const values = form.getFieldsValue(true);
+                            const elaboracaoAtualizada = {
+                                textoBase: values[campoTextoBase],
+                                fonte: values[campoFonte],
+                                enunciado: values[campoEnunciado],
+                                codigoItem: values[campoCodigoItem],
+                                video: values[campoVideo],
+                                audio: values[campoAudio],
+                                alternativaA: values[campoAlternativaA],
+                                justificativaA: values[campoJustificativaA],
+                                alternativaB: values[campoAlternativaB],
+                                justificativaB: values[campoJustificativaB],
+                                alternativaC: values[campoAlternativaC],
+                                justificativaC: values[campoJustificativaC],
+                                alternativaD: values[campoAlternativaD],
+                                justificativaD: values[campoJustificativaD],
+                                alternativaCorreta: values[campoAlternativaCorreta],
+                            };
+                            dispatch(setElaboracaoItemNovo(elaboracaoAtualizada));
                         }
                     } catch (error) {
-                        console.error('❌ Erro ao consultar backend após salvar rascunho:', error);
+                        console.error('❌ Erro ao recarregar dados após salvar rascunho:', error);
                         // Fallback: usar dados do formulário se consulta falhar
                         const values = form.getFieldsValue(true);
                         const elaboracaoAtualizada = {
@@ -644,13 +745,18 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
     const salvarRascunho = useCallback(
         async () => {
             setCarregando(true);
+            
+            // 🔥 IMPORTANTE: Salva dados do formulário no localStorage PRIMEIRO
+            console.log('💾 Salvando dados atuais do formulário no localStorage...');
+            salvarDadosFormularioNoLocalStorage();
+            
             const itemSalvar = gerarItemSalvar();
             console.log('💾 Salvando rascunho da elaboração:', itemSalvar);
 
             await inserirRascunhoItem(itemSalvar);
             setCarregando(false);
         },
-        [gerarItemSalvar, inserirRascunhoItem],
+        [gerarItemSalvar, inserirRascunhoItem, salvarDadosFormularioNoLocalStorage],
     );
 
     const cancelar = () => {

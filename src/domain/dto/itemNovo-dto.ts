@@ -3,7 +3,7 @@ import { AltenativaDto } from '~/domain/dto/AltenativaDto';
 
 export interface ItemNovoDto {
   id: number;
-  codigoItem: number | null;
+  codigoItem: string | null;
   areaConhecimentoId: SelectValueType;
   disciplinaId: SelectValueType;
   matrizId: SelectValueType;

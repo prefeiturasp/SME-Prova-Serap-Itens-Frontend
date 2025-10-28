@@ -78,6 +78,11 @@ export interface ElaboracaoItemNovoProps {
   alternativasDto?: any[]; // AlternativaRascunhoDto[] - será montado baseado nos campos acima
   arquivoVideoId?: number;
   arquivoAudioId?: number;
+  // 🆔 IDs das alternativas para update (vindos do backend)
+  idAlternativaA?: number | null;
+  idAlternativaB?: number | null;
+  idAlternativaC?: number | null;
+  idAlternativaD?: number | null;
 }
 
 const initialValuesElaboracaoItemNovoProps = {
@@ -99,6 +104,11 @@ const initialValuesElaboracaoItemNovoProps = {
   alternativasDto: undefined,
   arquivoVideoId: undefined,
   arquivoAudioId: undefined,
+  // 🆔 IDs das alternativas para update
+  idAlternativaA: undefined,
+  idAlternativaB: undefined,
+  idAlternativaC: undefined,
+  idAlternativaD: undefined,
 };
 
 export interface ItemNovoProps {

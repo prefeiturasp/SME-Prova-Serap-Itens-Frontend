@@ -217,8 +217,6 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
   // ✅ Cascata limpa: área → disciplinas
   useEffect(() => {
     if (areaConhecimentoIdForm) {
-      console.log('🔗 Cascata: área mudou, carregando disciplinas para:', areaConhecimentoIdForm);
-      console.log('📊 Lista disciplinas atual:', listaDisciplinas.length, 'itens');
       popularCampoSelectForm(areaConhecimentoIdForm, campoDisciplina, setListaDisciplinas);
     }
   }, [areaConhecimentoIdForm, campoDisciplina, popularCampoSelectForm]);
@@ -226,7 +224,6 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
   // 📡 Sinaliza quando disciplinas carregaram
   useEffect(() => {
     if (localStorage.getItem('aguardandoDisciplinas') === 'true' && listaDisciplinas.length > 0) {
-      console.log('📡 Sinalizando: disciplinas carregaram!', listaDisciplinas.length, 'itens');
       localStorage.removeItem('aguardandoDisciplinas');
     }
   }, [listaDisciplinas.length]);
@@ -234,8 +231,6 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
   // ✅ Cascata limpa: disciplina → matriz
   useEffect(() => {
     if (disciplinaIdForm) {
-      console.log('🔗 Cascata: disciplina mudou, carregando matriz para:', disciplinaIdForm);
-      console.log('📊 Lista matriz atual:', listaMatriz.length, 'itens');
       popularCampoSelectForm(disciplinaIdForm, campoMatriz, setListaMatriz);
     }
   }, [disciplinaIdForm, campoMatriz, popularCampoSelectForm]);
@@ -243,7 +238,6 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
   // 📡 Sinaliza quando matriz carregou
   useEffect(() => {
     if (localStorage.getItem('aguardandoMatriz') === 'true' && listaMatriz.length > 0) {
-      console.log('📡 Sinalizando: matriz carregou!', listaMatriz.length, 'itens');
       localStorage.removeItem('aguardandoMatriz');
     }
   }, [listaMatriz.length]);
@@ -255,7 +249,6 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
   // ✅ Cascata limpa: matriz → competências
   useEffect(() => {
     if (matrizIdForm) {
-      console.log('🔗 Cascata: matriz mudou, carregando competências para:', matrizIdForm);
       popularCampoSelectForm(matrizIdForm, campoCompetencia, setListaCompetencias);
     }
   }, [matrizIdForm, campoCompetencia, popularCampoSelectForm]);
@@ -263,7 +256,6 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
   // 📡 Sinaliza quando competências carregaram
   useEffect(() => {
     if (localStorage.getItem('aguardandoCompetencias') === 'true' && listaCompetencias.length > 0) {
-      console.log('📡 Sinalizando: competências carregaram!', listaCompetencias.length, 'itens');
       localStorage.removeItem('aguardandoCompetencias');
     }
   }, [listaCompetencias.length]);
@@ -282,7 +274,6 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
   useEffect(() => {
     if (listaAssuntos?.length > 0) {
       localStorage.removeItem('aguardandoAssuntos');
-      console.log('🔔 Assuntos carregaram - removendo flag aguardandoAssuntos');
     }
   }, [listaAssuntos]);
 
@@ -296,7 +287,6 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
   useEffect(() => {
     if (listaSubAssuntos?.length > 0) {
       localStorage.removeItem('aguardandoSubAssuntos');
-      console.log('🔔 SubAssuntos carregaram - removendo flag aguardandoSubAssuntos');
     }
   }, [listaSubAssuntos]);
 
@@ -326,8 +316,6 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
       const primeiroCarregamento = listaAreaConhecimento.length > 0;
 
       if (formularioVazio && primeiroCarregamento) {
-        console.log('🔄 Resetando formulário - primeira vez carregando (NÃO vindo do Voltar)');
-        
         // ✅ Delay pequeno para evitar conflito com outras validações
         setTimeout(() => {
           form?.resetFields();
@@ -356,7 +344,6 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
   // 📡 Sinaliza quando dificuldade sugerida carregou (para cascata automática)
   useEffect(() => {
     if (localStorage.getItem('aguardandoDificuldadeSugerida') === 'true' && listaDificuldadeSugerida.length > 0) {
-      console.log('📡 Sinalizando: dificuldade sugerida carregou!', listaDificuldadeSugerida.length, 'itens');
       localStorage.removeItem('aguardandoDificuldadeSugerida');
     }
   }, [listaDificuldadeSugerida.length]);
@@ -372,7 +359,6 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
   // 📡 Sinaliza quando área de conhecimento carregou (para o "Voltar")
   useEffect(() => {
     if (localStorage.getItem('aguardandoAreaConhecimento') === 'true' && listaAreaConhecimento.length > 0) {
-      console.log('📡 Sinalizando: área de conhecimento carregou!', listaAreaConhecimento.length, 'itens');
       localStorage.removeItem('aguardandoAreaConhecimento');
     }
   }, [listaAreaConhecimento.length]);

@@ -531,7 +531,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
 
         const dto: ItemNovoDto = {
             id: item.id,
-            codigoItem: values?.codigo ? +values?.codigo : 0,
+            codigoItem: values?.codigo ? String(values?.codigo) : '',
             areaConhecimentoId: values?.AreaConhecimento || null,
             disciplinaId: values?.disciplinas || null,
             matrizId: values?.matriz || null,
