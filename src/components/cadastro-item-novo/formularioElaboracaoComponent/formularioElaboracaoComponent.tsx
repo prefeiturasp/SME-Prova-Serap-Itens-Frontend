@@ -239,73 +239,74 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                 <div className='card-corpo'>
                     <Row>
                         <Col xs={24} md={12} className='card-campo-elaboracao'>
-                            <UploadArquivosSME
-                                form={form}
-                                isDraggerUpload={false}
-                                uploadService={arquivoService.uploadVideo}
-                                formItemProps={{
-                                    name: campoVideo,
-                                    label: 'Vídeo',
-                                }}
-                                uploadProps={{
-                                    maxCount: 1,
-                                    showUploadList: {
-                                        downloadIcon: false,
-                                    },
-                                }}
-                                tiposArquivosPermitidos={[
-                                    'video/mp4',
-                                    'video/webm',
-                                    'video/ogg',
-                                    'application/ogg',
-                                    'video/x-flv',
-                                    'application/x-mpegURL',
-                                    'video/MP2T',
-                                    'video/3gpp',
-                                    'video/quicktime',
-                                    'video/x-msvideo',
-                                    'video/x-ms-wmv',
-                                ]}
-                            >
-                                <ButtonPrimary
-                                    icon={<FontAwesomeIcon icon={faCloudUpload} style={{ marginRight: 5 }} />}
+                            <div className="card-video-corpo card-video-corpo-primeiro">
+                                <p className="titulo">Arquivo</p>
+                                <UploadArquivosSME
+                                    form={form}
+                                    isDraggerUpload={false}
+                                    uploadService={arquivoService.uploadVideo}
+                                    formItemProps={{
+                                        name: campoVideo,
+                                    }}
+                                    uploadProps={{
+                                        maxCount: 1,
+                                        showUploadList: {
+                                            downloadIcon: false,
+                                        },
+                                    }}
+                                    tiposArquivosPermitidos={[
+                                        'video/mp4',
+                                        'video/webm',
+                                        'video/ogg',
+                                        'application/ogg',
+                                        'video/x-flv',
+                                        'application/x-mpegURL',
+                                        'video/MP2T',
+                                        'video/3gpp',
+                                        'video/quicktime',
+                                        'video/x-msvideo',
+                                        'video/x-ms-wmv',
+                                    ]}
                                 >
-                                    UPLOAD VÍDEO
-                                </ButtonPrimary>
-                                <Typography.Text>Tamanho máximo 10MB</Typography.Text>
-                            </UploadArquivosSME>
+                                    <ButtonPrimary className="card-video-buttom">
+                                        Escolher outro vídeo
+                                    </ButtonPrimary>
+                                    <p className="descricao">Formatos suportados: .mp4, .MOV, .WEBM até 10MB</p>
+                                </UploadArquivosSME>
+                            </div>
                         </Col>
                         <Col xs={24} md={12} className='card-campo-elaboracao'>
-                            <UploadArquivosSME
-                                form={form}
-                                isDraggerUpload={false}
-                                uploadService={arquivoService.uploadAudio}
-                                formItemProps={{
-                                    name: campoAudio,
-                                    label: 'Áudio',
-                                }}
-                                uploadProps={{
-                                    maxCount: 1,
-                                    showUploadList: {
-                                        downloadIcon: false,
-                                    },
-                                }}
-                                tiposArquivosPermitidos={[
-                                    'audio/mpeg',
-                                    'audio/mp4',
-                                    'audio/mp3',
-                                    'audio/vnd.wav',
-                                    'audio/x-ms-wma',
-                                    'audio/ogg',
-                                ]}
-                            >
-                                <ButtonPrimary
-                                    icon={<FontAwesomeIcon icon={faCloudUpload} style={{ marginRight: 5 }} />}
+                            <div className="card-video-corpo">
+                                <p className="titulo">Arquivo</p>
+                                <UploadArquivosSME
+                                    form={form}
+                                    isDraggerUpload={false}
+                                    uploadService={arquivoService.uploadAudio}
+                                    formItemProps={{
+                                        name: campoAudio,
+                                    }}
+                                    uploadProps={{
+                                        maxCount: 1,
+                                        showUploadList: {
+                                            downloadIcon: false,
+                                        },
+                                    }}
+                                    tiposArquivosPermitidos={[
+                                        'audio/mpeg',
+                                        'audio/mp4',
+                                        'audio/mp3',
+                                        'audio/vnd.wav',
+                                        'audio/x-ms-wma',
+                                        'audio/ogg',
+                                    ]}
                                 >
-                                    UPLOAD ÁUDIO
-                                </ButtonPrimary>
-                                <Typography.Text>Tamanho máximo 10MB</Typography.Text>
-                            </UploadArquivosSME>
+                                    <ButtonPrimary className="card-video-buttom">
+                                        Escolher outro áudio
+                                    </ButtonPrimary>
+                                    <p className="descricao">Formatos suportados:
+                                        MP3, WAV até 10MB</p>
+                                </UploadArquivosSME>
+                            </div>
                         </Col>
                     </Row>
                 </div>

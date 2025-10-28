@@ -71,3 +71,33 @@
     color: #595959;
     margin-bottom: 1em;
 }
+
+.card-video-corpo {
+    border: 1px solid #D5D5D5;
+    border-radius: 6px;
+    padding: 16px;
+}
+
+.card-video-corpo-primeiro {
+   @media screen and (min-width: 768px) {
+       margin-right: 1em;
+   }
+}
+
+.card-video-corpo p.titulo{
+    font-weight: bold;
+    color: #595959;
+}
+
+.card-video-corpo p.descricao{
+    font-weight: 400;
+    color: #AAAAAA;
+    font-family: Roboto, sans-serif;
+    font-size: 14px;
+}
+
+.card-video-buttom {
+    margin-bottom: 8px;
+    height: 38px;
+    background: #5A94D8;
+}
