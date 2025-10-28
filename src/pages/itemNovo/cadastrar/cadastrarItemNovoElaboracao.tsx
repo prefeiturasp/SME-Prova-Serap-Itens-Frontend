@@ -86,6 +86,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
             localStorage.removeItem('itemAtual');
             localStorage.removeItem('itemNovo'); // 🧹 Remove também chave antiga para limpeza completa
             localStorage.removeItem('voltandoParaPrimeiraTela'); // 🧹 Remove flag de navegação
+            localStorage.removeItem('persist:SERAP-ITEM-PERSIST');
             console.log('🗑️ Todas as chaves do item removidas do localStorage na elaboração');
         } catch (error) {
             console.error('❌ Erro ao limpar localStorage:', error);
