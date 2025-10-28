@@ -10,7 +10,6 @@ import ListagemVersaoItemComponent from '~/components/listagem-itens/versaoItem/
 import { useNavigate } from 'react-router-dom';
 import { AntDesignDto } from '~/domain/dto/ant-design-dto';
 
-
 interface Item {
   codigo: string;
   componente: string;
@@ -119,18 +118,12 @@ const ListagemItens: React.FC = () => {
 
       <div className='listagem-head'>
         <div className='listagem-head-texto'>
-          <Row className='listagem-titulo'>
-            <Col xs={12} md={12}>
-              Lista de itens
-            </Col>
-          </Row>
+          <div className='listagem-titulo'>Lista de itens</div>
 
-          <Row className='listagem-subtitulo'>
-            <Col xs={12} md={12}>
-              Sua lista de itens criados. Você pode conferir detalhes, fazer edições ou usar os
-              filtros para encontrar o que precisa.
-            </Col>
-          </Row>
+          <div className='listagem-subtitulo'>
+            Sua lista de itens criados. Você pode conferir detalhes, fazer edições ou usar os
+            filtros para encontrar o que precisa.
+          </div>
         </div>
         <div className='listagem-head-botao'>
           <Button
@@ -138,8 +131,9 @@ const ListagemItens: React.FC = () => {
               navigate(`/criacao`);
               window.scrollTo(0, 0);
             }}
+            className='btn-azul-padrao'
           >
-            CRIAR NOVO ITEM
+            Criar novo item
           </Button>
         </div>
       </div>
@@ -163,14 +157,14 @@ const ListagemItens: React.FC = () => {
           ITENS_POR_PAGINA={ITENS_POR_PAGINA}
         ></ListagemTabela>
 
-        <Card className='listagem-tabela'>
+        <div className='listagem-tabela-direita'>
           <div>
             <ListagemResumoItemComponent></ListagemResumoItemComponent>
           </div>
           <div>
             <ListagemVersaoItemComponent></ListagemVersaoItemComponent>
           </div>
-        </Card>
+        </div>
       </div>
     </div>
   );

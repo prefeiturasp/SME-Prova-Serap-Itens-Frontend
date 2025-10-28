@@ -7,9 +7,7 @@
 }
 
 .listagem-head {
-
   display: flex;
-
 }
 
 .listagem-head-texto {
@@ -24,6 +22,7 @@
   font-family: Roboto;
   font-weight: 700;
   font-size: 24px !important;
+  color: #595959;
 }
 
 .listagem-subtitulo {
@@ -32,21 +31,33 @@
   font-size: 14px;
   line-height: 100%;
   letter-spacing: 0%;
+  color: #595959;
+  margin-top: 8px;
 }
-
-
 
 .listagem-tabela {
   background-color: #ffffff;
-  margin: 32px;
+  margin: 16px 0px 16px 32px;
   width: 50%;
   font-family: Roboto;
   color: #595959;
 }
 
+.listagem-tabela-direita {
+  background-color: #ffffff;
+  margin: 16px 32px 16px 0px;
+  width: 50%;
+  font-family: Roboto;
+  color: #595959;
+  background-color: #F5F5F5;
+}
+
 .listagem-conteudo {
   width: 100%;
   display: flex;
+}
+
+.listagem-conteudo .ant-card-body{
 }
 
 .listagem-tabela-head {
@@ -86,9 +97,28 @@
   font-family: Roboto;
   font-weight: 500;
   font-size: 20px;
-  color: #5A94D8;
+  color: #5a94d8;
   display: flex;
   align-items: center;
   justify-content: flex-end;
   /*background-color: red;*/
+}
+
+.btn-azul-padrao {
+  background: #5a94d8 !important;
+  color: #ffffff !important;
+  opacity: 1;
+  padding: 8px 16px;
+}
+
+.listagem-head-botao button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 127px;
+  height: 38px;
+  border-radius: 4px;
+  font-size: 14;
+  font-family: Roboto;
+  font-weight: 400;
 }
