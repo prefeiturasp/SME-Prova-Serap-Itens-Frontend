@@ -337,9 +337,9 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
             } catch (err: any) {
                 console.error('❌ Erro no carregamento localStorage com cascata:', err.message);
                 localStorage.removeItem('carregandoViaLocalStorage');
+            }finally {
+                setCarregando(false);
             }
-
-            setCarregando(false);
         },
         [dispatch, form, setCarregando]
     );
@@ -816,9 +816,9 @@ console.log('📋 Dados recebidos do backend para item ID----->>>>>>>>', id, ':'
                 console.error('❌ Erro no carregamento inteligente:', err.message);
                 mensagem('error', 'Erro', 'Erro ao carregar dados do item via Voltar');
                 localStorage.removeItem('carregandoViaVoltar');
-            }
-
-            setCarregando(false);
+            }finally {
+                setCarregando(false);
+            }            
         },
         [obterDadosItem, mensagem, form],
     );
