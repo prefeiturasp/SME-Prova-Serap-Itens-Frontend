@@ -1,5 +1,5 @@
 import React from "react";
-import { Col, Form, FormProps, Input, Row, Typography, Radio } from "antd";
+import { Col, Form, FormProps, Input, Row, Radio } from "antd";
 import { TextEditor } from "~/components/lib/editor";
 
 //css
@@ -8,10 +8,6 @@ import './formularioElaboracaoComponent.css';
 // components personalizados
 import UploadArquivosSME from "~/components/lib/upload";
 import ButtonPrimary from "~/components/lib/button/primary";
-
-// icones
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCloudUpload } from "@fortawesome/free-solid-svg-icons";
 
 // Enums
 import { Campos } from "~/domain/enums/campos-cadastro-item";
@@ -116,13 +112,13 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                         </Col>
                     </Row>
 
-                    {/* Alternativa A */}
-                    <div className='alternativa-corpo-elaboracao' style={{ marginBottom: 24 }}>
+
+                    <div className='alternativa-corpo-elaboracao card-alternativa-ajuste' style={{ marginBottom: 24 }}>
                         <Row>
                             <Col xs={24} md={24} className='card-campo-elaboracao'>
                                 <Form.Item
                                     name={campoAlternativaA}
-                                    label='A) Alternativa'
+                                    label='A) Alternativa Correta'
                                     style={{ marginBottom: 4 }}
                                 >
                                     <TextEditor
@@ -144,13 +140,12 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                         </Row>
                     </div>
 
-                    {/* Alternativa B */}
-                    <div className='alternativa-corpo-elaboracao'>
+                    <div className='alternativa-corpo-elaboracao card-alternativa-ajuste'>
                         <Row>
                             <Col xs={24} md={24} className='card-campo-elaboracao'>
                                 <Form.Item
                                     name={campoAlternativaB}
-                                    label='B) Alternativa'
+                                    label='B) Alternativa Correta'
                                     style={{ marginBottom: 4 }}
                                 >
                                     <TextEditor
@@ -172,13 +167,12 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                         </Row>
                     </div>
 
-                    {/* Alternativa C */}
-                    <div className='alternativa-corpo-elaboracao'>
+                    <div className='alternativa-corpo-elaboracao card-alternativa-ajuste'>
                         <Row>
                             <Col xs={24} md={24} className='card-campo-elaboracao'>
                                 <Form.Item
                                     name={campoAlternativaC}
-                                    label='C) Alternativa'
+                                    label='C) Alternativa Correta'
                                     style={{ marginBottom: 4 }}
                                 >
                                     <TextEditor
@@ -200,13 +194,12 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                         </Row>
                     </div>
 
-                    {/* Alternativa D */}
-                    <div className='alternativa-corpo-elaboracao'>
+                    <div className='alternativa-corpo-elaboracao card-alternativa-ajuste'>
                         <Row>
                             <Col xs={24} md={24} className='card-campo-elaboracao'>
                                 <Form.Item
                                     name={campoAlternativaD}
-                                    label='D) Alternativa'
+                                    label='D) Alternativa Correta'
                                     style={{ marginBottom: 4 }}
                                 >
                                     <TextEditor
