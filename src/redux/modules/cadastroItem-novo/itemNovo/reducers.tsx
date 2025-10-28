@@ -11,7 +11,7 @@ import {
 } from './actions';
 
 export interface ConfiguracaoItemNovoProps {
-  codigo: number;
+  codigoItem: string;
   areaConhecimento: SelectValueType;
   disciplina: SelectValueType;
   matriz: SelectValueType;
@@ -35,7 +35,7 @@ export interface ConfiguracaoItemNovoProps {
   observacao: string | null;
 }
 const initialValuesConfiguracaoItemNovoProps = {
-  codigo: 0,
+  codigoItem: '',
   areaConhecimento: null,
   disciplina: null,
   matriz: null,

@@ -30,11 +30,11 @@ import '../cards/caracteristicasItemComponet/caracteristicaItemComponent.css';
 
 const FormularioUnico: React.FC<FormProps> = ({ form }) => {
 
+
   // ✅ Redux - para detectar dados vindos do "Voltar"
-  
+
 
   // campos
-  const campoCodigo = Campos.codigo;
   const campoAreaConhecimento = Campos.areaConhecimento;
   const campoDisciplina = Campos.disciplinas;
   const campoMatriz = Campos.matriz;
@@ -374,17 +374,6 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
           Defina a localização desta questão na matriz curricular.
         </div>
         <div className='card-corpo'>
-          <div className="esconder">
-            <Form.Item
-              label='codigo'
-              name={campoCodigo}
-            >
-              <CampoNumero
-                value={form?.getFieldValue(campoCodigo)}
-                onChange={(valor) => form?.setFieldValue(campoCodigo, valor)}
-                placeholder='codigo' />
-            </Form.Item>
-          </div>
           <Row>
             <Col xs={24} md={12} className='card-campo'>
               <SelectForm
@@ -476,7 +465,9 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
                     buttonStyle="solid"
                     optionType="button"
                     options={listaDificuldadeSugerida}
-                    // ❌ Removido defaultValue={5} - deixar Form.Item controlar o valor
+                    value={dificuldadeSugeridaIdForm}
+                    onChange={(e) => form?.setFieldValue(campoDificuldadeSugerida, e.target.value)}
+                  // ❌ Removido defaultValue={5} - deixar Form.Item controlar o valor
                   />
                 </Spin>
               </Form.Item>

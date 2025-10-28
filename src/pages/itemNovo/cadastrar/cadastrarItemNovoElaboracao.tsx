@@ -56,7 +56,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
     );
 
     // 💾 Funções para gerenciar localStorage
-    const carregarItemDoLocalStorage = useCallback((): { id: number, codigo: number, configuracao: any, elaboracao?: any } | null => {
+    const carregarItemDoLocalStorage = useCallback((): { id: number, codigoItem: string, configuracao: any, elaboracao?: any } | null => {
         try {
             const itemSalvo = localStorage.getItem('itemAtual');
             if (itemSalvo) {
@@ -132,9 +132,9 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
     useEffect(() => {
         if (!verificacaoInicialFeita) {
             // Detecta acesso direto inválido: sem dados obrigatórios no Redux E sem localStorage válido
-            const temDadosObrigatorios = item.id > 0 && configuracaoItemNovo?.codigo && configuracaoItemNovo.codigo > 0;
+            const temDadosObrigatorios = item.id > 0 && configuracaoItemNovo?.codigoItem && configuracaoItemNovo.codigoItem.trim() !== '';
             const localStorageItem = carregarItemDoLocalStorage();
-            const temLocalStorageValido = localStorageItem && localStorageItem.id > 0 && localStorageItem.codigo > 0;
+            const temLocalStorageValido = localStorageItem && localStorageItem.id > 0 && localStorageItem.codigoItem && localStorageItem.codigoItem.trim() !== '';
 
             if (!temDadosObrigatorios && !temLocalStorageValido) {
                 console.log('🧹 Acesso direto inválido à segunda página - limpando localStorage e redirecionando');
@@ -165,17 +165,17 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
     useEffect(() => {
         let parametrosObrigatorios = {
             id: item.id,
-            codigoItem: configuracaoItemNovo?.codigo,
+            codigoItem: configuracaoItemNovo?.codigoItem,
             areaConhecimentoId: configuracaoItemNovo?.areaConhecimento,
             disciplinaId: configuracaoItemNovo?.disciplina
         };
 
         // Se Redux estiver vazio, tenta carregar do localStorage
         if ((!parametrosObrigatorios.id || parametrosObrigatorios.id === 0) ||
-            (!parametrosObrigatorios.codigoItem || parametrosObrigatorios.codigoItem === 0)) {
+            (!parametrosObrigatorios.codigoItem || parametrosObrigatorios.codigoItem.trim() === '')) {
 
             const itemSalvo = carregarItemDoLocalStorage();
-            if (itemSalvo && itemSalvo.id > 0 && itemSalvo.codigo > 0) {
+            if (itemSalvo && itemSalvo.id > 0 && itemSalvo.codigoItem && itemSalvo.codigoItem.trim() !== '') {
                 console.log('🔄 Dados do Redux vazios, restaurando do localStorage...');
 
                 // Restaura no Redux
@@ -189,7 +189,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
                 // Atualiza parâmetros obrigatórios com dados do localStorage
                 parametrosObrigatorios = {
                     id: itemSalvo.id,
-                    codigoItem: itemSalvo.codigo,
+                    codigoItem: itemSalvo.codigoItem,
                     areaConhecimentoId: itemSalvo.configuracao?.areaConhecimento,
                     disciplinaId: itemSalvo.configuracao?.disciplina
                 };
@@ -200,7 +200,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
         if (!parametrosObrigatorios.id || parametrosObrigatorios.id === 0) {
             parametrosFaltando.push('ID do item');
         }
-        if (!parametrosObrigatorios.codigoItem || parametrosObrigatorios.codigoItem === 0) {
+        if (!parametrosObrigatorios.codigoItem || parametrosObrigatorios.codigoItem.trim() === '') {
             parametrosFaltando.push('Código do item');
         }
         if (!parametrosObrigatorios.areaConhecimentoId) {
@@ -256,7 +256,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
                 
                 // ✅ Mapeia dados de configuração do backend
                 const configuracaoItemRetorno = {
-                    codigo: resposta.data.codigoItem,
+                    codigoItem: resposta.data.codigoItem,
                     areaConhecimento: resposta.data.areaconhecimentoId, // ← backend usa minúscula
                     disciplina: resposta.data.disciplinaId,
                     matriz: resposta.data.matrizId,
@@ -323,7 +323,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
                 // ✅ Salva dados completos no localStorage
                 const itemParaLocalStorage = {
                     id: itemId,
-                    codigo: configuracaoItemRetorno.codigo,
+                    codigoItem: configuracaoItemRetorno.codigoItem,
                     configuracao: configuracaoItemRetorno,
                     elaboracao: elaboracaoItemRetorno
                 };
@@ -359,11 +359,11 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
             // 🎯 2ª PRIORIDADE: Fallback para localStorage se backend falhar
             const itemSalvo = carregarItemDoLocalStorage();
             
-            if (itemSalvo && itemSalvo.id > 0 && itemSalvo.codigo > 0) {
+            if (itemSalvo && itemSalvo.id > 0 && itemSalvo.codigoItem && itemSalvo.codigoItem.trim() !== '') {
                 console.log('💾 ELABORAÇÃO: Carregando dados do localStorage como fallback...');
                 console.log('📋 Dados encontrados:', { 
                     id: itemSalvo.id, 
-                    codigo: itemSalvo.codigo,
+                    codigoItem: itemSalvo.codigoItem,
                     temConfiguracao: !!itemSalvo.configuracao,
                     temElaboracao: !!(itemSalvo as any).elaboracao
                 });
@@ -429,7 +429,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
                 textoBase: values[campoTextoBase] || '',
                 fonte: values[campoFonte] || '',
                 enunciado: values[campoEnunciado] || '',
-                codigoItem: values[campoCodigoItem] || configuracaoItemNovo?.codigo,
+                codigoItem: values[campoCodigoItem] || configuracaoItemNovo?.codigoItem,
                 video: values[campoVideo] || [],
                 audio: values[campoAudio] || [],
                 alternativaA: values[campoAlternativaA] || '',
@@ -454,7 +454,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
             // Salva no localStorage dados atuais
             const itemParaLocalStorage = {
                 id: item.id,
-                codigo: configuracaoItemNovo?.codigo,
+                codigoItem: configuracaoItemNovo?.codigoItem,
                 configuracao: configuracaoItemNovo,
                 elaboracao: elaboracaoAtual // ← Dados atuais do formulário
             };
@@ -475,7 +475,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
     const watchedValues = Form.useWatch([], form);
     useEffect(() => {
         // Só salva se tem dados essenciais
-        if (item.id > 0 && configuracaoItemNovo?.codigo && watchedValues) {
+        if (item.id > 0 && configuracaoItemNovo?.codigoItem && watchedValues) {
             // Debounce para não salvar muito frequentemente
             const timeoutId = setTimeout(() => {
                 console.log('🔄 Campo alterado, salvando no localStorage...', Object.keys(watchedValues));
@@ -484,7 +484,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
 
             return () => clearTimeout(timeoutId);
         }
-    }, [watchedValues, item.id, configuracaoItemNovo?.codigo, salvarDadosFormularioNoLocalStorage]);
+    }, [watchedValues, item.id, configuracaoItemNovo?.codigoItem, salvarDadosFormularioNoLocalStorage]);
 
     // Método para gerar o DTO para salvar
     const gerarItemSalvar = useCallback(() => {
@@ -577,7 +577,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
 
         const dto: ItemNovoDto = {
             id: item.id,
-            codigoItem: configuracaoItemNovo?.codigo ? String(configuracaoItemNovo?.codigo) : '',
+            codigoItem: configuracaoItemNovo?.codigoItem || '',
             areaConhecimentoId: configuracaoItemNovo?.areaConhecimento || null,
             disciplinaId: configuracaoItemNovo?.disciplina || null,
             matrizId: configuracaoItemNovo?.matriz || null,

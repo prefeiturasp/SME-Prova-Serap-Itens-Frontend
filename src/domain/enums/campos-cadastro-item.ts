@@ -1,5 +1,4 @@
 export enum Campos {
-    codigo = 'codigo',
     disciplinas = 'disciplinas',
     areaConhecimento = 'AreaConhecimento',
     matriz = 'matriz',

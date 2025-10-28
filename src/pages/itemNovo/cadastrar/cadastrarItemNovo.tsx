@@ -84,7 +84,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
     const [bloquearBtnAvancar, setBloquearBtnAvancar] = useState<boolean>(true);
 
     // 💾 Funções para gerenciar localStorage
-    const salvarItemNoLocalStorage = useCallback((itemData: { id: number, codigo: number, configuracao: any }) => {
+    const salvarItemNoLocalStorage = useCallback((itemData: { id: number, codigoItem: string, configuracao: any }) => {
         try {
             localStorage.setItem('itemAtual', JSON.stringify(itemData));
             console.log('💾 Item salvo no localStorage:', itemData);
@@ -93,7 +93,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
         }
     }, []);
 
-    const carregarItemDoLocalStorage = useCallback((): { id: number, codigo: number, configuracao: any } | null => {
+    const carregarItemDoLocalStorage = useCallback((): { id: number, codigoItem: string, configuracao: any } | null => {
         try {
             const itemSalvo = localStorage.getItem('itemAtual');
             if (itemSalvo) {
@@ -142,7 +142,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
     useEffect(() => {
         if (!limpezaInicialFeita) {
             // Detecta se é primeiro acesso: Redux vazio E não está voltando de navegação
-            const isReduxVazio = (!item.id || item.id === 0) && (!configuracaoItemNovo?.codigo || configuracaoItemNovo.codigo === 0);
+            const isReduxVazio = (!item.id || item.id === 0) && (!configuracaoItemNovo?.codigoItem || configuracaoItemNovo.codigoItem.trim() === '');
             const isLocalStorageVazio = !localStorage.getItem('itemAtual');
 
             if (isReduxVazio && isLocalStorageVazio) {
@@ -166,7 +166,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
 
     // 🔄 Função para carregar localStorage com cascata inteligente (igual ao "Voltar")
     const carregarLocalStorageComCascata = useCallback(
-        async (itemSalvo: { id: number, codigo: number, configuracao: any }) => {
+        async (itemSalvo: { id: number, codigoItem: string, configuracao: any }) => {
             console.log('� Iniciando carregamento localStorage com cascata inteligente...');
             setCarregando(true);
 
@@ -283,7 +283,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
 
                 // Mapeamento correto entre localStorage e campos do formulário
                 const mapeamentoCampos = {
-                    codigo: Campos.codigoItem,
+                    codigoItem: Campos.codigoItem,
                     areaConhecimento: Campos.areaConhecimento,
                     disciplina: Campos.disciplinas,
                     matriz: Campos.matriz,
@@ -337,7 +337,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
             } catch (err: any) {
                 console.error('❌ Erro no carregamento localStorage com cascata:', err.message);
                 localStorage.removeItem('carregandoViaLocalStorage');
-            }finally {
+            } finally {
                 setCarregando(false);
             }
         },
@@ -351,10 +351,10 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
 
         // 🎯 LÓGICA SIMPLIFICADA: Se tem dados no localStorage, carrega com cascata SEMPRE
         const itemSalvo = carregarItemDoLocalStorage();
-        
-        if (itemSalvo && itemSalvo.id > 0 && itemSalvo.codigo > 0) {
+
+        if (itemSalvo && itemSalvo.id > 0 && itemSalvo.codigoItem && itemSalvo.codigoItem.trim() !== '') {
             console.log('� SEMPRE: Detectado dados válidos no localStorage - carregando com cascata inteligente...');
-            console.log('📋 Dados encontrados:', { id: itemSalvo.id, codigo: itemSalvo.codigo });
+            console.log('📋 Dados encontrados:', { id: itemSalvo.id, codigoItem: itemSalvo.codigoItem });
             carregarLocalStorageComCascata(itemSalvo);
         } else {
             console.log('📂 localStorage vazio - formulário ficará limpo para novo cadastro');
@@ -379,7 +379,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
 
                 // Mapeamento correto entre Redux e campos do formulário
                 const mapeamentoCampos = {
-                    codigo: Campos.codigoItem,
+                    codigoItem: Campos.codigoItem,
                     areaConhecimento: Campos.areaConhecimento,
                     disciplina: Campos.disciplinas,
                     matriz: Campos.matriz,
@@ -432,16 +432,16 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
 
     // ✅ useEffect para controlar bloqueio do botão avançar baseado no Redux
     useEffect(() => {
-        const temIdECodigo = item.id > 0 && configuracaoItemNovo?.codigo && configuracaoItemNovo.codigo > 0;
+        const temIdECodigo = item.id > 0 && configuracaoItemNovo?.codigoItem && configuracaoItemNovo.codigoItem.trim() !== '';
 
         console.log('🔍 Verificando condições para habilitar botão Avançar:', {
             itemId: item.id,
-            codigoItem: configuracaoItemNovo?.codigo,
+            codigoItem: configuracaoItemNovo?.codigoItem,
             podeAvancar: temIdECodigo
         });
 
         setBloquearBtnAvancar(!temIdECodigo);
-    }, [item.id, configuracaoItemNovo?.codigo]);
+    }, [item.id, configuracaoItemNovo?.codigoItem]);
 
 
     type tipoMsg = 'success' | 'info' | 'warning' | 'error';
@@ -481,14 +481,14 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
             return;
         }
 
-        if (!configuracaoItemNovo?.codigo || configuracaoItemNovo.codigo === 0) {
+        if (!configuracaoItemNovo?.codigoItem || configuracaoItemNovo.codigoItem.trim() === '') {
             mensagem('error', 'Erro', 'É necessário que o item tenha um código antes de avançar');
             return;
         }
 
         console.log('✅ Navegando para elaboração com:', {
             id: item.id,
-            codigo: configuracaoItemNovo.codigo
+            codigoItem: configuracaoItemNovo.codigoItem
         });
 
         navigate('/elaboracao');
@@ -499,7 +499,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
         const values = form.getFieldsValue(true);
 
         console.log('📋 Valores do formulário para DTO:', {
-            codigo: values?.codigo,
+            codigoItem: values?.codigoItem,
             areaConhecimento: values?.AreaConhecimento,
             disciplina: values?.disciplinas,
             matriz: values?.matriz,
@@ -532,7 +532,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
 
         const dto: ItemNovoDto = {
             id: item.id,
-            codigoItem: values?.codigo ? String(values?.codigo) : '',
+            codigoItem: values?.codigoItem || '',
             areaConhecimentoId: values?.AreaConhecimento || null,
             disciplinaId: values?.disciplinas || null,
             matrizId: values?.matriz || null,
@@ -608,11 +608,11 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                 const resp = await configuracaoItemService.obterItem(id);
 
                 if (resp?.data) {
-console.log('📋 Dados recebidos do backend para item ID----->>>>>>>>', id, ':', resp.data);
+                    console.log('📋 Dados recebidos do backend para item ID----->>>>>>>>', id, ':', resp.data);
 
                     // ✅ 1. Mapear dados da API para o formato Redux
                     const configuracaoItemRetorno: ConfiguracaoItemNovoProps = {
-                        codigo: resp.data.codigoItem,
+                        codigoItem: resp.data.codigoItem,
                         areaConhecimento: resp.data.areaconhecimentoId,
                         disciplina: resp.data.disciplinaId,
                         matriz: resp.data.matrizId,
@@ -654,7 +654,7 @@ console.log('📋 Dados recebidos do backend para item ID----->>>>>>>>', id, ':'
                     // ✅ 3. Salvar no localStorage para persistir dados
                     salvarItemNoLocalStorage({
                         id: id,
-                        codigo: configuracaoItemRetorno.codigo,
+                        codigoItem: configuracaoItemRetorno.codigoItem,
                         configuracao: configuracaoItemRetorno
                     });
 
@@ -816,9 +816,9 @@ console.log('📋 Dados recebidos do backend para item ID----->>>>>>>>', id, ':'
                 console.error('❌ Erro no carregamento inteligente:', err.message);
                 mensagem('error', 'Erro', 'Erro ao carregar dados do item via Voltar');
                 localStorage.removeItem('carregandoViaVoltar');
-            }finally {
+            } finally {
                 setCarregando(false);
-            }            
+            }
         },
         [obterDadosItem, mensagem, form],
     );
@@ -883,13 +883,13 @@ console.log('📋 Dados recebidos do backend para item ID----->>>>>>>>', id, ':'
             { campo: 'disciplinaId', valor: dto.disciplinaId, nome: 'Disciplina' },
         ];
 
-        // 🔍 Verifica se é edição (tem id e codigo no Redux)
-        const ehEdicao = item.id > 0 && item.configuracao?.codigo && item.configuracao?.codigo > 0;
+        // 🔍 Verifica se é edição (tem id e codigoItem no Redux)
+        const ehEdicao = item.id > 0 && item.configuracao?.codigoItem && item.configuracao?.codigoItem.trim() !== '';
 
         console.log('🔍 Modo de operação:', {
             ehEdicao,
             itemReduxId: item.id,
-            itemReduxCodigo: item.configuracao?.codigo,
+            itemReduxCodigoItem: item.configuracao?.codigoItem,
             dtoId: dto.id,
             dtoCodigo: dto.codigoItem
         });
@@ -920,7 +920,7 @@ console.log('📋 Dados recebidos do backend para item ID----->>>>>>>>', id, ':'
 
         console.log(`✅ Validação passou! Modo: ${ehEdicao ? 'Edição' : 'Criação'}`);
         return true;
-    }, [mensagem, item.id, item.configuracao?.codigo]);
+    }, [mensagem, item.id, item.configuracao?.codigoItem]);
 
     const salvarItem = useCallback(
         async (rascunho = false) => {
