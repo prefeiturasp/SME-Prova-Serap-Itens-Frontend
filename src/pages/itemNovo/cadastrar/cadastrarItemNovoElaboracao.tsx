@@ -125,7 +125,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
         setTimeout(() => {
             setCarregando(false);
             navigate('/criacao');
-        }, 1000);
+        }, 500);
     };
 
     // ✅ useEffect para limpar localStorage no primeiro acesso direto à segunda página (sem navegação válida)
