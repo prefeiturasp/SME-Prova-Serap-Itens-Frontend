@@ -458,14 +458,6 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
                   <Radio value={3}>4 - Difícil</Radio>
                   <Radio value={4}>5 - Muito Difícil</Radio>
                 </Radio.Group>
-                
-                {/* 🔍 DEBUG: Status do carregamento */}
-                {process.env.NODE_ENV === 'development' && (
-                  <div style={{ fontSize: '10px', color: '#666', marginTop: '4px' }}>
-                    🏃‍♂️ HTML fixo | 
-                    Valor atual: {form?.getFieldValue(campoDificuldadeSugerida) || 'nenhum'}
-                  </div>
-                )}
               </Form.Item>
             </Col>
 
