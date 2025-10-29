@@ -27,9 +27,9 @@ const TabelaResumos: React.FC = () => {
     setCarregando(true);
     const resposta = await resumoService.obterDadosResumoGeralProvas(page, filtroPrincipal);
 
-    if (resposta?.data?.items?.length) {
+    if (resposta?.data?.itens?.length) {
       setTotalRegistros(resposta.data.totalRegistros);
-      setDados(resposta.data.items);
+      setDados(resposta.data.itens);
     } else {
       setTotalRegistros(0);
       setDados([]);
