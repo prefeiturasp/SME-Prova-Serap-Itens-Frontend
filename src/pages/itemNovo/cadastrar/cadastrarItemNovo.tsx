@@ -259,7 +259,21 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                     console.log('✅ Competências carregaram (tentativas:', tentativas, ')');
                 }
 
-                // 5️⃣ Popula todos os outros campos
+                // 5️⃣ Competência → Habilidades (se tiver)
+                if (itemSalvo.configuracao.competencia) {
+                    console.log('📝 Setando competência e aguardando habilidades carregarem...');
+                    localStorage.setItem('aguardandoHabilidade', 'true');
+                    form?.setFieldValue(Campos.competencia, itemSalvo.configuracao.competencia);
+
+                    tentativas = 0;
+                    while (tentativas < 25 && localStorage.getItem('aguardandoHabilidade') === 'true') {
+                        await new Promise(resolve => setTimeout(resolve, 200));
+                        tentativas++;
+                    }
+                    console.log('✅ Habilidades carregaram (tentativas:', tentativas, ')');
+                }
+
+                // 6️⃣ Popula todos os outros campos
                 console.log('📝 Populando campos restantes...');
 
                 // Restaura no Redux
@@ -586,7 +600,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
 
     const obterDadosItem = useCallback(
         async (id: number) => {
-            setCarregando(true);
+            //setCarregando(true);
 
             try {
                 const resp = await configuracaoItemService.obterItem(id);
@@ -658,9 +672,10 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
             } catch (err: any) {
                 console.error('❌ Erro ao carregar item:', err.message);
                 mensagem('error', 'Erro', 'Erro ao carregar dados do item');
+            } finally {
+                //setCarregando(false);
             }
 
-            setCarregando(false);
         },
         [dispatch, item, form, mensagem],
     );
@@ -779,11 +794,28 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                     console.log('⏹️ Sem matriz salva - não carrega competências');
                 }
 
-                // 5️⃣ Agora chama o obterDadosItem que vai popular todos os campos restantes
+                // 5️⃣ Competência → Habilidades (APENAS se tiver competência salva)
+                if (resp.data.competenciaId) {
+                    console.log('📝 Setando competência e aguardando habilidades carregarem...');
+                    localStorage.setItem('aguardandoHabilidade', 'true');
+                    form?.setFieldValue(Campos.competencia, resp.data.competenciaId);
+
+                    // Aguarda habilidades carregarem
+                    let tentativas = 0;
+                    while (tentativas < 25 && localStorage.getItem('aguardandoHabilidade') === 'true') {
+                        await new Promise(resolve => setTimeout(resolve, 200));
+                        tentativas++;
+                    }
+                    console.log('✅ Habilidades carregaram (tentativas:', tentativas, ')');
+                } else {
+                    console.log('⏹️ Sem competência salva - não carrega habilidades');
+                }
+
+                // 6️⃣ Agora chama o obterDadosItem que vai popular todos os campos restantes
                 console.log('📝 Finalizando com obterDadosItem...');
                 await obterDadosItem(id);
 
-                // 5️⃣ Remove flag DEPOIS de popular tudo
+                // 7️⃣ Remove flag DEPOIS de popular tudo
                 localStorage.removeItem('carregandoViaVoltar');
                 console.log('✅ Carregamento inteligente finalizado');
 
@@ -834,8 +866,6 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
 
     const inserirRascunhoItem = useCallback(
         async (item: ItemNovoDto) => {
-
-
             await configuracaoItemService
                 .salvarRascunhoItemNovo(item)
                 .then((resp) => {

@@ -247,6 +247,13 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
     }
   }, [listaCompetencias.length]);
 
+  // 📡 Sinaliza quando competências habilidade
+  useEffect(() => {
+    if (localStorage.getItem('aguardandoHabilidade') === 'true' && listaHabilidades.length > 0) {
+      localStorage.removeItem('aguardandoHabilidade');
+    }
+  }, [listaHabilidades.length]);
+
   useEffect(() => {
     popularCampoSelectForm(competenciaIdForm, campoHabilidade, setListaHabilidades);
   }, [competenciaIdForm, campoHabilidade, popularCampoSelectForm]);
