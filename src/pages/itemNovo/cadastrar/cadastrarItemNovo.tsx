@@ -49,7 +49,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
     const [limpezaInicialFeita, setLimpezaInicialFeita] = useState<boolean>(false);
     const item = useSelector((state: AppState) => state.item);
     const configuracaoItemNovo = useSelector((state: AppState) => state.configuracaoItemNovo);
-    //const elaboracaoItemNovo = useSelector((state: AppState) => state.elaboracaoItemNovo);
+    const elaboracaoItemNovo = useSelector((state: AppState) => state.elaboracaoItemNovo);
 
     const [form] = Form.useForm();
     const initialValuesForm = {
@@ -515,7 +515,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
 
         const dto: ItemNovoDto = {
             id: item.id,
-            codigoItem: values?.codigoItem || '',
+            codigoItem: values?.codigoItem || elaboracaoItemNovo?.codigoItem || '',
             areaConhecimentoId: values?.AreaConhecimento || null,
             disciplinaId: values?.disciplinas || null,
             matrizId: values?.matriz || null,
@@ -537,10 +537,11 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
             mediaEhDesvio: values?.mediaDesvioPadrao || null,
             sentencaDescritora: values?.sentencaDescritora || null,
             observacao: values?.observacao || null,
-            textoBase: values?.textoBase || '',
-            fonte: values?.fonte || '',
-            enunciado: values?.enunciado || '',
-            alternativasDto: values?.alternativasDto?.length ? values?.alternativasDto : [],
+            // 🎯 CORREÇÃO: Pegar dados da elaboração do Redux (não do form da configuração)
+            textoBase: elaboracaoItemNovo?.textoBase || '',
+            fonte: elaboracaoItemNovo?.fonte || '',
+            enunciado: elaboracaoItemNovo?.enunciado || '',
+            alternativasDto: elaboracaoItemNovo?.alternativasDto?.length ? elaboracaoItemNovo.alternativasDto : [],
         };
 
         if (values?.alternativasDto?.length) {
@@ -581,7 +582,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
         }
 
         return dto;
-    }, [item.id, form]);
+    }, [item.id, form, elaboracaoItemNovo]);
 
     const obterDadosItem = useCallback(
         async (id: number) => {
