@@ -182,10 +182,9 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                 // Define flag para evitar conflitos
                 localStorage.setItem('carregandoViaLocalStorage', 'true');
 
-                // 0️⃣ Garantir que listas básicas estão carregadas
-                console.log('📝 Garantindo que área de conhecimento e dificuldade sugerida estejam carregadas...');
+                // 0️⃣ Garantir que área de conhecimento está carregada
+                console.log('📝 Garantindo que área de conhecimento esteja carregada...');
                 localStorage.setItem('aguardandoAreaConhecimento', 'true');
-                localStorage.setItem('aguardandoDificuldadeSugerida', 'true');
 
                 let tentativas = 0;
                 while (tentativas < 25 && localStorage.getItem('aguardandoAreaConhecimento') === 'true') {
@@ -193,14 +192,6 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                     tentativas++;
                 }
                 console.log('✅ Área de conhecimento carregada (tentativas:', tentativas, ')');
-
-                // Aguarda dificuldade sugerida
-                tentativas = 0;
-                while (tentativas < 25 && localStorage.getItem('aguardandoDificuldadeSugerida') === 'true') {
-                    await new Promise(resolve => setTimeout(resolve, 200));
-                    tentativas++;
-                }
-                console.log('✅ Dificuldade sugerida carregada (tentativas:', tentativas, ')');
 
                 // 1️⃣ Área → Disciplinas + Assuntos
                 if (itemSalvo.configuracao.areaConhecimento) {
@@ -323,13 +314,13 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                     }
                 });
 
-                // 🎯 Force um re-render especial para dificuldade sugerida (Radio Button)
-                if (itemSalvo.configuracao.dificuldadeSugerida) {
-                    setTimeout(() => {
-                        form?.setFieldValue(Campos.dificuldadeSugerida, itemSalvo.configuracao.dificuldadeSugerida);
-                        console.log('🎯 Dificuldade sugerida forçada:', itemSalvo.configuracao.dificuldadeSugerida);
-                    }, 500);
-                }
+                // // 🎯 Force um re-render especial para dificuldade sugerida (Radio Button)
+                // if (itemSalvo.configuracao.dificuldadeSugerida) {
+                //     setTimeout(() => {
+                //         form?.setFieldValue(Campos.dificuldadeSugerida, itemSalvo.configuracao.dificuldadeSugerida);
+                //         console.log('🎯 Dificuldade sugerida forçada:', itemSalvo.configuracao.dificuldadeSugerida);
+                //     }, 500);
+                // }
 
                 localStorage.removeItem('carregandoViaLocalStorage');
                 console.log('✅ Carregamento localStorage com cascata finalizado');
@@ -710,10 +701,9 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
 
                 // ⏳ Estratégia melhorada: usar localStorage para comunicação entre componentes
 
-                // 0️⃣ Primeiro, garantir que listas básicas estão carregadas
-                console.log('📝 Garantindo que área de conhecimento e dificuldade sugerida estejam carregadas...');
+                // 0️⃣ Primeiro, garantir que área de conhecimento está carregada
+                console.log('📝 Garantindo que área de conhecimento esteja carregada...');
                 localStorage.setItem('aguardandoAreaConhecimento', 'true');
-                localStorage.setItem('aguardandoDificuldadeSugerida', 'true');
 
                 // Aguarda área de conhecimento carregar
                 let tentativas = 0;
@@ -722,14 +712,6 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                     tentativas++;
                 }
                 console.log('✅ Área de conhecimento carregada (tentativas:', tentativas, ')');
-
-                // Aguarda dificuldade sugerida carregar
-                tentativas = 0;
-                while (tentativas < 25 && localStorage.getItem('aguardandoDificuldadeSugerida') === 'true') {
-                    await new Promise(resolve => setTimeout(resolve, 200));
-                    tentativas++;
-                }
-                console.log('✅ Dificuldade sugerida carregada (tentativas:', tentativas, ')');
 
                 // 1️⃣ Área → Disciplinas
                 if (resp.data.areaconhecimentoId) {

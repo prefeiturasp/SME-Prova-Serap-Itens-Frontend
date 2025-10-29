@@ -1,5 +1,5 @@
 import React, { Dispatch, SetStateAction, useCallback, useEffect, useState } from "react";
-import { CheckboxOptionType, Col, Form, FormProps, Row, Spin, Radio } from 'antd';
+import { Col, Form, FormProps, Row, Radio } from 'antd';
 import { DefaultOptionType } from 'antd/lib/select';
 import { Campos } from "~/domain/enums/campos-cadastro-item";
 import { SelectValueType } from '~/domain/type/select';
@@ -18,7 +18,7 @@ import configuracaoItemService from '~/services/configuracaoItem-service';
 
 //utils
 import {
-  converterListaParaCheckboxOption,
+  // converterListaParaCheckboxOption, // Não precisamos mais - fazemos conversão manual
   // ruleCampoArrayStringObrigatorioForm, // Removido - palavrasChave não é obrigatório
   ruleCampoObrigatorioForm,
   validarCampoForm
@@ -27,6 +27,8 @@ import {
 //css
 import '../cards/identificacaoComponent/identificacaoComponent.css';
 import '../cards/caracteristicasItemComponet/caracteristicaItemComponent.css';
+
+// ✅ Dificuldade sugerida agora é HTML direto - constante removida
 
 const FormularioUnico: React.FC<FormProps> = ({ form }) => {
 
@@ -85,8 +87,7 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
   const [listaCompetencias, setListaCompetencias] = useState<DefaultOptionType[]>([]);
   const [listaHabilidades, setListaHabilidades] = useState<DefaultOptionType[]>([]);
 
-  const [listaDificuldadeSugerida, setListaDificuldadeSugerida] = useState<CheckboxOptionType[]>([]);
-  const [carregandoDificuldadeSugerida, setCarregandoDificuldadeSugerida] = useState<boolean>(false);
+  // ✅ Dificuldade sugerida - HTML FIXO para máxima performance e confiabilidade
   const [listaNivelItem, setListaNivelItem] = useState<DefaultOptionType[]>([]);
   const [listaQuantidadeAlternativas, setListaQuantidadeAlternativas] = useState<DefaultOptionType[]>([]);
   const [listaTiposItem, setListaTiposItem] = useState<DefaultOptionType[]>([]);
@@ -176,23 +177,10 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
     }
   }, [form, matrizIdForm, campoAnoMatriz]);
 
-  // Dificuldade sugerida
-  const obterListaDificuldadeSugerida = useCallback(async () => {
-    setCarregandoDificuldadeSugerida(true);
-    const resposta = await configuracaoItemService.obterDificuldadeSugerida();
-    if (resposta?.length > 0) {
-      setListaDificuldadeSugerida(converterListaParaCheckboxOption(resposta));
-
-    } else {
-      setListaDificuldadeSugerida([]);
-      form?.setFieldValue(campoDificuldadeSugerida, null);
-    }
-    setCarregandoDificuldadeSugerida(false);
-  }, [form, campoDificuldadeSugerida]);
+  // ✅ Dificuldade sugerida - HTML FIXO apenas (máxima performance)
 
   // nivelitems
   const obterListaNivelItem = useCallback(async () => {
-    setCarregandoDificuldadeSugerida(true);
     const resposta = await configuracaoItemService.obterNivelItem();
     if (resposta?.length > 0) {
       setListaNivelItem(resposta);
@@ -200,7 +188,6 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
       setListaNivelItem([]);
       form?.setFieldValue(campoNivelItem, null);
     }
-    setCarregandoDificuldadeSugerida(false);
   }, [form, campoNivelItem]);
 
   //fim carregamento dos selects
@@ -333,20 +320,16 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
   }, [form, listaAreaConhecimento]);
 
   useEffect(() => {
-    // 🏗️ Carrega listas básicas no mount
-    obterListaDificuldadeSugerida();
+    // 🏗️ Carrega listas básicas no mount (dificuldade sugerida é HTML fixo)
     obterListaNivelItem();
     popularCampoSelectForm(null, campoQuantidadeAlternativas, setListaQuantidadeAlternativas);
     popularCampoSelectForm(null, campoTipoItem, setListaTiposItem);
     popularCampoSelectForm(null, campoSituacaoItem, setListaSituacoesItem);
   }, []);
 
-  // 📡 Sinaliza quando dificuldade sugerida carregou (para cascata automática)
-  useEffect(() => {
-    if (localStorage.getItem('aguardandoDificuldadeSugerida') === 'true' && listaDificuldadeSugerida.length > 0) {
-      localStorage.removeItem('aguardandoDificuldadeSugerida');
-    }
-  }, [listaDificuldadeSugerida.length]);
+
+
+
 
   // ✅ UseEffect simples: carrega listas quando campos mudam (cascata normal)
   // ✅ UseEffect para carregar Área de Conhecimento quando componente monta
@@ -362,6 +345,8 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
       localStorage.removeItem('aguardandoAreaConhecimento');
     }
   }, [listaAreaConhecimento.length]);
+
+
 
   // �️ UseEffects para cascata simples de selects (sem complexidade de "Voltar")
 
@@ -458,18 +443,29 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
                 name={campoDificuldadeSugerida}
                 rules={ruleCampoObrigatorioForm(dificuldadeSugeridaIdForm)}
               >
-                <Spin size="small" spinning={carregandoDificuldadeSugerida}>
-                  <Radio.Group
-                    className="dificuldadeSugeridaCadastroItem"
-                    id="rblDificuldadeSugerida"
-                    buttonStyle="solid"
-                    optionType="button"
-                    options={listaDificuldadeSugerida}
-                    value={dificuldadeSugeridaIdForm}
-                    onChange={(e) => form?.setFieldValue(campoDificuldadeSugerida, e.target.value)}
-                  // ❌ Removido defaultValue={5} - deixar Form.Item controlar o valor
-                  />
-                </Spin>
+                {/* 🏃‍♂️ HTML FIXO: Opções conhecidas para carregamento instantâneo */}
+                <Radio.Group
+                  className="dificuldadeSugeridaCadastroItem"
+                  id="rblDificuldadeSugerida"
+                  buttonStyle="solid"
+                  optionType="button"
+                  value={dificuldadeSugeridaIdForm}
+                  onChange={(e) => form?.setFieldValue(campoDificuldadeSugerida, e.target.value)}
+                >
+                  <Radio value={5}>1 - Muito Fácil</Radio>
+                  <Radio value={1}>2 - Fácil</Radio>
+                  <Radio value={2}>3 - Médio</Radio>
+                  <Radio value={3}>4 - Difícil</Radio>
+                  <Radio value={4}>5 - Muito Difícil</Radio>
+                </Radio.Group>
+                
+                {/* 🔍 DEBUG: Status do carregamento */}
+                {process.env.NODE_ENV === 'development' && (
+                  <div style={{ fontSize: '10px', color: '#666', marginTop: '4px' }}>
+                    🏃‍♂️ HTML fixo | 
+                    Valor atual: {form?.getFieldValue(campoDificuldadeSugerida) || 'nenhum'}
+                  </div>
+                )}
               </Form.Item>
             </Col>
 
