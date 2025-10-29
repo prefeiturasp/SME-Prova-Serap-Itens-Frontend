@@ -314,14 +314,6 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                     }
                 });
 
-                // // 🎯 Force um re-render especial para dificuldade sugerida (Radio Button)
-                // if (itemSalvo.configuracao.dificuldadeSugerida) {
-                //     setTimeout(() => {
-                //         form?.setFieldValue(Campos.dificuldadeSugerida, itemSalvo.configuracao.dificuldadeSugerida);
-                //         console.log('🎯 Dificuldade sugerida forçada:', itemSalvo.configuracao.dificuldadeSugerida);
-                //     }, 500);
-                // }
-
                 localStorage.removeItem('carregandoViaLocalStorage');
                 console.log('✅ Carregamento localStorage com cascata finalizado');
 
