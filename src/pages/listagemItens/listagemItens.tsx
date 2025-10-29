@@ -10,15 +10,9 @@ import ListagemVersaoItemComponent from '~/components/listagem-itens/versaoItem/
 import { useNavigate } from 'react-router-dom';
 import { AntDesignDto } from '~/domain/dto/ant-design-dto';
 import type { VersaoDto } from '~/domain/dto/versao-dto';
-
-interface Item {
-  codigo: string;
-  componente: string;
-  enunciado: string;
-  dificuldade: string;
-  situacao: string;
-  dataCriacao: string;
-}
+import itemService from '~/services/item-service';
+import type { ItemListagemDto } from '~/domain/dto/item-listagem-dto';
+import type { PaginacaoDto } from '~/domain/dto/paginacao-dto';
 
 const ITENS_POR_PAGINA = 8;
 
@@ -27,6 +21,7 @@ const ListagemItens: React.FC = () => {
   const navigate = useNavigate();
 
   const [pagina, setPagina] = useState(1);
+  const [totalRegistros, setTotalRegistro] = useState(0);
   const [selectItemLista, setSelectItemLista] = useState<AntDesignDto[]>([
     {
       value: '0',
@@ -38,7 +33,7 @@ const ListagemItens: React.FC = () => {
     label: 'Todas',
   });
 
-  const [tabelaItens, setTabelaItens] = useState<Item[]>([]);
+  const [tabelaItens, setTabelaItens] = useState<ItemListagemDto[]>([]);
 
   useEffect(() => {
     buscaDadosSelectItens();
@@ -67,18 +62,12 @@ const ListagemItens: React.FC = () => {
 
   const buscaDadosTabela = async () => {
     try {
-      /*const retorno = MARIO CRIE O SERVICO NA PASTA SERVICO E CHAME A API AQUI SUBSTITUINDO O VALOR MOCKADO ABAIXO
-      EXEMPLO const resposta: any[] = await MetododaPastaServicoQueVoceCriou(Number(aplicacaoSelecionada?.value),Number(componenteSelecionado?.value),Number(anoSelecionado?.value));*/
-      const retorno: Item[] = Array.from({ length: 50 }).map((_, i) => ({
-        codigo: `_LPT_EF4_SAEB_00_${i + 1}`,
-        componente: 'Língua Portuguesa',
-        enunciado:
-          'O trecho a seguir foi retirado de uma crônica de Rubem Braga: "Há pessoas que têm o dom d..."',
-        dificuldade: ['Muito fácil', 'Fácil', 'Médio', 'Difícil'][Math.floor(Math.random() * 4)],
-        situacao: ['Ativo', 'Inativo', 'Pendente'][Math.floor(Math.random() * 3)],
-        dataCriacao: '29/05/2025',
-      }));
-      setTabelaItens(retorno);
+      const codigoItem: string = selectItemSelecionado?.value?.toString();
+      const resposta: PaginacaoDto<ItemListagemDto> = await itemService
+        .obterListaItens({ codigoItem: codigoItem, pagina: pagina, tamanhoPagina: ITENS_POR_PAGINA });
+      setTabelaItens(resposta?.itens);
+      setPagina(resposta?.pagina);
+      setTotalRegistro(resposta?.totalRegistros);
     } catch (error) {
       console.log(error);
     }
@@ -91,10 +80,6 @@ const ListagemItens: React.FC = () => {
     };
     setSelectItemSelecionado(obj);
   };
-
-  const inicio = (pagina - 1) * ITENS_POR_PAGINA;
-  const fim = inicio + ITENS_POR_PAGINA;
-  const itensPagina = tabelaItens.slice(inicio, fim);
 
   const versoes: VersaoDto[] = [
     { id: 1, codigoItem: '_LPT_EF4_SAEB_00', versaoItem: 1, dataCriacao: '05/10/2025', provas: [] },
@@ -154,11 +139,9 @@ const ListagemItens: React.FC = () => {
 
       <div className='listagem-conteudo'>
         <ListagemTabela
-          itensPagina={itensPagina}
-          inicio={inicio}
-          fim={fim}
           dados={tabelaItens}
           pagina={pagina}
+          totalRegistros={totalRegistros}
           setPagina={setPagina}
           ITENS_POR_PAGINA={ITENS_POR_PAGINA}
         ></ListagemTabela>
