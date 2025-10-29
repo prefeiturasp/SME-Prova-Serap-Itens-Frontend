@@ -41,8 +41,8 @@ const ListagemItens: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    buscaDadosTabela();
-  }, [selectItemSelecionado]);
+    if (selectItemSelecionado && pagina) buscaDadosTabela();
+  }, [selectItemSelecionado, pagina]);
 
   const buscaDadosSelectItens = async () => {
     try {
@@ -63,10 +63,12 @@ const ListagemItens: React.FC = () => {
   const buscaDadosTabela = async () => {
     try {
       const codigoItem: string = selectItemSelecionado?.value?.toString();
-      const resposta: PaginacaoDto<ItemListagemDto> = await itemService
-        .obterListaItens({ codigoItem: codigoItem, pagina: pagina, tamanhoPagina: ITENS_POR_PAGINA });
+      const resposta: PaginacaoDto<ItemListagemDto> = await itemService.obterListaItens({
+        codigoItem: codigoItem,
+        pagina: pagina,
+        tamanhoPagina: ITENS_POR_PAGINA,
+      });
       setTabelaItens(resposta?.itens);
-      setPagina(resposta?.pagina);
       setTotalRegistro(resposta?.totalRegistros);
     } catch (error) {
       console.log(error);
@@ -138,15 +140,16 @@ const ListagemItens: React.FC = () => {
       </div>
 
       <div className='listagem-conteudo'>
-        <ListagemTabela
-          dados={tabelaItens}
-          pagina={pagina}
-          totalRegistros={totalRegistros}
-          setPagina={setPagina}
-          ITENS_POR_PAGINA={ITENS_POR_PAGINA}
-        ></ListagemTabela>
-
-        <div className='listagem-tabela-direita'>
+        <div className='listagem-conteudo-esquerda'>
+          <ListagemTabela
+            dados={tabelaItens}
+            pagina={pagina}
+            totalRegistros={totalRegistros}
+            setPagina={setPagina}
+            ITENS_POR_PAGINA={ITENS_POR_PAGINA}
+          ></ListagemTabela>
+        </div>
+        <div className='listagem-conteudo-direita'>
           <div>
             <ListagemResumoItemComponent></ListagemResumoItemComponent>
           </div>
