@@ -75,7 +75,7 @@ const ListagemResumoItemComponent: React.FC<listagemResumoItemProps> = ({ dados 
           </Button>
 
           <Button className='btn-azul-branco'>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
               <img src={iconDelete} alt='Excluir' width={16} height={16} />
               <span>Excluir Item</span>
             </div>
@@ -87,7 +87,7 @@ const ListagemResumoItemComponent: React.FC<listagemResumoItemProps> = ({ dados 
         <div className='resumo-item-conteudo-head'>
           <div className='resumo-item-conteudo-head-title'>Visão do estudante</div>
           <div className='resumo-item-conteudo-head-tag'>
-            <Tag>Código do item: {item.codigoItem}</Tag>
+            Código do item: <b>{item.codigoItem}</b>
           </div>
         </div>
 
@@ -100,12 +100,11 @@ const ListagemResumoItemComponent: React.FC<listagemResumoItemProps> = ({ dados 
 
           <Radio.Group>
             {item.alternativas.map((alt: any) => (
-              <Tag key={alt.id} className='resumo-item-conteudo-corpo-alternativa'>
+              <div key={alt.id} className='resumo-item-conteudo-corpo-alternativa'>
                 <Radio value={alt.numeracao}>
-                  <b>{alt.numeracao})</b>
+                  <b>{alt.numeracao})</b> {alt.descricao}
                 </Radio>
-                {alt.descricao}
-              </Tag>
+              </div>
             ))}
           </Radio.Group>
         </div>

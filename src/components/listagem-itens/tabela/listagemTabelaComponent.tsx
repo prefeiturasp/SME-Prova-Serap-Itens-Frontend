@@ -3,6 +3,7 @@ import React from 'react';
 import './listagemTabelaComponent.css';
 import type { ItemListagemDto } from '~/domain/dto/item-listagem-dto';
 import { Situacao, SituacaoDescricao } from '~/domain/enums/situacao';
+import iconFilter from '~/assets/filtrar.svg';
 
 interface ListagemTabelaProps {
   dados: ItemListagemDto[];
@@ -65,7 +66,7 @@ const ListagemTabela: React.FC<ListagemTabelaProps> = ({
             </div>
           </div>
           <div className='listagem-tabela-filtrar'>
-            {/* <Button type='link' icon={<FilterOutlined />}></Button> */}
+            <img src={iconFilter} alt='Editar' width={24} height={24} />
             FILTRAR
           </div>
         </div>
@@ -96,9 +97,7 @@ const ListagemTabela: React.FC<ListagemTabelaProps> = ({
                 <div>
                   <b>Enunciado do item:</b>
                   <br></br>
-                  <div
-                    dangerouslySetInnerHTML={{ __html: item.enunciado }}
-                  />
+                  <div dangerouslySetInnerHTML={{ __html: item.enunciado }} />
                 </div>
 
                 <div
@@ -140,7 +139,7 @@ const ListagemTabela: React.FC<ListagemTabelaProps> = ({
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 24 }}>
           <div className='listagem-item-tabela-auto'>{`${inicio}-${Math.min(
             fim,
-            dados.length
+            dados.length,
           )} de ${totalRegistros} itens`}</div>
 
           <div>
