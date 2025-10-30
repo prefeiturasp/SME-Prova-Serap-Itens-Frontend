@@ -1,5 +1,5 @@
 import { Card, Col, Row, Select } from 'antd';
-import React, { useState } from 'react';
+import React from 'react';
 import './listagemSelectComponent.css';
 import { DefaultOptionType } from 'antd/es/select';
 
@@ -11,7 +11,6 @@ export interface ListagemSelectProps {
   loading: boolean;
 }
 
-
 const ListagemSelectComponent: React.FC<ListagemSelectProps> = ({
   dados,
   itemSelecionado,
@@ -19,8 +18,6 @@ const ListagemSelectComponent: React.FC<ListagemSelectProps> = ({
   buscarItemOnSearch,
   loading,
 }) => {
-
-
   return (
     <>
       <Card className='listagem-busca'>
