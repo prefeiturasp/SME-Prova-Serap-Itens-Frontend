@@ -105,11 +105,13 @@ const ListagemResumoItemComponent: React.FC<listagemResumoItemProps> = ({ dados 
           </p>
           <br></br>
 
-          <Radio.Group>
+          <Radio.Group className='radio-group-alterantivas'>
             {item.alternativas.map((alt: any) => (
               <div key={alt.id} className='resumo-item-conteudo-corpo-alternativa'>
                 <Radio value={alt.numeracao}>
-                  <b>{alt.numeracao})</b> {alt.descricao}
+                  <div className='radio-alternativa-conteudo'>
+                    <b>{alt.numeracao})</b> <div dangerouslySetInnerHTML={{ __html: alt.descricao }}></div>
+                  </div>
                 </Radio>
               </div>
             ))}

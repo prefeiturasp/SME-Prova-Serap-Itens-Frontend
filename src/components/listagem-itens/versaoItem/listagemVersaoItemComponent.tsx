@@ -17,26 +17,28 @@ const ListagemVersaoItemComponent: React.FC<Props> = ({versoes}) => {
     return lista && lista.length > 1;
   }
 
-  return <Card title={cardHeader} className='versoes-container' >
-    <Row>
-      <Col xs={24} md={24}>
-        {possuiMultiplasVersoes(versoes) ? 
-          <span className='versoes-descricao'>Este item possui mais versões anteriores, confira na lista abaixo.</span>
-          : 
-          <span className='versoes-subtitulo'>Este item não possui outras versões.</span>
-        }
-      </Col>
-    </Row>
-    {possuiMultiplasVersoes(versoes) ? 
-      (
-        <Row className='versoes-tabela-container'>
+  return <div className='versoes-wrapper'>
+      <Card title={cardHeader} className='versoes-container' >
+        <Row>
           <Col xs={24} md={24}>
-            <TabelaVersaoItemComponent versoes={versoes} />
+            {possuiMultiplasVersoes(versoes) ?
+              <span className='versoes-descricao'>Este item possui mais versões anteriores, confira na lista abaixo.</span>
+              :
+              <span className='versoes-subtitulo'>Este item não possui outras versões.</span>
+            }
           </Col>
         </Row>
-      ) : <></>
-      }
-  </Card>;
+        {possuiMultiplasVersoes(versoes) ?
+          (
+            <Row className='versoes-tabela-container'>
+              <Col xs={24} md={24}>
+                <TabelaVersaoItemComponent versoes={versoes} />
+              </Col>
+            </Row>
+          ) : <></>
+        }
+      </Card>
+  </div>;
 };
 
 export default ListagemVersaoItemComponent;
