@@ -62,7 +62,7 @@ const ListagemResumoItemComponent: React.FC<listagemResumoItemProps> = ({ dados 
   const item = dados || dadosMockados;
 
   return (
-    <div>
+    <div className='yo'>
       <div className='resumo-item'>
         <div className='resumo-item-titulo'>Resumo do item</div>
 
@@ -92,11 +92,18 @@ const ListagemResumoItemComponent: React.FC<listagemResumoItemProps> = ({ dados 
         </div>
 
         <div className='resumo-item-conteudo-corpo'>
-          <p>{item.enunciado}</p>
-          <p>{item.textoBase}</p>
+          <p>
+            <div dangerouslySetInnerHTML={{ __html: item.enunciado }} />
+          </p>
+          <br></br>
+          <p>
+            <div dangerouslySetInnerHTML={{ __html: item.textoBase }} />
+          </p>
+          <br></br>
           <p className='resumo-item-conteudo-corpo-fonte'>
             <i>{item.fonte}</i>
           </p>
+          <br></br>
 
           <Radio.Group>
             {item.alternativas.map((alt: any) => (

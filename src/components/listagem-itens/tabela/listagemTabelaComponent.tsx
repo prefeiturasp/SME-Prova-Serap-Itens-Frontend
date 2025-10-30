@@ -11,6 +11,7 @@ interface ListagemTabelaProps {
   totalRegistros: number;
   setPagina: (p: number) => void;
   ITENS_POR_PAGINA: number;
+  onItemClick?: (id: string) => void;
 }
 
 const ListagemTabela: React.FC<ListagemTabelaProps> = ({
@@ -19,6 +20,7 @@ const ListagemTabela: React.FC<ListagemTabelaProps> = ({
   totalRegistros,
   setPagina,
   ITENS_POR_PAGINA,
+  onItemClick,
 }) => {
   const corDificuldade = (nivel: string) => {
     switch (nivel) {
@@ -73,7 +75,16 @@ const ListagemTabela: React.FC<ListagemTabelaProps> = ({
 
         <div style={{ display: 'flex', flexDirection: 'column', marginTop: 16 }}>
           {dados.map((item, index) => (
-            <div className='listagem-item-tabela' key={index}>
+            <div
+              key={item.codigoItem}
+              className='listagem-item-tabela'
+              onClick={() => onItemClick?.(item.id)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') onItemClick?.(item.id);
+              }}
+              role='button'
+              tabIndex={0}
+            >
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 <div
                   style={{

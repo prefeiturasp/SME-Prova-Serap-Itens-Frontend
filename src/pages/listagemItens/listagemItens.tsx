@@ -13,6 +13,7 @@ import type { VersaoDto } from '~/domain/dto/versao-dto';
 import itemService from '~/services/item-service';
 import type { ItemListagemDto } from '~/domain/dto/item-listagem-dto';
 import type { PaginacaoDto } from '~/domain/dto/paginacao-dto';
+import { ItemResumoVersaoDto } from '~/domain/dto/item-resumo-versao-dto';
 
 const ITENS_POR_PAGINA = 8;
 
@@ -34,6 +35,9 @@ const ListagemItens: React.FC = () => {
   });
 
   const [tabelaItens, setTabelaItens] = useState<ItemListagemDto[]>([]);
+  const [itemResumoVersao, setItemResumoVersao] = useState<ItemResumoVersaoDto>();
+
+  const [codigoItemTabelaSelecionado, setCodigoItemTabelaSelecionado] = useState<string>('');
 
   useEffect(() => {
     buscaDadosSelectItens();
@@ -43,6 +47,10 @@ const ListagemItens: React.FC = () => {
   useEffect(() => {
     if (selectItemSelecionado && pagina) buscaDadosTabela();
   }, [selectItemSelecionado, pagina]);
+
+  useEffect(() => {
+    if (codigoItemTabelaSelecionado) buscaResumoEVersoes();
+  }, [codigoItemTabelaSelecionado]);
 
   const buscaDadosSelectItens = async () => {
     try {
@@ -75,12 +83,24 @@ const ListagemItens: React.FC = () => {
     }
   };
 
+  const buscaResumoEVersoes = async () => {
+    const resposta: ItemResumoVersaoDto = await itemService.obterVersaoEResumo(
+      codigoItemTabelaSelecionado,
+    );
+
+    setItemResumoVersao(resposta);
+  };
+
   const selecionaItemOnChange = async (value: string, option: any) => {
     const obj: AntDesignDto = {
       label: option.label,
       value: value,
     };
     setSelectItemSelecionado(obj);
+  };
+
+  const tabelaItemClick = (id: string) => {
+    setCodigoItemTabelaSelecionado(id);
   };
 
   const versoes: VersaoDto[] = [
@@ -147,15 +167,27 @@ const ListagemItens: React.FC = () => {
             totalRegistros={totalRegistros}
             setPagina={setPagina}
             ITENS_POR_PAGINA={ITENS_POR_PAGINA}
+            onItemClick={tabelaItemClick}
           ></ListagemTabela>
         </div>
         <div className='listagem-conteudo-direita'>
-          <div>
-            <ListagemResumoItemComponent></ListagemResumoItemComponent>
-          </div>
-          <div>
-            <ListagemVersaoItemComponent versoes={versoes}></ListagemVersaoItemComponent>
-          </div>
+          {codigoItemTabelaSelecionado === '' ? (
+            <div className='listagem-conteudo-direita-vazio'>
+              <p>
+                <b>Nenhum item selecionado!</b>
+              </p>
+              Escolha um na lista ao lado para conferir os detalhes aqui.
+            </div>
+          ) : (
+            <>
+              <div>
+                <ListagemResumoItemComponent dados={itemResumoVersao} />
+              </div>
+              <div>
+                <ListagemVersaoItemComponent versoes={versoes} />
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
