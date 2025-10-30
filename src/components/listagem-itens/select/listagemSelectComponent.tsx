@@ -27,7 +27,6 @@ const ListagemSelectComponent: React.FC<ListagemSelectProps> = ({
     buscarItemOnSearch(value);
   };
 
-
   return (
     <>
       <Card className='listagem-busca'>
