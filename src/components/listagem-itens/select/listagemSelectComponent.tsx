@@ -18,6 +18,14 @@ const ListagemSelectComponent: React.FC<ListagemSelectProps> = ({
   buscarItemOnSearch,
   loading,
 }) => {
+
+  const [searchValue, setSearchValue] = useState<string>('');
+
+  const handleSearchChange = (value: string) => {
+    setSearchValue(value);
+    buscarItemOnSearch(value);
+  };
+
   return (
     <>
       <Card className='listagem-busca'>
@@ -30,12 +38,12 @@ const ListagemSelectComponent: React.FC<ListagemSelectProps> = ({
               showSearch
               filterOption={false}
               data-testid='select-aplicacao'
-              onSearch={buscarItemOnSearch}
+              onSearch={handleSearchChange}
               placeholder='Digite o código do item'
               className='select-custom'
               onChange={selecionaItemOnChange}
               value={itemSelecionado ?? undefined}
-              notFoundContent='Não encontramos nenhum item com o trecho digitado...'
+              notFoundContent={searchValue?.length >= 3 ? 'Não encontramos nenhum item com o trecho digitado...' : 'Digite ao menos 3 caracteres para buscar'}
               loading={loading}
               options={dados}
               style={{ width: '100%' }}
@@ -48,3 +56,4 @@ const ListagemSelectComponent: React.FC<ListagemSelectProps> = ({
 };
 
 export default ListagemSelectComponent;
+ 
