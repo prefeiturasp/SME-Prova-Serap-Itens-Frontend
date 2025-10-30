@@ -11,7 +11,7 @@ import {
 } from './actions';
 
 export interface ConfiguracaoItemNovoProps {
-  codigo: number;
+  codigoItem: string;
   areaConhecimento: SelectValueType;
   disciplina: SelectValueType;
   matriz: SelectValueType;
@@ -35,7 +35,7 @@ export interface ConfiguracaoItemNovoProps {
   observacao: string | null;
 }
 const initialValuesConfiguracaoItemNovoProps = {
-  codigo: 0,
+  codigoItem: '',
   areaConhecimento: null,
   disciplina: null,
   matriz: null,
@@ -61,15 +61,60 @@ const initialValuesConfiguracaoItemNovoProps = {
 
 export interface ElaboracaoItemNovoProps {
   textoBase?: string;
+  fonte?: string;
+  enunciado?: string;
+  codigoItem?: string;
+  video?: any; // Arquivo de vídeo do upload
+  audio?: any; // Arquivo de áudio do upload
+  alternativaA?: string;
+  justificativaA?: string;
+  alternativaB?: string;
+  justificativaB?: string;
+  alternativaC?: string;
+  justificativaC?: string;
+  alternativaD?: string;
+  justificativaD?: string;
+  alternativaCorreta?: string; // "A", "B", "C" ou "D"
+  alternativasDto?: any[]; // AlternativaRascunhoDto[] - será montado baseado nos campos acima
+  arquivoVideoId?: number;
+  arquivoAudioId?: number;
+  // 🆔 IDs das alternativas para update (vindos do backend)
+  idAlternativaA?: number | null;
+  idAlternativaB?: number | null;
+  idAlternativaC?: number | null;
+  idAlternativaD?: number | null;
 }
+
 const initialValuesElaboracaoItemNovoProps = {
   textoBase: undefined,
+  fonte: undefined,
+  enunciado: undefined,
+  codigoItem: undefined,
+  video: undefined,
+  audio: undefined,
+  alternativaA: undefined,
+  justificativaA: undefined,
+  alternativaB: undefined,
+  justificativaB: undefined,
+  alternativaC: undefined,
+  justificativaC: undefined,
+  alternativaD: undefined,
+  justificativaD: undefined,
+  alternativaCorreta: undefined,
+  alternativasDto: undefined,
+  arquivoVideoId: undefined,
+  arquivoAudioId: undefined,
+  // 🆔 IDs das alternativas para update
+  idAlternativaA: undefined,
+  idAlternativaB: undefined,
+  idAlternativaC: undefined,
+  idAlternativaD: undefined,
 };
 
 export interface ItemNovoProps {
   id: number;
-  configuracao?: ConfiguracaoItemNovoProps;
-  elaboracao?: ElaboracaoItemNovoProps;
+  configuracao?: Partial<ConfiguracaoItemNovoProps>;
+  elaboracao?: Partial<ElaboracaoItemNovoProps>;
 }
 const initialValuesItemNovoProps = {
   id: 0,
@@ -92,34 +137,13 @@ export const itemPrincipalNovo = (state: ItemNovoProps = initialValuesItemNovoPr
 };
 
 export const configuracaoItemNovo = (
-  state: ConfiguracaoItemNovoProps = initialValuesConfiguracaoItemNovoProps,
+  state: Partial<ConfiguracaoItemNovoProps> = initialValuesConfiguracaoItemNovoProps,
   action: SetConfiguracaoItemNovo,
 ) => {
   return produce(state, (draft) => {
     switch (action.type) {
       case typeSetConfiguracaoItemNovo:
-        draft.codigo = action.payload.codigo;
-        draft.areaConhecimento = action.payload.areaConhecimento;
-        draft.disciplina = action.payload.disciplina;
-        draft.matriz = action.payload.matriz;
-        draft.anoMatriz = action.payload.anoMatriz;
-        draft.competencia = action.payload.competencia;
-        draft.habilidade = action.payload.habilidade;       
-        draft.dificuldadeSugerida = action.payload.dificuldadeSugerida;
-        draft.discriminacao = action.payload.discriminacao;
-        draft.dificuldade = action.payload.dificuldade;
-        draft.nivelItem = action.payload.nivelItem;
-        draft.acertoCasual = action.payload.acertoCasual;
-        draft.assunto = action.payload.assunto;
-        draft.subAssunto = action.payload.subAssunto;
-        draft.situacaoItem = action.payload.situacaoItem;
-        draft.tipoItem = action.payload.tipoItem;
-        draft.quantidadeAlternativas = action.payload.quantidadeAlternativas;
-        draft.palavrasChave = action.payload.palavrasChave;
-        draft.parametroBTransformado = action.payload.parametroBTransformado;
-        draft.mediaDesvioPadrao = action.payload.mediaDesvioPadrao;
-        draft.sentencaDescritora = action.payload.sentencaDescritora;
-        draft.observacao = action.payload.observacao;
+        Object.assign(draft, action.payload);
         break;
       default:
         break;
@@ -128,13 +152,13 @@ export const configuracaoItemNovo = (
 };
 
 export const elaboracaoItemNovo = (
-  state: ElaboracaoItemNovoProps = initialValuesElaboracaoItemNovoProps,
+  state: Partial<ElaboracaoItemNovoProps> = initialValuesElaboracaoItemNovoProps,
   action: SetElaboracaoItemNovo,
 ) => {
   return produce(state, (draft) => {
     switch (action.type) {
       case typeSetElaboracaoItemNovo:
-        draft.textoBase = action.payload.textoBase;
+        Object.assign(draft, action.payload);
         break;
       default:
         break;

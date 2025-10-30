@@ -1,5 +1,5 @@
 import React, { Dispatch, SetStateAction, useCallback, useEffect, useState } from "react";
-import { CheckboxOptionType, Col, Form, FormProps, Row, Spin, Radio } from 'antd';
+import { Col, Form, FormProps, Row, Radio } from 'antd';
 import { DefaultOptionType } from 'antd/lib/select';
 import { Campos } from "~/domain/enums/campos-cadastro-item";
 import { SelectValueType } from '~/domain/type/select';
@@ -11,16 +11,15 @@ import InputTag from "~/components/input-tag";
 import TipoItem from "~/components/cadastro-item/campos/tipo-item";
 import { CampoNumero } from "~/components/cadastro-item/campo-numero";
 
-// Redux
-// import { ConfiguracaoItemNovoProps } from '~/redux/modules/cadastroItem-novo/itemNovo/reducers';
+// Lógica de população movida para cadastrarItemNovo.tsx
 
 //services
 import configuracaoItemService from '~/services/configuracaoItem-service';
 
 //utils
 import {
-  converterListaParaCheckboxOption,
-  ruleCampoArrayStringObrigatorioForm,
+  // converterListaParaCheckboxOption, // Não precisamos mais - fazemos conversão manual
+  // ruleCampoArrayStringObrigatorioForm, // Removido - palavrasChave não é obrigatório
   ruleCampoObrigatorioForm,
   validarCampoForm
 } from "~/utils/funcoes";
@@ -29,10 +28,15 @@ import {
 import '../cards/identificacaoComponent/identificacaoComponent.css';
 import '../cards/caracteristicasItemComponet/caracteristicaItemComponent.css';
 
+// ✅ Dificuldade sugerida agora é HTML direto - constante removida
+
 const FormularioUnico: React.FC<FormProps> = ({ form }) => {
 
+
+  // Detectar dados vindos do "Voltar" (via localStorage/estados do pai)
+
+
   // campos
-  const campoCodigo = Campos.codigo;
   const campoAreaConhecimento = Campos.areaConhecimento;
   const campoDisciplina = Campos.disciplinas;
   const campoMatriz = Campos.matriz;
@@ -60,33 +64,19 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
   const campoMediaDesvioPadrao = Campos.mediaDesvioPadrao;
 
   // watchers
-  // const codigoForm = Form.useWatch(campoCodigo, form);
   const areaConhecimentoIdForm = Form.useWatch(Campos.areaConhecimento, form);
   const disciplinaIdForm = Form.useWatch(Campos.disciplinas, form);
   const matrizIdForm = Form.useWatch(Campos.matriz, form);
-  // const anoMatrizIdForm = Form.useWatch(Campos.anoMatriz, form);
+
+  // Debug logs removidos - usando método obterDadosItem(id) para carregar dados
 
   const competenciaIdForm = Form.useWatch(Campos.competencia, form);
-  // const habilidadeIdForm = Form.useWatch(Campos.habilidade, form);
 
   const dificuldadeSugeridaIdForm = Form.useWatch(campoDificuldadeSugerida, form);
   const nivelItemIdForm = Form.useWatch(campoNivelItem, form);
   const quantidadeAlternativasForm = Form.useWatch(campoQuantidadeAlternativas, form);
-  // const tipoItemIdForm = Form.useWatch(campoTipoItem, form);
-  // const situacaoItemIdForm = Form.useWatch(campoSituacaoItem, form);
 
   const assuntoIdForm = Form.useWatch(campoAssunto, form);
-  // const subAssuntoIdForm = Form.useWatch(campoSubAssunto, form);
-  // const palavrasChaveForm = Form.useWatch(campoPalavraChave, form);
-  // const sentencaDescritoraForm = Form.useWatch(campoSentencaDescritora, form);
-  // const observacaoForm = Form.useWatch(campoObservacao, form);
-
-  // const discriminacaoForm = Form.useWatch(campoDiscriminacao, form);
-  // const dificuldadeForm = Form.useWatch(campoDificuldade, form);
-  // const acertoCasualForm = Form.useWatch(campoAcertoCasual, form);
-  // const parametroBTransformadoForm = Form.useWatch(campoParametroBTransformado, form);
-  // const mediaDesvioPadraoForm = Form.useWatch(campoMediaDesvioPadrao, form);
-
 
   // listas
   const [listaAreaConhecimento, setListaAreaConhecimento] = useState<DefaultOptionType[]>([]);
@@ -97,8 +87,7 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
   const [listaCompetencias, setListaCompetencias] = useState<DefaultOptionType[]>([]);
   const [listaHabilidades, setListaHabilidades] = useState<DefaultOptionType[]>([]);
 
-  const [listaDificuldadeSugerida, setListaDificuldadeSugerida] = useState<CheckboxOptionType[]>([]);
-  const [carregandoDificuldadeSugerida, setCarregandoDificuldadeSugerida] = useState<boolean>(false);
+  // ✅ Dificuldade sugerida - HTML FIXO para máxima performance e confiabilidade
   const [listaNivelItem, setListaNivelItem] = useState<DefaultOptionType[]>([]);
   const [listaQuantidadeAlternativas, setListaQuantidadeAlternativas] = useState<DefaultOptionType[]>([]);
   const [listaTiposItem, setListaTiposItem] = useState<DefaultOptionType[]>([]);
@@ -106,13 +95,13 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
 
   const [listaAssuntos, setListaAssuntos] = useState<DefaultOptionType[]>([]);
   const [listaSubAssuntos, setListaSubAssuntos] = useState<DefaultOptionType[]>([]);
-  
+
   // ✅ Estado local para palavras-chave (necessário para exibição das tags)
   const [palavrasChave, setPalavrasChave] = useState<string[] | undefined>([]);
 
   // const [objTabConfiguracaoItemNovo, setObjTabConfiguracaoItemNovo] =
   //   useState<ConfiguracaoItemNovoProps>({} as ConfiguracaoItemNovoProps);
- 
+
 
 
   //carregamento dos selects
@@ -124,6 +113,33 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
     ) => {
       let resposta: DefaultOptionType[] = [];
       const parametroValido = !validarCampoForm(param);
+
+      // Sinaliza início de carregamento para a cascata automática
+      switch (nomeCampo) {
+        case Campos.areaConhecimento:
+          localStorage.setItem('aguardandoAreaConhecimento', 'true');
+          break;
+        case Campos.disciplinas:
+          localStorage.setItem('aguardandoDisciplinas', 'true');
+          break;
+        case Campos.matriz:
+          localStorage.setItem('aguardandoMatriz', 'true');
+          break;
+        case Campos.competencia:
+          localStorage.setItem('aguardandoCompetencias', 'true');
+          break;
+        case Campos.habilidade:
+          localStorage.setItem('aguardandoHabilidade', 'true');
+          break;
+        case Campos.assunto:
+          localStorage.setItem('aguardandoAssuntos', 'true');
+          break;
+        case Campos.subAssunto:
+          localStorage.setItem('aguardandoSubAssuntos', 'true');
+          break;
+        default:
+          break;
+      }
 
       switch (nomeCampo) {
         case Campos.areaConhecimento:
@@ -167,7 +183,36 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
       }
 
       if (resposta?.length) {
-        setLista(resposta);        
+        setLista(resposta);
+      } else {
+        setLista([]);
+      }
+
+      // Sinaliza fim de carregamento (sucesso ou vazio) para a cascata automática
+      switch (nomeCampo) {
+        case Campos.areaConhecimento:
+          localStorage.removeItem('aguardandoAreaConhecimento');
+          break;
+        case Campos.disciplinas:
+          localStorage.removeItem('aguardandoDisciplinas');
+          break;
+        case Campos.matriz:
+          localStorage.removeItem('aguardandoMatriz');
+          break;
+        case Campos.competencia:
+          localStorage.removeItem('aguardandoCompetencias');
+          break;
+        case Campos.habilidade:
+          localStorage.removeItem('aguardandoHabilidade');
+          break;
+        case Campos.assunto:
+          localStorage.removeItem('aguardandoAssuntos');
+          break;
+        case Campos.subAssunto:
+          localStorage.removeItem('aguardandoSubAssuntos');
+          break;
+        default:
+          break;
       }
     },
     [form],
@@ -178,6 +223,8 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
       setListaAnosMatriz([]);
       return;
     }
+    // Sinaliza início do carregamento de anos de matriz
+    localStorage.setItem('aguardandoAnoMatriz', 'true');
     const resposta = await configuracaoItemService.obterAnosMatriz(matrizIdForm);
     if (resposta?.length) {
       setListaAnosMatriz(resposta);
@@ -186,25 +233,14 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
       setListaAnosMatriz([]);
       form?.setFieldValue(campoAnoMatriz, null);
     }
+    // Sinaliza fim do carregamento de anos de matriz
+    localStorage.removeItem('aguardandoAnoMatriz');
   }, [form, matrizIdForm, campoAnoMatriz]);
 
-  // Dificuldade sugerida
-  const obterListaDificuldadeSugerida = useCallback(async () => {
-    setCarregandoDificuldadeSugerida(true);
-    const resposta = await configuracaoItemService.obterDificuldadeSugerida();
-    if (resposta?.length > 0) {
-      setListaDificuldadeSugerida(converterListaParaCheckboxOption(resposta));
-     
-    } else {
-      setListaDificuldadeSugerida([]);
-      form?.setFieldValue(campoDificuldadeSugerida, null);
-    }
-    setCarregandoDificuldadeSugerida(false);
-  }, [form, campoDificuldadeSugerida]);
+  // ✅ Dificuldade sugerida - HTML FIXO apenas (máxima performance)
 
   // nivelitems
   const obterListaNivelItem = useCallback(async () => {
-    setCarregandoDificuldadeSugerida(true);
     const resposta = await configuracaoItemService.obterNivelItem();
     if (resposta?.length > 0) {
       setListaNivelItem(resposta);
@@ -212,7 +248,6 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
       setListaNivelItem([]);
       form?.setFieldValue(campoNivelItem, null);
     }
-    setCarregandoDificuldadeSugerida(false);
   }, [form, campoNivelItem]);
 
   //fim carregamento dos selects
@@ -226,64 +261,180 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
     obterAreaConhecimento();
   }, [obterAreaConhecimento]);
 
+  // ✅ Cascata limpa: área → disciplinas
   useEffect(() => {
-    popularCampoSelectForm(areaConhecimentoIdForm, campoDisciplina, setListaDisciplinas);
+    if (areaConhecimentoIdForm) {
+      popularCampoSelectForm(areaConhecimentoIdForm, campoDisciplina, setListaDisciplinas);
+    }
   }, [areaConhecimentoIdForm, campoDisciplina, popularCampoSelectForm]);
 
+  // 📡 Sinaliza quando disciplinas carregaram
   useEffect(() => {
-    popularCampoSelectForm(disciplinaIdForm, campoMatriz, setListaMatriz);
+    if (localStorage.getItem('aguardandoDisciplinas') === 'true' && listaDisciplinas.length > 0) {
+      localStorage.removeItem('aguardandoDisciplinas');
+    }
+  }, [listaDisciplinas.length]);
+
+  // ✅ Cascata limpa: disciplina → matriz
+  useEffect(() => {
+    if (disciplinaIdForm) {
+      popularCampoSelectForm(disciplinaIdForm, campoMatriz, setListaMatriz);
+    }
   }, [disciplinaIdForm, campoMatriz, popularCampoSelectForm]);
+
+  // 📡 Sinaliza quando matriz carregou
+  useEffect(() => {
+    if (localStorage.getItem('aguardandoMatriz') === 'true' && listaMatriz.length > 0) {
+      localStorage.removeItem('aguardandoMatriz');
+    }
+  }, [listaMatriz.length]);
 
   useEffect(() => {
     obterAnosMatriz();
   }, [matrizIdForm, campoAnoMatriz, obterAnosMatriz]);
 
-  // 🔹 Atualiza competências quando muda a matriz
+  // ✅ Cascata limpa: matriz → competências
   useEffect(() => {
-    popularCampoSelectForm(matrizIdForm, campoCompetencia, setListaCompetencias);
+    if (matrizIdForm) {
+      popularCampoSelectForm(matrizIdForm, campoCompetencia, setListaCompetencias);
+    }
   }, [matrizIdForm, campoCompetencia, popularCampoSelectForm]);
 
-  // 🔹 Atualiza habilidades quando muda a competência
+  // 📡 Sinaliza quando competências carregaram
+  useEffect(() => {
+    if (localStorage.getItem('aguardandoCompetencias') === 'true' && listaCompetencias.length > 0) {
+      localStorage.removeItem('aguardandoCompetencias');
+    }
+  }, [listaCompetencias.length]);
+
+  // 📡 Sinaliza quando competências habilidade
+  useEffect(() => {
+    if (localStorage.getItem('aguardandoHabilidade') === 'true' && listaHabilidades.length > 0) {
+      localStorage.removeItem('aguardandoHabilidade');
+    }
+  }, [listaHabilidades.length]);
+
   useEffect(() => {
     popularCampoSelectForm(competenciaIdForm, campoHabilidade, setListaHabilidades);
   }, [competenciaIdForm, campoHabilidade, popularCampoSelectForm]);
 
-  // 🔹 Atualiza listas conforme dependências
   useEffect(() => {
-    if (disciplinaIdForm)
+    if (disciplinaIdForm) {
       popularCampoSelectForm(disciplinaIdForm, campoAssunto, setListaAssuntos);
+    }
   }, [disciplinaIdForm, popularCampoSelectForm, campoAssunto]);
 
+  // ✅ Sinaliza quando assuntos carregam (para cascata automática)
   useEffect(() => {
-    if (assuntoIdForm)
-      popularCampoSelectForm(assuntoIdForm, campoSubAssunto, setListaSubAssuntos);
-  }, [assuntoIdForm, popularCampoSelectForm, campoSubAssunto]);
+    if (listaAssuntos?.length > 0) {
+      localStorage.removeItem('aguardandoAssuntos');
+    }
+  }, [listaAssuntos]);
 
   useEffect(() => {
-    const valorInicial = form?.getFieldValue(campoPalavraChave);
-    if (valorInicial && Array.isArray(valorInicial)) {
-      setPalavrasChave(valorInicial);
+    if (assuntoIdForm) {
+      popularCampoSelectForm(assuntoIdForm, campoSubAssunto, setListaSubAssuntos);
     }
-  }, [form, campoPalavraChave]);
+  }, [assuntoIdForm, popularCampoSelectForm, campoSubAssunto]);
+
+  // ✅ Sinaliza quando subassuntos carregam (para cascata automática)
+  useEffect(() => {
+    if (listaSubAssuntos?.length > 0) {
+      localStorage.removeItem('aguardandoSubAssuntos');
+    }
+  }, [listaSubAssuntos]);
+
+  // ✅ Sinaliza quando anos da matriz carregam (para cascata automática)
+  useEffect(() => {
+    if (listaAnosMatriz?.length > 0) {
+      localStorage.removeItem('aguardandoAnoMatriz');
+    }
+  }, [listaAnosMatriz]);
+
+  // 🔄 Watch do campo palavrasChave para sincronizar com estado local
+  const valorPalavrasChaveFormulario = Form.useWatch(campoPalavraChave, form);
+  
+  useEffect(() => {
+    console.log('🔍 FormularioUnico - Valor palavrasChave mudou:', {
+      valorFormulario: valorPalavrasChaveFormulario,
+      tipoValor: typeof valorPalavrasChaveFormulario,
+      isArray: Array.isArray(valorPalavrasChaveFormulario),
+      estadoAtual: palavrasChave
+    });
+    
+    if (valorPalavrasChaveFormulario && Array.isArray(valorPalavrasChaveFormulario)) {
+      setPalavrasChave(valorPalavrasChaveFormulario);
+      console.log('✅ Estado palavrasChave atualizado via watch:', valorPalavrasChaveFormulario);
+    } else if (!valorPalavrasChaveFormulario) {
+      // Se não há valor, limpa o estado
+      setPalavrasChave([]);
+      console.log('🗑️ Estado palavrasChave limpo via watch');
+    }
+  }, [valorPalavrasChaveFormulario]);
 
   //fim cascata dos selects
 
 
   // Os Efeitos
+  // ✅ Reset inteligente: só reseta se REALMENTE vazio E primeira vez carregando E NÃO vindo de processo especial
   useEffect(() => {
-    form?.resetFields();
+    const voltandoParaPrimeiraTela = localStorage.getItem('voltandoParaPrimeiraTela') === 'true';
+
+    if (!voltandoParaPrimeiraTela) {
+      const valores = form?.getFieldsValue();
+      const formularioVazio = !valores || Object.keys(valores).length === 0 ||
+        Object.values(valores).every(v => !v || (Array.isArray(v) && v.length === 0));
+
+      // Só reseta se formulário TOTALMENTE vazio E lista carregou pela primeira vez
+      const primeiroCarregamento = listaAreaConhecimento.length > 0;
+
+      if (formularioVazio && primeiroCarregamento) {
+        // ✅ Delay pequeno para evitar conflito com outras validações
+        setTimeout(() => {
+          form?.resetFields();
+          // Limpa erros de validação que possam ter aparecido
+          form?.setFields(Object.keys(form.getFieldsValue()).map(name => ({
+            name,
+            errors: []
+          })));
+        }, 50);
+
+        // 🧹 Limpa flags de sessão quando reseta
+        sessionStorage.removeItem('populouViaVoltar');
+      }
+    }
   }, [form, listaAreaConhecimento]);
 
   useEffect(() => {
-    obterListaDificuldadeSugerida();
+    // 🏗️ Carrega listas básicas no mount (dificuldade sugerida é HTML fixo)
     obterListaNivelItem();
     popularCampoSelectForm(null, campoQuantidadeAlternativas, setListaQuantidadeAlternativas);
     popularCampoSelectForm(null, campoTipoItem, setListaTiposItem);
     popularCampoSelectForm(null, campoSituacaoItem, setListaSituacoesItem);
-
   }, []);
 
-  // Fim dos Efeitos
+
+
+
+
+  // ✅ UseEffect simples: carrega listas quando campos mudam (cascata normal)
+  // ✅ UseEffect para carregar Área de Conhecimento quando componente monta
+  useEffect(() => {
+    if (listaAreaConhecimento.length === 0) {
+      popularCampoSelectForm(null, campoAreaConhecimento, setListaAreaConhecimento);
+    }
+  }, []);
+
+  // 📡 Sinaliza quando área de conhecimento carregou (para o "Voltar")
+  useEffect(() => {
+    if (localStorage.getItem('aguardandoAreaConhecimento') === 'true' && listaAreaConhecimento.length > 0) {
+      localStorage.removeItem('aguardandoAreaConhecimento');
+    }
+  }, [listaAreaConhecimento.length]);
+
+
+
+  // �️ UseEffects para cascata simples de selects (sem complexidade de "Voltar")
 
 
   return (
@@ -294,24 +445,6 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
           Defina a localização desta questão na matriz curricular.
         </div>
         <div className='card-corpo'>
-          <div className="esconder">
-            {/* <Form.Item label='Código'>
-              <Input
-                disabled={true}
-                placeholder='Código Item'
-                value={configuracaoItem?.codigo > 0 ? configuracaoItem.codigo : ''}
-              />
-            </Form.Item> */}
-            <Form.Item
-                label='codigo'
-                name={campoCodigo}
-              >
-                <CampoNumero
-                  value={form?.getFieldValue(campoCodigo)}
-                  onChange={(valor) => form?.setFieldValue(campoCodigo, valor)}
-                  placeholder='codigo' />
-              </Form.Item>
-          </div>
           <Row>
             <Col xs={24} md={12} className='card-campo'>
               <SelectForm
@@ -396,16 +529,21 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
                 name={campoDificuldadeSugerida}
                 rules={ruleCampoObrigatorioForm(dificuldadeSugeridaIdForm)}
               >
-                <Spin size="small" spinning={carregandoDificuldadeSugerida}>
-                  <Radio.Group
-                    className="dificuldadeSugeridaCadastroItem"
-                    id="rblDificuldadeSugerida"
-                    buttonStyle="solid"
-                    optionType="button"
-                    options={listaDificuldadeSugerida}
-                    defaultValue={5}
-                  />
-                </Spin>
+                {/* 🏃‍♂️ HTML FIXO: Opções conhecidas para carregamento instantâneo */}
+                <Radio.Group
+                  className="dificuldadeSugeridaCadastroItem"
+                  id="rblDificuldadeSugerida"
+                  buttonStyle="solid"
+                  optionType="button"
+                  value={dificuldadeSugeridaIdForm}
+                  onChange={(e) => form?.setFieldValue(campoDificuldadeSugerida, e.target.value)}
+                >
+                  <Radio value={5}>1 - Muito Fácil</Radio>
+                  <Radio value={1}>2 - Fácil</Radio>
+                  <Radio value={2}>3 - Médio</Radio>
+                  <Radio value={3}>4 - Difícil</Radio>
+                  <Radio value={4}>5 - Muito Difícil</Radio>
+                </Radio.Group>
               </Form.Item>
             </Col>
 
@@ -498,7 +636,8 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
               <Form.Item
                 label='Palavra-chave'
                 name={campoPalavraChave}
-                rules={ruleCampoArrayStringObrigatorioForm(palavrasChave || [])}
+                // Campo não obrigatório - sem validação obrigatória
+                rules={[]}
               >
                 <InputTag
                   valueForm={palavrasChave}

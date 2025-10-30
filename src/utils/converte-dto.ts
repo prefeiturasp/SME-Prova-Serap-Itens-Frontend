@@ -14,3 +14,15 @@ export const voltarAoSerap = () => {
   const URL_SERAP = import.meta.env.VITE_SME_SERAP;
   window.location.replace(URL_SERAP);
 };
+
+export const converterDtoParaQueryString = <T extends Record<string, any>>(dto: T): string => {
+  const params = new URLSearchParams();
+
+  Object.entries(dto).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '' && value !== '0') {
+      params.append(key, String(value));
+    }
+  });
+
+  return params.toString();
+};

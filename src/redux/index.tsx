@@ -7,17 +7,15 @@ import { composeWithDevTools } from '@redux-devtools/extension';
 
 const middlewares = [thunk];
 
-// export type AppState = ReturnType<typeof rootReducer>; antigo
 export type AppState = ReturnType<typeof rootReducerNovo>;
 
 const persistedReducer = persistReducer(
   {
     key: 'SERAP-ITEM-PERSIST',
     storage: sessionStorage,
-    whitelist: ['auth', 'filtroPrincipal', 'areaConhecimento', 'disciplina', 'matriz', 'item'],
+    whitelist: ['auth', 'filtroPrincipal', 'areaConhecimento', 'disciplina', 'matriz', 'item', 'configuracaoItemNovo', 'elaboracaoItemNovo'],
   },
   rootReducerNovo,
-  // rootReducer, antigo
   
 );
 

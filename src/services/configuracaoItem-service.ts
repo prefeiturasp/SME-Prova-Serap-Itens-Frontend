@@ -3,7 +3,7 @@ import { AxiosResponse } from 'axios';
 import { MatrizObj } from '~/components/cadastro-item/modelo-matriz';
 import { ItemDto } from '~/domain/dto/item-dto';
 import { SelectValueType } from '~/domain/type/select';
-import { DisciplinaProps } from '~/redux/modules/cadastro-item/disciplina/reducers';
+import { DisciplinaProps } from '~/redux/modules/cadastroItem-novo/disciplina/reducers';
 import geralService from '~/services/geral-service';
 import api from './api';
 import { ItemNovoDto } from '~/domain/dto/itemNovo-dto';
@@ -70,6 +70,8 @@ const obterQuantidadeAlternativas = (): Promise<DefaultOptionType[]> =>
 
 const obterItem = (id: number): Promise<AxiosResponse<any>> => api.get(`${URL_DEFAULT}/Item/${id}`);
 
+const obterItemComAlternativas = (id: number): Promise<AxiosResponse<any>> => api.get(`${URL_DEFAULT}/Item/${id}/Alternativas`);
+
 export default {
   obterAreaConhecimento,
   obterDisciplinas,
@@ -91,4 +93,5 @@ export default {
   obterAnosMatriz,
   obterDificuldadeSugerida,
   obterNivelItem,
+  obterItemComAlternativas,
 };

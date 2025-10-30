@@ -1,0 +1,92 @@
+.tabela-versao-item .ant-table {
+  border: none !important;
+}
+
+.tabela-versao-item .ant-table-container {
+  border: none !important;
+}
+
+.tabela-versao-item .ant-table-thead>tr>th {
+  background-color: #fff !important;
+  border: none !important;
+  padding-left: 0px !important;
+  font-family: Roboto;
+  font-weight: 700;
+  font-size: 14px;
+  color: #595959;
+}
+
+.tabela-versao-item .ant-table-thead>tr>th::before {
+  display: none !important;
+  content: none !important;
+}
+
+.tabela-versao-item .ant-table-thead>tr>th.ant-table-cell {
+  padding: 8px 8px;
+}
+
+.tabela-versao-item .ant-table-tbody>tr>td {
+  border: none !important;
+  /* remove bordas entre linhas */
+}
+
+.tabela-versao-item .ant-table-tbody>tr:hover>td {
+  background-color: #fafafa !important;
+}
+
+.tabela-versao-item .ant-table-content {
+  border: none !important;
+}
+
+.tabela-versao-item .ant-table-wrapper {
+  border: none !important;
+}
+
+.tabela-versao-item .ant-table-tbody>tr>td {
+  background-color: #fff !important;
+  border: none !important;
+  padding-left: 0px !important;
+  font-family: Roboto;
+  font-weight: 400;
+  font-size: 14px;
+  color: #595959;
+}
+
+.tabela-versao-item .ant-table-tbody>tr>td {
+  border: none !important;
+  border-bottom: 1px solid #D5D5D5 !important;
+}
+
+.tabela-versao-item .ant-table-tbody>tr>td.ant-table-cell {
+  padding: 8px 8px;
+}
+
+.tabela-versao-item .ant-table-tbody>tr:last-child>td {
+  border-bottom: none !important;
+}
+
+.acao-container{
+    display: flex;
+    gap: 8px;
+}
+
+.acao-container .btn-acao{
+  border-radius: 4px;
+  height: 38px;
+  width: 38px;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.acao-container .btn-editar{
+  background: #5A94D8;
+  color: #D5D5D5;
+}
+
+.acao-container .btn-remover {
+  background: #FFFFFF;
+  color: #5A94D8;
+  border-color: #5A94D8
+}

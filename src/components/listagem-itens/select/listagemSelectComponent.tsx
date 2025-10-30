@@ -18,7 +18,6 @@ const ListagemSelectComponent: React.FC<ListagemSelectProps> = ({
   buscarItemOnSearch,
   loading,
 }) => {
-  console.log(dados);
 
   return (
     <>

@@ -15,12 +15,12 @@ export interface SetItemNovo {
 
 export interface SetConfiguracaoItemNovo {
   type: typeof typeSetConfiguracaoItemNovo;
-  payload: ConfiguracaoItemNovoProps;
+  payload: Partial<ConfiguracaoItemNovoProps>;
 }
 
 export interface SetElaboracaoItemNovo {
   type: typeof typeSetElaboracaoItemNovo;
-  payload: ElaboracaoItemNovoProps;
+  payload: Partial<ElaboracaoItemNovoProps>;
 }
 
 export const setItemNovo = (payload: ItemNovoProps): SetItemNovo => {
@@ -30,13 +30,13 @@ export const setItemNovo = (payload: ItemNovoProps): SetItemNovo => {
   };
 };
 
-export const setConfiguracaoItemNovo = (payload: ConfiguracaoItemNovoProps) => ({
+export const setConfiguracaoItemNovo = (payload: Partial<ConfiguracaoItemNovoProps>) => ({
   type: typeSetConfiguracaoItemNovo,
   payload,
 });
 
 
-export const setElaboracaoItemNovo = (payload: ElaboracaoItemNovoProps): SetElaboracaoItemNovo => {
+export const setElaboracaoItemNovo = (payload: Partial<ElaboracaoItemNovoProps>): SetElaboracaoItemNovo => {
   return {
     type: typeSetElaboracaoItemNovo,
     payload,

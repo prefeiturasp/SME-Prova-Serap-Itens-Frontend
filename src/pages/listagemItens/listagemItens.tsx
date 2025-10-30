@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Card, Col, Row } from 'antd';
+import { Button, Col, Row } from 'antd';
 import { Link } from 'react-router-dom';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import './listagemItens.css';
@@ -9,6 +9,10 @@ import ListagemResumoItemComponent from '~/components/listagem-itens/resumoItem/
 import ListagemVersaoItemComponent from '~/components/listagem-itens/versaoItem/listagemVersaoItemComponent';
 import { useNavigate } from 'react-router-dom';
 import { AntDesignDto } from '~/domain/dto/ant-design-dto';
+import itemService from '~/services/item-service';
+import type { ItemListagemDto } from '~/domain/dto/item-listagem-dto';
+import type { PaginacaoDto } from '~/domain/dto/paginacao-dto';
+import { ItemResumoVersaoDto } from '~/domain/dto/item-resumo-versao-dto';
 import filtroSelectService from '~/services/filtro-select-service';
 import { DefaultOptionType } from 'antd/es/select';
 import { SelecioneDto } from '~/domain/dto/selecione-dto';
@@ -30,6 +34,7 @@ const ListagemItens: React.FC = () => {
   const navigate = useNavigate();
 
   const [pagina, setPagina] = useState(1);
+  const [totalRegistros, setTotalRegistro] = useState(0);
   const [selectItemLista, setSelectItemLista] = useState<DefaultOptionType[]>([
     {
       value: '0',
@@ -41,7 +46,10 @@ const ListagemItens: React.FC = () => {
     label: 'Todas',
   });
 
-  const [tabelaItens, setTabelaItens] = useState<Item[]>([]);
+  const [tabelaItens, setTabelaItens] = useState<ItemListagemDto[]>([]);
+  const [itemResumoVersao, setItemResumoVersao] = useState<ItemResumoVersaoDto>();
+
+  const [codigoItemTabelaSelecionado, setCodigoItemTabelaSelecionado] = useState<string>('');
 
   const [loadingSelect, setLoadingSelect] = useState<boolean>(false);
   useEffect(() => {
@@ -49,26 +57,50 @@ const ListagemItens: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    buscaDadosTabela();
-  }, [selectItemSelecionado]);
+    if (selectItemSelecionado && pagina) buscaDadosTabela();
+  }, [selectItemSelecionado, pagina]);
 
-  const buscaDadosTabela = async () => {
+  useEffect(() => {
+    if (codigoItemTabelaSelecionado) buscaResumoEVersoes();
+  }, [codigoItemTabelaSelecionado]);
+
+  const buscaDadosSelectItens = async () => {
     try {
-      /*const retorno = MARIO CRIE O SERVICO NA PASTA SERVICO E CHAME A API AQUI SUBSTITUINDO O VALOR MOCKADO ABAIXO
+      /*const retorno = CAIQUE CRIE O SERVICO NA PASTA SERVICO E CHAME A API AQUI SUBSTITUINDO O VALOR MOCKADO ABAIXO 
       EXEMPLO const resposta: any[] = await MetododaPastaServicoQueVoceCriou(Number(aplicacaoSelecionada?.value),Number(componenteSelecionado?.value),Number(anoSelecionado?.value));*/
-      const retorno: Item[] = Array.from({ length: 50 }).map((_, i) => ({
-        codigo: `_LPT_EF4_SAEB_00_${i + 1}`,
-        componente: 'Língua Portuguesa',
-        enunciado:
-          'O trecho a seguir foi retirado de uma crônica de Rubem Braga: "Há pessoas que têm o dom d..."',
-        dificuldade: ['Muito fácil', 'Fácil', 'Médio', 'Difícil'][Math.floor(Math.random() * 4)],
-        situacao: ['Ativo', 'Inativo', 'Pendente'][Math.floor(Math.random() * 3)],
-        dataCriacao: '29/05/2025',
-      }));
-      setTabelaItens(retorno);
+      const retorno = [
+        {
+          value: '0',
+          label: 'Todas',
+        },
+      ];
+      setSelectItemLista(retorno);
     } catch (error) {
       console.log(error);
     }
+  };
+
+  const buscaDadosTabela = async () => {
+    try {
+      const codigoItem: string = selectItemSelecionado?.value?.toString();
+      const resposta: PaginacaoDto<ItemListagemDto> = await itemService.obterListaItens({
+        codigoItem: codigoItem,
+        pagina: pagina,
+        tamanhoPagina: ITENS_POR_PAGINA,
+      });
+      setTabelaItens(resposta?.itens);
+      setTotalRegistro(resposta?.totalRegistros);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const buscaResumoEVersoes = async () => {
+    const resposta: ItemResumoVersaoDto = await itemService.obterVersaoEResumo(
+      codigoItemTabelaSelecionado,
+    );
+
+    setItemResumoVersao(resposta);
   };
 
   const selecionaItemOnChange = async (value: string, option: any) => {
@@ -79,6 +111,8 @@ const ListagemItens: React.FC = () => {
     };
     setSelectItemSelecionado(obj);
   };
+
+  
 
   const buscarItemOnSearch = async (value: string) => {
     try {
@@ -96,9 +130,9 @@ const ListagemItens: React.FC = () => {
 
   }
 
-  const inicio = (pagina - 1) * ITENS_POR_PAGINA;
-  const fim = inicio + ITENS_POR_PAGINA;
-  const itensPagina = tabelaItens.slice(inicio, fim);
+  const tabelaItemClick = (id: string) => {
+    setCodigoItemTabelaSelecionado(id);
+  };
 
   return (
     <div className='listagem-pagina'>
@@ -123,18 +157,12 @@ const ListagemItens: React.FC = () => {
 
       <div className='listagem-head'>
         <div className='listagem-head-texto'>
-          <Row className='listagem-titulo'>
-            <Col xs={12} md={12}>
-              Lista de itens
-            </Col>
-          </Row>
+          <div className='listagem-titulo'>Lista de itens</div>
 
-          <Row className='listagem-subtitulo'>
-            <Col xs={12} md={12}>
-              Sua lista de itens criados. Você pode conferir detalhes, fazer edições ou usar os
-              filtros para encontrar o que precisa.
-            </Col>
-          </Row>
+          <div className='listagem-subtitulo'>
+            Sua lista de itens criados. Você pode conferir detalhes, fazer edições ou usar os
+            filtros para encontrar o que precisa.
+          </div>
         </div>
         <div className='listagem-head-botao'>
           <Button
@@ -142,8 +170,9 @@ const ListagemItens: React.FC = () => {
               navigate(`/criacao`);
               window.scrollTo(0, 0);
             }}
+            className='btn-azul-padrao'
           >
-            CRIAR NOVO ITEM
+            Criar novo item
           </Button>
         </div>
       </div>
@@ -159,24 +188,35 @@ const ListagemItens: React.FC = () => {
       </div>
 
       <div className='listagem-conteudo'>
-        <ListagemTabela
-          itensPagina={itensPagina}
-          inicio={inicio}
-          fim={fim}
-          dados={tabelaItens}
-          pagina={pagina}
-          setPagina={setPagina}
-          ITENS_POR_PAGINA={ITENS_POR_PAGINA}
-        ></ListagemTabela>
-
-        <Card className='listagem-tabela'>
-          <div>
-            <ListagemResumoItemComponent></ListagemResumoItemComponent>
-          </div>
-          <div>
-            <ListagemVersaoItemComponent></ListagemVersaoItemComponent>
-          </div>
-        </Card>
+        <div className='listagem-conteudo-esquerda'>
+          <ListagemTabela
+            dados={tabelaItens}
+            pagina={pagina}
+            totalRegistros={totalRegistros}
+            setPagina={setPagina}
+            ITENS_POR_PAGINA={ITENS_POR_PAGINA}
+            onItemClick={tabelaItemClick}
+          ></ListagemTabela>
+        </div>
+        <div className='listagem-conteudo-direita'>
+          {codigoItemTabelaSelecionado === '' ? (
+            <div className='listagem-conteudo-direita-vazio'>
+              <p>
+                <b>Nenhum item selecionado!</b>
+              </p>
+              Escolha um na lista ao lado para conferir os detalhes aqui.
+            </div>
+          ) : (
+            <>
+              <div>
+                <ListagemResumoItemComponent dados={itemResumoVersao} />
+              </div>
+              <div>
+                <ListagemVersaoItemComponent versoes={itemResumoVersao?.versoesDisponiveis!} />
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );
