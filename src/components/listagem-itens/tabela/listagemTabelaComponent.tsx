@@ -108,7 +108,12 @@ const ListagemTabela: React.FC<ListagemTabelaProps> = ({
                 <div>
                   <b>Enunciado do item:</b>
                   <br></br>
-                  <div dangerouslySetInnerHTML={{ __html: item.enunciado }} />
+
+                  {item.enunciado && item.enunciado.trim() !== '' ? (
+                    <div dangerouslySetInnerHTML={{ __html: item.enunciado }} />
+                  ) : (
+                    <i>[Enunciado não cadastrado]</i>
+                  )}
                 </div>
 
                 <div
@@ -119,22 +124,30 @@ const ListagemTabela: React.FC<ListagemTabelaProps> = ({
                   }}
                 >
                   <div style={{ marginTop: 4 }}>
+                    {item.dificuldade && (
+                      <Tag
+                        style={{
+                          borderRadius: '8px',
+                          marginRight: 8,
+                          ...corDificuldade(item.dificuldade),
+                        }}
+                      >
+                        <b>Dificuldade: </b> {item.dificuldade}
+                      </Tag>
+                    )}
+
                     <Tag
                       style={{
                         borderRadius: '8px',
-                        marginRight: 8,
-                        ...corDificuldade(item.dificuldade),
+                        ...corSituacao(item.situacao === null ? Situacao.Rascunho : item.situacao),
                       }}
                     >
-                      <b>Dificuldade: </b> {item.dificuldade}
-                    </Tag>
-                    <Tag
-                      style={{
-                        borderRadius: '8px',
-                        ...corSituacao(item.situacao),
-                      }}
-                    >
-                      <b>Situação: </b> {SituacaoDescricao[item.situacao]}
+                      <b>Situação: </b>{' '}
+                      {
+                        SituacaoDescricao[
+                          item.situacao === null ? Situacao.Rascunho : item.situacao
+                        ]
+                      }
                     </Tag>
                   </div>
                   <div>
