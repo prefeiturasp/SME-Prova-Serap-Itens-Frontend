@@ -84,7 +84,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
     // const [messageApi, contextHolder] = message.useMessage();
     const [carregando, setCarregando] = useState(false);
     const [verificacaoInicialFeita, setVerificacaoInicialFeita] = useState(false);
-    // Estados locais substituindo Redux
+    
     const [itemId, setItemId] = useState<number>(0);
     const [codigoItemEstado, setCodigoItemEstado] = useState<string>('');
     const [configuracaoItemNovo, setConfiguracaoItemNovoLocal] = useState<Partial<ConfiguracaoItemNovoProps>>({});
@@ -377,7 +377,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
         const executarCarregamento = async () => {
             // 🎯 1ª PRIORIDADE: Se tem ID no Redux, busca dados completos do backend
             if (itemId > 0) {
-                console.log('🎯 ELABORAÇÃO: ID disponível (estado/local), carregando do backend...');
+                console.log('🎯 ELABORAÇÃO: ID disponível (estado/local), carregando');
                 const dadosBackend = await obterItemComAlternativasEPopular(itemId);
                 
                 if (dadosBackend) {
@@ -441,14 +441,14 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
     // � Função para salvar dados atuais do formulário no localStorage
     const salvarDadosFormularioNoLocalStorage = useCallback(() => {
         try {
-            const values = form.getFieldsValue(true);
+            const values = form.getFieldsValue(true); // Ensure all fields are retrieved
             
             // Cria objeto de elaboração com dados atuais do formulário
             const elaboracaoAtual: ElaboracaoLocalProps = {
                 textoBase: values[campoTextoBase] || '',
                 fonte: values[campoFonte] || '',
                 enunciado: values[campoEnunciado] || '',
-                codigoItem: values[campoCodigoItem] || configuracaoItemNovo?.codigoItem,
+                codigoItem: values[campoCodigoItem] || '', // Ensure codigoItem is retrieved from the form
                 video: values[campoVideo] || [],
                 audio: values[campoAudio] || [],
                 alternativaA: values[campoAlternativaA] || '',
@@ -466,15 +466,16 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
                 idAlternativaC: elaboracaoItemNovo?.idAlternativaC || null,
                 idAlternativaD: elaboracaoItemNovo?.idAlternativaD || null,
             };
+
             // Atualiza estado local com dados do formulário
             setElaboracaoItemNovoLocal(elaboracaoAtual);
 
             // Salva no localStorage dados atuais
             const itemParaLocalStorage = {
                 id: itemId,
-                codigoItem: configuracaoItemNovo?.codigoItem || codigoItemEstado,
+                codigoItem: values[campoCodigoItem] || '', // Save codigoItem in the localStorage object
                 configuracao: configuracaoItemNovo,
-                elaboracao: elaboracaoAtual // ← Dados atuais do formulário
+                elaboracao: elaboracaoAtual // Dados atuais do formulário
             };
 
             localStorage.setItem('itemAtual', JSON.stringify(itemParaLocalStorage));
