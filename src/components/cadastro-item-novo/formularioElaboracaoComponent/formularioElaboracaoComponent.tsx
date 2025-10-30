@@ -136,18 +136,64 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
     };
 
     let handleCancel = (nomeModal: string) => {
+        const itemAtual = localStorage.getItem('itemAtual');
         switch (nomeModal) {
+
             case "modalA":
                 setIsModalAVisible(false);
+                setAlternativaA('');
+                setJustificativaA('');
+                form?.resetFields([campoAlternativaA, campoJustificativaA]);
+                if (itemAtual) {
+                    const item = JSON.parse(itemAtual);
+                    if (item.elaboracao) {
+                        item.elaboracao.alternativaA = '';
+                        item.elaboracao.justificativaA = '';
+                        localStorage.setItem('itemAtual', JSON.stringify(item));
+                    }
+                }
                 break;
             case "modalB":
                 setIsModalBVisible(false);
+                setAlternativaB('');
+                setJustificativaB('');
+                form?.resetFields([campoAlternativaB, campoJustificativaB]);
+                if (itemAtual) {
+                    const item = JSON.parse(itemAtual);
+                    if (item.elaboracao) {
+                        item.elaboracao.alternativaB = '';
+                        item.elaboracao.justificativaB = '';
+                        localStorage.setItem('itemAtual', JSON.stringify(item));
+                    }
+                }
                 break;
             case "modalC":
                 setIsModalCVisible(false);
+                setAlternativaC('');
+                setJustificativaC('');
+                form?.resetFields([campoAlternativaC, campoJustificativaC]);
+                if (itemAtual) {
+                    const item = JSON.parse(itemAtual);
+                    if (item.elaboracao) {
+                        item.elaboracao.alternativaC = '';
+                        item.elaboracao.justificativaC = '';
+                        localStorage.setItem('itemAtual', JSON.stringify(item));
+                    }
+                }
                 break;
             case "modalD":
                 setIsModalDVisible(false);
+                setAlternativaD('');
+                setJustificativaD('');
+                form?.resetFields([campoAlternativaD, campoJustificativaD]);
+                if (itemAtual) {
+                    const item = JSON.parse(itemAtual);
+                    if (item.elaboracao) {
+                        item.elaboracao.alternativaD = '';
+                        item.elaboracao.justificativaD = '';
+                        localStorage.setItem('itemAtual', JSON.stringify(item));
+                    }
+                }
                 break;
             default:
                 break;
@@ -226,8 +272,8 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                                                 Alternativa A
                                             </div>
                                             <div className="card-elaboracao-radio-buttom">
-                                                <Button className="azulPadrao"  icon={<EditOutlined />}
-                                                onClick={() => showModal("modalA")}>
+                                                <Button className="azulPadrao" icon={<EditOutlined />}
+                                                    onClick={() => showModal("modalA")}>
                                                     Editar
                                                 </Button>
                                             </div>
@@ -255,7 +301,7 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                                             </div>
                                             <div className="card-elaboracao-radio-buttom">
                                                 <Button className="azulPadrao" type="primary" icon={<EditOutlined />}
-                                                onClick={() => showModal("modalB")}>
+                                                    onClick={() => showModal("modalB")}>
                                                     Editar
                                                 </Button>
                                             </div>
@@ -281,7 +327,7 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                                             </div>
                                             <div className="card-elaboracao-radio-buttom">
                                                 <Button className="azulPadrao" icon={<EditOutlined />}
-                                                onClick={() => showModal("modalC")}>
+                                                    onClick={() => showModal("modalC")}>
                                                     Editar
                                                 </Button>
                                             </div>
@@ -307,7 +353,7 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                                             </div>
                                             <div className="card-elaboracao-radio-buttom">
                                                 <Button className="azulPadrao" icon={<EditOutlined />}
-                                                onClick={() => showModal("modalD")}>
+                                                    onClick={() => showModal("modalD")}>
                                                     Editar
                                                 </Button>
                                             </div>
@@ -337,8 +383,8 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                         onOk={() => handleOk("modalA")}
                         onCancel={() => handleCancel("modalA")}
                         okText="Finalizar"
-                        okButtonProps={{style: {background: '#5A94D6'}}}
-                        cancelButtonProps={{ style: {background: '#FFFFFF', color: '#5A94D8'}}}
+                        okButtonProps={{ style: { background: '#5A94D6' } }}
+                        cancelButtonProps={{ style: { background: '#FFFFFF', color: '#5A94D8' } }}
                     >
                         <div className='alternativa-corpo-elaboracao card-alternativa-ajuste' style={{ marginBottom: 24 }}>
                             <Row>
@@ -378,8 +424,8 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                         onOk={() => handleOk("modalB")}
                         onCancel={() => handleCancel("modalB")}
                         okText="Finalizar"
-                        okButtonProps={{style: {background: '#5A94D6'}}}
-                        cancelButtonProps={{ style: {background: '#FFFFFF', color: '#5A94D8'}}}
+                        okButtonProps={{ style: { background: '#5A94D6' } }}
+                        cancelButtonProps={{ style: { background: '#FFFFFF', color: '#5A94D8' } }}
                     >
                         <div className='alternativa-corpo-elaboracao card-alternativa-ajuste'>
                             <Row>
@@ -419,8 +465,8 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                         onOk={() => handleOk("modalC")}
                         onCancel={() => handleCancel("modalC")}
                         okText="Finalizar"
-                        okButtonProps={{style: {background: '#5A94D6'}}}
-                        cancelButtonProps={{ style: {background: '#FFFFFF', color: '#5A94D8'}}}
+                        okButtonProps={{ style: { background: '#5A94D6' } }}
+                        cancelButtonProps={{ style: { background: '#FFFFFF', color: '#5A94D8' } }}
                     >
                         <div className='alternativa-corpo-elaboracao card-alternativa-ajuste'>
                             <Row>
@@ -460,8 +506,8 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                         onOk={() => handleOk("modalD")}
                         onCancel={() => handleCancel("modalD")}
                         okText="Finalizar"
-                        okButtonProps={{style: {background: '#5A94D6'}}}
-                        cancelButtonProps={{ style: {background: '#FFFFFF', color: '#5A94D8'}}}
+                        okButtonProps={{ style: { background: '#5A94D6' } }}
+                        cancelButtonProps={{ style: { background: '#FFFFFF', color: '#5A94D8' } }}
                     >
                         <div className='alternativa-corpo-elaboracao card-alternativa-ajuste'>
                             <Row>

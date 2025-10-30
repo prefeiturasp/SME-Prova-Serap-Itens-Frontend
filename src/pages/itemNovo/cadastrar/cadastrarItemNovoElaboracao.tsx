@@ -522,69 +522,69 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
         // Monta as alternativas com base nos campos individuais
         const alternativasDto: AltenativaDto[] = [];
 
-        if (values[campoAlternativaA]) {
-            const alternativaA: any = {
-                numeracao: 'A',
-                descricao: values[campoAlternativaA],
-                justificativa: values[campoJustificativaA] || '',
-                correta: values[campoAlternativaCorreta] === 'A',
-                ordem: 1,
-                itemId: itemId,
-            };
-            // 🆔 ADICIONA ID se existir (para update)
-            if (elaboracaoItemNovo?.idAlternativaA) {
-                alternativaA.id = elaboracaoItemNovo.idAlternativaA;
-            }
-            alternativasDto.push(alternativaA);
-        }
 
-        if (values[campoAlternativaB]) {
-            const alternativaB: any = {
-                numeracao: 'B',
-                descricao: values[campoAlternativaB],
-                justificativa: values[campoJustificativaB] || '',
-                correta: values[campoAlternativaCorreta] === 'B',
-                ordem: 2,
-                itemId: itemId,
-            };
-            // 🆔 ADICIONA ID se existir (para update)
-            if (elaboracaoItemNovo?.idAlternativaB) {
-                alternativaB.id = elaboracaoItemNovo.idAlternativaB;
-            }
-            alternativasDto.push(alternativaB);
+        const alternativaA: any = {
+            numeracao: 'A',
+            descricao: values[campoAlternativaA],
+            justificativa: values[campoJustificativaA] || '',
+            correta: values[campoAlternativaCorreta] === 'A',
+            ordem: 1,
+            itemId: itemId,
+        };
+        // 🆔 ADICIONA ID se existir (para update)
+        if (elaboracaoItemNovo?.idAlternativaA) {
+            alternativaA.id = elaboracaoItemNovo.idAlternativaA;
         }
+        alternativasDto.push(alternativaA);
 
-        if (values[campoAlternativaC]) {
-            const alternativaC: any = {
-                numeracao: 'C',
-                descricao: values[campoAlternativaC],
-                justificativa: values[campoJustificativaC] || '',
-                correta: values[campoAlternativaCorreta] === 'C',
-                ordem: 3,
-                itemId: itemId
-            };
-            // 🆔 ADICIONA ID se existir (para update)
-            if (elaboracaoItemNovo?.idAlternativaC) {
-                alternativaC.id = elaboracaoItemNovo.idAlternativaC;
-            }
-            alternativasDto.push(alternativaC);
-        }
 
-        if (values[campoAlternativaD]) {
-            const alternativaD: any = {
-                numeracao: 'D',
-                descricao: values[campoAlternativaD],
-                justificativa: values[campoJustificativaD] || '',
-                correta: values[campoAlternativaCorreta] === 'D',
-                ordem: 4,
-                itemId: itemId,
-            };
-            // 🆔 ADICIONA ID se existir (para update)
-            if (elaboracaoItemNovo?.idAlternativaD) {
-                alternativaD.id = elaboracaoItemNovo.idAlternativaD;
-            }
-            alternativasDto.push(alternativaD);
+
+        const alternativaB: any = {
+            numeracao: 'B',
+            descricao: values[campoAlternativaB],
+            justificativa: values[campoJustificativaB] || '',
+            correta: values[campoAlternativaCorreta] === 'B',
+            ordem: 2,
+            itemId: itemId,
+        };
+        // 🆔 ADICIONA ID se existir (para update)
+        if (elaboracaoItemNovo?.idAlternativaB) {
+            alternativaB.id = elaboracaoItemNovo.idAlternativaB;
         }
+        alternativasDto.push(alternativaB);
+
+
+
+        const alternativaC: any = {
+            numeracao: 'C',
+            descricao: values[campoAlternativaC],
+            justificativa: values[campoJustificativaC] || '',
+            correta: values[campoAlternativaCorreta] === 'C',
+            ordem: 3,
+            itemId: itemId
+        };
+        // 🆔 ADICIONA ID se existir (para update)
+        if (elaboracaoItemNovo?.idAlternativaC) {
+            alternativaC.id = elaboracaoItemNovo.idAlternativaC;
+        }
+        alternativasDto.push(alternativaC);
+
+
+
+        const alternativaD: any = {
+            numeracao: 'D',
+            descricao: values[campoAlternativaD],
+            justificativa: values[campoJustificativaD] || '',
+            correta: values[campoAlternativaCorreta] === 'D',
+            ordem: 4,
+            itemId: itemId,
+        };
+        // 🆔 ADICIONA ID se existir (para update)
+        if (elaboracaoItemNovo?.idAlternativaD) {
+            alternativaD.id = elaboracaoItemNovo.idAlternativaD;
+        }
+        alternativasDto.push(alternativaD);
+
 
         console.log('🎯 Alternativas montadas para envio:', alternativasDto);
 
@@ -599,7 +599,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
         // Atualiza o codigoItem no DTO com o valor mais recente do estado ou do formulário
         const codigoItemAtualizado = configuracaoItemNovo?.codigoItem || codigoItemEstado || values[campoCodigoItem] || '';
         console.log('🔄 Atualizando codigoItem no DTO:', codigoItemAtualizado);
-        
+
         const dto: ItemNovoDto = {
             id: itemId,
             codigoItem: codigoItemAtualizado,
