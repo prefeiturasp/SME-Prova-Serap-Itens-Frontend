@@ -76,7 +76,7 @@ const ListagemTabela: React.FC<ListagemTabelaProps> = ({
         <div style={{ display: 'flex', flexDirection: 'column', marginTop: 16 }}>
           {dados.map((item, index) => (
             <div
-              key={item.codigoItem}
+              key={index}
               className='listagem-item-tabela'
               onClick={() => onItemClick?.(item.id)}
               onKeyDown={(e) => {

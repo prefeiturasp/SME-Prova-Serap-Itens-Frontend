@@ -1,6 +1,6 @@
 import React from 'react';
 import './listagemResumoItemComponent.css';
-import { Button, Radio, Tag } from 'antd';
+import { Button, Radio } from 'antd';
 import iconEdit from '~/assets/icon-editar.svg';
 import iconDelete from '~/assets/icon-remover.svg';
 
