@@ -128,7 +128,7 @@
   font-size: 14px;
   color: #222;
   word-wrap: break-word;
-  min-height: 30px;
+  min-height: 50px;
 }
 
 .resumo-item-conteudo-corpo-alternativa .ant-radio-wrapper {
@@ -154,4 +154,13 @@
   align-items: center;
   gap: 8px;
   line-height: 1.4;
+}
+
+
+.no-click {
+  pointer-events: none; /* 👈 stops all clicks inside */
+}
+
+.no-click .ant-radio-inner {
+  cursor: default !important; /* optional: remove hand cursor */
 }

@@ -117,7 +117,7 @@ const ListagemResumoItemComponent: React.FC<listagemResumoItemProps> = ({ dados 
           </p>
           <br></br>
 
-          <Radio.Group className='radio-group-alterantivas'>
+          <Radio.Group className='radio-group-alterantivas no-click'>
             {item.alternativas.map((alt: any) => (
               <div key={alt.id} className='resumo-item-conteudo-corpo-alternativa'>
                 <Radio value={alt.numeracao}>
