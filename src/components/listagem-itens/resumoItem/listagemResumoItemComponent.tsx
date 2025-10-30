@@ -93,15 +93,27 @@ const ListagemResumoItemComponent: React.FC<listagemResumoItemProps> = ({ dados 
 
         <div className='resumo-item-conteudo-corpo'>
           <p>
-            <div dangerouslySetInnerHTML={{ __html: item.enunciado }} />
+            {item.enunciado && item.enunciado.trim() !== '' ? (
+              <div dangerouslySetInnerHTML={{ __html: item.enunciado }} />
+            ) : (
+              <i>Enunciado não cadastrado</i>
+            )}
           </p>
           <br></br>
           <p>
-            <div dangerouslySetInnerHTML={{ __html: item.textoBase }} />
+            {item.textoBase && item.textoBase.trim() !== '' ? (
+              <div dangerouslySetInnerHTML={{ __html: item.textoBase }} />
+            ) : (
+              <i>Texto base não cadastrado</i>
+            )}
           </p>
           <br></br>
           <p className='resumo-item-conteudo-corpo-fonte'>
-            <i>{item.fonte}</i>
+            {item.fonte && item.fonte.trim() !== '' ? (
+              <i dangerouslySetInnerHTML={{ __html: item.fonte }} />
+            ) : (
+              <i>Fonte não cadastrada</i>
+            )}
           </p>
           <br></br>
 
@@ -110,7 +122,8 @@ const ListagemResumoItemComponent: React.FC<listagemResumoItemProps> = ({ dados 
               <div key={alt.id} className='resumo-item-conteudo-corpo-alternativa'>
                 <Radio value={alt.numeracao}>
                   <div className='radio-alternativa-conteudo'>
-                    <b>{alt.numeracao})</b> <div dangerouslySetInnerHTML={{ __html: alt.descricao }}></div>
+                    <b>{alt.numeracao})</b>{' '}
+                    <div dangerouslySetInnerHTML={{ __html: alt.descricao }}></div>
                   </div>
                 </Radio>
               </div>
