@@ -8,7 +8,7 @@ import { AlunoTurmaDto } from '~/domain/dto/aluno-turma-dto';
 const obterDadosResumoGeralProvas = (
   page: number,
   filtros: FiltroPrincipalProps,
-): Promise<AxiosResponse<PaginacaoDto>> => {
+): Promise<AxiosResponse<PaginacaoDto<any>>> => {
   const params = {
     anoLetivo: filtros.anoLetivo,
     modalidade: filtros.modalidade,
