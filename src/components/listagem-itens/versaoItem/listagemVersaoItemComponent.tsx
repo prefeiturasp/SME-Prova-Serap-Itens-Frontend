@@ -1,4 +1,4 @@
-import { Card, Col, Row, Table, type TableColumnsType } from 'antd';
+import { Card, Col, Row } from 'antd';
 import React from 'react';
 import './listagemVersaoItemComponent.css';
 import TabelaVersaoItemComponent from '../tabelaVersaoItem/tabelaVersaoItemComponent';

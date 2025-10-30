@@ -14,7 +14,8 @@ const ListagemSelectComponent: React.FC<ListagemSelectProps> = ({
   itemSelecionado,
   selecionaItemOnChange,
 }) => {
-  console.log(dados);
+  console.log(dados, itemSelecionado);
+  selecionaItemOnChange(null, null);
   return (
     <>
       {/* CAIQUE SEGUE UM EXEMPLO QUE PODE TE AJUDAR, ESTE COMPONENTE AQUI VAI CHAMAR O ONCHANGE NO COMPONENTE PAI selecionaItemOnChange QUE FOI PASSADO PARA ELE POR REFERENCIA
