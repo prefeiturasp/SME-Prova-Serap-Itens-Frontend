@@ -184,7 +184,7 @@ const ListagemItens: React.FC = () => {
                 <ListagemResumoItemComponent dados={itemResumoVersao} />
               </div>
               <div>
-                <ListagemVersaoItemComponent versoes={versoes} />
+                  <ListagemVersaoItemComponent versoes={itemResumoVersao?.versoesDisponiveis!} />
               </div>
             </>
           )}
