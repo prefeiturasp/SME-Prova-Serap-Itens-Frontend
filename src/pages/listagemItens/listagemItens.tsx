@@ -103,11 +103,6 @@ const ListagemItens: React.FC = () => {
     setCodigoItemTabelaSelecionado(id);
   };
 
-  const versoes: VersaoDto[] = [
-    { id: 1, codigoItem: '_LPT_EF4_SAEB_00', versaoItem: 1, dataCriacao: '05/10/2025', provas: [] },
-    { id: 2, codigoItem: '_LPT_EF4_SAEB_00', versaoItem: 2, dataCriacao: '30/11/2020', provas: [] },
-  ];
-
   return (
     <div className='listagem-pagina'>
       <div className='cadastrarItemHeader'>
@@ -184,7 +179,7 @@ const ListagemItens: React.FC = () => {
                 <ListagemResumoItemComponent dados={itemResumoVersao} />
               </div>
               <div>
-                <ListagemVersaoItemComponent versoes={versoes} />
+                <ListagemVersaoItemComponent versoes={itemResumoVersao?.versoesDisponiveis!} />
               </div>
             </>
           )}

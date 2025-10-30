@@ -148,10 +148,9 @@ const ListagemTabela: React.FC<ListagemTabelaProps> = ({
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 24 }}>
-          <div className='listagem-item-tabela-auto'>{`${inicio}-${Math.min(
-            fim,
-            dados.length,
-          )} de ${totalRegistros} itens`}</div>
+          <div className='listagem-item-tabela-auto'>
+            {`${inicio + 1}-${Math.min(fim, totalRegistros)} de ${totalRegistros} itens`}
+          </div>
 
           <div>
             <Pagination

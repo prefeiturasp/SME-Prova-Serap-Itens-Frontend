@@ -21,6 +21,10 @@
   content: none !important;
 }
 
+.tabela-versao-item .ant-table-thead>tr>th.ant-table-cell {
+  padding: 8px 8px;
+}
+
 .tabela-versao-item .ant-table-tbody>tr>td {
   border: none !important;
   /* remove bordas entre linhas */
@@ -51,6 +55,10 @@
 .tabela-versao-item .ant-table-tbody>tr>td {
   border: none !important;
   border-bottom: 1px solid #D5D5D5 !important;
+}
+
+.tabela-versao-item .ant-table-tbody>tr>td.ant-table-cell {
+  padding: 8px 8px;
 }
 
 .tabela-versao-item .ant-table-tbody>tr:last-child>td {
