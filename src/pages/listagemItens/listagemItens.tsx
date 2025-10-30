@@ -9,7 +9,6 @@ import ListagemResumoItemComponent from '~/components/listagem-itens/resumoItem/
 import ListagemVersaoItemComponent from '~/components/listagem-itens/versaoItem/listagemVersaoItemComponent';
 import { useNavigate } from 'react-router-dom';
 import { AntDesignDto } from '~/domain/dto/ant-design-dto';
-import type { VersaoDto } from '~/domain/dto/versao-dto';
 import itemService from '~/services/item-service';
 import type { ItemListagemDto } from '~/domain/dto/item-listagem-dto';
 import type { PaginacaoDto } from '~/domain/dto/paginacao-dto';
