@@ -1,0 +1,21 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap");
+
+.cadastrarItem-footer {
+    background: #E6E6E6;
+    padding: 2em 1em 2em 1em;
+}
+
+.cadastrarItem-footer-conteudo {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 2em;
+}
+
+.footer-item1,
+.footer-item2 {
+    color: #B3B3B3;
+    font-size: 14px;
+    font-weight: 400;
+    font-family: Roboto, sans-serif;
+
+}
