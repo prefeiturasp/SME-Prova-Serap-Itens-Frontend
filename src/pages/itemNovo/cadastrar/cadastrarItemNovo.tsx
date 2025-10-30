@@ -136,6 +136,13 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                 if (item.elaboracao) {
                     setElaboracaoItem(item.elaboracao);
                 }
+
+                // ✅ Garante que o codigoItem da configuração prevaleça se o item for novo
+                if (!item.elaboracao || !item.elaboracao.codigoItem) {
+                    item.elaboracao = item.elaboracao || {};
+                    item.elaboracao.codigoItem = item.codigoItem;
+                }
+
                 return item;
             }
         } catch (error) {
@@ -572,15 +579,12 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
 
     const obterDadosItem = useCallback(
         async (id: number) => {
-            //setCarregando(true);
-
             try {
                 const resp = await configuracaoItemService.obterItem(id);
 
                 if (resp?.data) {
-                    console.log('📋 Dados recebidos do backend para item ID----->>>>>>>>', id, ':', resp.data);
+                    console.log('📋 Dados recebidos do backend para item ID:', id, ':', resp.data);
 
-                    // ✅ 1. Mapear dados da API para o formato local
                     const configuracaoItemRetorno: ConfiguracaoItemNovoProps = {
                         codigoItem: resp.data.codigoItem,
                         areaConhecimento: resp.data.areaconhecimentoId,
@@ -608,33 +612,34 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                         observacao: resp.data.observacao,
                     };
 
-                    // ✅ 2. Atualizar estados locais (para navegação entre telas)
                     setItemId(id);
                     setCodigoItem(configuracaoItemRetorno.codigoItem || '');
 
-                    // ✅ 3. Salvar no localStorage para persistir dados
+                    const itemAtual = localStorage.getItem('itemAtual');
+                    let elaboracaoExistente = {};
+
+                    if (itemAtual) {
+                        const itemAtualizado = JSON.parse(itemAtual);
+                        elaboracaoExistente = itemAtualizado.elaboracao || {};
+                        itemAtualizado.codigoItem = resp.data.codigoItem;
+                        itemAtualizado.configuracao = configuracaoItemRetorno;
+                        localStorage.setItem('itemAtual', JSON.stringify(itemAtualizado));
+                        console.log('💾 Código do item atualizado no localStorage:', resp.data.codigoItem);
+                    }
+
                     salvarItemNoLocalStorage({
                         id: id,
                         codigoItem: configuracaoItemRetorno.codigoItem,
-                        configuracao: configuracaoItemRetorno
-                    });
-
-                    // ✅ 4. Popular o formulário respeitando a CASCATA automática
-                   
-                    console.log('✅ Item carregado com sucesso:', {
-                        id,
-                        configuracao: configuracaoItemRetorno
+                        configuracao: configuracaoItemRetorno,
+                        elaboracao: elaboracaoExistente,
                     });
                 }
             } catch (err: any) {
-                console.error('❌ Erro ao carregar item:', err.message);
+                console.error('❌ Erro ao carregar dados do item:', err.message);
                 mensagem('error', 'Erro', 'Erro ao carregar dados do item');
-            } finally {
-                //setCarregando(false);
             }
-
         },
-        [form, mensagem, elaboracaoItem, carregarLocalStorageComCascata],
+        [form, mensagem, salvarItemNoLocalStorage]
     );
 
     const inserirItem = useCallback(

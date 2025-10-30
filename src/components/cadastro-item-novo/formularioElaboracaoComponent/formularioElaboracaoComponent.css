@@ -111,6 +111,7 @@
 
 .card-corpo-radio{
     padding: 1em;
+    color: #595959;
 }
 
 .card-corpo-radio-escuro{
@@ -143,4 +144,17 @@
 
 :where(.css-dev-only-do-not-override-diro6f).ant-radio-wrapper span.ant-radio+* {
     width: 100%;
+}
+
+.azulPadrao{
+    background-color: #5A94D6;
+    color: white;
+}
+
+.card-radio-texto p{
+    margin: 0;
+}
+
+.card-elaboracao-radio-texto{
+    
 }

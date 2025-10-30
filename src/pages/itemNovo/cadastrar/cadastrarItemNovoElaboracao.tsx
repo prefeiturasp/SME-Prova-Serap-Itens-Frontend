@@ -124,6 +124,13 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
                 setCodigoItemEstado(item.codigoItem || '');
                 if (item.configuracao) setConfiguracaoItemNovoLocal(item.configuracao);
                 if (item.elaboracao) setElaboracaoItemNovoLocal(item.elaboracao);
+
+                // ✅ Garante que o codigoItem da configuração prevaleça se o item for novo
+                if (!item.elaboracao || !item.elaboracao.codigoItem) {
+                    item.elaboracao = item.elaboracao || {};
+                    item.elaboracao.codigoItem = item.codigoItem;
+                }
+
                 return item;
             }
         } catch (error) {
@@ -692,7 +699,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
                     // 🔄 USA NOVA FUNÇÃO: Carrega dados completos atualizados do backend
                     try {
                         console.log('🔄 Recarregando dados completos após salvar rascunho...');
-                        const dadosAtualizados = await obterItemComAlternativasEPopular(itemId);
+                        const dadosAtualizados = await obterItemComAlternativasEPopular(resp.data);
 
                         if (dadosAtualizados) {
                             console.log('✅ Dados completos recarregados com sucesso após salvar rascunho');
