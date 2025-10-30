@@ -9,7 +9,10 @@ import ListagemResumoItemComponent from '~/components/listagem-itens/resumoItem/
 import ListagemVersaoItemComponent from '~/components/listagem-itens/versaoItem/listagemVersaoItemComponent';
 import { useNavigate } from 'react-router-dom';
 import { AntDesignDto } from '~/domain/dto/ant-design-dto';
-
+import filtroSelectService from '~/services/filtro-select-service';
+import { DefaultOptionType } from 'antd/es/select';
+import { SelecioneDto } from '~/domain/dto/selecione-dto';
+import { converterSelecineDto } from '~/utils/converte-dto';
 
 interface Item {
   codigo: string;
@@ -27,7 +30,7 @@ const ListagemItens: React.FC = () => {
   const navigate = useNavigate();
 
   const [pagina, setPagina] = useState(1);
-  const [selectItemLista, setSelectItemLista] = useState<AntDesignDto[]>([
+  const [selectItemLista, setSelectItemLista] = useState<DefaultOptionType[]>([
     {
       value: '0',
       label: 'Todas',
@@ -40,30 +43,14 @@ const ListagemItens: React.FC = () => {
 
   const [tabelaItens, setTabelaItens] = useState<Item[]>([]);
 
+  const [loadingSelect, setLoadingSelect] = useState<boolean>(false);
   useEffect(() => {
-    buscaDadosSelectItens();
     buscaDadosTabela();
   }, []);
 
   useEffect(() => {
     buscaDadosTabela();
   }, [selectItemSelecionado]);
-
-  const buscaDadosSelectItens = async () => {
-    try {
-      /*const retorno = CAIQUE CRIE O SERVICO NA PASTA SERVICO E CHAME A API AQUI SUBSTITUINDO O VALOR MOCKADO ABAIXO 
-      EXEMPLO const resposta: any[] = await MetododaPastaServicoQueVoceCriou(Number(aplicacaoSelecionada?.value),Number(componenteSelecionado?.value),Number(anoSelecionado?.value));*/
-      const retorno = [
-        {
-          value: '0',
-          label: 'Todas',
-        },
-      ];
-      setSelectItemLista(retorno);
-    } catch (error) {
-      console.log(error);
-    }
-  };
 
   const buscaDadosTabela = async () => {
     try {
@@ -85,12 +72,29 @@ const ListagemItens: React.FC = () => {
   };
 
   const selecionaItemOnChange = async (value: string, option: any) => {
+    console.log(value)
     const obj: AntDesignDto = {
       label: option.label,
       value: value,
     };
     setSelectItemSelecionado(obj);
   };
+
+  const buscarItemOnSearch = async (value: string) => {
+    try {
+      setLoadingSelect(true);
+      if (value?.length >= 3) {
+        const resposta: SelecioneDto[] = await filtroSelectService.obterListaItems(value)
+        setSelectItemLista(converterSelecineDto(resposta))
+      }
+      else { setSelectItemLista([]) }
+    }
+    catch (error) {
+
+    }
+    finally { setLoadingSelect(false) }
+
+  }
 
   const inicio = (pagina - 1) * ITENS_POR_PAGINA;
   const fim = inicio + ITENS_POR_PAGINA;
@@ -147,8 +151,10 @@ const ListagemItens: React.FC = () => {
       <div>
         <ListagemSelectComponent
           dados={selectItemLista}
+          buscarItemOnSearch={buscarItemOnSearch}
           itemSelecionado={selectItemSelecionado}
           selecionaItemOnChange={selecionaItemOnChange}
+          loading={loadingSelect}
         ></ListagemSelectComponent>
       </div>
 

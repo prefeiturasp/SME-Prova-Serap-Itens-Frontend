@@ -1,40 +1,49 @@
-import { Card } from 'antd';
+import { Card, Col, Row, Select } from 'antd';
 import React from 'react';
 import './listagemSelectComponent.css';
-import { AntDesignDto } from '~/domain/dto/ant-design-dto';
+import { DefaultOptionType } from 'antd/es/select';
 
 export interface ListagemSelectProps {
-  dados: AntDesignDto[];
-  itemSelecionado: AntDesignDto;
+  dados: DefaultOptionType[];
+  itemSelecionado: DefaultOptionType;
   selecionaItemOnChange: (value: any, option: any) => void;
+  buscarItemOnSearch: (value: string) => void;
+  loading: boolean;
 }
 
 const ListagemSelectComponent: React.FC<ListagemSelectProps> = ({
   dados,
   itemSelecionado,
   selecionaItemOnChange,
+  buscarItemOnSearch,
+  loading,
 }) => {
   console.log(dados);
+
   return (
     <>
-      {/* CAIQUE SEGUE UM EXEMPLO QUE PODE TE AJUDAR, ESTE COMPONENTE AQUI VAI CHAMAR O ONCHANGE NO COMPONENTE PAI selecionaItemOnChange QUE FOI PASSADO PARA ELE POR REFERENCIA
-  <Select
-                        data-testid="select-aplicacao"
-                        showSearch
-                        placeholder="Selecione uma aplicação..."
-                        className="select-custom"
-                        onChange={selecionaItemOnChange}
-                        value={itemSelecionado ?? undefined}
-                        notFoundContent="Nenhuma aplicação encontrada"
-                        filterOption={(input, option: any) =>
-                          (option?.label ?? "")
-                            .toLowerCase()
-                            .includes(input.toLowerCase())
-                        }
-                        options={dados}
-                        /> */}
-
-      <Card className='listagem-busca'>***CAIQUE BUSCA VEM AQUI***</Card>
+      <Card className='listagem-busca'>
+        <Row>
+          <span className='titulo-listagem-busca'>Você pode buscar um item específico</span>
+          <Col span={24}>
+            <Select
+              labelInValue
+              showSearch
+              filterOption={false}
+              data-testid='select-aplicacao'
+              onSearch={buscarItemOnSearch}
+              placeholder='Digite o código do item'
+              className='select-custom'
+              onChange={selecionaItemOnChange}
+              value={itemSelecionado ?? undefined}
+              notFoundContent='Não encontramos nenhum item com o trecho digitado...'
+              loading={loading}
+              options={dados}
+              style={{ width: '100%' }}
+            />{' '}
+          </Col>
+        </Row>
+      </Card>
     </>
   );
 };

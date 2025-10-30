@@ -2,3 +2,13 @@
   background-color: #ffffff;
   margin: 0px 32px;
 }
+
+.titulo-listagem-busca {
+  font-family: Roboto;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 14px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  margin-bottom: 12px;
+}
