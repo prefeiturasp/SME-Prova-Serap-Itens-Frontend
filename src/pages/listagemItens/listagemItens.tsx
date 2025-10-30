@@ -13,6 +13,10 @@ import itemService from '~/services/item-service';
 import type { ItemListagemDto } from '~/domain/dto/item-listagem-dto';
 import type { PaginacaoDto } from '~/domain/dto/paginacao-dto';
 import { ItemResumoVersaoDto } from '~/domain/dto/item-resumo-versao-dto';
+import filtroSelectService from '~/services/filtro-select-service';
+import { DefaultOptionType } from 'antd/es/select';
+import { SelecioneDto } from '~/domain/dto/selecione-dto';
+import { converterSelecineDto } from '~/utils/converte-dto';
 
 const ITENS_POR_PAGINA = 8;
 
@@ -22,54 +26,35 @@ const ListagemItens: React.FC = () => {
 
   const [pagina, setPagina] = useState(1);
   const [totalRegistros, setTotalRegistro] = useState(0);
-  const [selectItemLista, setSelectItemLista] = useState<AntDesignDto[]>([
-    {
-      value: '0',
-      label: 'Todas',
-    },
-  ]);
-  const [selectItemSelecionado, setSelectItemSelecionado] = useState<AntDesignDto>({
-    value: '0',
-    label: 'Todas',
-  });
+  const [selectItemLista, setSelectItemLista] = useState<DefaultOptionType[]>(null!);
+  const [selectItemSelecionado, setSelectItemSelecionado] = useState<DefaultOptionType>(null!);
 
   const [tabelaItens, setTabelaItens] = useState<ItemListagemDto[]>([]);
   const [itemResumoVersao, setItemResumoVersao] = useState<ItemResumoVersaoDto>();
 
   const [codigoItemTabelaSelecionado, setCodigoItemTabelaSelecionado] = useState<string>('');
 
+  const [loadingSelect, setLoadingSelect] = useState<boolean>(false);
   useEffect(() => {
-    buscaDadosSelectItens();
     buscaDadosTabela();
   }, []);
 
   useEffect(() => {
-    if (selectItemSelecionado && pagina) buscaDadosTabela();
+    if (pagina) buscaDadosTabela();
   }, [selectItemSelecionado, pagina]);
 
   useEffect(() => {
     if (codigoItemTabelaSelecionado) buscaResumoEVersoes();
   }, [codigoItemTabelaSelecionado]);
 
-  const buscaDadosSelectItens = async () => {
-    try {
-      /*const retorno = CAIQUE CRIE O SERVICO NA PASTA SERVICO E CHAME A API AQUI SUBSTITUINDO O VALOR MOCKADO ABAIXO 
-      EXEMPLO const resposta: any[] = await MetododaPastaServicoQueVoceCriou(Number(aplicacaoSelecionada?.value),Number(componenteSelecionado?.value),Number(anoSelecionado?.value));*/
-      const retorno = [
-        {
-          value: '0',
-          label: 'Todas',
-        },
-      ];
-      setSelectItemLista(retorno);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
+  
   const buscaDadosTabela = async () => {
     try {
-      const codigoItem: string = selectItemSelecionado?.value?.toString();
+
+      console.log(selectItemSelecionado, "buscaTabela");
+      const valorSelcionado: any = selectItemSelecionado?.value;
+
+      const codigoItem: string = valorSelcionado?.label!;
       const resposta: PaginacaoDto<ItemListagemDto> = await itemService.obterListaItens({
         codigoItem: codigoItem,
         pagina: pagina,
@@ -91,11 +76,31 @@ const ListagemItens: React.FC = () => {
   };
 
   const selecionaItemOnChange = async (value: string, option: any) => {
-    const obj: AntDesignDto = {
-      label: option.label,
-      value: value,
-    };
-    setSelectItemSelecionado(obj);
+       setPagina(1);
+    if (value) {
+      const obj: AntDesignDto = {
+        label: option.label,
+        value: value,
+      };
+      setSelectItemSelecionado(obj);
+    } else {
+      setSelectItemSelecionado(null!);
+    }
+  };
+
+  const buscarItemOnSearch = async (value: string) => {
+    try {
+      setLoadingSelect(true);
+      if (value?.length >= 3) {
+        const resposta: SelecioneDto[] = await filtroSelectService.obterListaItems(value);
+        setSelectItemLista(converterSelecineDto(resposta));
+      } else {
+        setSelectItemLista([]);
+      }
+    } catch (error) {
+    } finally {
+      setLoadingSelect(false);
+    }
   };
 
   const tabelaItemClick = (id: string) => {
@@ -148,8 +153,10 @@ const ListagemItens: React.FC = () => {
       <div>
         <ListagemSelectComponent
           dados={selectItemLista}
+          buscarItemOnSearch={buscarItemOnSearch}
           itemSelecionado={selectItemSelecionado}
           selecionaItemOnChange={selecionaItemOnChange}
+          loading={loadingSelect}
         ></ListagemSelectComponent>
       </div>
 

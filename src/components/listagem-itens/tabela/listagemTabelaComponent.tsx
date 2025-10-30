@@ -74,77 +74,78 @@ const ListagemTabela: React.FC<ListagemTabelaProps> = ({
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', marginTop: 16 }}>
-          {dados.map((item, index) => (
-            <div
-              key={index}
-              className='listagem-item-tabela'
-              onClick={() => onItemClick?.(item.id)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') onItemClick?.(item.id);
-              }}
-              role='button'
-              tabIndex={0}
-            >
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    flexWrap: 'wrap',
-                  }}
-                >
-                  <div className='listagem-item-tabela-head'>
-                    <div className='listagem-item-tabela-flex'>
-                      <b>Código do item: </b>
-                      {item.codigoItem}
-                    </div>
-                    <div className='listagem-item-tabela-auto'>
-                      <b>Componente curricular: </b>
-                      {item.disciplina}
+          {dados &&
+            dados.map((item, index) => (
+              <div
+                key={index}
+                className='listagem-item-tabela'
+                onClick={() => onItemClick?.(item.id)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') onItemClick?.(item.id);
+                }}
+                role='button'
+                tabIndex={0}
+              >
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      flexWrap: 'wrap',
+                    }}
+                  >
+                    <div className='listagem-item-tabela-head'>
+                      <div className='listagem-item-tabela-flex'>
+                        <b>Código do item: </b>
+                        {item.codigoItem}
+                      </div>
+                      <div className='listagem-item-tabela-auto'>
+                        <b>Componente curricular: </b>
+                        {item.disciplina}
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div>
-                  <b>Enunciado do item:</b>
-                  <br></br>
-                  <div dangerouslySetInnerHTML={{ __html: item.enunciado }} />
-                </div>
-
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    flexWrap: 'wrap',
-                  }}
-                >
-                  <div style={{ marginTop: 4 }}>
-                    <Tag
-                      style={{
-                        borderRadius: '8px',
-                        marginRight: 8,
-                        ...corDificuldade(item.dificuldade),
-                      }}
-                    >
-                      <b>Dificuldade: </b> {item.dificuldade}
-                    </Tag>
-                    <Tag
-                      style={{
-                        borderRadius: '8px',
-                        ...corSituacao(item.situacao),
-                      }}
-                    >
-                      <b>Situação: </b> {SituacaoDescricao[item.situacao]}
-                    </Tag>
-                  </div>
                   <div>
-                    <b>Data de criação: </b>
-                    {new Date(item.dataCriacao).toLocaleDateString('pt-BR')}
+                    <b>Enunciado do item:</b>
+                    <br></br>
+                    <div dangerouslySetInnerHTML={{ __html: item.enunciado }} />
+                  </div>
+
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      flexWrap: 'wrap',
+                    }}
+                  >
+                    <div style={{ marginTop: 4 }}>
+                      <Tag
+                        style={{
+                          borderRadius: '8px',
+                          marginRight: 8,
+                          ...corDificuldade(item.dificuldade),
+                        }}
+                      >
+                        <b>Dificuldade: </b> {item.dificuldade}
+                      </Tag>
+                      <Tag
+                        style={{
+                          borderRadius: '8px',
+                          ...corSituacao(item.situacao),
+                        }}
+                      >
+                        <b>Situação: </b> {SituacaoDescricao[item.situacao]}
+                      </Tag>
+                    </div>
+                    <div>
+                      <b>Data de criação: </b>
+                      {new Date(item.dataCriacao).toLocaleDateString('pt-BR')}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 24 }}>
