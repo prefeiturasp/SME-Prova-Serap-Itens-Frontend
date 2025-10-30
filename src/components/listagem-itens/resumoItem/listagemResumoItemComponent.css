@@ -1,9 +1,16 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
 .resumo-item {
+  
   padding: 0px 0px 16px 0px;
   display: flex;
   align-items: center;
+}
+
+.yo {
+  margin: 16px 0px 16px 0px;
+  padding: 32px;
+  color: #595959;
 }
 
 .resumo-item-titulo {
@@ -118,6 +125,12 @@
   color: #222;
   line-height: 1.4;
   word-wrap: break-word;
+}
+
+.resumo-item-conteudo-corpo-alternativa .ant-radio-wrapper {
+  width: 100%;           
+  display: flex;
+  align-items: center;
 }
 
 .resumo-item-conteudo-corpo-fonte {
