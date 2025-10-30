@@ -20,7 +20,7 @@ export interface ItemNovoDto {
   dificuldade: number | string | null;
   nivelItem: SelectValueType;
   acertoCasual: number | string | null;
-  palavrasChave: string | null;
+  palavrasChave: string[] | null;
   parametroBTransformado: number | string | null;
   mediaEhDesvio: string | null;
   observacao: string | null;

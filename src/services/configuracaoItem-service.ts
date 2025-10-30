@@ -70,7 +70,7 @@ const obterQuantidadeAlternativas = (): Promise<DefaultOptionType[]> =>
 
 const obterItem = (id: number): Promise<AxiosResponse<any>> => api.get(`${URL_DEFAULT}/Item/${id}`);
 
-const obterItemComAlternativas = (id: number): Promise<AxiosResponse<any>> => api.get(`${URL_DEFAULT}/Item/${id}/comAlternativas`);
+const obterItemComAlternativas = (id: number): Promise<AxiosResponse<any>> => api.get(`${URL_DEFAULT}/Item/${id}/Alternativas`);
 
 export default {
   obterAreaConhecimento,

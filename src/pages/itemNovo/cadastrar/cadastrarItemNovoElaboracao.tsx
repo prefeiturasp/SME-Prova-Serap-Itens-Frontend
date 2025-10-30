@@ -19,14 +19,60 @@ import { AltenativaDto } from '~/domain/dto/AltenativaDto';
 // Services
 import configuracaoItemService from '~/services/configuracaoItem-service';
 
-// Redux
-import { useDispatch, useSelector } from "react-redux";
-import { AppState } from "~/redux";
-import { setConfiguracaoItemNovo, setElaboracaoItemNovo, setItemNovo } from '~/redux/modules/cadastroItem-novo/itemNovo/actions';
+// Usaremos estado local + localStorage
 
 // Enums
 import { Campos } from "~/domain/enums/campos-cadastro-item";
-import { ElaboracaoItemNovoProps, ItemNovoProps } from "~/redux/modules/cadastroItem-novo/itemNovo/reducers";
+import { SelectValueType } from "~/domain/type/select";
+
+// Tipos locais
+export interface ConfiguracaoItemNovoProps {
+    codigoItem: string;
+    areaConhecimento: SelectValueType;
+    disciplina: SelectValueType;
+    matriz: SelectValueType;
+    anoMatriz: SelectValueType;
+    competencia: SelectValueType;
+    habilidade: SelectValueType;
+    assunto: SelectValueType;
+    subAssunto: SelectValueType;
+    situacaoItem: SelectValueType;
+    tipoItem: SelectValueType;
+    quantidadeAlternativas: SelectValueType;
+    dificuldadeSugerida: SelectValueType;
+    nivelItem: SelectValueType;
+    discriminacao: number | string | null;
+    dificuldade: number | string | null;
+    acertoCasual: number | string | null;
+    palavrasChave: string[] | null;
+    parametroBTransformado: number | string | null;
+    mediaDesvioPadrao: string | null;
+    observacao: string | null;
+    sentencaDescritora: string | null;
+}
+
+export interface ElaboracaoLocalProps {
+    textoBase?: string;
+    fonte?: string;
+    enunciado?: string;
+    codigoItem?: string;
+    video?: any[];
+    audio?: any[];
+    alternativaA?: string;
+    justificativaA?: string;
+    alternativaB?: string;
+    justificativaB?: string;
+    alternativaC?: string;
+    justificativaC?: string;
+    alternativaD?: string;
+    justificativaD?: string;
+    alternativaCorreta?: 'A'|'B'|'C'|'D';
+    idAlternativaA?: number | null;
+    idAlternativaB?: number | null;
+    idAlternativaC?: number | null;
+    idAlternativaD?: number | null;
+    alternativasDto?: AltenativaDto[];
+}
 
 const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
 
@@ -35,14 +81,14 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
     const initialValuesForm = {}
 
 
-    const dispatch = useDispatch();
     // const [messageApi, contextHolder] = message.useMessage();
     const [carregando, setCarregando] = useState(false);
     const [verificacaoInicialFeita, setVerificacaoInicialFeita] = useState(false);
-
-    const elaboracaoItemNovo = useSelector((state: AppState) => state.elaboracaoItemNovo);
-    const configuracaoItemNovo = useSelector((state: AppState) => state.configuracaoItemNovo);
-    const item = useSelector((state: AppState) => state.item);
+    // Estados locais substituindo Redux
+    const [itemId, setItemId] = useState<number>(0);
+    const [codigoItemEstado, setCodigoItemEstado] = useState<string>('');
+    const [configuracaoItemNovo, setConfiguracaoItemNovoLocal] = useState<Partial<ConfiguracaoItemNovoProps>>({});
+    const [elaboracaoItemNovo, setElaboracaoItemNovoLocal] = useState<ElaboracaoLocalProps>({});
 
 
     type tipoMsg = 'success' | 'info' | 'warning' | 'error';
@@ -62,7 +108,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
             if (itemSalvo) {
                 const item = JSON.parse(itemSalvo);
 
-                // 🔧 Normaliza palavrasChave - converte string separada por ';' em array
+                // Normaliza palavrasChave - converte string separada por ';' em array
                 if (item.configuracao && item.configuracao.palavrasChave) {
                     if (typeof item.configuracao.palavrasChave === 'string') {
                         item.configuracao.palavrasChave = item.configuracao.palavrasChave
@@ -72,7 +118,12 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
                     }
                 }
 
-                console.log('📂 Item carregado do localStorage na elaboração:', item);
+                console.log('📂 Item completo carregado do localStorage na elaboração:', item);
+                // Seta estados locais
+                setItemId(item.id || 0);
+                setCodigoItemEstado(item.codigoItem || '');
+                if (item.configuracao) setConfiguracaoItemNovoLocal(item.configuracao);
+                if (item.elaboracao) setElaboracaoItemNovoLocal(item.elaboracao);
                 return item;
             }
         } catch (error) {
@@ -96,7 +147,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
     const voltar = async () => {
         console.log('🔙 Voltando para primeira tela - recarregando dados completos...');
 
-        if (item.id && item.id > 0) {
+        if (itemId && itemId > 0) {
             try {
                 setCarregando(true);
 
@@ -104,7 +155,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
                 localStorage.setItem('voltandoParaPrimeiraTela', 'true');
 
                 // 🔄 Usa a nova função que carrega dados completos com alternativas
-                const dadosCompletos = await obterItemComAlternativasEPopular(item.id);
+                const dadosCompletos = await obterItemComAlternativasEPopular(itemId);
 
                 if (dadosCompletos) {
                     console.log('✅ Dados completos recarregados com sucesso, navegando para primeira tela...');
@@ -128,29 +179,15 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
         }, 500);
     };
 
-    // ✅ useEffect para limpar localStorage no primeiro acesso direto à segunda página (sem navegação válida)
+    // ✅ Acesso direto inválido: apenas redireciona, NÃO limpa localStorage (limpeza só no botão Cancelar)
     useEffect(() => {
         if (!verificacaoInicialFeita) {
-            // Detecta acesso direto inválido: sem dados obrigatórios no Redux E sem localStorage válido
-            const temDadosObrigatorios = item.id > 0 && configuracaoItemNovo?.codigoItem && configuracaoItemNovo.codigoItem.trim() !== '';
+            const temDadosObrigatorios = itemId > 0 && (configuracaoItemNovo?.codigoItem || codigoItemEstado) && (configuracaoItemNovo?.codigoItem || codigoItemEstado)?.toString().trim() !== '';
             const localStorageItem = carregarItemDoLocalStorage();
             const temLocalStorageValido = localStorageItem && localStorageItem.id > 0 && localStorageItem.codigoItem && localStorageItem.codigoItem.trim() !== '';
 
             if (!temDadosObrigatorios && !temLocalStorageValido) {
-                console.log('🧹 Acesso direto inválido à segunda página - limpando localStorage e redirecionando');
-                limparItemDoLocalStorage();
-
-                // Limpa Redux também
-                const itemLimpo: ItemNovoProps = {
-                    id: 0,
-                    configuracao: {},
-                    elaboracao: {} as ElaboracaoItemNovoProps,
-                };
-                dispatch(setItemNovo(itemLimpo));
-                dispatch(setConfiguracaoItemNovo({}));
-                dispatch(setElaboracaoItemNovo({} as ElaboracaoItemNovoProps));
-
-                // Redireciona para primeira página
+                console.log('↩️ Acesso direto inválido à segunda página - redirecionando sem limpar localStorage');
                 setTimeout(() => {
                     navigate('/item-novo');
                 }, 100);
@@ -159,32 +196,29 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
 
             setVerificacaoInicialFeita(true);
         }
-    }, [verificacaoInicialFeita, item.id, configuracaoItemNovo, carregarItemDoLocalStorage, limparItemDoLocalStorage, dispatch, navigate, setVerificacaoInicialFeita]);
+    }, [verificacaoInicialFeita, itemId, codigoItemEstado, configuracaoItemNovo, carregarItemDoLocalStorage, navigate, setVerificacaoInicialFeita]);
 
     // Validação dos parâmetros obrigatórios para acessar esta tela
     useEffect(() => {
         let parametrosObrigatorios = {
-            id: item.id,
-            codigoItem: configuracaoItemNovo?.codigoItem,
+            id: itemId,
+            codigoItem: configuracaoItemNovo?.codigoItem || codigoItemEstado,
             areaConhecimentoId: configuracaoItemNovo?.areaConhecimento,
             disciplinaId: configuracaoItemNovo?.disciplina
         };
 
-        // Se Redux estiver vazio, tenta carregar do localStorage
+    // Se estados locais estiverem vazios, tenta carregar do localStorage
         if ((!parametrosObrigatorios.id || parametrosObrigatorios.id === 0) ||
             (!parametrosObrigatorios.codigoItem || parametrosObrigatorios.codigoItem.trim() === '')) {
 
             const itemSalvo = carregarItemDoLocalStorage();
             if (itemSalvo && itemSalvo.id > 0 && itemSalvo.codigoItem && itemSalvo.codigoItem.trim() !== '') {
-                console.log('🔄 Dados do Redux vazios, restaurando do localStorage...');
-
-                // Restaura no Redux
-                dispatch(setConfiguracaoItemNovo(itemSalvo.configuracao));
-                dispatch(setItemNovo({
-                    id: itemSalvo.id,
-                    configuracao: itemSalvo.configuracao,
-                    elaboracao: elaboracaoItemNovo,
-                }));
+                console.log('🔄 Estados locais vazios, restaurando do localStorage...');
+                // Restaura nos estados locais
+                setItemId(itemSalvo.id);
+                setCodigoItemEstado(itemSalvo.codigoItem);
+                setConfiguracaoItemNovoLocal(itemSalvo.configuracao || {});
+                // mantém elaboracao atual se existir
 
                 // Atualiza parâmetros obrigatórios com dados do localStorage
                 parametrosObrigatorios = {
@@ -222,11 +256,11 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
         }
 
         console.log('✅ FormularioElaboracaoComponent carregado com sucesso!');
-        console.log('📋 Dados do Redux carregados:', {
+        console.log('📋 Dados carregados:', {
             item: parametrosObrigatorios,
             elaboracao: elaboracaoItemNovo
         });
-    }, [item.id, configuracaoItemNovo, mensagem, navigate, elaboracaoItemNovo, carregarItemDoLocalStorage, dispatch]);
+    }, [itemId, configuracaoItemNovo, mensagem, navigate, elaboracaoItemNovo, carregarItemDoLocalStorage]);
 
     // Campos do enum
     const campoTextoBase = Campos.textoBase;
@@ -311,14 +345,11 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
                 console.log('🎯 Configuração mapeada:', configuracaoItemRetorno);
                 console.log('🎯 Elaboração mapeada com alternativas:', elaboracaoItemRetorno);
 
-                // ✅ Atualiza Redux com dados completos do backend
-                dispatch(setConfiguracaoItemNovo(configuracaoItemRetorno));
-                dispatch(setElaboracaoItemNovo(elaboracaoItemRetorno));
-                dispatch(setItemNovo({
-                    id: itemId,
-                    configuracao: configuracaoItemRetorno,
-                    elaboracao: elaboracaoItemRetorno
-                }));
+                // ✅ Atualiza estados locais com dados completos do backend
+                setItemId(itemId);
+                setCodigoItemEstado(configuracaoItemRetorno.codigoItem || '');
+                setConfiguracaoItemNovoLocal(configuracaoItemRetorno);
+                setElaboracaoItemNovoLocal(elaboracaoItemRetorno);
 
                 // ✅ Salva dados completos no localStorage
                 const itemParaLocalStorage = {
@@ -339,15 +370,15 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
             console.error('❌ Erro ao carregar dados completos do backend:', error);
             return null;
         }
-    }, [dispatch]);
+    }, []);
 
     // ✅ useEffect INTELIGENTE: Prioriza backend, fallback para localStorage
     useEffect(() => {
         const executarCarregamento = async () => {
             // 🎯 1ª PRIORIDADE: Se tem ID no Redux, busca dados completos do backend
-            if (item.id > 0) {
-                console.log('🎯 ELABORAÇÃO: ID disponível no Redux, carregando do backend...');
-                const dadosBackend = await obterItemComAlternativasEPopular(item.id);
+            if (itemId > 0) {
+                console.log('🎯 ELABORAÇÃO: ID disponível (estado/local), carregando do backend...');
+                const dadosBackend = await obterItemComAlternativasEPopular(itemId);
                 
                 if (dadosBackend) {
                     console.log('✅ Dados carregados do backend com sucesso');
@@ -368,23 +399,11 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
                     temElaboracao: !!(itemSalvo as any).elaboracao
                 });
                 
-                // Restaura configuração no Redux
-                if (itemSalvo.configuracao) {
-                    dispatch(setConfiguracaoItemNovo(itemSalvo.configuracao));
-                }
-                
-                // Restaura elaboração no Redux
-                if ((itemSalvo as any).elaboracao) {
-                    dispatch(setElaboracaoItemNovo((itemSalvo as any).elaboracao));
-                    console.log('✅ Dados da elaboração restaurados do localStorage:', (itemSalvo as any).elaboracao);
-                }
-                
-                // Restaura item no Redux
-                dispatch(setItemNovo({
-                    id: itemSalvo.id,
-                    configuracao: itemSalvo.configuracao || {},
-                    elaboracao: (itemSalvo as any).elaboracao || {}
-                }));
+                // Restaura estados locais
+                setItemId(itemSalvo.id);
+                setCodigoItemEstado(itemSalvo.codigoItem);
+                if (itemSalvo.configuracao) setConfiguracaoItemNovoLocal(itemSalvo.configuracao);
+                if ((itemSalvo as any).elaboracao) setElaboracaoItemNovoLocal((itemSalvo as any).elaboracao);
             } else {
                 console.log('📂 Nem backend nem localStorage têm dados válidos');
             }
@@ -393,7 +412,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
         executarCarregamento();
     }, []); // 🎯 SEM dependências - executa só quando componente monta
 
-    // Carrega dados do Redux no form quando o componente monta
+    // Carrega dados locais no form quando o componente monta
     useEffect(() => {
         if (elaboracaoItemNovo && form) {
             form.setFieldsValue({
@@ -425,7 +444,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
             const values = form.getFieldsValue(true);
             
             // Cria objeto de elaboração com dados atuais do formulário
-            const elaboracaoAtual = {
+            const elaboracaoAtual: ElaboracaoLocalProps = {
                 textoBase: values[campoTextoBase] || '',
                 fonte: values[campoFonte] || '',
                 enunciado: values[campoEnunciado] || '',
@@ -441,20 +460,19 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
                 alternativaD: values[campoAlternativaD] || '',
                 justificativaD: values[campoJustificativaD] || '',
                 alternativaCorreta: values[campoAlternativaCorreta] || 'A',
-                // 🆔 PRESERVA IDs DAS ALTERNATIVAS existentes do Redux (para update)
+                // 🆔 PRESERVA IDs DAS ALTERNATIVAS existentes (para update)
                 idAlternativaA: elaboracaoItemNovo?.idAlternativaA || null,
                 idAlternativaB: elaboracaoItemNovo?.idAlternativaB || null,
                 idAlternativaC: elaboracaoItemNovo?.idAlternativaC || null,
                 idAlternativaD: elaboracaoItemNovo?.idAlternativaD || null,
             };
-
-            // Atualiza Redux com dados do formulário
-            dispatch(setElaboracaoItemNovo(elaboracaoAtual));
+            // Atualiza estado local com dados do formulário
+            setElaboracaoItemNovoLocal(elaboracaoAtual);
 
             // Salva no localStorage dados atuais
             const itemParaLocalStorage = {
-                id: item.id,
-                codigoItem: configuracaoItemNovo?.codigoItem,
+                id: itemId,
+                codigoItem: configuracaoItemNovo?.codigoItem || codigoItemEstado,
                 configuracao: configuracaoItemNovo,
                 elaboracao: elaboracaoAtual // ← Dados atuais do formulário
             };
@@ -465,7 +483,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
         } catch (error) {
             console.error('❌ Erro ao salvar dados do formulário no localStorage:', error);
         }
-    }, [form, item.id, configuracaoItemNovo, dispatch, 
+    }, [form, itemId, configuracaoItemNovo, 
         campoTextoBase, campoFonte, campoEnunciado, campoCodigoItem,
         campoVideo, campoAudio, campoAlternativaA, campoJustificativaA, 
         campoAlternativaB, campoJustificativaB, campoAlternativaC, campoJustificativaC, 
@@ -475,7 +493,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
     const watchedValues = Form.useWatch([], form);
     useEffect(() => {
         // Só salva se tem dados essenciais
-        if (item.id > 0 && configuracaoItemNovo?.codigoItem && watchedValues) {
+    if (itemId > 0 && (configuracaoItemNovo?.codigoItem || codigoItemEstado) && watchedValues) {
             // Debounce para não salvar muito frequentemente
             const timeoutId = setTimeout(() => {
                 console.log('🔄 Campo alterado, salvando no localStorage...', Object.keys(watchedValues));
@@ -484,14 +502,14 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
 
             return () => clearTimeout(timeoutId);
         }
-    }, [watchedValues, item.id, configuracaoItemNovo?.codigoItem, salvarDadosFormularioNoLocalStorage]);
+    }, [watchedValues, itemId, configuracaoItemNovo?.codigoItem, codigoItemEstado, salvarDadosFormularioNoLocalStorage]);
 
     // Método para gerar o DTO para salvar
     const gerarItemSalvar = useCallback(() => {
         const values = cloneDeep(form.getFieldsValue(true));
 
         console.log('📋 Valores do formulário da elaboração:', values);
-        console.log('🆔 IDs das alternativas no Redux:', {
+        console.log('🆔 IDs das alternativas atuais:', {
             idA: elaboracaoItemNovo?.idAlternativaA,
             idB: elaboracaoItemNovo?.idAlternativaB,
             idC: elaboracaoItemNovo?.idAlternativaC,
@@ -508,7 +526,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
                 justificativa: values[campoJustificativaA] || '',
                 correta: values[campoAlternativaCorreta] === 'A',
                 ordem: 1,
-                itemId: item.id,
+                itemId: itemId,
             };
             // 🆔 ADICIONA ID se existir (para update)
             if (elaboracaoItemNovo?.idAlternativaA) {
@@ -524,7 +542,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
                 justificativa: values[campoJustificativaB] || '',
                 correta: values[campoAlternativaCorreta] === 'B',
                 ordem: 2,
-                itemId: item.id,
+                itemId: itemId,
             };
             // 🆔 ADICIONA ID se existir (para update)
             if (elaboracaoItemNovo?.idAlternativaB) {
@@ -540,7 +558,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
                 justificativa: values[campoJustificativaC] || '',
                 correta: values[campoAlternativaCorreta] === 'C',
                 ordem: 3,
-                itemId: item.id
+                itemId: itemId
             };
             // 🆔 ADICIONA ID se existir (para update)
             if (elaboracaoItemNovo?.idAlternativaC) {
@@ -556,7 +574,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
                 justificativa: values[campoJustificativaD] || '',
                 correta: values[campoAlternativaCorreta] === 'D',
                 ordem: 4,
-                itemId: item.id,
+                itemId: itemId,
             };
             // 🆔 ADICIONA ID se existir (para update)
             if (elaboracaoItemNovo?.idAlternativaD) {
@@ -568,7 +586,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
         console.log('🎯 Alternativas montadas para envio:', alternativasDto);
 
         // 🔍 DEBUG: verificar dados da configuração
-        console.log('🔍 CONFIGURAÇÃO REDUX PARA DTO:', configuracaoItemNovo);
+    console.log('🔍 CONFIGURAÇÃO ATUAL PARA DTO:', configuracaoItemNovo);
         console.log('🔍 AREA CONHECIMENTO ESPECIFICAMENTE:', {
             valor: configuracaoItemNovo?.areaConhecimento,
             tipo: typeof configuracaoItemNovo?.areaConhecimento,
@@ -576,8 +594,8 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
         });
 
         const dto: ItemNovoDto = {
-            id: item.id,
-            codigoItem: configuracaoItemNovo?.codigoItem || '',
+            id: itemId,
+            codigoItem: (configuracaoItemNovo?.codigoItem || codigoItemEstado || ''),
             areaConhecimentoId: configuracaoItemNovo?.areaConhecimento || null,
             disciplinaId: configuracaoItemNovo?.disciplina || null,
             matrizId: configuracaoItemNovo?.matriz || null,
@@ -594,29 +612,32 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
             dificuldade: configuracaoItemNovo?.dificuldade ? +configuracaoItemNovo?.dificuldade : null,
             nivelItem: configuracaoItemNovo?.nivelItem || null,
             acertoCasual: configuracaoItemNovo?.acertoCasual ? +configuracaoItemNovo?.acertoCasual : null,
-            // Conversão segura do palavrasChave para elaboração (campo não obrigatório)
+            // Conversão segura do palavrasChave para elaboração (campo não obrigatório) - BACKEND ESPERA ARRAY
             palavrasChave: (() => {
-                let palavrasChaveConvertido = '';
+                let palavrasChaveArray: string[] | null = null;
 
                 if (configuracaoItemNovo?.palavrasChave) {
                     if (Array.isArray(configuracaoItemNovo.palavrasChave)) {
-                        // Filtra valores vazios e junta com ';'
+                        // Filtra valores vazios e mantém como array
                         const palavrasValidas = configuracaoItemNovo.palavrasChave.filter((p: string) => p && p.trim());
-                        palavrasChaveConvertido = palavrasValidas.length > 0 ? palavrasValidas.join(';') : '';
+                        palavrasChaveArray = palavrasValidas.length > 0 ? palavrasValidas : null;
                     } else if (typeof configuracaoItemNovo.palavrasChave === 'string') {
                         const palavraString = (configuracaoItemNovo.palavrasChave as string).trim();
                         if (palavraString) {
-                            palavrasChaveConvertido = palavraString;
+                            // Se for string, converte para array (separado por ';' se houver)
+                            palavrasChaveArray = palavraString.includes(';') 
+                                ? palavraString.split(';').filter((p: string) => p && p.trim()).map((p: string) => p.trim())
+                                : [palavraString];
                         }
                     }
                 }
 
-                console.log('🔧 palavrasChave convertido na elaboração:', {
+                console.log('🔧 palavrasChave convertido na elaboração para array:', {
                     original: configuracaoItemNovo?.palavrasChave,
-                    convertido: palavrasChaveConvertido,
-                    isEmpty: !palavrasChaveConvertido
+                    convertido: palavrasChaveArray,
+                    isArray: Array.isArray(palavrasChaveArray)
                 });
-                return palavrasChaveConvertido || null; // null se vazio
+                return palavrasChaveArray; // Array de strings ou null
             })(),
             parametroBTransformado: configuracaoItemNovo?.parametroBTransformado ? +configuracaoItemNovo?.parametroBTransformado : null,
             mediaEhDesvio: configuracaoItemNovo?.mediaDesvioPadrao || null,
@@ -665,7 +686,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
         }
 
         return dto;
-    }, [item.id, configuracaoItemNovo, form, campoTextoBase, campoFonte, campoEnunciado,
+    }, [itemId, configuracaoItemNovo, codigoItemEstado, form, campoTextoBase, campoFonte, campoEnunciado,
         campoVideo, campoAudio, campoAlternativaA, campoJustificativaA, campoAlternativaB,
         campoJustificativaB, campoAlternativaC, campoJustificativaC, campoAlternativaD,
         campoJustificativaD, campoAlternativaCorreta]);
@@ -681,7 +702,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
                     // 🔄 USA NOVA FUNÇÃO: Carrega dados completos atualizados do backend
                     try {
                         console.log('🔄 Recarregando dados completos após salvar rascunho...');
-                        const dadosAtualizados = await obterItemComAlternativasEPopular(item.id);
+                        const dadosAtualizados = await obterItemComAlternativasEPopular(itemId);
                         
                         if (dadosAtualizados) {
                             console.log('✅ Dados completos recarregados com sucesso após salvar rascunho');
@@ -706,7 +727,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
                                 justificativaD: values[campoJustificativaD],
                                 alternativaCorreta: values[campoAlternativaCorreta],
                             };
-                            dispatch(setElaboracaoItemNovo(elaboracaoAtualizada));
+                            setElaboracaoItemNovoLocal(elaboracaoAtualizada);
                         }
                     } catch (error) {
                         console.error('❌ Erro ao recarregar dados após salvar rascunho:', error);
@@ -729,7 +750,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
                             justificativaD: values[campoJustificativaD],
                             alternativaCorreta: values[campoAlternativaCorreta],
                         };
-                        dispatch(setElaboracaoItemNovo(elaboracaoAtualizada));
+                        setElaboracaoItemNovoLocal(elaboracaoAtualizada);
                     }
                 })
                 .catch((err) => {
@@ -737,7 +758,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
                     mensagem('error', 'Erro', 'Ocorreu um erro ao salvar o rascunho');
                 });
         },
-        [mensagem, dispatch, form, item.id, configuracaoItemNovo, campoTextoBase, campoFonte, campoEnunciado, campoCodigoItem,
+        [mensagem, form, itemId, configuracaoItemNovo, campoTextoBase, campoFonte, campoEnunciado, campoCodigoItem,
             campoVideo, campoAudio, campoAlternativaA, campoJustificativaA, campoAlternativaB,
             campoJustificativaB, campoAlternativaC, campoJustificativaC, campoAlternativaD,
             campoJustificativaD, campoAlternativaCorreta],
@@ -763,14 +784,11 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
     const cancelar = () => {
         setCarregando(true);
         limparItemDoLocalStorage();
-        const itemAtual: ItemNovoProps = {
-            id: 0,
-            configuracao: {},
-            elaboracao: {} as ElaboracaoItemNovoProps,
-        };
-        dispatch(setItemNovo(itemAtual));
-        dispatch(setConfiguracaoItemNovo({}));
-        dispatch(setElaboracaoItemNovo({} as ElaboracaoItemNovoProps));
+        // Reseta estados locais
+        setItemId(0);
+        setCodigoItemEstado('');
+        setConfiguracaoItemNovoLocal({});
+        setElaboracaoItemNovoLocal({});
         form.resetFields();
         setCarregando(false);
 

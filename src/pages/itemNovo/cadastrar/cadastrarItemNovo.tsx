@@ -1,55 +1,82 @@
 import { Button, Form, FormProps, notification, Spin } from 'antd';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './cadastrarItemNovo.css';
 
-// import IdentificacaoComponent from '~/components/cadastro-item-novo/cards/identificacaoComponent/identificacaoComponent';
-// import CompetenciaHabilidade from '~/components/cadastro-item-novo/cards/competenciaHabilidadeComponent/competenciaHabilidadeComponent';
-// import CaracteristicasItemComponent from '~/components/cadastro-item-novo/cards/caracteristicasItemComponet/caracteristicasItemComponent';
-// import ClassificacaoTemaComponent from '~/components/cadastro-item-novo/cards/classificacaoTemaComponent/classificacaoTemaComponent';
-// import InformacoesEstatisticasComponent from '~/components/cadastro-item-novo/cards/informacoesEstatisticasComponent/informacoesEstatisticasComponent';
-
-
 import FormularioUnico from '~/components/cadastro-item-novo/formularioUnicoComponent/formularioUnicoComponent';
 
-import { validarCampoForm } from '~/utils/funcoes'; //validarCampoArrayStringForm
+import { validarCampoForm } from '~/utils/funcoes';
 
 import { Campos } from '~/domain/enums/campos-cadastro-item';
 import configuracaoItemService from '~/services/configuracaoItem-service';
 
-//redux
-import { useDispatch, useSelector } from 'react-redux';
-import { AppState } from '~/redux';
-// import { cloneDeep } from 'lodash'; // ⚠️ Removido para evitar referências circulares
 import { AltenativaDto } from '~/domain/dto/AltenativaDto';
 import { DadosIniciais } from '~/domain/enums/campos-cadastro-item';
 
-import {
-    setConfiguracaoItemNovo,
-    setElaboracaoItemNovo,
-    setItemNovo,
-} from '~/redux/modules/cadastroItem-novo/itemNovo/actions';
-import {
-    ConfiguracaoItemNovoProps,
-    ElaboracaoItemNovoProps,
-    ItemNovoProps,
-} from '~/redux/modules/cadastroItem-novo/itemNovo/reducers';
 import { ItemNovoDto } from '~/domain/dto/itemNovo-dto';
+import { SelectValueType } from '~/domain/type/select';
 import CadastrarItemHeaderComponent from './cadastrarItemHeaderComponent';
 import CadastrarItemRodapeComponent from './cadastrarItemRodapeComponent';
+// Tipo local para elaboração
+interface ElaboracaoLocalProps {
+    textoBase?: string;
+    fonte?: string;
+    enunciado?: string;
+    codigoItem?: string;
+    video?: any[];
+    audio?: any[];
+    alternativaA?: string;
+    justificativaA?: string;
+    alternativaB?: string;
+    justificativaB?: string;
+    alternativaC?: string;
+    justificativaC?: string;
+    alternativaD?: string;
+    justificativaD?: string;
+    alternativaCorreta?: 'A' | 'B' | 'C' | 'D';
+    alternativasDto?: AltenativaDto[];
+}
 
-
-
+// ✅ Tipo movido do Redux para cá
+export interface ConfiguracaoItemNovoProps {
+    codigoItem: string;
+    areaConhecimento: SelectValueType;
+    disciplina: SelectValueType;
+    matriz: SelectValueType;
+    anoMatriz: SelectValueType;
+    competencia: SelectValueType;
+    habilidade: SelectValueType;
+    assunto: SelectValueType;
+    subAssunto: SelectValueType;
+    situacaoItem: SelectValueType;
+    tipoItem: SelectValueType;
+    quantidadeAlternativas: SelectValueType;
+    dificuldadeSugerida: SelectValueType;
+    nivelItem: SelectValueType;
+    discriminacao: number | string | null;
+    dificuldade: number | string | null;
+    acertoCasual: number | string | null;
+    palavrasChave: string[] | null;
+    parametroBTransformado: number | string | null;
+    mediaDesvioPadrao: string | null;
+    observacao: string | null;
+    sentencaDescritora: string | null;
+}
 
 const CadastrarItemNovo: React.FC<FormProps> = () => {
 
     const navigate = useNavigate();
-    const dispatch = useDispatch();
     const [carregando, setCarregando] = useState<boolean>(false);
-    const [limpezaInicialFeita, setLimpezaInicialFeita] = useState<boolean>(false);
-    const item = useSelector((state: AppState) => state.item);
-    const configuracaoItemNovo = useSelector((state: AppState) => state.configuracaoItemNovo);
-    const elaboracaoItemNovo = useSelector((state: AppState) => state.elaboracaoItemNovo);
+    // removido estado de limpeza inicial automática do localStorage
+    // Evita recriações do callback e loops por dependência
+    const cascataEmAndamentoRef = useRef<boolean>(false);
+    // Garante que a cascata automática só rode uma vez no primeiro acesso
+    const cascataInicialAplicadaRef = useRef<boolean>(false);
+
+    // ✅ Estados locais
+    const [itemId, setItemId] = useState<number>(0);
+    const [codigoItem, setCodigoItem] = useState<string>('');
+    const [elaboracaoItem, setElaboracaoItem] = useState<ElaboracaoLocalProps>({});
 
     const [form] = Form.useForm();
     const initialValuesForm = {
@@ -66,34 +93,27 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
     const areaConhecimentoIdForm = Form.useWatch(Campos.areaConhecimento, form);
     const disciplinaIdForm = Form.useWatch(Campos.disciplinas, form);
 
-    // const bloquearSalvar =
-    //     validarCampoForm(configuracaoItemNovo.disciplina) ||
-    //     validarCampoForm(configuracaoItemNovo.areaConhecimento) ||
-    //     validarCampoForm(configuracaoItemNovo.matriz) ||
-    //     validarCampoForm(configuracaoItemNovo.competencia) ||
-    //     validarCampoForm(configuracaoItemNovo.habilidade) ||
-    //     validarCampoForm(configuracaoItemNovo.anoMatriz) ||
-    //     validarCampoForm(configuracaoItemNovo.dificuldadeSugerida) ||
-    //     validarCampoForm(configuracaoItemNovo.situacaoItem) ||
-    //     validarCampoForm(configuracaoItemNovo.quantidadeAlternativas) ||
-    //     validarCampoArrayStringForm(configuracaoItemNovo.palavrasChave ?? []);
-
-    // const [bloquearBtnSalvar, setBloquearBtnSalvar] = useState<boolean>(bloquearSalvar);
     const [bloquearBtnSalvarRascunho, setBloquearBtnSalvarRascunho] =
         useState<boolean>(true);
     const [bloquearBtnAvancar, setBloquearBtnAvancar] = useState<boolean>(true);
 
     // 💾 Funções para gerenciar localStorage
-    const salvarItemNoLocalStorage = useCallback((itemData: { id: number, codigoItem: string, configuracao: any }) => {
+    const salvarItemNoLocalStorage = useCallback((itemData: { id: number, codigoItem: string, configuracao: any, elaboracao?: any }) => {
         try {
-            localStorage.setItem('itemAtual', JSON.stringify(itemData));
-            console.log('💾 Item salvo no localStorage:', itemData);
+            const itemCompleto = {
+                id: itemData.id,
+                codigoItem: itemData.codigoItem,
+                configuracao: itemData.configuracao,
+                elaboracao: itemData.elaboracao || {},
+            };
+            localStorage.setItem('itemAtual', JSON.stringify(itemCompleto));
+            console.log('💾 Item completo salvo no localStorage:', itemCompleto);
         } catch (error) {
             console.error('❌ Erro ao salvar no localStorage:', error);
         }
     }, []);
 
-    const carregarItemDoLocalStorage = useCallback((): { id: number, codigoItem: string, configuracao: any } | null => {
+    const carregarItemDoLocalStorage = useCallback((): { id: number, codigoItem: string, configuracao: any, elaboracao?: any } | null => {
         try {
             const itemSalvo = localStorage.getItem('itemAtual');
             if (itemSalvo) {
@@ -110,6 +130,12 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                 }
 
                 console.log('📂 Item carregado do localStorage:', item);
+                // ✅ Seta os estados locais ao carregar
+                setItemId(item.id || 0);
+                setCodigoItem(item.codigoItem || '');
+                if (item.elaboracao) {
+                    setElaboracaoItem(item.elaboracao);
+                }
                 return item;
             }
         } catch (error) {
@@ -124,12 +150,16 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
             localStorage.removeItem('voltandoParaPrimeiraTela'); // 🧹 Remove flag de navegação
             localStorage.removeItem('persist:SERAP-ITEM-PERSIST');
             console.log('🗑️ Todas as chaves do item removidas do localStorage');
+            // ✅ Limpa estados locais
+            setItemId(0);
+            setCodigoItem('');
+            setElaboracaoItem({});
         } catch (error) {
             console.error('❌ Erro ao limpar localStorage:', error);
         }
     }, []);
 
-    // ✅ useEffect refatorado para usar valores do formulário ao invés do Redux
+    // ✅ useEffect refatorado para usar valores do formulário
     useEffect(() => {
         const bloquear =
             validarCampoForm(disciplinaIdForm) ||
@@ -138,307 +168,231 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
         setBloquearBtnSalvarRascunho(bloquear);
     }, [areaConhecimentoIdForm, disciplinaIdForm]);
 
-    // ✅ useEffect para limpar localStorage no primeiro acesso à primeira página
-    useEffect(() => {
-        if (!limpezaInicialFeita) {
-            // Detecta se é primeiro acesso: Redux vazio E não está voltando de navegação
-            const isReduxVazio = (!item.id || item.id === 0) && (!configuracaoItemNovo?.codigoItem || configuracaoItemNovo.codigoItem.trim() === '');
-            const isLocalStorageVazio = !localStorage.getItem('itemAtual');
-
-            if (isReduxVazio && isLocalStorageVazio) {
-                console.log('🧹 Primeiro acesso à primeira página - limpando localStorage');
-                limparItemDoLocalStorage();
-
-                // Limpa Redux também para garantir estado limpo
-                const itemLimpo: ItemNovoProps = {
-                    id: 0,
-                    configuracao: {},
-                    elaboracao: {} as ElaboracaoItemNovoProps,
-                };
-                dispatch(setItemNovo(itemLimpo));
-                dispatch(setConfiguracaoItemNovo({}));
-                dispatch(setElaboracaoItemNovo({} as ElaboracaoItemNovoProps));
-            }
-
-            setLimpezaInicialFeita(true);
-        }
-    }, [limpezaInicialFeita, item.id, configuracaoItemNovo, limparItemDoLocalStorage, dispatch, setLimpezaInicialFeita]);
+    // Removido: limpeza automática do localStorage no primeiro acesso.
+    // Motivo: quando vier da listagem (edição), o localStorage já terá dados
+    // e não deve ser apagado. A limpeza ocorrerá explicitamente via botão
+    // "Novo item" (que chama limparItemDoLocalStorage) ou "Cancelar".
 
     // 🔄 Função para carregar localStorage com cascata inteligente (igual ao "Voltar")
     const carregarLocalStorageComCascata = useCallback(
-        async (itemSalvo: { id: number, codigoItem: string, configuracao: any }) => {
-            console.log('� Iniciando carregamento localStorage com cascata inteligente...');
+        async (itemSalvo: { id: number, codigoItem: string, configuracao: any, elaboracao?: any }) => {
+            console.log(' Iniciando carregamento localStorage com cascata inteligente...');
+            // 🚫 Evita execuções simultâneas
+            if (cascataEmAndamentoRef.current) {
+                console.log('🚫 CASCATA: Já em andamento - ignorando chamada duplicada');
+                return;
+            }
+
+            cascataEmAndamentoRef.current = true;
             setCarregando(true);
 
-            try {
-                console.log('📋 Dados localStorage - carregando listas sob demanda:', {
-                    area: itemSalvo.configuracao.areaConhecimento,
-                    disciplina: itemSalvo.configuracao.disciplina,
-                    matriz: itemSalvo.configuracao.matriz,
-                    assunto: itemSalvo.configuracao.assunto,
-                    competencia: itemSalvo.configuracao.competencia
-                });
-
-                // Define flag para evitar conflitos
-                localStorage.setItem('carregandoViaLocalStorage', 'true');
-
-                // 0️⃣ Garantir que área de conhecimento está carregada
-                console.log('📝 Garantindo que área de conhecimento esteja carregada...');
-                localStorage.setItem('aguardandoAreaConhecimento', 'true');
-
+            const aguardarFlag = async (flag: string, maxTentativas = 25, atrasoMs = 200) => {
                 let tentativas = 0;
-                while (tentativas < 25 && localStorage.getItem('aguardandoAreaConhecimento') === 'true') {
-                    await new Promise(resolve => setTimeout(resolve, 200));
+                while (
+                    tentativas < maxTentativas &&
+                    localStorage.getItem(flag) === 'true'
+                ) {
+                    await new Promise(resolve => setTimeout(resolve, atrasoMs));
                     tentativas++;
                 }
-                console.log('✅ Área de conhecimento carregada (tentativas:', tentativas, ')');
+                return tentativas;
+            };
 
-                // 1️⃣ Área → Disciplinas + Assuntos
+            try {
+                console.log('� Dados localStorage (configuração):', itemSalvo.configuracao);
+
+                // 0) Atualiza estados locais para navegação/botões
+                setItemId(itemSalvo.id);
+                setCodigoItem(itemSalvo.codigoItem);
+                if (itemSalvo.elaboracao) setElaboracaoItem(itemSalvo.elaboracao);
+
+                // Sequência correta de dependências:
+                // áreaConhecimento → disciplinas → matriz → anoMatriz → competências → habilidades
+                // e em paralelo à disciplina: assuntos → subAssuntos
+
+                // 1) Área do Conhecimento (carrega options e seta valor)
                 if (itemSalvo.configuracao.areaConhecimento) {
-                    console.log('📝 Setando área e aguardando disciplinas + assuntos carregarem...');
+                    console.log('📝 Definindo área do conhecimento...');
+                    // Aguarda caso a tela esteja carregando a lista de áreas
+                    await aguardarFlag('aguardandoAreaConhecimento');
+                    // Predefine flags que serão disparadas pelos effects após setar a área
                     localStorage.setItem('aguardandoDisciplinas', 'true');
                     localStorage.setItem('aguardandoAssuntos', 'true');
                     form?.setFieldValue(Campos.areaConhecimento, itemSalvo.configuracao.areaConhecimento);
 
-                    // Aguarda disciplinas
-                    tentativas = 0;
-                    while (tentativas < 25 && localStorage.getItem('aguardandoDisciplinas') === 'true') {
-                        await new Promise(resolve => setTimeout(resolve, 200));
-                        tentativas++;
-                    }
-                    console.log('✅ Disciplinas carregaram (tentativas:', tentativas, ')');
-
-                    // Aguarda assuntos
-                    tentativas = 0;
-                    while (tentativas < 25 && localStorage.getItem('aguardandoAssuntos') === 'true') {
-                        await new Promise(resolve => setTimeout(resolve, 200));
-                        tentativas++;
-                    }
-                    console.log('✅ Assuntos carregaram (tentativas:', tentativas, ')');
+                    // Ao definir área, a tela carrega disciplinas e assuntos
+                    console.log('⏳ Aguardando disciplinas e assuntos após selecionar área...');
+                    await aguardarFlag('aguardandoDisciplinas');
+                    await aguardarFlag('aguardandoAssuntos');
                 }
 
-                // 2️⃣ Disciplina → Matriz
+                // 2) Disciplina (depende da área)
                 if (itemSalvo.configuracao.disciplina) {
-                    console.log('📝 Setando disciplina e aguardando matriz carregarem...');
+                    console.log('📝 Definindo disciplina...');
+                    // Predefine flags de carregamento a serem limpas pelos effects do formulário
                     localStorage.setItem('aguardandoMatriz', 'true');
+                    localStorage.setItem('aguardandoAssuntos', 'true');
                     form?.setFieldValue(Campos.disciplinas, itemSalvo.configuracao.disciplina);
 
-                    tentativas = 0;
-                    while (tentativas < 25 && localStorage.getItem('aguardandoMatriz') === 'true') {
-                        await new Promise(resolve => setTimeout(resolve, 200));
-                        tentativas++;
-                    }
-                    console.log('✅ Matriz carregou (tentativas:', tentativas, ')');
+                    // Ao definir disciplina, a tela carrega matriz e (novamente) assuntos
+                    console.log('⏳ Aguardando matriz e assuntos após selecionar disciplina...');
+                    await aguardarFlag('aguardandoMatriz');
+                    await aguardarFlag('aguardandoAssuntos');
                 }
 
-                // 3️⃣ Assunto → SubAssunto (se tiver)
-                if (itemSalvo.configuracao.assunto) {
-                    console.log('� Setando assunto e aguardando subassuntos carregarem...');
-                    localStorage.setItem('aguardandoSubAssuntos', 'true');
-                    form?.setFieldValue(Campos.assunto, itemSalvo.configuracao.assunto);
-
-                    tentativas = 0;
-                    while (tentativas < 25 && localStorage.getItem('aguardandoSubAssuntos') === 'true') {
-                        await new Promise(resolve => setTimeout(resolve, 200));
-                        tentativas++;
-                    }
-                    console.log('✅ SubAssuntos carregaram (tentativas:', tentativas, ')');
-                }
-
-                // 4️⃣ Matriz → Competências (se tiver)
+                // 3) Matriz (depende da disciplina)
                 if (itemSalvo.configuracao.matriz) {
-                    console.log('📝 Setando matriz e aguardando competências carregarem...');
+                    console.log('📝 Definindo matriz...');
+                    // Predefine flags para ano e competências
+                    localStorage.setItem('aguardandoAnoMatriz', 'true');
                     localStorage.setItem('aguardandoCompetencias', 'true');
                     form?.setFieldValue(Campos.matriz, itemSalvo.configuracao.matriz);
 
-                    tentativas = 0;
-                    while (tentativas < 25 && localStorage.getItem('aguardandoCompetencias') === 'true') {
-                        await new Promise(resolve => setTimeout(resolve, 200));
-                        tentativas++;
-                    }
-                    console.log('✅ Competências carregaram (tentativas:', tentativas, ')');
+                    // Ao definir matriz, a tela carrega anoMatriz e competências
+                    console.log('⏳ Aguardando ano da matriz e competências...');
+                    await aguardarFlag('aguardandoAnoMatriz');
+                    await aguardarFlag('aguardandoCompetencias');
                 }
 
-                // 5️⃣ Competência → Habilidades (se tiver)
+                // 4) Ano da Matriz (depende da matriz)
+                if (itemSalvo.configuracao.anoMatriz) {
+                    console.log('📝 Definindo ano da matriz...');
+                    form?.setFieldValue(Campos.anoMatriz, itemSalvo.configuracao.anoMatriz);
+                }
+
+                // 5) Competência (depende da matriz)
                 if (itemSalvo.configuracao.competencia) {
-                    console.log('📝 Setando competência e aguardando habilidades carregarem...');
+                    console.log('📝 Definindo competência...');
+                    // Predefine flag para habilidades
                     localStorage.setItem('aguardandoHabilidade', 'true');
                     form?.setFieldValue(Campos.competencia, itemSalvo.configuracao.competencia);
 
-                    tentativas = 0;
-                    while (tentativas < 25 && localStorage.getItem('aguardandoHabilidade') === 'true') {
-                        await new Promise(resolve => setTimeout(resolve, 200));
-                        tentativas++;
-                    }
-                    console.log('✅ Habilidades carregaram (tentativas:', tentativas, ')');
+                    // Ao definir competência, a tela carrega habilidades
+                    console.log('⏳ Aguardando habilidades...');
+                    await aguardarFlag('aguardandoHabilidade');
                 }
 
-                // 6️⃣ Popula todos os outros campos
-                console.log('📝 Populando campos restantes...');
+                // 6) Habilidade (depende da competência)
+                if (itemSalvo.configuracao.habilidade) {
+                    console.log('📝 Definindo habilidade...');
+                    form?.setFieldValue(Campos.habilidade, itemSalvo.configuracao.habilidade);
+                }
 
-                // Restaura no Redux
-                const itemAtual: ItemNovoProps = {
-                    id: itemSalvo.id,
-                    configuracao: itemSalvo.configuracao,
-                    elaboracao: {} as ElaboracaoItemNovoProps,
-                };
+                // 7) Assunto (depende da disciplina)
+                if (itemSalvo.configuracao.assunto) {
+                    console.log('📝 Definindo assunto...');
+                    // Predefine flag para subassuntos
+                    localStorage.setItem('aguardandoSubAssuntos', 'true');
+                    form?.setFieldValue(Campos.assunto, itemSalvo.configuracao.assunto);
 
-                dispatch(setItemNovo(itemAtual));
-                dispatch(setConfiguracaoItemNovo(itemSalvo.configuracao));
+                    // Ao definir assunto, a tela carrega subassuntos
+                    console.log('⏳ Aguardando subassuntos...');
+                    await aguardarFlag('aguardandoSubAssuntos');
+                }
 
-                // Mapeamento correto entre localStorage e campos do formulário
+                // 8) SubAssunto (depende do assunto)
+                if (itemSalvo.configuracao.subAssunto) {
+                    console.log('📝 Definindo subAssunto...');
+                    form?.setFieldValue(Campos.subAssunto, itemSalvo.configuracao.subAssunto);
+                }
+
+                // Demais campos simples (não quebrar a cascata principal)
+                console.log('📝 Populando campos restantes não-cascata...');
                 const mapeamentoCampos = {
                     codigoItem: Campos.codigoItem,
-                    areaConhecimento: Campos.areaConhecimento,
-                    disciplina: Campos.disciplinas,
-                    matriz: Campos.matriz,
-                    competencia: Campos.competencia,
-                    habilidade: Campos.habilidade,
-                    anoMatriz: Campos.anoMatriz,
-                    assunto: Campos.assunto,
-                    subAssunto: Campos.subAssunto,
                     situacaoItem: Campos.situacaoItem,
                     tipoItem: Campos.tipoItem,
                     quantidadeAlternativas: Campos.quantidadeAlternativas,
                     dificuldadeSugerida: Campos.dificuldadeSugerida,
                     nivelItem: Campos.nivelItem,
-                    discriminacao: Campos.discriminacao,        // ← 'infoEstatisticasDiscriminacao'
-                    dificuldade: Campos.dificuldade,            // ← 'infoEstatisticasDificuldade'
-                    acertoCasual: Campos.acertoCasual,          // ← 'infoEstatisticasAcertoCasual'
+                    discriminacao: Campos.discriminacao,        // infoEstatisticasDiscriminacao
+                    dificuldade: Campos.dificuldade,            // infoEstatisticasDificuldade
+                    acertoCasual: Campos.acertoCasual,          // infoEstatisticasAcertoCasual
                     palavrasChave: Campos.palavraChave,
                     parametroBTransformado: Campos.parametroBTransformado,
                     mediaDesvioPadrao: Campos.mediaDesvioPadrao,
                     sentencaDescritora: Campos.sentencaDescritora,
                     observacao: Campos.observacao,
-                };
+                } as const;
 
-                // 📝 Popula campos após cascata completa
-                console.log('📝 Populando todos os campos após cascata completa...');
-
-                // Aguarda um pouco para garantir que todas as listas estão prontas
-                await new Promise(resolve => setTimeout(resolve, 300));
+                const camposJaDefinidos = new Set([
+                    'areaConhecimento',
+                    'disciplina',
+                    'matriz',
+                    'anoMatriz',
+                    'competencia',
+                    'habilidade',
+                    'assunto',
+                    'subAssunto',
+                ]);
 
                 Object.keys(itemSalvo.configuracao).forEach(key => {
+                    if (camposJaDefinidos.has(key)) return;
                     const value = itemSalvo.configuracao[key];
-                    const formFieldName = mapeamentoCampos[key as keyof typeof mapeamentoCampos];
-
+                    const formFieldName = (mapeamentoCampos as any)[key];
                     if (value !== undefined && value !== null && formFieldName) {
                         form?.setFieldValue(formFieldName, value);
                         console.log(`📝 Campo ${formFieldName} (${key}) restaurado:`, value);
                     }
                 });
 
-                localStorage.removeItem('carregandoViaLocalStorage');
+                // Pequeno atraso para garantir processamento dos setFieldValue
+                await new Promise(resolve => setTimeout(resolve, 100));
+
                 console.log('✅ Carregamento localStorage com cascata finalizado');
 
             } catch (err: any) {
                 console.error('❌ Erro no carregamento localStorage com cascata:', err.message);
-                localStorage.removeItem('carregandoViaLocalStorage');
             } finally {
+                cascataEmAndamentoRef.current = false;
                 setCarregando(false);
             }
         },
-        [dispatch, form, setCarregando]
+        [form]
     );
 
-    // ✅ useEffect SIMPLIFICADO: SEMPRE verifica localStorage quando tela carrega
+    // ✅ useEffect UNIFICADO: Detecta localStorage e "Voltar" em um só lugar
     useEffect(() => {
-        // � Detecta se Redux está vazio mas localStorage tem dados
-
-
-        // 🎯 LÓGICA SIMPLIFICADA: Se tem dados no localStorage, carrega com cascata SEMPRE
+        const voltandoParaPrimeiraTela = localStorage.getItem('voltandoParaPrimeiraTela') === 'true';
         const itemSalvo = carregarItemDoLocalStorage();
 
-        if (itemSalvo && itemSalvo.id > 0 && itemSalvo.codigoItem && itemSalvo.codigoItem.trim() !== '') {
-            console.log('� SEMPRE: Detectado dados válidos no localStorage - carregando com cascata inteligente...');
+        // 🔙 Cenário 1: Voltando da elaboração
+        if (voltandoParaPrimeiraTela) {
+            console.log('🔙 Detectado "Voltar" - usando dados do localStorage...');
+            localStorage.removeItem('voltandoParaPrimeiraTela');
+            // Permite aplicar cascata novamente ao voltar
+            cascataInicialAplicadaRef.current = false;
+
+            if (itemSalvo && itemSalvo.id > 0 && itemSalvo.codigoItem) {
+                console.log('✅ Dados encontrados no localStorage - carregando com cascata...');
+                carregarLocalStorageComCascata(itemSalvo);
+            } else {
+                console.log('⚠️ Dados inconsistentes no localStorage - mantendo estado atual');
+            }
+        }
+        // 📂 Cenário 2: Primeiro acesso com dados no localStorage
+        else if (!cascataInicialAplicadaRef.current && itemSalvo && itemSalvo.id > 0 && itemSalvo.codigoItem && itemSalvo.codigoItem.trim() !== '') {
+            console.log('📂 Primeiro acesso: Detectado dados válidos no localStorage - carregando com cascata...');
             console.log('📋 Dados encontrados:', { id: itemSalvo.id, codigoItem: itemSalvo.codigoItem });
             carregarLocalStorageComCascata(itemSalvo);
+            cascataInicialAplicadaRef.current = true;
         } else {
             console.log('📂 localStorage vazio - formulário ficará limpo para novo cadastro');
         }
-    }, []); // 🎯 SEM dependências - roda só quando componente monta (F5, primeira vez, etc.)
+    }, [itemId, carregarItemDoLocalStorage, carregarLocalStorageComCascata]); // Executa quando itemId muda ou componente monta
 
-    // ✅ useEffect para sincronizar dados do Redux com os campos do formulário
+    // ✅ useEffect para controlar bloqueio do botão avançar
     useEffect(() => {
-        // 🚫 NÃO sincronizar apenas se estiver carregando cascata no momento
-        const carregandoViaLocalStorage = localStorage.getItem('carregandoViaLocalStorage') === 'true';
-
-        if (carregandoViaLocalStorage) {
-            console.log('🚫 Pulando sincronização - cascata localStorage em andamento');
-            return;
-        }
-
-        if (configuracaoItemNovo && Object.keys(configuracaoItemNovo).length > 0) {
-            console.log('🔄 Sincronizando dados do Redux com os campos do formulário (modo normal)...');
-
-            // Pequeno delay para garantir que o formulário esteja renderizado
-            const timeoutId = setTimeout(() => {
-
-                // Mapeamento correto entre Redux e campos do formulário
-                const mapeamentoCampos = {
-                    codigoItem: Campos.codigoItem,
-                    areaConhecimento: Campos.areaConhecimento,
-                    disciplina: Campos.disciplinas,
-                    matriz: Campos.matriz,
-                    competencia: Campos.competencia,
-                    habilidade: Campos.habilidade,
-                    anoMatriz: Campos.anoMatriz,
-                    assunto: Campos.assunto,
-                    subAssunto: Campos.subAssunto,
-                    situacaoItem: Campos.situacaoItem,
-                    tipoItem: Campos.tipoItem,
-                    quantidadeAlternativas: Campos.quantidadeAlternativas,
-                    dificuldadeSugerida: Campos.dificuldadeSugerida,
-                    nivelItem: Campos.nivelItem,
-                    discriminacao: Campos.discriminacao,        // ← 'infoEstatisticasDiscriminacao'
-                    dificuldade: Campos.dificuldade,            // ← 'infoEstatisticasDificuldade'
-                    acertoCasual: Campos.acertoCasual,          // ← 'infoEstatisticasAcertoCasual'
-                    palavrasChave: Campos.palavraChave,
-                    parametroBTransformado: Campos.parametroBTransformado,
-                    mediaDesvioPadrao: Campos.mediaDesvioPadrao,
-                    sentencaDescritora: Campos.sentencaDescritora,
-                    observacao: Campos.observacao,
-                };
-
-                // Prepara objeto com todos os valores para setar de uma vez
-                const valoresParaFormulario: Record<string, any> = {};
-
-                Object.keys(configuracaoItemNovo).forEach(reduxKey => {
-                    const value = configuracaoItemNovo[reduxKey as keyof typeof configuracaoItemNovo];
-                    const formFieldName = mapeamentoCampos[reduxKey as keyof typeof mapeamentoCampos];
-
-                    if (value !== undefined && value !== null && formFieldName) {
-                        valoresParaFormulario[formFieldName] = value;
-                        console.log(`📝 Campo ${formFieldName} (${reduxKey}) será carregado com valor:`, value);
-                    }
-                });
-
-                // Seta todos os valores de uma vez e força re-render
-                if (Object.keys(valoresParaFormulario).length > 0) {
-                    form?.setFieldsValue(valoresParaFormulario);
-                    console.log('✅ Todos os campos foram atualizados no formulário:', valoresParaFormulario);
-
-                    // ✅ Removed validateFields() - não é necessário validar automaticamente
-                    // Validação acontece apenas quando usuário submete o form
-                }
-            }, 50); // Delay de 50ms para garantir que o formulário esteja renderizado
-
-            return () => clearTimeout(timeoutId);
-        }
-    }, [configuracaoItemNovo, form]); // Executa sempre que configuracaoItemNovo mudar
-
-    // ✅ useEffect para controlar bloqueio do botão avançar baseado no Redux
-    useEffect(() => {
-        const temIdECodigo = item.id > 0 && configuracaoItemNovo?.codigoItem && configuracaoItemNovo.codigoItem.trim() !== '';
+        const temIdECodigo = itemId > 0 && codigoItem && codigoItem.trim() !== '';
 
         console.log('🔍 Verificando condições para habilitar botão Avançar:', {
-            itemId: item.id,
-            codigoItem: configuracaoItemNovo?.codigoItem,
+            itemId: itemId,
+            codigoItem: codigoItem,
             podeAvancar: temIdECodigo
         });
 
         setBloquearBtnAvancar(!temIdECodigo);
-    }, [item.id, configuracaoItemNovo?.codigoItem]);
+    }, [itemId, codigoItem]);
 
 
     type tipoMsg = 'success' | 'info' | 'warning' | 'error';
@@ -453,17 +407,9 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
     const cancelar = () => {
         setCarregando(true);
 
-        // Limpa localStorage
+        // Limpa localStorage e estados locais
         limparItemDoLocalStorage();
 
-        const itemAtual: ItemNovoProps = {
-            id: 0,
-            configuracao: {},
-            elaboracao: {} as ElaboracaoItemNovoProps,
-        };
-        dispatch(setItemNovo(itemAtual));
-        dispatch(setConfiguracaoItemNovo({}));
-        dispatch(setElaboracaoItemNovo({} as ElaboracaoItemNovoProps));
         form.resetFields();
         setCarregando(false);
 
@@ -473,63 +419,85 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
 
     const avancar = () => {
         // Validação adicional antes de navegar
-        if (!item.id || item.id === 0) {
+        if (!itemId || itemId === 0) {
             mensagem('error', 'Erro', 'É necessário salvar o item antes de avançar');
             return;
         }
-
-        if (!configuracaoItemNovo?.codigoItem || configuracaoItemNovo.codigoItem.trim() === '') {
+        if (!codigoItem || codigoItem.trim() === '') {
             mensagem('error', 'Erro', 'É necessário que o item tenha um código antes de avançar');
             return;
         }
-
         console.log('✅ Navegando para elaboração com:', {
-            id: item.id,
-            codigoItem: configuracaoItemNovo.codigoItem
+            id: itemId,
+            codigoItem: codigoItem
         });
-
         navigate('/elaboracao');
     };
 
     const gerarItemSalvar = useCallback(() => {
-        // ⚠️ Não usar cloneDeep para evitar referências circulares
         const values = form.getFieldsValue(true);
 
-        console.log('📋 Valores do formulário para DTO:', {
-            codigoItem: values?.codigoItem,
-            areaConhecimento: values?.AreaConhecimento,
-            disciplina: values?.disciplinas,
-            matriz: values?.matriz,
-            palavraChave: values?.palavraChave
-        });
-        console.log('🔍 Campo palavraChave especificamente:', {
-            valor: values?.palavraChave,
-            tipo: typeof values?.palavraChave,
-            isArray: Array.isArray(values?.palavraChave)
-        });
+        // Pega o estado mais recente do localStorage para garantir que a elaboração não seja perdida
+        let elaboracaoLS: any = elaboracaoItem;
+        try {
+            const raw = localStorage.getItem('itemAtual');
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (parsed?.elaboracao) {
+                    elaboracaoLS = parsed.elaboracao;
+                }
+            }
+        } catch (_) {
+            // ignora erro de parse
+        }
 
-        // Conversão segura do palavrasChave (campo não obrigatório)
-        let palavrasChaveConvertido = '';
-
+        // Conversão segura do palavrasChave (campo não obrigatório) - BACKEND ESPERA ARRAY
+        let palavrasChaveArray: string[] | null = null;
         if (values?.palavraChave) {
             if (Array.isArray(values.palavraChave)) {
-                // Filtra valores vazios e junta com ';'
                 const palavrasValidas = values.palavraChave.filter((p: string) => p && p.trim());
-                palavrasChaveConvertido = palavrasValidas.length > 0 ? palavrasValidas.join(';') : '';
+                palavrasChaveArray = palavrasValidas.length > 0 ? palavrasValidas : null;
             } else if (typeof values.palavraChave === 'string' && values.palavraChave.trim()) {
-                palavrasChaveConvertido = values.palavraChave.trim();
+                palavrasChaveArray = values.palavraChave.includes(';')
+                    ? values.palavraChave.split(';').filter((p: string) => p && p.trim()).map((p: string) => p.trim())
+                    : [values.palavraChave.trim()];
             }
         }
 
-        console.log('✅ palavrasChave convertido:', {
-            original: values?.palavraChave,
-            convertido: palavrasChaveConvertido,
-            isEmpty: !palavrasChaveConvertido
-        });
+        // Constrói alternativas a partir da elaboração salva (se não houver alternativasDto no form)
+        const construirAlternativasDeElaboracao = (): AltenativaDto[] | undefined => {
+            if (!elaboracaoLS) return undefined;
+            const alt: AltenativaDto[] = [] as any;
+            const correta = elaboracaoLS?.alternativaCorreta;
+            const push = (
+                letra: 'A'|'B'|'C'|'D',
+                descricao?: string,
+                justificativa?: string,
+                idAlt?: number | null,
+                ordem?: number
+            ) => {
+                if (!descricao) return;
+                const obj: any = {
+                    numeracao: letra,
+                    descricao,
+                    justificativa: justificativa || '',
+                    correta: letra === correta,
+                    ordem: ordem || 1,
+                    itemId: itemId,
+                };
+                if (idAlt) obj.id = idAlt;
+                alt.push(obj);
+            };
+            push('A', elaboracaoLS?.alternativaA, elaboracaoLS?.justificativaA, elaboracaoLS?.idAlternativaA, 1);
+            push('B', elaboracaoLS?.alternativaB, elaboracaoLS?.justificativaB, elaboracaoLS?.idAlternativaB, 2);
+            push('C', elaboracaoLS?.alternativaC, elaboracaoLS?.justificativaC, elaboracaoLS?.idAlternativaC, 3);
+            push('D', elaboracaoLS?.alternativaD, elaboracaoLS?.justificativaD, elaboracaoLS?.idAlternativaD, 4);
+            return alt.length ? alt : undefined;
+        };
 
         const dto: ItemNovoDto = {
-            id: item.id,
-            codigoItem: elaboracaoItemNovo?.codigoItem || '',
+            id: itemId,
+            codigoItem: codigoItem || '',
             areaConhecimentoId: values?.AreaConhecimento || null,
             disciplinaId: values?.disciplinas || null,
             matrizId: values?.matriz || null,
@@ -539,41 +507,45 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
             assuntoId: values?.assunto || null,
             subAssuntoId: values?.subAssunto || null,
             situacao: values?.situacaoItem || null,
-            tipo: values?.tipoItem ? Number(values.tipoItem) : 1, // ← Corrigido: 'tipo' como no backend
+            tipo: values?.tipoItem ? Number(values.tipoItem) : 1,
             quantidadeAlternativasId: values?.quantidadeAlternativas || null,
             dificuldadeSugeridaId: values?.dificuldadeSugerida || null,
             discriminacao: values?.infoEstatisticasDiscriminacao ? +values?.infoEstatisticasDiscriminacao : null,
             dificuldade: values?.infoEstatisticasDificuldade ? +values?.infoEstatisticasDificuldade : null,
             nivelItem: values?.nivelItem || null,
             acertoCasual: values?.infoEstatisticasAcertoCasual ? +values?.infoEstatisticasAcertoCasual : null,
-            palavrasChave: palavrasChaveConvertido || null, // null se vazio
+            palavrasChave: palavrasChaveArray,
             parametroBTransformado: values?.parametroBTransformado ? +values?.parametroBTransformado : null,
             mediaEhDesvio: values?.mediaDesvioPadrao || null,
             sentencaDescritora: values?.sentencaDescritora || null,
             observacao: values?.observacao || null,
-            // 🎯 CORREÇÃO: Pegar dados da elaboração do Redux (não do form da configuração)
-            textoBase: elaboracaoItemNovo?.textoBase || '',
-            fonte: elaboracaoItemNovo?.fonte || '',
-            enunciado: elaboracaoItemNovo?.enunciado || '',
-            alternativasDto: elaboracaoItemNovo?.alternativasDto?.length ? elaboracaoItemNovo.alternativasDto : [],
-        };
+            // Elaboração sempre a partir do localStorage/estado de elaboração, para não perder dados
+            textoBase: elaboracaoLS?.textoBase || '',
+            fonte: elaboracaoLS?.fonte || '',
+            enunciado: elaboracaoLS?.enunciado || '',
+            alternativasDto: undefined,
+        } as ItemNovoDto;
 
+        // Preferência: se vier alternativasDto via form (raríssimo na primeira tela), usa e marca correta
         if (values?.alternativasDto?.length) {
-            dto.alternativasDto = values?.alternativasDto.map((item: AltenativaDto) => {
+            dto.alternativasDto = values.alternativasDto.map((item: AltenativaDto) => {
                 const ehAlternativaCorreta = item.numeracao === values.alternativaCorreta;
                 item.correta = ehAlternativaCorreta;
                 return item;
             });
+        } else {
+            // Caso contrário, constrói a partir da elaboração salva
+            const alt = construirAlternativasDeElaboracao();
+            if (alt) dto.alternativasDto = alt;
         }
 
-        if (values?.video?.length) {
-            dto.arquivoVideoId = values?.video?.[0]?.idFile;
+        // Arquivos de mídia a partir da elaboração salva
+        if (elaboracaoLS?.video?.length) {
+            dto.arquivoVideoId = elaboracaoLS.video?.[0]?.idFile;
         }
-        if (values?.audio?.length) {
-            dto.arquivoAudioId = values?.audio?.[0]?.idFile;
+        if (elaboracaoLS?.audio?.length) {
+            dto.arquivoAudioId = elaboracaoLS.audio?.[0]?.idFile;
         }
-
-
 
         // 🔍 Log final do DTO antes de enviar
         console.log('🚀 DTO Final sendo enviado:', dto);
@@ -596,7 +568,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
         }
 
         return dto;
-    }, [item.id, form, elaboracaoItemNovo]);
+    }, [itemId, codigoItem, form, elaboracaoItem]);
 
     const obterDadosItem = useCallback(
         async (id: number) => {
@@ -608,7 +580,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                 if (resp?.data) {
                     console.log('📋 Dados recebidos do backend para item ID----->>>>>>>>', id, ':', resp.data);
 
-                    // ✅ 1. Mapear dados da API para o formato Redux
+                    // ✅ 1. Mapear dados da API para o formato local
                     const configuracaoItemRetorno: ConfiguracaoItemNovoProps = {
                         codigoItem: resp.data.codigoItem,
                         areaConhecimento: resp.data.areaconhecimentoId,
@@ -636,18 +608,9 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                         observacao: resp.data.observacao,
                     };
 
-
-
-                    // ✅ 2. Atualizar Redux (para navegação entre telas)
-                    // 🔍 Agora Redux terá id e codigo - próximos salvamentos serão EDIÇÃO
-                    const itemAtual: ItemNovoProps = {
-                        ...item,
-                        id: id,
-                        configuracao: configuracaoItemRetorno
-                    };
-
-                    dispatch(setConfiguracaoItemNovo(configuracaoItemRetorno));
-                    dispatch(setItemNovo(itemAtual));
+                    // ✅ 2. Atualizar estados locais (para navegação entre telas)
+                    setItemId(id);
+                    setCodigoItem(configuracaoItemRetorno.codigoItem || '');
 
                     // ✅ 3. Salvar no localStorage para persistir dados
                     salvarItemNoLocalStorage({
@@ -656,14 +619,8 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                         configuracao: configuracaoItemRetorno
                     });
 
-                    // ✅ 4. Atualizar formulário com os dados carregados
-                    Object.keys(configuracaoItemRetorno).forEach(key => {
-                        const value = configuracaoItemRetorno[key as keyof ConfiguracaoItemNovoProps];
-                        if (value !== undefined && value !== null) {
-                            form?.setFieldValue(key, value);
-                        }
-                    });
-
+                    // ✅ 4. Popular o formulário respeitando a CASCATA automática
+                   
                     console.log('✅ Item carregado com sucesso:', {
                         id,
                         configuracao: configuracaoItemRetorno
@@ -677,174 +634,8 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
             }
 
         },
-        [dispatch, item, form, mensagem],
+        [form, mensagem, elaboracaoItem, carregarLocalStorageComCascata],
     );
-
-    // 🔄 Função específica para "Voltar" - carrega listas sequencialmente e depois os dados
-    const obterDadosItemComListas = useCallback(
-        async (id: number) => {
-            console.log('🔄 Iniciando carregamento inteligente para "Voltar" - ID:', id);
-            setCarregando(true);
-
-            try {
-                // 1️⃣ Primeiro busca os dados do backend
-                const resp = await configuracaoItemService.obterItem(id);
-
-                if (!resp?.data) {
-                    throw new Error('Nenhum dado retornado do backend');
-                }
-
-                console.log('📋 Dados recebidos - carregando listas sob demanda:', {
-                    area: resp.data.areaconhecimentoId,
-                    disciplina: resp.data.disciplinaId,
-                    matriz: resp.data.matrizId,
-                    competencia: resp.data.competenciaId
-                });
-
-                // 2️⃣ Define flag para evitar reset e cascata conflitante
-                localStorage.setItem('carregandoViaVoltar', 'true');
-
-                // 3️⃣ Simular carregamento cascata forçando mudanças nos campos (FormularioUnico vai reagir)
-                // Isso força a cascata a carregar as listas na ordem certa
-
-                // ⏳ Estratégia melhorada: usar localStorage para comunicação entre componentes
-
-                // 0️⃣ Primeiro, garantir que área de conhecimento está carregada
-                console.log('📝 Garantindo que área de conhecimento esteja carregada...');
-                localStorage.setItem('aguardandoAreaConhecimento', 'true');
-
-                // Aguarda área de conhecimento carregar
-                let tentativas = 0;
-                while (tentativas < 25 && localStorage.getItem('aguardandoAreaConhecimento') === 'true') {
-                    await new Promise(resolve => setTimeout(resolve, 200));
-                    tentativas++;
-                }
-                console.log('✅ Área de conhecimento carregada (tentativas:', tentativas, ')');
-
-                // 1️⃣ Área → Disciplinas
-                if (resp.data.areaconhecimentoId) {
-                    console.log('📝 Setando área e aguardando disciplinas carregarem...');
-                    localStorage.setItem('aguardandoDisciplinas', 'true');
-                    form?.setFieldValue(Campos.areaConhecimento, resp.data.areaconhecimentoId);
-
-                    // Aguarda FormularioUnico sinalizar que disciplinas carregaram
-                    let tentativas = 0;
-                    while (tentativas < 25 && localStorage.getItem('aguardandoDisciplinas') === 'true') {
-                        await new Promise(resolve => setTimeout(resolve, 200));
-                        tentativas++;
-                    }
-                    console.log('✅ Disciplinas carregaram (tentativas:', tentativas, ')');
-                }
-
-                // 2️⃣ Disciplina → Matriz + Assuntos
-                if (resp.data.disciplinaId) {
-                    console.log('📝 Setando disciplina e aguardando matriz + assuntos carregarem...');
-                    localStorage.setItem('aguardandoMatriz', 'true');
-                    localStorage.setItem('aguardandoAssuntos', 'true');
-                    form?.setFieldValue(Campos.disciplinas, resp.data.disciplinaId);
-
-                    // Aguarda FormularioUnico sinalizar que matriz carregou
-                    let tentativas = 0;
-                    while (tentativas < 25 && localStorage.getItem('aguardandoMatriz') === 'true') {
-                        await new Promise(resolve => setTimeout(resolve, 200));
-                        tentativas++;
-                    }
-                    console.log('✅ Matriz carregou (tentativas:', tentativas, ')');
-
-                    // Aguarda FormularioUnico sinalizar que assuntos carregaram
-                    tentativas = 0;
-                    while (tentativas < 25 && localStorage.getItem('aguardandoAssuntos') === 'true') {
-                        await new Promise(resolve => setTimeout(resolve, 200));
-                        tentativas++;
-                    }
-                    console.log('✅ Assuntos carregaram (tentativas:', tentativas, ')');
-                }
-
-                // 3️⃣ Assunto → SubAssunto (APENAS se tiver assunto salvo)
-                if (resp.data.assuntoId) {
-                    console.log('📝 Setando assunto e aguardando subassuntos carregarem...');
-                    localStorage.setItem('aguardandoSubAssuntos', 'true');
-                    form?.setFieldValue(Campos.assunto, resp.data.assuntoId);
-
-                    // Aguarda subassuntos carregarem
-                    let tentativas = 0;
-                    while (tentativas < 25 && localStorage.getItem('aguardandoSubAssuntos') === 'true') {
-                        await new Promise(resolve => setTimeout(resolve, 200));
-                        tentativas++;
-                    }
-                    console.log('✅ SubAssuntos carregaram (tentativas:', tentativas, ')');
-                } else {
-                    console.log('⏹️ Sem assunto salvo - não carrega subassuntos');
-                }
-
-                // 4️⃣ Matriz → Competências (APENAS se tiver matriz salva)
-                if (resp.data.matrizId) {
-                    console.log('📝 Setando matriz e aguardando competências carregarem...');
-                    localStorage.setItem('aguardandoCompetencias', 'true');
-                    form?.setFieldValue(Campos.matriz, resp.data.matrizId);
-
-                    // Aguarda competências carregarem
-                    let tentativas = 0;
-                    while (tentativas < 25 && localStorage.getItem('aguardandoCompetencias') === 'true') {
-                        await new Promise(resolve => setTimeout(resolve, 200));
-                        tentativas++;
-                    }
-                    console.log('✅ Competências carregaram (tentativas:', tentativas, ')');
-                } else {
-                    console.log('⏹️ Sem matriz salva - não carrega competências');
-                }
-
-                // 5️⃣ Competência → Habilidades (APENAS se tiver competência salva)
-                if (resp.data.competenciaId) {
-                    console.log('📝 Setando competência e aguardando habilidades carregarem...');
-                    localStorage.setItem('aguardandoHabilidade', 'true');
-                    form?.setFieldValue(Campos.competencia, resp.data.competenciaId);
-
-                    // Aguarda habilidades carregarem
-                    let tentativas = 0;
-                    while (tentativas < 25 && localStorage.getItem('aguardandoHabilidade') === 'true') {
-                        await new Promise(resolve => setTimeout(resolve, 200));
-                        tentativas++;
-                    }
-                    console.log('✅ Habilidades carregaram (tentativas:', tentativas, ')');
-                } else {
-                    console.log('⏹️ Sem competência salva - não carrega habilidades');
-                }
-
-                // 6️⃣ Agora chama o obterDadosItem que vai popular todos os campos restantes
-                console.log('📝 Finalizando com obterDadosItem...');
-                await obterDadosItem(id);
-
-                // 7️⃣ Remove flag DEPOIS de popular tudo
-                localStorage.removeItem('carregandoViaVoltar');
-                console.log('✅ Carregamento inteligente finalizado');
-
-            } catch (err: any) {
-                console.error('❌ Erro no carregamento inteligente:', err.message);
-                mensagem('error', 'Erro', 'Erro ao carregar dados do item via Voltar');
-                localStorage.removeItem('carregandoViaVoltar');
-            } finally {
-                setCarregando(false);
-            }
-        },
-        [obterDadosItem, mensagem, form],
-    );
-
-    // ✅ useEffect para detectar "Voltar" e recarregar dados via service
-    useEffect(() => {
-        const voltandoParaPrimeiraTela = localStorage.getItem('voltandoParaPrimeiraTela') === 'true';
-
-        if (voltandoParaPrimeiraTela && item.id > 0) {
-            console.log('🔙 Detectado "Voltar" - recarregando dados via obterDadosItem...');
-            console.log('⚠️ IMPORTANTE: obterDadosItem() precisa que as listas dos selects já estejam carregadas!');
-
-            // Remove a flag imediatamente para evitar loops
-            localStorage.removeItem('voltandoParaPrimeiraTela');
-
-            // Chama a nova função que carrega listas E dados
-            obterDadosItemComListas(item.id);
-        }
-    }, [item.id, obterDadosItemComListas]); // Executa quando item.id muda
 
     const inserirItem = useCallback(
         async (item: ItemNovoDto) => {
@@ -888,16 +679,8 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
             { campo: 'disciplinaId', valor: dto.disciplinaId, nome: 'Disciplina' },
         ];
 
-        // 🔍 Verifica se é edição (tem id e codigoItem no Redux)
-        const ehEdicao = item.id > 0 && item.configuracao?.codigoItem && item.configuracao?.codigoItem.trim() !== '';
-
-        console.log('🔍 Modo de operação:', {
-            ehEdicao,
-            itemReduxId: item.id,
-            itemReduxCodigoItem: item.configuracao?.codigoItem,
-            dtoId: dto.id,
-            dtoCodigo: dto.codigoItem
-        });
+        // 🔍 Verifica se é edição (tem id e codigoItem no estado/localStorage)
+        const ehEdicao = itemId > 0 && codigoItem && codigoItem.trim() !== '';
 
         let camposObrigatorios = [...camposSempreObrigatorios];
 
@@ -925,7 +708,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
 
         console.log(`✅ Validação passou! Modo: ${ehEdicao ? 'Edição' : 'Criação'}`);
         return true;
-    }, [mensagem, item.id, item.configuracao?.codigoItem]);
+    }, [mensagem, itemId, codigoItem]);
 
     const salvarItem = useCallback(
         async (rascunho = false) => {
@@ -957,7 +740,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
             // }
             setCarregando(false);
         },
-        [item.id, mensagem, inserirItem, inserirRascunhoItem, gerarItemSalvar],
+        [mensagem, inserirItem, inserirRascunhoItem, gerarItemSalvar],
     );
 
     // const bloquearBtnSalvarRascunhoDadosTabElaboracaoItem = (): boolean => {
@@ -1050,33 +833,6 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
         </>
     );
 }
-
-/* 
-🔒 REDUX SIMPLIFICADO - Uma Validação, Todas as Situações
-
-✅ REDUX (simples):
-   dispatch(setConfiguracaoItemNovo({ dificuldade: 5 })); // Sempre Partial
-   dispatch(setElaboracaoItemNovo({ textoBase: "texto" })); // Sempre Partial
-
-🎯 VALIDAÇÃO INTELIGENTE:
-   A função validarCamposObrigatorios() detecta automaticamente:
-   
-   🆕 CRIAÇÃO (Redux: id=0): 
-      - Obrigatórios: disciplina, areaConhecimento
-      - Backend gera: id, codigoItem
-   
-   ✏️ EDIÇÃO (Redux: id>0 + codigo>0):
-      - Obrigatórios: id, codigo, disciplina, areaConhecimento  
-      - Backend atualiza: item existente
-
-🔄 FLUXO:
-   1️⃣ Primeira vez → disciplina+área → Backend gera ID/código → Redux atualizado
-   2️⃣ Navegação → Redux mantém ID/código
-   3️⃣ Voltar → Redux resetado (id=0)
-   4️⃣ Listagem→Edição → Redux carregado com ID/código
-
-🚀 SEM COMPLEXIDADE: Uma validação serve para tudo!
-*/
 
 export default CadastrarItemNovo;
 

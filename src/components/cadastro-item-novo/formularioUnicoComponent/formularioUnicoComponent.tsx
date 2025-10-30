@@ -11,7 +11,7 @@ import InputTag from "~/components/input-tag";
 import TipoItem from "~/components/cadastro-item/campos/tipo-item";
 import { CampoNumero } from "~/components/cadastro-item/campo-numero";
 
-// Redux - removido (lógica de população movida para cadastrarItemNovo.tsx)
+// Lógica de população movida para cadastrarItemNovo.tsx
 
 //services
 import configuracaoItemService from '~/services/configuracaoItem-service';
@@ -33,7 +33,7 @@ import '../cards/caracteristicasItemComponet/caracteristicaItemComponent.css';
 const FormularioUnico: React.FC<FormProps> = ({ form }) => {
 
 
-  // ✅ Redux - para detectar dados vindos do "Voltar"
+  // Detectar dados vindos do "Voltar" (via localStorage/estados do pai)
 
 
   // campos
@@ -114,6 +114,33 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
       let resposta: DefaultOptionType[] = [];
       const parametroValido = !validarCampoForm(param);
 
+      // Sinaliza início de carregamento para a cascata automática
+      switch (nomeCampo) {
+        case Campos.areaConhecimento:
+          localStorage.setItem('aguardandoAreaConhecimento', 'true');
+          break;
+        case Campos.disciplinas:
+          localStorage.setItem('aguardandoDisciplinas', 'true');
+          break;
+        case Campos.matriz:
+          localStorage.setItem('aguardandoMatriz', 'true');
+          break;
+        case Campos.competencia:
+          localStorage.setItem('aguardandoCompetencias', 'true');
+          break;
+        case Campos.habilidade:
+          localStorage.setItem('aguardandoHabilidade', 'true');
+          break;
+        case Campos.assunto:
+          localStorage.setItem('aguardandoAssuntos', 'true');
+          break;
+        case Campos.subAssunto:
+          localStorage.setItem('aguardandoSubAssuntos', 'true');
+          break;
+        default:
+          break;
+      }
+
       switch (nomeCampo) {
         case Campos.areaConhecimento:
           resposta = await configuracaoItemService.obterAreaConhecimento();
@@ -157,6 +184,35 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
 
       if (resposta?.length) {
         setLista(resposta);
+      } else {
+        setLista([]);
+      }
+
+      // Sinaliza fim de carregamento (sucesso ou vazio) para a cascata automática
+      switch (nomeCampo) {
+        case Campos.areaConhecimento:
+          localStorage.removeItem('aguardandoAreaConhecimento');
+          break;
+        case Campos.disciplinas:
+          localStorage.removeItem('aguardandoDisciplinas');
+          break;
+        case Campos.matriz:
+          localStorage.removeItem('aguardandoMatriz');
+          break;
+        case Campos.competencia:
+          localStorage.removeItem('aguardandoCompetencias');
+          break;
+        case Campos.habilidade:
+          localStorage.removeItem('aguardandoHabilidade');
+          break;
+        case Campos.assunto:
+          localStorage.removeItem('aguardandoAssuntos');
+          break;
+        case Campos.subAssunto:
+          localStorage.removeItem('aguardandoSubAssuntos');
+          break;
+        default:
+          break;
       }
     },
     [form],
@@ -167,6 +223,8 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
       setListaAnosMatriz([]);
       return;
     }
+    // Sinaliza início do carregamento de anos de matriz
+    localStorage.setItem('aguardandoAnoMatriz', 'true');
     const resposta = await configuracaoItemService.obterAnosMatriz(matrizIdForm);
     if (resposta?.length) {
       setListaAnosMatriz(resposta);
@@ -175,6 +233,8 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
       setListaAnosMatriz([]);
       form?.setFieldValue(campoAnoMatriz, null);
     }
+    // Sinaliza fim do carregamento de anos de matriz
+    localStorage.removeItem('aguardandoAnoMatriz');
   }, [form, matrizIdForm, campoAnoMatriz]);
 
   // ✅ Dificuldade sugerida - HTML FIXO apenas (máxima performance)
@@ -284,12 +344,33 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
     }
   }, [listaSubAssuntos]);
 
+  // ✅ Sinaliza quando anos da matriz carregam (para cascata automática)
   useEffect(() => {
-    const valorInicial = form?.getFieldValue(campoPalavraChave);
-    if (valorInicial && Array.isArray(valorInicial)) {
-      setPalavrasChave(valorInicial);
+    if (listaAnosMatriz?.length > 0) {
+      localStorage.removeItem('aguardandoAnoMatriz');
     }
-  }, [form, campoPalavraChave]);
+  }, [listaAnosMatriz]);
+
+  // 🔄 Watch do campo palavrasChave para sincronizar com estado local
+  const valorPalavrasChaveFormulario = Form.useWatch(campoPalavraChave, form);
+  
+  useEffect(() => {
+    console.log('🔍 FormularioUnico - Valor palavrasChave mudou:', {
+      valorFormulario: valorPalavrasChaveFormulario,
+      tipoValor: typeof valorPalavrasChaveFormulario,
+      isArray: Array.isArray(valorPalavrasChaveFormulario),
+      estadoAtual: palavrasChave
+    });
+    
+    if (valorPalavrasChaveFormulario && Array.isArray(valorPalavrasChaveFormulario)) {
+      setPalavrasChave(valorPalavrasChaveFormulario);
+      console.log('✅ Estado palavrasChave atualizado via watch:', valorPalavrasChaveFormulario);
+    } else if (!valorPalavrasChaveFormulario) {
+      // Se não há valor, limpa o estado
+      setPalavrasChave([]);
+      console.log('🗑️ Estado palavrasChave limpo via watch');
+    }
+  }, [valorPalavrasChaveFormulario]);
 
   //fim cascata dos selects
 
@@ -298,10 +379,8 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
   // ✅ Reset inteligente: só reseta se REALMENTE vazio E primeira vez carregando E NÃO vindo de processo especial
   useEffect(() => {
     const voltandoParaPrimeiraTela = localStorage.getItem('voltandoParaPrimeiraTela') === 'true';
-    const carregandoViaVoltar = localStorage.getItem('carregandoViaVoltar') === 'true';
-    const carregandoViaLocalStorage = localStorage.getItem('carregandoViaLocalStorage') === 'true';
 
-    if (!voltandoParaPrimeiraTela && !carregandoViaVoltar && !carregandoViaLocalStorage) {
+    if (!voltandoParaPrimeiraTela) {
       const valores = form?.getFieldsValue();
       const formularioVazio = !valores || Object.keys(valores).length === 0 ||
         Object.values(valores).every(v => !v || (Array.isArray(v) && v.length === 0));
