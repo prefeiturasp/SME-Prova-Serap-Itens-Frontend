@@ -83,9 +83,9 @@
 }
 
 .listagem-conteudo-direita-vazio {
-  display: flex; /* needed for align-items/justify-content to work */
-  flex-direction: column; /* so text stacks vertically */
-  align-items: center; /* horizontal centering */
-  justify-content: center; /* vertical centering */
-  height: 500px; /* fill the container */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 500px;
   text-align: center;}

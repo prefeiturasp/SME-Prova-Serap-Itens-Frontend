@@ -77,7 +77,6 @@ const ListagemItens: React.FC = () => {
         tamanhoPagina: ITENS_POR_PAGINA,
       });
       setTabelaItens(resposta?.itens);
-      console.log(resposta?.itens);
       setTotalRegistro(resposta?.totalRegistros);
     } catch (error) {
       console.log(error);
