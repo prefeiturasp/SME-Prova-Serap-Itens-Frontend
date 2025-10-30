@@ -470,6 +470,9 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
             // Atualiza estado local com dados do formulário
             setElaboracaoItemNovoLocal(elaboracaoAtual);
 
+            configuracaoItemNovo.codigoItem = values[campoCodigoItem] || '';
+            setConfiguracaoItemNovoLocal(configuracaoItemNovo);
+
             // Salva no localStorage dados atuais
             const itemParaLocalStorage = {
                 id: itemId,
@@ -586,9 +589,13 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
             undefined: configuracaoItemNovo?.areaConhecimento === undefined
         });
 
+        // Atualiza o codigoItem no DTO com o valor mais recente do estado ou do formulário
+        const codigoItemAtualizado = configuracaoItemNovo?.codigoItem || codigoItemEstado || values[campoCodigoItem] || '';
+        console.log('🔄 Atualizando codigoItem no DTO:', codigoItemAtualizado);
+        
         const dto: ItemNovoDto = {
             id: itemId,
-            codigoItem: (configuracaoItemNovo?.codigoItem || codigoItemEstado || ''),
+            codigoItem: codigoItemAtualizado,
             areaConhecimentoId: configuracaoItemNovo?.areaConhecimento || null,
             disciplinaId: configuracaoItemNovo?.disciplina || null,
             matrizId: configuracaoItemNovo?.matriz || null,
