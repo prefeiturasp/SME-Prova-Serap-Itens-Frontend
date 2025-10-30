@@ -141,3 +141,15 @@
   justify-items: right;
   text-align: right;
 }
+
+.radio-group-alterantivas{
+  width: 100%;
+}
+
+.radio-alternativa-conteudo {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 8px;
+}
