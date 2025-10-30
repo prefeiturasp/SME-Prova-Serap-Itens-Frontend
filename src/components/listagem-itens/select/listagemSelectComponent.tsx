@@ -1,5 +1,5 @@
 import { Card, Col, Row, Select } from 'antd';
-import React from 'react';
+import React, { useState } from 'react';
 import './listagemSelectComponent.css';
 import { DefaultOptionType } from 'antd/es/select';
 
@@ -18,7 +18,6 @@ const ListagemSelectComponent: React.FC<ListagemSelectProps> = ({
   buscarItemOnSearch,
   loading,
 }) => {
-
   const [searchValue, setSearchValue] = useState<string>('');
 
   const handleSearchChange = (value: string) => {
@@ -43,7 +42,11 @@ const ListagemSelectComponent: React.FC<ListagemSelectProps> = ({
               className='select-custom'
               onChange={selecionaItemOnChange}
               value={itemSelecionado ?? undefined}
-              notFoundContent={searchValue?.length >= 3 ? 'Não encontramos nenhum item com o trecho digitado...' : 'Digite ao menos 3 caracteres para buscar'}
+              notFoundContent={
+                searchValue?.length >= 3
+                  ? 'Não encontramos nenhum item com o trecho digitado...'
+                  : 'Digite ao menos 3 caracteres para buscar'
+              }
               loading={loading}
               options={dados}
               style={{ width: '100%' }}
@@ -56,4 +59,3 @@ const ListagemSelectComponent: React.FC<ListagemSelectProps> = ({
 };
 
 export default ListagemSelectComponent;
- 
