@@ -83,16 +83,35 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
     useEffect(() => {
         const itemSalvo = localStorage.getItem('itemAtual');
         if (itemSalvo) {
-            const item = JSON.parse(itemSalvo);
+            try {
+                const item = JSON.parse(itemSalvo);
 
-            setAlternativaA(item.elaboracao?.alternativaA || '');
-            setAlternativaB(item.elaboracao?.alternativaB || '');
-            setAlternativaC(item.elaboracao?.alternativaC || '');
-            setAlternativaD(item.elaboracao?.alternativaD || '');
-            setJustificativaA(item.elaboracao?.justificativaA || '');
-            setJustificativaB(item.elaboracao?.justificativaB || '');
-            setJustificativaC(item.elaboracao?.justificativaC || '');
-            setJustificativaD(item.elaboracao?.justificativaD || '');
+                // 🛡️ Proteção extra: garante que nunca seja null ou undefined
+                const safeString = (value: any): string => {
+                    if (value === null || value === undefined) return '';
+                    return String(value);
+                };
+
+                setAlternativaA(safeString(item.elaboracao?.alternativaA));
+                setAlternativaB(safeString(item.elaboracao?.alternativaB));
+                setAlternativaC(safeString(item.elaboracao?.alternativaC));
+                setAlternativaD(safeString(item.elaboracao?.alternativaD));
+                setJustificativaA(safeString(item.elaboracao?.justificativaA));
+                setJustificativaB(safeString(item.elaboracao?.justificativaB));
+                setJustificativaC(safeString(item.elaboracao?.justificativaC));
+                setJustificativaD(safeString(item.elaboracao?.justificativaD));
+            } catch (error) {
+                console.error('❌ Erro ao carregar dados do localStorage:', error);
+                // 🔄 Em caso de erro, inicializa com valores vazios
+                setAlternativaA('');
+                setAlternativaB('');
+                setAlternativaC('');
+                setAlternativaD('');
+                setJustificativaA('');
+                setJustificativaB('');
+                setJustificativaC('');
+                setJustificativaD('');
+            }
         }
     }, []);
 
