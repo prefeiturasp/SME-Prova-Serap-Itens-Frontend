@@ -38,7 +38,6 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
     const campoJustificativaD = Campos.justificativaD;
     const campoAlternativaCorreta = Campos.alternativaCorreta;
 
-
     // Estado para controlar a visibilidade do modal
     const [isModalAVisible, setIsModalAVisible] = useState(false);
     const [isModalBVisible, setIsModalBVisible] = useState(false);
@@ -143,8 +142,7 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                 setAlternativaA('');
                 setJustificativaA('');
                 form?.resetFields([campoAlternativaA, campoJustificativaA]);
-
-                // Limpa alternativaA e justificativaA do localStorage
+                
                 const itemAtualA = localStorage.getItem('itemAtual');
                 if (itemAtualA) {
                     const item = JSON.parse(itemAtualA);
@@ -160,8 +158,7 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                 setAlternativaB('');
                 setJustificativaB('');
                 form?.resetFields([campoAlternativaB, campoJustificativaB]);
-
-                // Limpa alternativaB e justificativaB do localStorage
+                
                 const itemAtualB = localStorage.getItem('itemAtual');
                 if (itemAtualB) {
                     const item = JSON.parse(itemAtualB);
@@ -177,8 +174,7 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                 setAlternativaC('');
                 setJustificativaC('');
                 form?.resetFields([campoAlternativaC, campoJustificativaC]);
-
-                // Limpa alternativaC e justificativaC do localStorage
+                
                 const itemAtualC = localStorage.getItem('itemAtual');
                 if (itemAtualC) {
                     const item = JSON.parse(itemAtualC);
@@ -194,8 +190,7 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                 setAlternativaD('');
                 setJustificativaD('');
                 form?.resetFields([campoAlternativaD, campoJustificativaD]);
-
-                // Limpa alternativaD e justificativaD do localStorage
+                
                 const itemAtualD = localStorage.getItem('itemAtual');
                 if (itemAtualD) {
                     const item = JSON.parse(itemAtualD);
