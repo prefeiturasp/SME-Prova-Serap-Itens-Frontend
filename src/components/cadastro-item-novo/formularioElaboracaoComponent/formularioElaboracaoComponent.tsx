@@ -43,6 +43,12 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
     const [isModalBVisible, setIsModalBVisible] = useState(false);
     const [isModalCVisible, setIsModalCVisible] = useState(false);
     const [isModalDVisible, setIsModalDVisible] = useState(false);
+    
+    // 🛡️ Estados para controlar se os TextEditors devem ser renderizados (proteção contra erro de produção)
+    const [renderTextEditorA, setRenderTextEditorA] = useState(true);
+    const [renderTextEditorB, setRenderTextEditorB] = useState(true);
+    const [renderTextEditorC, setRenderTextEditorC] = useState(true);
+    const [renderTextEditorD, setRenderTextEditorD] = useState(true);
 
     //Exibe os valores do radio
     const [alternativaA, setAlternativaA] = useState<string>('');
@@ -78,6 +84,20 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
     };
     const handleJustificativaDChange = (value: string) => {
         setJustificativaD(value || '');
+    };
+
+    // 🛡️ Função helper para renderização condicional de TextEditor
+    const renderTextEditorSafe = (shouldRender: boolean, value: string, onChange: (value: any) => void, placeholder: string) => {
+        if (shouldRender) {
+            return (
+                <TextEditor
+                    value={value || ''}
+                    onChange={onChange}
+                    placeholder={placeholder}
+                />
+            );
+        }
+        return <div style={{ minHeight: '100px', backgroundColor: '#f5f5f5' }}>Carregando...</div>;
     };
 
     useEffect(() => {
@@ -156,68 +176,100 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
         switch (nomeModal) {
 
             case "modalA":
-                setIsModalAVisible(false);
-                setAlternativaA('');
-                setJustificativaA('');
-                form?.resetFields([campoAlternativaA, campoJustificativaA]);
+                // 🛡️ Desabilita TextEditor temporariamente para evitar erro em produção
+                setRenderTextEditorA(false);
                 
-                const itemAtualA = localStorage.getItem('itemAtual');
-                if (itemAtualA) {
-                    const item = JSON.parse(itemAtualA);
-                    if (item.elaboracao) {
-                        item.elaboracao.alternativaA = '';
-                        item.elaboracao.justificativaA = '';
-                        localStorage.setItem('itemAtual', JSON.stringify(item));
+                setTimeout(() => {
+                    setIsModalAVisible(false);
+                    setAlternativaA('');
+                    setJustificativaA('');
+                    form?.resetFields([campoAlternativaA, campoJustificativaA]);
+                    
+                    const itemAtualA = localStorage.getItem('itemAtual');
+                    if (itemAtualA) {
+                        const item = JSON.parse(itemAtualA);
+                        if (item.elaboracao) {
+                            item.elaboracao.alternativaA = '';
+                            item.elaboracao.justificativaA = '';
+                            localStorage.setItem('itemAtual', JSON.stringify(item));
+                        }
                     }
-                }
+                    
+                    // 🔄 Reabilita TextEditor após fechar modal
+                    setTimeout(() => setRenderTextEditorA(true), 100);
+                }, 50);
                 break;
             case "modalB":
-                setIsModalBVisible(false);
-                setAlternativaB('');
-                setJustificativaB('');
-                form?.resetFields([campoAlternativaB, campoJustificativaB]);
+                // 🛡️ Desabilita TextEditor temporariamente para evitar erro em produção
+                setRenderTextEditorB(false);
                 
-                const itemAtualB = localStorage.getItem('itemAtual');
-                if (itemAtualB) {
-                    const item = JSON.parse(itemAtualB);
-                    if (item.elaboracao) {
-                        item.elaboracao.alternativaB = '';
-                        item.elaboracao.justificativaB = '';
-                        localStorage.setItem('itemAtual', JSON.stringify(item));
+                setTimeout(() => {
+                    setIsModalBVisible(false);
+                    setAlternativaB('');
+                    setJustificativaB('');
+                    form?.resetFields([campoAlternativaB, campoJustificativaB]);
+                    
+                    const itemAtualB = localStorage.getItem('itemAtual');
+                    if (itemAtualB) {
+                        const item = JSON.parse(itemAtualB);
+                        if (item.elaboracao) {
+                            item.elaboracao.alternativaB = '';
+                            item.elaboracao.justificativaB = '';
+                            localStorage.setItem('itemAtual', JSON.stringify(item));
+                        }
                     }
-                }
+                    
+                    // 🔄 Reabilita TextEditor após fechar modal
+                    setTimeout(() => setRenderTextEditorB(true), 100);
+                }, 50);
                 break;
             case "modalC":
-                setIsModalCVisible(false);
-                setAlternativaC('');
-                setJustificativaC('');
-                form?.resetFields([campoAlternativaC, campoJustificativaC]);
+                // 🛡️ Desabilita TextEditor temporariamente para evitar erro em produção
+                setRenderTextEditorC(false);
                 
-                const itemAtualC = localStorage.getItem('itemAtual');
-                if (itemAtualC) {
-                    const item = JSON.parse(itemAtualC);
-                    if (item.elaboracao) {
-                        item.elaboracao.alternativaC = '';
-                        item.elaboracao.justificativaC = '';
-                        localStorage.setItem('itemAtual', JSON.stringify(item));
+                setTimeout(() => {
+                    setIsModalCVisible(false);
+                    setAlternativaC('');
+                    setJustificativaC('');
+                    form?.resetFields([campoAlternativaC, campoJustificativaC]);
+                    
+                    const itemAtualC = localStorage.getItem('itemAtual');
+                    if (itemAtualC) {
+                        const item = JSON.parse(itemAtualC);
+                        if (item.elaboracao) {
+                            item.elaboracao.alternativaC = '';
+                            item.elaboracao.justificativaC = '';
+                            localStorage.setItem('itemAtual', JSON.stringify(item));
+                        }
                     }
-                }
+                    
+                    // 🔄 Reabilita TextEditor após fechar modal
+                    setTimeout(() => setRenderTextEditorC(true), 100);
+                }, 50);
                 break;
             case "modalD":
-                setIsModalDVisible(false);
-                setAlternativaD('');
-                setJustificativaD('');
-                form?.resetFields([campoAlternativaD, campoJustificativaD]);
+                // 🛡️ Desabilita TextEditor temporariamente para evitar erro em produção
+                setRenderTextEditorD(false);
                 
-                const itemAtualD = localStorage.getItem('itemAtual');
-                if (itemAtualD) {
-                    const item = JSON.parse(itemAtualD);
-                    if (item.elaboracao) {
-                        item.elaboracao.alternativaD = '';
-                        item.elaboracao.justificativaD = '';
-                        localStorage.setItem('itemAtual', JSON.stringify(item));
+                setTimeout(() => {
+                    setIsModalDVisible(false);
+                    setAlternativaD('');
+                    setJustificativaD('');
+                    form?.resetFields([campoAlternativaD, campoJustificativaD]);
+                    
+                    const itemAtualD = localStorage.getItem('itemAtual');
+                    if (itemAtualD) {
+                        const item = JSON.parse(itemAtualD);
+                        if (item.elaboracao) {
+                            item.elaboracao.alternativaD = '';
+                            item.elaboracao.justificativaD = '';
+                            localStorage.setItem('itemAtual', JSON.stringify(item));
+                        }
                     }
-                }
+                    
+                    // 🔄 Reabilita TextEditor após fechar modal
+                    setTimeout(() => setRenderTextEditorD(true), 100);
+                }, 50);
                 break;
             default:
                 break;
@@ -419,11 +471,12 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                                         label='A) Alternativa Correta'
                                         style={{ marginBottom: 4 }}
                                     >
-                                        <TextEditor
-                                            value={alternativaA || ''}
-                                            onChange={(value: any) => handleAlternativaAChange(value)}
-                                            placeholder='Descreva a alternativa que será exibida aos estudantes...'
-                                        />
+                                        {renderTextEditorSafe(
+                                            renderTextEditorA,
+                                            alternativaA,
+                                            handleAlternativaAChange,
+                                            'Descreva a alternativa que será exibida aos estudantes...'
+                                        )}
                                     </Form.Item>
                                 </Col>
                                 <Col xs={24} md={24} className='card-campo-elaboracao'>
@@ -432,11 +485,12 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                                         label='Justificativa'
                                         style={{ marginBottom: 4 }}
                                     >
-                                        <TextEditor
-                                            value={justificativaA || ''}
-                                            onChange={(value: any) => handleJustificativaAChange(value)}
-                                            placeholder='O estudante possivelmente assinalou essa alternativa porque...'
-                                        />
+                                        {renderTextEditorSafe(
+                                            renderTextEditorA,
+                                            justificativaA,
+                                            handleJustificativaAChange,
+                                            'O estudante possivelmente assinalou essa alternativa porque...'
+                                        )}
                                     </Form.Item>
                                 </Col>
                             </Row>
@@ -461,11 +515,12 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                                         label='B) Alternativa Correta'
                                         style={{ marginBottom: 4 }}
                                     >
-                                        <TextEditor
-                                            value={alternativaB || ''}
-                                            onChange={(value: any) => handleAlternativaBChange(value)}
-                                            placeholder='Descreva a alternativa que será exibida aos estudantes...'
-                                        />
+                                        {renderTextEditorSafe(
+                                            renderTextEditorB,
+                                            alternativaB,
+                                            handleAlternativaBChange,
+                                            'Descreva a alternativa que será exibida aos estudantes...'
+                                        )}
                                     </Form.Item>
                                 </Col>
                                 <Col xs={24} md={24} className='card-campo-elaboracao'>
@@ -474,11 +529,12 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                                         label='Justificativa'
                                         style={{ marginBottom: 4 }}
                                     >
-                                        <TextEditor
-                                            value={justificativaB || ''}
-                                            onChange={(value: any) => handleJustificativaBChange(value)}
-                                            placeholder='O estudante possivelmente assinalou essa alternativa porque...'
-                                        />
+                                        {renderTextEditorSafe(
+                                            renderTextEditorB,
+                                            justificativaB,
+                                            handleJustificativaBChange,
+                                            'O estudante possivelmente assinalou essa alternativa porque...'
+                                        )}
                                     </Form.Item>
                                 </Col>
                             </Row>
@@ -503,11 +559,12 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                                         label='C) Alternativa Correta'
                                         style={{ marginBottom: 4 }}
                                     >
-                                        <TextEditor
-                                            value={alternativaC || ''}
-                                            onChange={(value: any) => handleAlternativaCChange(value)}
-                                            placeholder='Descreva a alternativa que será exibida aos estudantes...'
-                                        />
+                                        {renderTextEditorSafe(
+                                            renderTextEditorC,
+                                            alternativaC,
+                                            handleAlternativaCChange,
+                                            'Descreva a alternativa que será exibida aos estudantes...'
+                                        )}
                                     </Form.Item>
                                 </Col>
                                 <Col xs={24} md={24} className='card-campo-elaboracao'>
@@ -516,11 +573,12 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                                         label='Justificativa'
                                         style={{ marginBottom: 4 }}
                                     >
-                                        <TextEditor
-                                            value={justificativaC || ''}
-                                            onChange={(value: any) => handleJustificativaCChange(value)}
-                                            placeholder='O estudante possivelmente assinalou essa alternativa porque...'
-                                        />
+                                        {renderTextEditorSafe(
+                                            renderTextEditorC,
+                                            justificativaC,
+                                            handleJustificativaCChange,
+                                            'O estudante possivelmente assinalou essa alternativa porque...'
+                                        )}
                                     </Form.Item>
                                 </Col>
                             </Row>
@@ -545,11 +603,12 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                                         label='D) Alternativa Correta'
                                         style={{ marginBottom: 4 }}
                                     >
-                                        <TextEditor
-                                            value={alternativaD || ''}
-                                            onChange={(value: any) => handleAlternativaDChange(value)}
-                                            placeholder='Descreva a alternativa que será exibida aos estudantes...'
-                                        />
+                                        {renderTextEditorSafe(
+                                            renderTextEditorD,
+                                            alternativaD,
+                                            handleAlternativaDChange,
+                                            'Descreva a alternativa que será exibida aos estudantes...'
+                                        )}
                                     </Form.Item>
                                 </Col>
                                 <Col xs={24} md={24} className='card-campo-elaboracao'>
@@ -558,11 +617,12 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                                         label='Justificativa'
                                         style={{ marginBottom: 4 }}
                                     >
-                                        <TextEditor
-                                            value={justificativaD || ''}
-                                            onChange={(value: any) => handleJustificativaDChange(value)}
-                                            placeholder='O estudante possivelmente assinalou essa alternativa porque...'
-                                        />
+                                        {renderTextEditorSafe(
+                                            renderTextEditorD,
+                                            justificativaD,
+                                            handleJustificativaDChange,
+                                            'O estudante possivelmente assinalou essa alternativa porque...'
+                                        )}
                                     </Form.Item>
                                 </Col>
                             </Row>
