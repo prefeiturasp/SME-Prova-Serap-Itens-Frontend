@@ -383,6 +383,7 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                         onOk={() => handleOk("modalA")}
                         onCancel={() => handleCancel("modalA")}
                         okText="Finalizar"
+                        maskClosable={false}
                         okButtonProps={{ style: { background: '#5A94D6' } }}
                         cancelButtonProps={{ style: { background: '#FFFFFF', color: '#5A94D8' } }}
                     >
@@ -424,6 +425,7 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                         onOk={() => handleOk("modalB")}
                         onCancel={() => handleCancel("modalB")}
                         okText="Finalizar"
+                        maskClosable={false}
                         okButtonProps={{ style: { background: '#5A94D6' } }}
                         cancelButtonProps={{ style: { background: '#FFFFFF', color: '#5A94D8' } }}
                     >
@@ -465,6 +467,7 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                         onOk={() => handleOk("modalC")}
                         onCancel={() => handleCancel("modalC")}
                         okText="Finalizar"
+                        maskClosable={false}
                         okButtonProps={{ style: { background: '#5A94D6' } }}
                         cancelButtonProps={{ style: { background: '#FFFFFF', color: '#5A94D8' } }}
                     >
@@ -506,6 +509,7 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                         onOk={() => handleOk("modalD")}
                         onCancel={() => handleCancel("modalD")}
                         okText="Finalizar"
+                        maskClosable={false}
                         okButtonProps={{ style: { background: '#5A94D6' } }}
                         cancelButtonProps={{ style: { background: '#FFFFFF', color: '#5A94D8' } }}
                     >
