@@ -17,13 +17,12 @@ import { DefaultOptionType } from 'antd/es/select';
 import { SelecioneDto } from '~/domain/dto/selecione-dto';
 import { converterSelecineDto } from '~/utils/converte-dto';
 
-const ITENS_POR_PAGINA = 8;
-
 const ListagemItens: React.FC = () => {
   const linkRetorno = 'https://hom-serap.sme.prefeitura.sp.gov.br/';
   const navigate = useNavigate();
 
   const [pagina, setPagina] = useState(1);
+  const [itensPorPagina, setItensPorPagina] = useState(10);
   const [totalRegistros, setTotalRegistro] = useState(0);
   const [selectItemLista, setSelectItemLista] = useState<DefaultOptionType[]>(null!);
   const [selectItemSelecionado, setSelectItemSelecionado] = useState<DefaultOptionType>(null!);
@@ -40,7 +39,7 @@ const ListagemItens: React.FC = () => {
 
   useEffect(() => {
     if (pagina) buscaDadosTabela();
-  }, [selectItemSelecionado, pagina]);
+  }, [selectItemSelecionado, pagina, itensPorPagina]);
 
   useEffect(() => {
     if (codigoItemTabelaSelecionado) buscaResumoEVersoes();
@@ -54,7 +53,7 @@ const ListagemItens: React.FC = () => {
       const resposta: PaginacaoDto<ItemListagemDto> = await itemService.obterListaItens({
         codigoItem: codigoItem,
         pagina: pagina,
-        tamanhoPagina: ITENS_POR_PAGINA,
+        tamanhoPagina: itensPorPagina,
       });
       setTabelaItens(resposta?.itens);
       setTotalRegistro(resposta?.totalRegistros);
@@ -94,10 +93,14 @@ const ListagemItens: React.FC = () => {
         setSelectItemLista([]);
       }
     } catch (error) {
-      console.log(error)
+      console.log(error);
     } finally {
       setLoadingSelect(false);
     }
+  };
+
+  const selecionaPaginasOnChange = async (valor: string, option: any) => {
+    setItensPorPagina(Number(valor));
   };
 
   const tabelaItemClick = (id: string) => {
@@ -164,8 +167,9 @@ const ListagemItens: React.FC = () => {
             pagina={pagina}
             totalRegistros={totalRegistros}
             setPagina={setPagina}
-            ITENS_POR_PAGINA={ITENS_POR_PAGINA}
+            itensPorPagina={itensPorPagina}
             onItemClick={tabelaItemClick}
+            selecionaPaginasOnChange={selecionaPaginasOnChange}
           ></ListagemTabela>
         </div>
         <div className='listagem-conteudo-direita'>
