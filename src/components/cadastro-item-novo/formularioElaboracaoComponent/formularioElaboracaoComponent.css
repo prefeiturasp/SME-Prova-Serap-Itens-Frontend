@@ -154,3 +154,7 @@
 .card-radio-texto p{
     margin: 0;
 }
+
+:where(.css-diro6f).ant-radio-wrapper span.ant-radio+* {    
+    width: 100%;
+}

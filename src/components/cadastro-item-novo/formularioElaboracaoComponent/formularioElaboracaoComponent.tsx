@@ -56,28 +56,28 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
     const [justificativaD, setJustificativaD] = useState<string>('');
 
     const handleAlternativaAChange = (value: string) => {
-        setAlternativaA(value);
+        setAlternativaA(value || '');
     };
     const handleAlternativaBChange = (value: string) => {
-        setAlternativaB(value);
+        setAlternativaB(value || '');
     };
     const handleAlternativaCChange = (value: string) => {
-        setAlternativaC(value);
+        setAlternativaC(value || '');
     };
     const handleAlternativaDChange = (value: string) => {
-        setAlternativaD(value);
+        setAlternativaD(value || '');
     };
     const handleJustificativaAChange = (value: string) => {
-        setJustificativaA(value);
+        setJustificativaA(value || '');
     };
     const handleJustificativaBChange = (value: string) => {
-        setJustificativaB(value);
+        setJustificativaB(value || '');
     };
     const handleJustificativaCChange = (value: string) => {
-        setJustificativaC(value);
+        setJustificativaC(value || '');
     };
     const handleJustificativaDChange = (value: string) => {
-        setJustificativaD(value);
+        setJustificativaD(value || '');
     };
 
     useEffect(() => {
@@ -402,7 +402,7 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                                         style={{ marginBottom: 4 }}
                                     >
                                         <TextEditor
-                                            value={alternativaA}
+                                            value={alternativaA || ''}
                                             onChange={(value: any) => handleAlternativaAChange(value)}
                                             placeholder='Descreva a alternativa que será exibida aos estudantes...'
                                         />
@@ -415,7 +415,7 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                                         style={{ marginBottom: 4 }}
                                     >
                                         <TextEditor
-                                            value={justificativaA}
+                                            value={justificativaA || ''}
                                             onChange={(value: any) => handleJustificativaAChange(value)}
                                             placeholder='O estudante possivelmente assinalou essa alternativa porque...'
                                         />
@@ -444,7 +444,7 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                                         style={{ marginBottom: 4 }}
                                     >
                                         <TextEditor
-                                            value={alternativaB}
+                                            value={alternativaB || ''}
                                             onChange={(value: any) => handleAlternativaBChange(value)}
                                             placeholder='Descreva a alternativa que será exibida aos estudantes...'
                                         />
@@ -457,7 +457,7 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                                         style={{ marginBottom: 4 }}
                                     >
                                         <TextEditor
-                                            value={justificativaB}
+                                            value={justificativaB || ''}
                                             onChange={(value: any) => handleJustificativaBChange(value)}
                                             placeholder='O estudante possivelmente assinalou essa alternativa porque...'
                                         />
@@ -486,7 +486,7 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                                         style={{ marginBottom: 4 }}
                                     >
                                         <TextEditor
-                                            value={alternativaC}
+                                            value={alternativaC || ''}
                                             onChange={(value: any) => handleAlternativaCChange(value)}
                                             placeholder='Descreva a alternativa que será exibida aos estudantes...'
                                         />
@@ -499,7 +499,7 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                                         style={{ marginBottom: 4 }}
                                     >
                                         <TextEditor
-                                            value={justificativaC}
+                                            value={justificativaC || ''}
                                             onChange={(value: any) => handleJustificativaCChange(value)}
                                             placeholder='O estudante possivelmente assinalou essa alternativa porque...'
                                         />
@@ -528,7 +528,7 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                                         style={{ marginBottom: 4 }}
                                     >
                                         <TextEditor
-                                            value={alternativaD}
+                                            value={alternativaD || ''}
                                             onChange={(value: any) => handleAlternativaDChange(value)}
                                             placeholder='Descreva a alternativa que será exibida aos estudantes...'
                                         />
@@ -541,7 +541,7 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                                         style={{ marginBottom: 4 }}
                                     >
                                         <TextEditor
-                                            value={justificativaD}
+                                            value={justificativaD || ''}
                                             onChange={(value: any) => handleJustificativaDChange(value)}
                                             placeholder='O estudante possivelmente assinalou essa alternativa porque...'
                                         />
