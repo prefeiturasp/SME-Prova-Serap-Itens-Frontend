@@ -1,4 +1,4 @@
-import { Card, Pagination, Tag } from 'antd';
+import { Card, Pagination, Select, Tag } from 'antd';
 import React from 'react';
 import './listagemTabelaComponent.css';
 import type { ItemListagemDto } from '~/domain/dto/item-listagem-dto';
@@ -10,8 +10,9 @@ interface ListagemTabelaProps {
   pagina: number;
   totalRegistros: number;
   setPagina: (p: number) => void;
-  ITENS_POR_PAGINA: number;
+  itensPorPagina: number;
   onItemClick?: (id: string) => void;
+  selecionaPaginasOnChange: (value: any, option: any) => void;
 }
 
 const ListagemTabela: React.FC<ListagemTabelaProps> = ({
@@ -19,8 +20,9 @@ const ListagemTabela: React.FC<ListagemTabelaProps> = ({
   pagina,
   totalRegistros,
   setPagina,
-  ITENS_POR_PAGINA,
+  itensPorPagina,
   onItemClick,
+  selecionaPaginasOnChange,
 }) => {
   const corDificuldade = (nivel: string) => {
     switch (nivel) {
@@ -54,8 +56,8 @@ const ListagemTabela: React.FC<ListagemTabelaProps> = ({
     }
   };
 
-  const inicio = (pagina - 1) * ITENS_POR_PAGINA;
-  const fim = inicio + ITENS_POR_PAGINA;
+  const inicio = (pagina - 1) * itensPorPagina;
+  const fim = inicio + itensPorPagina;
 
   return (
     <>
@@ -73,7 +75,16 @@ const ListagemTabela: React.FC<ListagemTabelaProps> = ({
           </div>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', marginTop: 16 }}>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            marginTop: 16,
+            maxHeight: '500px',
+            overflowY: 'auto',
+            width: 'calc(100% + 24px)',
+          }}
+        >
           {dados.map((item, index) => (
             <div
               key={index}
@@ -169,9 +180,26 @@ const ListagemTabela: React.FC<ListagemTabelaProps> = ({
             <Pagination
               current={pagina}
               total={totalRegistros}
-              pageSize={ITENS_POR_PAGINA}
+              pageSize={itensPorPagina}
               onChange={(p) => setPagina(p)}
               showSizeChanger={false}
+            />
+          </div>
+
+          <div>
+            <Select
+              className='listagem-item-tabela-select'
+              placeholder=''
+              defaultValue={10}
+              options={[
+                { value: 10, label: '10' },
+                { value: 20, label: '20' },
+                { value: 30, label: '30' },
+                { value: 40, label: '40' },
+                { value: 50, label: '50' },
+                { value: 100, label: '100' },
+              ]}
+              onChange={selecionaPaginasOnChange}
             />
           </div>
         </div>
