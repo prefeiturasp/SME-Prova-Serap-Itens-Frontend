@@ -462,6 +462,8 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                         maskClosable={false}
                         okButtonProps={{ style: { background: '#5A94D6' } }}
                         cancelButtonProps={{ style: { background: '#FFFFFF', color: '#5A94D8' } }}
+                        closable={false}
+                        keyboard={false}
                     >
                         <div className='alternativa-corpo-elaboracao card-alternativa-ajuste' style={{ marginBottom: 24 }}>
                             <Row>
@@ -506,6 +508,8 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                         maskClosable={false}
                         okButtonProps={{ style: { background: '#5A94D6' } }}
                         cancelButtonProps={{ style: { background: '#FFFFFF', color: '#5A94D8' } }}
+                        closable={false}
+                        keyboard={false}
                     >
                         <div className='alternativa-corpo-elaboracao card-alternativa-ajuste'>
                             <Row>
@@ -550,6 +554,8 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                         maskClosable={false}
                         okButtonProps={{ style: { background: '#5A94D6' } }}
                         cancelButtonProps={{ style: { background: '#FFFFFF', color: '#5A94D8' } }}
+                        closable={false}
+                        keyboard={false}
                     >
                         <div className='alternativa-corpo-elaboracao card-alternativa-ajuste'>
                             <Row>
@@ -594,6 +600,8 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                         maskClosable={false}
                         okButtonProps={{ style: { background: '#5A94D6' } }}
                         cancelButtonProps={{ style: { background: '#FFFFFF', color: '#5A94D8' } }}
+                        closable={false}
+                        keyboard={false}
                     >
                         <div className='alternativa-corpo-elaboracao card-alternativa-ajuste'>
                             <Row>
