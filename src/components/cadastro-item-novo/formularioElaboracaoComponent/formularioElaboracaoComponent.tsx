@@ -38,7 +38,6 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
     const campoJustificativaD = Campos.justificativaD;
     const campoAlternativaCorreta = Campos.alternativaCorreta;
 
-
     // Estado para controlar a visibilidade do modal
     const [isModalAVisible, setIsModalAVisible] = useState(false);
     const [isModalBVisible, setIsModalBVisible] = useState(false);
@@ -46,15 +45,15 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
     const [isModalDVisible, setIsModalDVisible] = useState(false);
 
     //Exibe os valores do radio
-    const [alternativaA, setAlternativaA] = useState<string | null>('');
-    const [alternativaB, setAlternativaB] = useState<string | null>('');
-    const [alternativaC, setAlternativaC] = useState<string | null>('');
-    const [alternativaD, setAlternativaD] = useState<string | null>('');
+    const [alternativaA, setAlternativaA] = useState<string>('');
+    const [alternativaB, setAlternativaB] = useState<string>('');
+    const [alternativaC, setAlternativaC] = useState<string>('');
+    const [alternativaD, setAlternativaD] = useState<string>('');
 
-    const [justificativaA, setJustificativaA] = useState<string | null>('');
-    const [justificativaB, setJustificativaB] = useState<string | null>('');
-    const [justificativaC, setJustificativaC] = useState<string | null>('');
-    const [justificativaD, setJustificativaD] = useState<string | null>('');
+    const [justificativaA, setJustificativaA] = useState<string>('');
+    const [justificativaB, setJustificativaB] = useState<string>('');
+    const [justificativaC, setJustificativaC] = useState<string>('');
+    const [justificativaD, setJustificativaD] = useState<string>('');
 
     const handleAlternativaAChange = (value: string) => {
         setAlternativaA(value);
@@ -86,14 +85,14 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
         if (itemSalvo) {
             const item = JSON.parse(itemSalvo);
 
-            setAlternativaA(item.elaboracao.alternativaA || null);
-            setAlternativaB(item.elaboracao.alternativaB || null);
-            setAlternativaC(item.elaboracao.alternativaC || null);
-            setAlternativaD(item.elaboracao.alternativaD || null);
-            setJustificativaA(item.elaboracao.justificativaA || null);
-            setJustificativaB(item.elaboracao.justificativaB || null);
-            setJustificativaC(item.elaboracao.justificativaC || null);
-            setJustificativaD(item.elaboracao.justificativaD || null);
+            setAlternativaA(item.elaboracao?.alternativaA || '');
+            setAlternativaB(item.elaboracao?.alternativaB || '');
+            setAlternativaC(item.elaboracao?.alternativaC || '');
+            setAlternativaD(item.elaboracao?.alternativaD || '');
+            setJustificativaA(item.elaboracao?.justificativaA || '');
+            setJustificativaB(item.elaboracao?.justificativaB || '');
+            setJustificativaC(item.elaboracao?.justificativaC || '');
+            setJustificativaD(item.elaboracao?.justificativaD || '');
         }
     }, []);
 
@@ -136,7 +135,6 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
     };
 
     let handleCancel = (nomeModal: string) => {
-        const itemAtual = localStorage.getItem('itemAtual');
         switch (nomeModal) {
 
             case "modalA":
@@ -144,8 +142,10 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                 setAlternativaA('');
                 setJustificativaA('');
                 form?.resetFields([campoAlternativaA, campoJustificativaA]);
-                if (itemAtual) {
-                    const item = JSON.parse(itemAtual);
+                
+                const itemAtualA = localStorage.getItem('itemAtual');
+                if (itemAtualA) {
+                    const item = JSON.parse(itemAtualA);
                     if (item.elaboracao) {
                         item.elaboracao.alternativaA = '';
                         item.elaboracao.justificativaA = '';
@@ -158,8 +158,10 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                 setAlternativaB('');
                 setJustificativaB('');
                 form?.resetFields([campoAlternativaB, campoJustificativaB]);
-                if (itemAtual) {
-                    const item = JSON.parse(itemAtual);
+                
+                const itemAtualB = localStorage.getItem('itemAtual');
+                if (itemAtualB) {
+                    const item = JSON.parse(itemAtualB);
                     if (item.elaboracao) {
                         item.elaboracao.alternativaB = '';
                         item.elaboracao.justificativaB = '';
@@ -172,8 +174,10 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                 setAlternativaC('');
                 setJustificativaC('');
                 form?.resetFields([campoAlternativaC, campoJustificativaC]);
-                if (itemAtual) {
-                    const item = JSON.parse(itemAtual);
+                
+                const itemAtualC = localStorage.getItem('itemAtual');
+                if (itemAtualC) {
+                    const item = JSON.parse(itemAtualC);
                     if (item.elaboracao) {
                         item.elaboracao.alternativaC = '';
                         item.elaboracao.justificativaC = '';
@@ -186,8 +190,10 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                 setAlternativaD('');
                 setJustificativaD('');
                 form?.resetFields([campoAlternativaD, campoJustificativaD]);
-                if (itemAtual) {
-                    const item = JSON.parse(itemAtual);
+                
+                const itemAtualD = localStorage.getItem('itemAtual');
+                if (itemAtualD) {
+                    const item = JSON.parse(itemAtualD);
                     if (item.elaboracao) {
                         item.elaboracao.alternativaD = '';
                         item.elaboracao.justificativaD = '';
