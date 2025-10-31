@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Col, Row } from 'antd';
-import { Link } from 'react-router-dom';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import './listagemItens.css';
 import ListagemTabela from '~/components/listagem-itens/tabela/listagemTabelaComponent';
@@ -21,7 +20,7 @@ import { converterSelecineDto } from '~/utils/converte-dto';
 const ITENS_POR_PAGINA = 8;
 
 const ListagemItens: React.FC = () => {
-  const linkRetorno = 'https://serap.sme.prefeitura.sp.gov.br/';
+  const linkRetorno = 'https://hom-serap.sme.prefeitura.sp.gov.br/';
   const navigate = useNavigate();
 
   const [pagina, setPagina] = useState(1);
@@ -47,11 +46,8 @@ const ListagemItens: React.FC = () => {
     if (codigoItemTabelaSelecionado) buscaResumoEVersoes();
   }, [codigoItemTabelaSelecionado]);
 
-  
   const buscaDadosTabela = async () => {
     try {
-
-      console.log(selectItemSelecionado, "buscaTabela");
       const valorSelcionado: any = selectItemSelecionado?.value;
 
       const codigoItem: string = valorSelcionado?.label!;
@@ -76,7 +72,7 @@ const ListagemItens: React.FC = () => {
   };
 
   const selecionaItemOnChange = async (value: string, option: any) => {
-       setPagina(1);
+    setPagina(1);
     if (value) {
       const obj: AntDesignDto = {
         label: option.label,
@@ -98,6 +94,7 @@ const ListagemItens: React.FC = () => {
         setSelectItemLista([]);
       }
     } catch (error) {
+      console.log(error)
     } finally {
       setLoadingSelect(false);
     }
@@ -112,19 +109,19 @@ const ListagemItens: React.FC = () => {
       <div className='cadastrarItemHeader'>
         <Row className='cadastrarItemHeader-corpo'>
           <Col xs={12} md={6}>
-            <Link to={linkRetorno} className='cadastrarItemHeader-retornar'>
+            <a href={linkRetorno} className='cadastrarItemHeader-retornar'>
               <ArrowLeftOutlined className='cadastrarItemHeader-icone-retornar' />
               <span className='cadastrarItemHeader-texto-retornar'>Retornar à tela inicial</span>
-            </Link>
+            </a>
           </Col>
           <Col xs={12} md={12} className='cadastrarItemHeader-titulo'>
-            Cadastrar novo item
+            Banco de itens
           </Col>
           <Col xs={0} md={6} />
         </Row>
         <div className='cadastrarItemHeader-rota'>
-          <div className='cadastrarItemHeader-rota-texto'>Home / Itens / Cadastrar novo item</div>
-          <div className='cadastrarItemHeader-rota-titulo'>Cadastrar novo item</div>
+          <div className='cadastrarItemHeader-rota-texto'>Home / Itens / Banco de itens</div>
+          <div className='cadastrarItemHeader-rota-titulo'>Banco de itens</div>
         </div>
       </div>
 
