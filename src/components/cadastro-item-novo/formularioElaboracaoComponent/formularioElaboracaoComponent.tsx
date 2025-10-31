@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Col, Form, FormProps, Input, Row, Radio, Modal, Button } from "antd";
 import { TextEditor } from "~/components/lib/editor";
+import { EditOutlined } from '@ant-design/icons';
 
 //css
 import './formularioElaboracaoComponent.css';
@@ -44,24 +45,40 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
     const [isModalCVisible, setIsModalCVisible] = useState(false);
     const [isModalDVisible, setIsModalDVisible] = useState(false);
 
-    //const alternativaA = localStorage.getItem('alternativaA');
-    const alternativaB = localStorage.getItem('alternativaB');
-    const alternativaC = localStorage.getItem('alternativaC');
-    const alternativaD = localStorage.getItem('alternativaD');
-
-
-
-    const justificativaA = localStorage.getItem('justificativaA');
-    const justificativaB = localStorage.getItem('justificativaB');
-    const justificativaC = localStorage.getItem('justificativaC');
-    const justificativaD = localStorage.getItem('justificativaD');
-
+    //Exibe os valores do radio
     const [alternativaA, setAlternativaA] = useState<string | null>('');
-    console.log('Alternativa A do localStorage:', alternativaA);
+    const [alternativaB, setAlternativaB] = useState<string | null>('');
+    const [alternativaC, setAlternativaC] = useState<string | null>('');
+    const [alternativaD, setAlternativaD] = useState<string | null>('');
+
+    const [justificativaA, setJustificativaA] = useState<string | null>('');
+    const [justificativaB, setJustificativaB] = useState<string | null>('');
+    const [justificativaC, setJustificativaC] = useState<string | null>('');
+    const [justificativaD, setJustificativaD] = useState<string | null>('');
 
     const handleAlternativaAChange = (value: string) => {
         setAlternativaA(value);
-        //localStorage.setItem('alternativaA', value);
+    };
+    const handleAlternativaBChange = (value: string) => {
+        setAlternativaB(value);
+    };
+    const handleAlternativaCChange = (value: string) => {
+        setAlternativaC(value);
+    };
+    const handleAlternativaDChange = (value: string) => {
+        setAlternativaD(value);
+    };
+    const handleJustificativaAChange = (value: string) => {
+        setJustificativaA(value);
+    };
+    const handleJustificativaBChange = (value: string) => {
+        setJustificativaB(value);
+    };
+    const handleJustificativaCChange = (value: string) => {
+        setJustificativaC(value);
+    };
+    const handleJustificativaDChange = (value: string) => {
+        setJustificativaD(value);
     };
 
     useEffect(() => {
@@ -69,8 +86,14 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
         if (itemSalvo) {
             const item = JSON.parse(itemSalvo);
 
-            const valor = item.elaboracao.alternativaA
-            setAlternativaA(valor || null);
+            setAlternativaA(item.elaboracao.alternativaA || null);
+            setAlternativaB(item.elaboracao.alternativaB || null);
+            setAlternativaC(item.elaboracao.alternativaC || null);
+            setAlternativaD(item.elaboracao.alternativaD || null);
+            setJustificativaA(item.elaboracao.justificativaA || null);
+            setJustificativaB(item.elaboracao.justificativaB || null);
+            setJustificativaC(item.elaboracao.justificativaC || null);
+            setJustificativaD(item.elaboracao.justificativaD || null);
         }
     }, []);
 
@@ -113,18 +136,64 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
     };
 
     let handleCancel = (nomeModal: string) => {
+        const itemAtual = localStorage.getItem('itemAtual');
         switch (nomeModal) {
+
             case "modalA":
                 setIsModalAVisible(false);
+                setAlternativaA('');
+                setJustificativaA('');
+                form?.resetFields([campoAlternativaA, campoJustificativaA]);
+                if (itemAtual) {
+                    const item = JSON.parse(itemAtual);
+                    if (item.elaboracao) {
+                        item.elaboracao.alternativaA = '';
+                        item.elaboracao.justificativaA = '';
+                        localStorage.setItem('itemAtual', JSON.stringify(item));
+                    }
+                }
                 break;
             case "modalB":
                 setIsModalBVisible(false);
+                setAlternativaB('');
+                setJustificativaB('');
+                form?.resetFields([campoAlternativaB, campoJustificativaB]);
+                if (itemAtual) {
+                    const item = JSON.parse(itemAtual);
+                    if (item.elaboracao) {
+                        item.elaboracao.alternativaB = '';
+                        item.elaboracao.justificativaB = '';
+                        localStorage.setItem('itemAtual', JSON.stringify(item));
+                    }
+                }
                 break;
             case "modalC":
                 setIsModalCVisible(false);
+                setAlternativaC('');
+                setJustificativaC('');
+                form?.resetFields([campoAlternativaC, campoJustificativaC]);
+                if (itemAtual) {
+                    const item = JSON.parse(itemAtual);
+                    if (item.elaboracao) {
+                        item.elaboracao.alternativaC = '';
+                        item.elaboracao.justificativaC = '';
+                        localStorage.setItem('itemAtual', JSON.stringify(item));
+                    }
+                }
                 break;
             case "modalD":
                 setIsModalDVisible(false);
+                setAlternativaD('');
+                setJustificativaD('');
+                form?.resetFields([campoAlternativaD, campoJustificativaD]);
+                if (itemAtual) {
+                    const item = JSON.parse(itemAtual);
+                    if (item.elaboracao) {
+                        item.elaboracao.alternativaD = '';
+                        item.elaboracao.justificativaD = '';
+                        localStorage.setItem('itemAtual', JSON.stringify(item));
+                    }
+                }
                 break;
             default:
                 break;
@@ -200,10 +269,11 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                                     <Radio value="A" className="card-corpo-radio card-corpo-radio-escuro">
                                         <div className="card-radio-flex">
                                             <div className="card-elaboracao-radio-texto">
-                                                A
+                                                Alternativa A
                                             </div>
                                             <div className="card-elaboracao-radio-buttom">
-                                                <Button type="primary" onClick={() => showModal("modalA")}>
+                                                <Button className="azulPadrao" icon={<EditOutlined />}
+                                                    onClick={() => showModal("modalA")}>
                                                     Editar
                                                 </Button>
                                             </div>
@@ -213,11 +283,12 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                                                 ? "mostrar-card" : "esconder-card"} `}>
                                                 <div>
                                                     <div className="card-radio-label">Alternativa:</div>
-                                                    <div>{alternativaA}</div>
+                                                    <div className="card-radio-texto" dangerouslySetInnerHTML={{ __html: alternativaA || '' }} />
                                                 </div>
                                                 <div>
                                                     <div className="card-radio-label">Justificativa:</div>
-                                                    <div>{justificativaA}</div>
+                                                    <div className="card-radio-texto" dangerouslySetInnerHTML={{ __html: justificativaA || '' }} />
+
                                                 </div>
                                             </div>
                                         </div>
@@ -226,10 +297,11 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                                     <Radio value="B" className="card-corpo-radio">
                                         <div className="card-radio-flex">
                                             <div className="card-elaboracao-radio-texto">
-                                                B
+                                                Alternativa B
                                             </div>
                                             <div className="card-elaboracao-radio-buttom">
-                                                <Button type="primary" onClick={() => showModal("modalB")}>
+                                                <Button className="azulPadrao" type="primary" icon={<EditOutlined />}
+                                                    onClick={() => showModal("modalB")}>
                                                     Editar
                                                 </Button>
                                             </div>
@@ -239,11 +311,11 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                                                 ? "mostrar-card" : "esconder-card"} `}>
                                                 <div>
                                                     <div className="card-radio-label">Alternativa:</div>
-                                                    <div>{alternativaB}</div>
+                                                    <div className="card-radio-texto" dangerouslySetInnerHTML={{ __html: alternativaB || '' }} />
                                                 </div>
                                                 <div>
                                                     <div className="card-radio-label">Justificativa:</div>
-                                                    <div>{justificativaB}</div>
+                                                    <div className="card-radio-texto" dangerouslySetInnerHTML={{ __html: justificativaB || '' }} />
                                                 </div>
                                             </div>
                                         </div>
@@ -251,10 +323,11 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                                     <Radio value="C" className="card-corpo-radio card-corpo-radio-escuro">
                                         <div className="card-radio-flex">
                                             <div className="card-elaboracao-radio-texto">
-                                                C
+                                                Alternativa C
                                             </div>
                                             <div className="card-elaboracao-radio-buttom">
-                                                <Button type="primary" onClick={() => showModal("modalC")}>
+                                                <Button className="azulPadrao" icon={<EditOutlined />}
+                                                    onClick={() => showModal("modalC")}>
                                                     Editar
                                                 </Button>
                                             </div>
@@ -264,11 +337,11 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                                                 ? "mostrar-card" : "esconder-card"} `}>
                                                 <div>
                                                     <div className="card-radio-label">Alternativa:</div>
-                                                    <div>{alternativaC}</div>
+                                                    <div className="card-radio-texto" dangerouslySetInnerHTML={{ __html: alternativaC || '' }} />
                                                 </div>
                                                 <div>
                                                     <div className="card-radio-label">Justificativa:</div>
-                                                    <div>{justificativaC}</div>
+                                                    <div className="card-radio-texto" dangerouslySetInnerHTML={{ __html: justificativaC || '' }} />
                                                 </div>
                                             </div>
                                         </div>
@@ -276,10 +349,11 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                                     <Radio value="D" className="card-corpo-radio">
                                         <div className="card-radio-flex">
                                             <div className="card-elaboracao-radio-texto">
-                                                D
+                                                Alternativa D
                                             </div>
                                             <div className="card-elaboracao-radio-buttom">
-                                                <Button type="primary" onClick={() => showModal("modalD")}>
+                                                <Button className="azulPadrao" icon={<EditOutlined />}
+                                                    onClick={() => showModal("modalD")}>
                                                     Editar
                                                 </Button>
                                             </div>
@@ -289,11 +363,11 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                                                 ? "mostrar-card" : "esconder-card"} `}>
                                                 <div>
                                                     <div className="card-radio-label">Alternativa:</div>
-                                                    <div>{alternativaD}</div>
+                                                    <div className="card-radio-texto" dangerouslySetInnerHTML={{ __html: alternativaD || '' }} />
                                                 </div>
                                                 <div>
                                                     <div className="card-radio-label">Justificativa:</div>
-                                                    <div>{justificativaD}</div>
+                                                    <div className="card-radio-texto" dangerouslySetInnerHTML={{ __html: justificativaD || '' }} />
                                                 </div>
                                             </div>
                                         </div>
@@ -308,6 +382,10 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                         open={isModalAVisible}
                         onOk={() => handleOk("modalA")}
                         onCancel={() => handleCancel("modalA")}
+                        okText="Finalizar"
+                        maskClosable={false}
+                        okButtonProps={{ style: { background: '#5A94D6' } }}
+                        cancelButtonProps={{ style: { background: '#FFFFFF', color: '#5A94D8' } }}
                     >
                         <div className='alternativa-corpo-elaboracao card-alternativa-ajuste' style={{ marginBottom: 24 }}>
                             <Row>
@@ -331,6 +409,8 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                                         style={{ marginBottom: 4 }}
                                     >
                                         <TextEditor
+                                            value={justificativaA}
+                                            onChange={(value: any) => handleJustificativaAChange(value)}
                                             placeholder='O estudante possivelmente assinalou essa alternativa porque...'
                                         />
                                     </Form.Item>
@@ -344,6 +424,10 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                         open={isModalBVisible}
                         onOk={() => handleOk("modalB")}
                         onCancel={() => handleCancel("modalB")}
+                        okText="Finalizar"
+                        maskClosable={false}
+                        okButtonProps={{ style: { background: '#5A94D6' } }}
+                        cancelButtonProps={{ style: { background: '#FFFFFF', color: '#5A94D8' } }}
                     >
                         <div className='alternativa-corpo-elaboracao card-alternativa-ajuste'>
                             <Row>
@@ -354,6 +438,8 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                                         style={{ marginBottom: 4 }}
                                     >
                                         <TextEditor
+                                            value={alternativaB}
+                                            onChange={(value: any) => handleAlternativaBChange(value)}
                                             placeholder='Descreva a alternativa que será exibida aos estudantes...'
                                         />
                                     </Form.Item>
@@ -365,6 +451,8 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                                         style={{ marginBottom: 4 }}
                                     >
                                         <TextEditor
+                                            value={justificativaB}
+                                            onChange={(value: any) => handleJustificativaBChange(value)}
                                             placeholder='O estudante possivelmente assinalou essa alternativa porque...'
                                         />
                                     </Form.Item>
@@ -378,6 +466,10 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                         open={isModalCVisible}
                         onOk={() => handleOk("modalC")}
                         onCancel={() => handleCancel("modalC")}
+                        okText="Finalizar"
+                        maskClosable={false}
+                        okButtonProps={{ style: { background: '#5A94D6' } }}
+                        cancelButtonProps={{ style: { background: '#FFFFFF', color: '#5A94D8' } }}
                     >
                         <div className='alternativa-corpo-elaboracao card-alternativa-ajuste'>
                             <Row>
@@ -388,6 +480,8 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                                         style={{ marginBottom: 4 }}
                                     >
                                         <TextEditor
+                                            value={alternativaC}
+                                            onChange={(value: any) => handleAlternativaCChange(value)}
                                             placeholder='Descreva a alternativa que será exibida aos estudantes...'
                                         />
                                     </Form.Item>
@@ -399,6 +493,8 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                                         style={{ marginBottom: 4 }}
                                     >
                                         <TextEditor
+                                            value={justificativaC}
+                                            onChange={(value: any) => handleJustificativaCChange(value)}
                                             placeholder='O estudante possivelmente assinalou essa alternativa porque...'
                                         />
                                     </Form.Item>
@@ -412,6 +508,10 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                         open={isModalDVisible}
                         onOk={() => handleOk("modalD")}
                         onCancel={() => handleCancel("modalD")}
+                        okText="Finalizar"
+                        maskClosable={false}
+                        okButtonProps={{ style: { background: '#5A94D6' } }}
+                        cancelButtonProps={{ style: { background: '#FFFFFF', color: '#5A94D8' } }}
                     >
                         <div className='alternativa-corpo-elaboracao card-alternativa-ajuste'>
                             <Row>
@@ -422,6 +522,8 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                                         style={{ marginBottom: 4 }}
                                     >
                                         <TextEditor
+                                            value={alternativaD}
+                                            onChange={(value: any) => handleAlternativaDChange(value)}
                                             placeholder='Descreva a alternativa que será exibida aos estudantes...'
                                         />
                                     </Form.Item>
@@ -433,6 +535,8 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                                         style={{ marginBottom: 4 }}
                                     >
                                         <TextEditor
+                                            value={justificativaD}
+                                            onChange={(value: any) => handleJustificativaDChange(value)}
                                             placeholder='O estudante possivelmente assinalou essa alternativa porque...'
                                         />
                                     </Form.Item>

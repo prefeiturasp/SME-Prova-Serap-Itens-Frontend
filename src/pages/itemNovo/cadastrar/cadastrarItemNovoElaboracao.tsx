@@ -66,7 +66,7 @@ export interface ElaboracaoLocalProps {
     justificativaC?: string;
     alternativaD?: string;
     justificativaD?: string;
-    alternativaCorreta?: 'A'|'B'|'C'|'D';
+    alternativaCorreta?: 'A' | 'B' | 'C' | 'D';
     idAlternativaA?: number | null;
     idAlternativaB?: number | null;
     idAlternativaC?: number | null;
@@ -84,7 +84,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
     // const [messageApi, contextHolder] = message.useMessage();
     const [carregando, setCarregando] = useState(false);
     const [verificacaoInicialFeita, setVerificacaoInicialFeita] = useState(false);
-    
+
     const [itemId, setItemId] = useState<number>(0);
     const [codigoItemEstado, setCodigoItemEstado] = useState<string>('');
     const [configuracaoItemNovo, setConfiguracaoItemNovoLocal] = useState<Partial<ConfiguracaoItemNovoProps>>({});
@@ -124,6 +124,13 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
                 setCodigoItemEstado(item.codigoItem || '');
                 if (item.configuracao) setConfiguracaoItemNovoLocal(item.configuracao);
                 if (item.elaboracao) setElaboracaoItemNovoLocal(item.elaboracao);
+
+                // ✅ Garante que o codigoItem da configuração prevaleça se o item for novo
+                if (!item.elaboracao || !item.elaboracao.codigoItem) {
+                    item.elaboracao = item.elaboracao || {};
+                    item.elaboracao.codigoItem = item.codigoItem;
+                }
+
                 return item;
             }
         } catch (error) {
@@ -207,7 +214,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
             disciplinaId: configuracaoItemNovo?.disciplina
         };
 
-    // Se estados locais estiverem vazios, tenta carregar do localStorage
+        // Se estados locais estiverem vazios, tenta carregar do localStorage
         if ((!parametrosObrigatorios.id || parametrosObrigatorios.id === 0) ||
             (!parametrosObrigatorios.codigoItem || parametrosObrigatorios.codigoItem.trim() === '')) {
 
@@ -284,10 +291,10 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
         try {
             console.log('🔄 ELABORAÇÃO: Carregando dados completos do backend (id:', itemId, ')...');
             const resposta = await configuracaoItemService.obterItemComAlternativas(itemId);
-            
+
             if (resposta?.data) {
                 console.log('✅ Dados completos recebidos do backend:', resposta.data);
-                
+
                 // ✅ Mapeia dados de configuração do backend
                 const configuracaoItemRetorno = {
                     codigoItem: resposta.data.codigoItem,
@@ -307,9 +314,9 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
                     dificuldade: resposta.data.dificuldade,
                     nivelItem: resposta.data.nivelItem,
                     acertoCasual: resposta.data.acertoCasual,
-                    palavrasChave: Array.isArray(resposta.data.palavrasChave) 
+                    palavrasChave: Array.isArray(resposta.data.palavrasChave)
                         ? resposta.data.palavrasChave.filter((p: string) => p && p.trim())
-                        : resposta.data.palavrasChave 
+                        : resposta.data.palavrasChave
                             ? resposta.data.palavrasChave.split(';').filter((p: string) => p && p.trim())
                             : [],
                     parametroBTransformado: resposta.data.parametroBTransformado,
@@ -379,7 +386,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
             if (itemId > 0) {
                 console.log('🎯 ELABORAÇÃO: ID disponível (estado/local), carregando');
                 const dadosBackend = await obterItemComAlternativasEPopular(itemId);
-                
+
                 if (dadosBackend) {
                     console.log('✅ Dados carregados do backend com sucesso');
                     return; // ✅ Sucesso, não precisa fazer mais nada
@@ -389,16 +396,16 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
 
             // 🎯 2ª PRIORIDADE: Fallback para localStorage se backend falhar
             const itemSalvo = carregarItemDoLocalStorage();
-            
+
             if (itemSalvo && itemSalvo.id > 0 && itemSalvo.codigoItem && itemSalvo.codigoItem.trim() !== '') {
                 console.log('💾 ELABORAÇÃO: Carregando dados do localStorage como fallback...');
-                console.log('📋 Dados encontrados:', { 
-                    id: itemSalvo.id, 
+                console.log('📋 Dados encontrados:', {
+                    id: itemSalvo.id,
                     codigoItem: itemSalvo.codigoItem,
                     temConfiguracao: !!itemSalvo.configuracao,
                     temElaboracao: !!(itemSalvo as any).elaboracao
                 });
-                
+
                 // Restaura estados locais
                 setItemId(itemSalvo.id);
                 setCodigoItemEstado(itemSalvo.codigoItem);
@@ -442,7 +449,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
     const salvarDadosFormularioNoLocalStorage = useCallback(() => {
         try {
             const values = form.getFieldsValue(true); // Ensure all fields are retrieved
-            
+
             // Cria objeto de elaboração com dados atuais do formulário
             const elaboracaoAtual: ElaboracaoLocalProps = {
                 textoBase: values[campoTextoBase] || '',
@@ -470,6 +477,9 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
             // Atualiza estado local com dados do formulário
             setElaboracaoItemNovoLocal(elaboracaoAtual);
 
+            configuracaoItemNovo.codigoItem = values[campoCodigoItem] || '';
+            setConfiguracaoItemNovoLocal(configuracaoItemNovo);
+
             // Salva no localStorage dados atuais
             const itemParaLocalStorage = {
                 id: itemId,
@@ -480,21 +490,21 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
 
             localStorage.setItem('itemAtual', JSON.stringify(itemParaLocalStorage));
             console.log('💾 Dados do formulário salvos no localStorage:', itemParaLocalStorage.elaboracao);
-            
+
         } catch (error) {
             console.error('❌ Erro ao salvar dados do formulário no localStorage:', error);
         }
-    }, [form, itemId, configuracaoItemNovo, 
+    }, [form, itemId, configuracaoItemNovo,
         campoTextoBase, campoFonte, campoEnunciado, campoCodigoItem,
-        campoVideo, campoAudio, campoAlternativaA, campoJustificativaA, 
-        campoAlternativaB, campoJustificativaB, campoAlternativaC, campoJustificativaC, 
+        campoVideo, campoAudio, campoAlternativaA, campoJustificativaA,
+        campoAlternativaB, campoJustificativaB, campoAlternativaC, campoJustificativaC,
         campoAlternativaD, campoJustificativaD, campoAlternativaCorreta]);
 
     // �🔄 Watch mudanças nos campos e salva automaticamente no localStorage
     const watchedValues = Form.useWatch([], form);
     useEffect(() => {
         // Só salva se tem dados essenciais
-    if (itemId > 0 && (configuracaoItemNovo?.codigoItem || codigoItemEstado) && watchedValues) {
+        if (itemId > 0 && (configuracaoItemNovo?.codigoItem || codigoItemEstado) && watchedValues) {
             // Debounce para não salvar muito frequentemente
             const timeoutId = setTimeout(() => {
                 console.log('🔄 Campo alterado, salvando no localStorage...', Object.keys(watchedValues));
@@ -509,94 +519,90 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
     const gerarItemSalvar = useCallback(() => {
         const values = cloneDeep(form.getFieldsValue(true));
 
-        console.log('📋 Valores do formulário da elaboração:', values);
-        console.log('🆔 IDs das alternativas atuais:', {
-            idA: elaboracaoItemNovo?.idAlternativaA,
-            idB: elaboracaoItemNovo?.idAlternativaB,
-            idC: elaboracaoItemNovo?.idAlternativaC,
-            idD: elaboracaoItemNovo?.idAlternativaD
-        });
-
         // Monta as alternativas com base nos campos individuais
         const alternativasDto: AltenativaDto[] = [];
 
-        if (values[campoAlternativaA]) {
-            const alternativaA: any = {
-                numeracao: 'A',
-                descricao: values[campoAlternativaA],
-                justificativa: values[campoJustificativaA] || '',
-                correta: values[campoAlternativaCorreta] === 'A',
-                ordem: 1,
-                itemId: itemId,
-            };
-            // 🆔 ADICIONA ID se existir (para update)
-            if (elaboracaoItemNovo?.idAlternativaA) {
-                alternativaA.id = elaboracaoItemNovo.idAlternativaA;
-            }
-            alternativasDto.push(alternativaA);
-        }
 
-        if (values[campoAlternativaB]) {
-            const alternativaB: any = {
-                numeracao: 'B',
-                descricao: values[campoAlternativaB],
-                justificativa: values[campoJustificativaB] || '',
-                correta: values[campoAlternativaCorreta] === 'B',
-                ordem: 2,
-                itemId: itemId,
-            };
-            // 🆔 ADICIONA ID se existir (para update)
-            if (elaboracaoItemNovo?.idAlternativaB) {
-                alternativaB.id = elaboracaoItemNovo.idAlternativaB;
-            }
-            alternativasDto.push(alternativaB);
+        const alternativaA: any = {
+            numeracao: 'A',
+            descricao: values[campoAlternativaA],
+            justificativa: values[campoJustificativaA] || '',
+            correta: values[campoAlternativaCorreta] === 'A',
+            ordem: 1,
+            itemId: itemId,
+        };
+        // 🆔 ADICIONA ID se existir (para update)
+        if (elaboracaoItemNovo?.idAlternativaA) {
+            alternativaA.id = elaboracaoItemNovo.idAlternativaA;
         }
+        alternativasDto.push(alternativaA);
 
-        if (values[campoAlternativaC]) {
-            const alternativaC: any = {
-                numeracao: 'C',
-                descricao: values[campoAlternativaC],
-                justificativa: values[campoJustificativaC] || '',
-                correta: values[campoAlternativaCorreta] === 'C',
-                ordem: 3,
-                itemId: itemId
-            };
-            // 🆔 ADICIONA ID se existir (para update)
-            if (elaboracaoItemNovo?.idAlternativaC) {
-                alternativaC.id = elaboracaoItemNovo.idAlternativaC;
-            }
-            alternativasDto.push(alternativaC);
-        }
 
-        if (values[campoAlternativaD]) {
-            const alternativaD: any = {
-                numeracao: 'D',
-                descricao: values[campoAlternativaD],
-                justificativa: values[campoJustificativaD] || '',
-                correta: values[campoAlternativaCorreta] === 'D',
-                ordem: 4,
-                itemId: itemId,
-            };
-            // 🆔 ADICIONA ID se existir (para update)
-            if (elaboracaoItemNovo?.idAlternativaD) {
-                alternativaD.id = elaboracaoItemNovo.idAlternativaD;
-            }
-            alternativasDto.push(alternativaD);
+
+        const alternativaB: any = {
+            numeracao: 'B',
+            descricao: values[campoAlternativaB],
+            justificativa: values[campoJustificativaB] || '',
+            correta: values[campoAlternativaCorreta] === 'B',
+            ordem: 2,
+            itemId: itemId,
+        };
+        // 🆔 ADICIONA ID se existir (para update)
+        if (elaboracaoItemNovo?.idAlternativaB) {
+            alternativaB.id = elaboracaoItemNovo.idAlternativaB;
         }
+        alternativasDto.push(alternativaB);
+
+
+
+        const alternativaC: any = {
+            numeracao: 'C',
+            descricao: values[campoAlternativaC],
+            justificativa: values[campoJustificativaC] || '',
+            correta: values[campoAlternativaCorreta] === 'C',
+            ordem: 3,
+            itemId: itemId
+        };
+        // 🆔 ADICIONA ID se existir (para update)
+        if (elaboracaoItemNovo?.idAlternativaC) {
+            alternativaC.id = elaboracaoItemNovo.idAlternativaC;
+        }
+        alternativasDto.push(alternativaC);
+
+
+
+        const alternativaD: any = {
+            numeracao: 'D',
+            descricao: values[campoAlternativaD],
+            justificativa: values[campoJustificativaD] || '',
+            correta: values[campoAlternativaCorreta] === 'D',
+            ordem: 4,
+            itemId: itemId,
+        };
+        // 🆔 ADICIONA ID se existir (para update)
+        if (elaboracaoItemNovo?.idAlternativaD) {
+            alternativaD.id = elaboracaoItemNovo.idAlternativaD;
+        }
+        alternativasDto.push(alternativaD);
+
 
         console.log('🎯 Alternativas montadas para envio:', alternativasDto);
 
         // 🔍 DEBUG: verificar dados da configuração
-    console.log('🔍 CONFIGURAÇÃO ATUAL PARA DTO:', configuracaoItemNovo);
+        console.log('🔍 CONFIGURAÇÃO ATUAL PARA DTO:', configuracaoItemNovo);
         console.log('🔍 AREA CONHECIMENTO ESPECIFICAMENTE:', {
             valor: configuracaoItemNovo?.areaConhecimento,
             tipo: typeof configuracaoItemNovo?.areaConhecimento,
             undefined: configuracaoItemNovo?.areaConhecimento === undefined
         });
 
+        // Atualiza o codigoItem no DTO com o valor mais recente do estado ou do formulário
+        const codigoItemAtualizado = configuracaoItemNovo?.codigoItem || codigoItemEstado || values[campoCodigoItem] || '';
+        console.log('🔄 Atualizando codigoItem no DTO:', codigoItemAtualizado);
+
         const dto: ItemNovoDto = {
             id: itemId,
-            codigoItem: (configuracaoItemNovo?.codigoItem || codigoItemEstado || ''),
+            codigoItem: codigoItemAtualizado,
             areaConhecimentoId: configuracaoItemNovo?.areaConhecimento || null,
             disciplinaId: configuracaoItemNovo?.disciplina || null,
             matrizId: configuracaoItemNovo?.matriz || null,
@@ -626,7 +632,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
                         const palavraString = (configuracaoItemNovo.palavrasChave as string).trim();
                         if (palavraString) {
                             // Se for string, converte para array (separado por ';' se houver)
-                            palavrasChaveArray = palavraString.includes(';') 
+                            palavrasChaveArray = palavraString.includes(';')
                                 ? palavraString.split(';').filter((p: string) => p && p.trim()).map((p: string) => p.trim())
                                 : [palavraString];
                         }
@@ -656,16 +662,6 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
         if (values[campoAudio]?.length) {
             dto.arquivoAudioId = values[campoAudio]?.[0]?.idFile;
         }
-
-        // 🔍 Debug específico para palavrasChave
-        console.log('🔍 Debug palavrasChave:', {
-            original: configuracaoItemNovo?.palavrasChave,
-            tipo: typeof configuracaoItemNovo?.palavrasChave,
-            isArray: Array.isArray(configuracaoItemNovo?.palavrasChave),
-            final: dto.palavrasChave,
-            tipoFinal: typeof dto.palavrasChave,
-            formatoBackend: 'String separada por ";" ex: "escola;livro"'
-        });
 
         console.log('🚀 DTO Final da elaboração sendo enviado:', dto);
 
@@ -703,8 +699,8 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
                     // 🔄 USA NOVA FUNÇÃO: Carrega dados completos atualizados do backend
                     try {
                         console.log('🔄 Recarregando dados completos após salvar rascunho...');
-                        const dadosAtualizados = await obterItemComAlternativasEPopular(itemId);
-                        
+                        const dadosAtualizados = await obterItemComAlternativasEPopular(resp.data);
+
                         if (dadosAtualizados) {
                             console.log('✅ Dados completos recarregados com sucesso após salvar rascunho');
                         } else {
@@ -768,11 +764,11 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
     const salvarRascunho = useCallback(
         async () => {
             setCarregando(true);
-            
+
             // 🔥 IMPORTANTE: Salva dados do formulário no localStorage PRIMEIRO
             console.log('💾 Salvando dados atuais do formulário no localStorage...');
             salvarDadosFormularioNoLocalStorage();
-            
+
             const itemSalvar = gerarItemSalvar();
             console.log('💾 Salvando rascunho da elaboração:', itemSalvar);
 
@@ -797,7 +793,14 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
         navigate('/listagem');
     };
 
-
+    // Sincroniza o estado local com o valor do campo codigoItem no formulário
+    useEffect(() => {
+        const codigoItemAtual = form.getFieldValue(campoCodigoItem);
+        if (codigoItemAtual !== codigoItemEstado) {
+            console.log('🔄 Atualizando estado codigoItemEstado:', codigoItemAtual);
+            setCodigoItemEstado(codigoItemAtual);
+        }
+    }, [form, campoCodigoItem, codigoItemEstado]);
 
     return (
         <>
