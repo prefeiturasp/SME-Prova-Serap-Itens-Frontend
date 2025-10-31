@@ -85,8 +85,7 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
         if (itemSalvo) {
             try {
                 const item = JSON.parse(itemSalvo);
-
-                // 🛡️ Proteção extra: garante que nunca seja null ou undefined
+                
                 const safeString = (value: any): string => {
                     if (value === null || value === undefined) return '';
                     return String(value);
@@ -102,7 +101,7 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                 setJustificativaD(safeString(item.elaboracao?.justificativaD));
             } catch (error) {
                 console.error('❌ Erro ao carregar dados do localStorage:', error);
-                // 🔄 Em caso de erro, inicializa com valores vazios
+                
                 setAlternativaA('');
                 setAlternativaB('');
                 setAlternativaC('');
