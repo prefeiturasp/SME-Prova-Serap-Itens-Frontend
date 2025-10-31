@@ -78,8 +78,10 @@ const ListagemItens: React.FC = () => {
         value: value,
       };
       setSelectItemSelecionado(obj);
+      setCodigoItemTabelaSelecionado('');
     } else {
       setSelectItemSelecionado(null!);
+      setCodigoItemTabelaSelecionado('');
     }
   };
 
@@ -90,6 +92,7 @@ const ListagemItens: React.FC = () => {
         const resposta: SelecioneDto[] = await filtroSelectService.obterListaItems(value);
         setSelectItemLista(converterSelecineDto(resposta));
       } else {
+        setCodigoItemTabelaSelecionado('');
         setSelectItemLista([]);
       }
     } catch (error) {
