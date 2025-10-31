@@ -100,6 +100,7 @@ const ListagemItens: React.FC = () => {
   };
 
   const selecionaPaginasOnChange = async (valor: string, option: any) => {
+    console.log(valor, option);
     setItensPorPagina(Number(valor));
   };
 
