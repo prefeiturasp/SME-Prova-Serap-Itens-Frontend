@@ -87,11 +87,15 @@ const ListagemItens: React.FC = () => {
 
   const buscarItemOnSearch = async (value: string) => {
     try {
+      if (!value) return;
+
       setLoadingSelect(true);
-      if (value?.length >= 3) {
+
+      if (value?.length >= 3 || selectItemSelecionado.length >= 3) {
         const resposta: SelecioneDto[] = await filtroSelectService.obterListaItems(value);
         setSelectItemLista(converterSelecineDto(resposta));
       } else {
+        setSelectItemSelecionado(null!);
         setCodigoItemTabelaSelecionado('');
         setSelectItemLista([]);
       }
