@@ -36,16 +36,6 @@ interface FormularioUnicoProps extends FormProps {
 
 const FormularioUnico: React.FC<FormularioUnicoProps> = ({ form, setCarregando }) => {
 
-
-  // Detectar dados vindos do "Voltar" (via localStorage/estados do pai)
-
-
-  // 🚀 CAMPOS SIMPLIFICADOS - usando strings diretas ao invés de constantes
-  // Remoção de ~20 linhas de declarações desnecessárias
-
-  // 🚀 WATCHERS REMOVIDOS - agora usa onChange direto!
-  // Eliminação completa de Form.useWatch para evitar conflitos e re-renders
-
   // listas
   const [listaAreaConhecimento, setListaAreaConhecimento] = useState<DefaultOptionType[]>([]);
   const [listaDisciplinas, setListaDisciplinas] = useState<DefaultOptionType[]>([]);
@@ -632,8 +622,7 @@ const FormularioUnico: React.FC<FormularioUnicoProps> = ({ form, setCarregando }
                 options={listaQuantidadeAlternativas}
                 nomeCampo={Campos.quantidadeAlternativas}
                 label="Categoria do item e quantidade de alternativas*"
-                campoObrigatorio={true}
-                disabled={!form?.getFieldValue(Campos.nivelItem)}
+                campoObrigatorio={true}                
                 labelInValue={false}
               />
             </Col>
