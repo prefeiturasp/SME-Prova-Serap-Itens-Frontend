@@ -151,6 +151,10 @@
     color: white;
 }
 
+.azulPadrao:hover{
+    color: white !important;
+}
+
 .card-radio-texto p{
     margin: 0;
 }

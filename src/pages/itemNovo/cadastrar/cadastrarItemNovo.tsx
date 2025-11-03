@@ -1,5 +1,5 @@
 import { Button, Form, FormProps, notification, Spin } from 'antd';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './cadastrarItemNovo.css';
 
@@ -66,12 +66,7 @@ export interface ConfiguracaoItemNovoProps {
 const CadastrarItemNovo: React.FC<FormProps> = () => {
 
     const navigate = useNavigate();
-    const [carregando, setCarregando] = useState<boolean>(false);
-    // removido estado de limpeza inicial automática do localStorage
-    // Evita recriações do callback e loops por dependência
-    const cascataEmAndamentoRef = useRef<boolean>(false);
-    // Garante que a cascata automática só rode uma vez no primeiro acesso
-    const cascataInicialAplicadaRef = useRef<boolean>(false);
+    const [carregando, setCarregando] = useState<boolean>(false);   
 
     // ✅ Estados locais
     const [itemId, setItemId] = useState<number>(0);
@@ -113,43 +108,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
         }
     }, []);
 
-    const carregarItemDoLocalStorage = useCallback((): { id: number, codigoItem: string, configuracao: any, elaboracao?: any } | null => {
-        try {
-            const itemSalvo = localStorage.getItem('itemAtual');
-            if (itemSalvo) {
-                const item = JSON.parse(itemSalvo);
-
-                // 🔧 Normaliza palavrasChave - converte string separada por ';' em array
-                if (item.configuracao && item.configuracao.palavrasChave) {
-                    if (typeof item.configuracao.palavrasChave === 'string') {
-                        item.configuracao.palavrasChave = item.configuracao.palavrasChave
-                            .split(';')
-                            .filter((p: string) => p && p.trim());
-                        console.log('🔧 palavrasChave convertida de string para array:', item.configuracao.palavrasChave);
-                    }
-                }
-
-                console.log('📂 Item carregado do localStorage:', item);
-                // ✅ Seta os estados locais ao carregar
-                setItemId(item.id || 0);
-                setCodigoItem(item.codigoItem || '');
-                if (item.elaboracao) {
-                    setElaboracaoItem(item.elaboracao);
-                }
-
-                // ✅ Garante que o codigoItem da configuração prevaleça se o item for novo
-                if (!item.elaboracao || !item.elaboracao.codigoItem) {
-                    item.elaboracao = item.elaboracao || {};
-                    item.elaboracao.codigoItem = item.codigoItem;
-                }
-
-                return item;
-            }
-        } catch (error) {
-            console.error('❌ Erro ao carregar do localStorage:', error);
-        }
-        return null;
-    }, []);
+   
 
     const limparItemDoLocalStorage = useCallback(() => {
         try {
@@ -166,6 +125,33 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
         }
     }, []);
 
+    // 🔄 Função para carregar apenas estados locais do localStorage
+    const carregarEstadosDoLocalStorage = useCallback(() => {
+        try {
+            const itemSalvoStr = localStorage.getItem('itemAtual');
+            if (!itemSalvoStr) return;
+
+            const itemSalvo = JSON.parse(itemSalvoStr);
+            console.log('📋 Carregando estados locais do localStorage:', {
+                id: itemSalvo.id,
+                codigoItem: itemSalvo.codigoItem
+            });
+
+            // Atualiza apenas estados locais para navegação/botões
+            if (itemSalvo.id) setItemId(itemSalvo.id);
+            if (itemSalvo.codigoItem) setCodigoItem(itemSalvo.codigoItem);
+            if (itemSalvo.elaboracao) setElaboracaoItem(itemSalvo.elaboracao);
+
+        } catch (error) {
+            console.error('❌ Erro ao carregar estados do localStorage:', error);
+        }
+    }, []);
+
+    // ✅ useEffect para carregar estados locais na montagem
+    useEffect(() => {
+        carregarEstadosDoLocalStorage();
+    }, [carregarEstadosDoLocalStorage]);
+
     // ✅ useEffect refatorado para usar valores do formulário
     useEffect(() => {
         const bloquear =
@@ -175,218 +161,6 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
         setBloquearBtnSalvarRascunho(bloquear);
     }, [areaConhecimentoIdForm, disciplinaIdForm]);
 
-    // Removido: limpeza automática do localStorage no primeiro acesso.
-    // Motivo: quando vier da listagem (edição), o localStorage já terá dados
-    // e não deve ser apagado. A limpeza ocorrerá explicitamente via botão
-    // "Novo item" (que chama limparItemDoLocalStorage) ou "Cancelar".
-
-    // 🔄 Função para carregar localStorage com cascata inteligente (igual ao "Voltar")
-    const carregarLocalStorageComCascata = useCallback(
-        async (itemSalvo: { id: number, codigoItem: string, configuracao: any, elaboracao?: any }) => {
-            console.log(' Iniciando carregamento localStorage com cascata inteligente...');
-            // 🚫 Evita execuções simultâneas
-            if (cascataEmAndamentoRef.current) {
-                console.log('🚫 CASCATA: Já em andamento - ignorando chamada duplicada');
-                return;
-            }
-
-            cascataEmAndamentoRef.current = true;
-            setCarregando(true);
-
-            const aguardarFlag = async (flag: string, maxTentativas = 25, atrasoMs = 200) => {
-                let tentativas = 0;
-                while (
-                    tentativas < maxTentativas &&
-                    localStorage.getItem(flag) === 'true'
-                ) {
-                    await new Promise(resolve => setTimeout(resolve, atrasoMs));
-                    tentativas++;
-                }
-                return tentativas;
-            };
-
-            try {
-                console.log('� Dados localStorage (configuração):', itemSalvo.configuracao);
-
-                // 0) Atualiza estados locais para navegação/botões
-                setItemId(itemSalvo.id);
-                setCodigoItem(itemSalvo.codigoItem);
-                if (itemSalvo.elaboracao) setElaboracaoItem(itemSalvo.elaboracao);
-
-                // Sequência correta de dependências:
-                // áreaConhecimento → disciplinas → matriz → anoMatriz → competências → habilidades
-                // e em paralelo à disciplina: assuntos → subAssuntos
-
-                // 1) Área do Conhecimento (carrega options e seta valor)
-                if (itemSalvo.configuracao.areaConhecimento) {
-                    console.log('📝 Definindo área do conhecimento...');
-                    // Aguarda caso a tela esteja carregando a lista de áreas
-                    await aguardarFlag('aguardandoAreaConhecimento');
-                    // Predefine flags que serão disparadas pelos effects após setar a área
-                    localStorage.setItem('aguardandoDisciplinas', 'true');
-                    localStorage.setItem('aguardandoAssuntos', 'true');
-                    form?.setFieldValue(Campos.areaConhecimento, itemSalvo.configuracao.areaConhecimento);
-
-                    // Ao definir área, a tela carrega disciplinas e assuntos
-                    console.log('⏳ Aguardando disciplinas e assuntos após selecionar área...');
-                    await aguardarFlag('aguardandoDisciplinas');
-                    await aguardarFlag('aguardandoAssuntos');
-                }
-
-                // 2) Disciplina (depende da área)
-                if (itemSalvo.configuracao.disciplina) {
-                    console.log('📝 Definindo disciplina...');
-                    // Predefine flags de carregamento a serem limpas pelos effects do formulário
-                    localStorage.setItem('aguardandoMatriz', 'true');
-                    localStorage.setItem('aguardandoAssuntos', 'true');
-                    form?.setFieldValue(Campos.disciplinas, itemSalvo.configuracao.disciplina);
-
-                    // Ao definir disciplina, a tela carrega matriz e (novamente) assuntos
-                    console.log('⏳ Aguardando matriz e assuntos após selecionar disciplina...');
-                    await aguardarFlag('aguardandoMatriz');
-                    await aguardarFlag('aguardandoAssuntos');
-                }
-
-                // 3) Matriz (depende da disciplina)
-                if (itemSalvo.configuracao.matriz) {
-                    console.log('📝 Definindo matriz...');
-                    // Predefine flags para ano e competências
-                    localStorage.setItem('aguardandoAnoMatriz', 'true');
-                    localStorage.setItem('aguardandoCompetencias', 'true');
-                    form?.setFieldValue(Campos.matriz, itemSalvo.configuracao.matriz);
-
-                    // Ao definir matriz, a tela carrega anoMatriz e competências
-                    console.log('⏳ Aguardando ano da matriz e competências...');
-                    await aguardarFlag('aguardandoAnoMatriz');
-                    await aguardarFlag('aguardandoCompetencias');
-                }
-
-                // 4) Ano da Matriz (depende da matriz)
-                if (itemSalvo.configuracao.anoMatriz) {
-                    console.log('📝 Definindo ano da matriz...');
-                    form?.setFieldValue(Campos.anoMatriz, itemSalvo.configuracao.anoMatriz);
-                }
-
-                // 5) Competência (depende da matriz)
-                if (itemSalvo.configuracao.competencia) {
-                    console.log('📝 Definindo competência...');
-                    // Predefine flag para habilidades
-                    localStorage.setItem('aguardandoHabilidade', 'true');
-                    form?.setFieldValue(Campos.competencia, itemSalvo.configuracao.competencia);
-
-                    // Ao definir competência, a tela carrega habilidades
-                    console.log('⏳ Aguardando habilidades...');
-                    await aguardarFlag('aguardandoHabilidade');
-                }
-
-                // 6) Habilidade (depende da competência)
-                if (itemSalvo.configuracao.habilidade) {
-                    console.log('📝 Definindo habilidade...');
-                    form?.setFieldValue(Campos.habilidade, itemSalvo.configuracao.habilidade);
-                }
-
-                // 7) Assunto (depende da disciplina)
-                if (itemSalvo.configuracao.assunto) {
-                    console.log('📝 Definindo assunto...');
-                    // Predefine flag para subassuntos
-                    localStorage.setItem('aguardandoSubAssuntos', 'true');
-                    form?.setFieldValue(Campos.assunto, itemSalvo.configuracao.assunto);
-
-                    // Ao definir assunto, a tela carrega subassuntos
-                    console.log('⏳ Aguardando subassuntos...');
-                    await aguardarFlag('aguardandoSubAssuntos');
-                }
-
-                // 8) SubAssunto (depende do assunto)
-                if (itemSalvo.configuracao.subAssunto) {
-                    console.log('📝 Definindo subAssunto...');
-                    form?.setFieldValue(Campos.subAssunto, itemSalvo.configuracao.subAssunto);
-                }
-
-                // Demais campos simples (não quebrar a cascata principal)
-                console.log('📝 Populando campos restantes não-cascata...');
-                const mapeamentoCampos = {
-                    codigoItem: Campos.codigoItem,
-                    situacaoItem: Campos.situacaoItem,
-                    tipoItem: Campos.tipoItem,
-                    quantidadeAlternativas: Campos.quantidadeAlternativas,
-                    dificuldadeSugerida: Campos.dificuldadeSugerida,
-                    nivelItem: Campos.nivelItem,
-                    discriminacao: Campos.discriminacao,        // infoEstatisticasDiscriminacao
-                    dificuldade: Campos.dificuldade,            // infoEstatisticasDificuldade
-                    acertoCasual: Campos.acertoCasual,          // infoEstatisticasAcertoCasual
-                    palavrasChave: Campos.palavraChave,
-                    parametroBTransformado: Campos.parametroBTransformado,
-                    mediaDesvioPadrao: Campos.mediaDesvioPadrao,
-                    sentencaDescritora: Campos.sentencaDescritora,
-                    observacao: Campos.observacao,
-                } as const;
-
-                const camposJaDefinidos = new Set([
-                    'areaConhecimento',
-                    'disciplina',
-                    'matriz',
-                    'anoMatriz',
-                    'competencia',
-                    'habilidade',
-                    'assunto',
-                    'subAssunto',
-                ]);
-
-                Object.keys(itemSalvo.configuracao).forEach(key => {
-                    if (camposJaDefinidos.has(key)) return;
-                    const value = itemSalvo.configuracao[key];
-                    const formFieldName = (mapeamentoCampos as any)[key];
-                    if (value !== undefined && value !== null && formFieldName) {
-                        form?.setFieldValue(formFieldName, value);
-                        console.log(`📝 Campo ${formFieldName} (${key}) restaurado:`, value);
-                    }
-                });
-
-                // Pequeno atraso para garantir processamento dos setFieldValue
-                await new Promise(resolve => setTimeout(resolve, 100));
-
-                console.log('✅ Carregamento localStorage com cascata finalizado');
-
-            } catch (err: any) {
-                console.error('❌ Erro no carregamento localStorage com cascata:', err.message);
-            } finally {
-                cascataEmAndamentoRef.current = false;
-                setCarregando(false);
-            }
-        },
-        [form]
-    );
-
-    // ✅ useEffect UNIFICADO: Detecta localStorage e "Voltar" em um só lugar
-    useEffect(() => {
-        const voltandoParaPrimeiraTela = localStorage.getItem('voltandoParaPrimeiraTela') === 'true';
-        const itemSalvo = carregarItemDoLocalStorage();
-
-        // 🔙 Cenário 1: Voltando da elaboração
-        if (voltandoParaPrimeiraTela) {
-            console.log('🔙 Detectado "Voltar" - usando dados do localStorage...');
-            localStorage.removeItem('voltandoParaPrimeiraTela');
-            // Permite aplicar cascata novamente ao voltar
-            cascataInicialAplicadaRef.current = false;
-
-            if (itemSalvo && itemSalvo.id > 0 && itemSalvo.codigoItem) {
-                console.log('✅ Dados encontrados no localStorage - carregando com cascata...');
-                carregarLocalStorageComCascata(itemSalvo);
-            } else {
-                console.log('⚠️ Dados inconsistentes no localStorage - mantendo estado atual');
-            }
-        }
-        // 📂 Cenário 2: Primeiro acesso com dados no localStorage
-        else if (!cascataInicialAplicadaRef.current && itemSalvo && itemSalvo.id > 0 && itemSalvo.codigoItem && itemSalvo.codigoItem.trim() !== '') {
-            console.log('📂 Primeiro acesso: Detectado dados válidos no localStorage - carregando com cascata...');
-            console.log('📋 Dados encontrados:', { id: itemSalvo.id, codigoItem: itemSalvo.codigoItem });
-            carregarLocalStorageComCascata(itemSalvo);
-            cascataInicialAplicadaRef.current = true;
-        } else {
-            console.log('📂 localStorage vazio - formulário ficará limpo para novo cadastro');
-        }
-    }, [itemId, carregarItemDoLocalStorage, carregarLocalStorageComCascata]); // Executa quando itemId muda ou componente monta
 
     // ✅ useEffect para controlar bloqueio do botão avançar
     useEffect(() => {
@@ -644,8 +418,6 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
 
     const inserirItem = useCallback(
         async (item: ItemNovoDto) => {
-
-
             await configuracaoItemService
                 .salvarItemNovo(item)
                 .then((resp) => {
@@ -733,38 +505,10 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                 await inserirItem(itemSalvar);
             }
 
-            // if (item?.id > 0) {
-            //     mensagem('info', 'Atenção','Desenvolver regras.' );
-            //     //`Item já cadastrado, id:${item.id}`
-            // } else {
-            //     // if (rascunho) {
-            //     //     await inserirRascunhoItem(itemSalvar);
-            //     // } else {
-            //     //     await inserirItem(itemSalvar);
-            //     // }
-            // }
             setCarregando(false);
         },
-        [mensagem, inserirItem, inserirRascunhoItem, gerarItemSalvar],
+        [mensagem, inserirItem, inserirRascunhoItem, gerarItemSalvar, validarCamposObrigatorios],
     );
-
-    // const bloquearBtnSalvarRascunhoDadosTabElaboracaoItem = (): boolean => {
-    //     const values = cloneDeep(form.getFieldsValue(true));
-
-    //     let algumaDescricaoSemValor = false;
-
-    //     if (values?.alternativasDto?.length) {
-    //         algumaDescricaoSemValor = values.alternativasDto.find(
-    //             (item: AltenativaDto) => !item?.descricao,
-    //         );
-    //     }
-
-    //     if (!values?.enunciado || !values?.alternativaCorreta || algumaDescricaoSemValor) return true;
-
-    //     return false;
-    // };
-
-
 
     return (
         <>
@@ -804,7 +548,10 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                         <ClassificacaoTemaComponent form={form} />
                         <InformacoesEstatisticasComponent form={form} /> */}
 
-                        <FormularioUnico form={form} />
+                        <FormularioUnico 
+                            form={form} 
+                            setCarregando={setCarregando}
+                        />
 
                         <div className='cadastrarItem-botoes'>
                             <div className='cadastrarItem-btn'>

@@ -1,6 +1,6 @@
+import React from 'react';
 import { Form, FormItemProps, FormProps } from 'antd';
 import { DefaultOptionType } from 'antd/lib/select';
-import React, { useEffect } from 'react';
 import { Campos } from '~/domain/enums/campos-cadastro-item';
 import Select from '~/components/select';
 import { validarCampoForm } from '~/utils/funcoes';
@@ -13,6 +13,7 @@ interface SelectProps extends FormProps {
     campoObrigatorio: boolean;
     labelInValue?: boolean;
     disabled?: boolean;
+    onChange?: (value: any) => void;
 }
 
 const SelectForm: React.FC<SelectProps> = ({
@@ -23,11 +24,16 @@ const SelectForm: React.FC<SelectProps> = ({
     campoObrigatorio,
     labelInValue = false,
     disabled,
+    onChange,
 }) => {
     const campo = nomeCampo;
     const valorCampoForm = Form.useWatch(campo, form);
     const validacaoCampo = validarCampoForm(valorCampoForm);
 
+    // ❌ COMENTADO: Este useEffect causa conflito com a lógica onChange
+    // A limpeza já é feita nos handlers onChange e a seleção automática 
+    // de item único deve ser feita quando a lista é carregada
+    /*
     useEffect(() => {
         if (options?.length > 1 || options?.length == 1) {
             form?.resetFields([campo]);
@@ -38,6 +44,7 @@ const SelectForm: React.FC<SelectProps> = ({
             form?.setFieldValue(campo, newValue);
         }
     }, [form, options, campo]);
+    */
 
     const customFormItemProps: FormItemProps = {};
 
@@ -68,6 +75,7 @@ const SelectForm: React.FC<SelectProps> = ({
                 placeholder='Selecione'
                 allowClear
                 showSearch={false}
+                onChange={onChange}
             />
         </Form.Item>
     );
