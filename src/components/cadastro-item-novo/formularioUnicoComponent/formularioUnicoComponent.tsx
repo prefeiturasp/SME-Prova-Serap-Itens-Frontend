@@ -30,7 +30,11 @@ import '../cards/caracteristicasItemComponet/caracteristicaItemComponent.css';
 
 // ✅ Dificuldade sugerida agora é HTML direto - constante removida
 
-const FormularioUnico: React.FC<FormProps> = ({ form }) => {
+interface FormularioUnicoProps extends FormProps {
+  setCarregando?: (loading: boolean) => void;
+}
+
+const FormularioUnico: React.FC<FormularioUnicoProps> = ({ form, setCarregando }) => {
 
 
   // Detectar dados vindos do "Voltar" (via localStorage/estados do pai)
@@ -251,6 +255,9 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
   // 🔄 CASCATA AUTOMÁTICA - Executada quando há dados no localStorage
   const executarCascataAutomatica = useCallback(async () => {
     console.log('🔄 Iniciando cascata automática...');
+    
+    // 🎯 Inicia animação de carregamento
+    setCarregando?.(true);
 
     try {
       const itemSalvoStr = localStorage.getItem('itemAtual');
@@ -438,8 +445,11 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
 
     } catch (error) {
       console.error('❌ Erro na cascata automática:', error);
+    } finally {
+      // 🎯 Finaliza animação de carregamento
+      setCarregando?.(false);
     }
-  }, [form]);
+  }, [form, setCarregando]);
 
   // Helper functions para validação de campos dependentes
   const disciplinaIdForm = form?.getFieldValue(Campos.disciplinas);

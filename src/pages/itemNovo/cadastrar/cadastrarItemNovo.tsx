@@ -548,7 +548,10 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                         <ClassificacaoTemaComponent form={form} />
                         <InformacoesEstatisticasComponent form={form} /> */}
 
-                        <FormularioUnico form={form} />
+                        <FormularioUnico 
+                            form={form} 
+                            setCarregando={setCarregando}
+                        />
 
                         <div className='cadastrarItem-botoes'>
                             <div className='cadastrarItem-btn'>
