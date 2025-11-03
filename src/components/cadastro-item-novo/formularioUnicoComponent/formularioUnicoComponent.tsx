@@ -1,8 +1,8 @@
-import React, { Dispatch, SetStateAction, useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Col, Form, FormProps, Row, Radio } from 'antd';
 import { DefaultOptionType } from 'antd/lib/select';
-import { Campos } from "~/domain/enums/campos-cadastro-item";
 import { SelectValueType } from '~/domain/type/select';
+import { Campos } from "~/domain/enums/campos-cadastro-item";
 
 // form personalizados
 import SelectForm from '~/components/select-form';
@@ -36,47 +36,11 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
   // Detectar dados vindos do "Voltar" (via localStorage/estados do pai)
 
 
-  // campos
-  const campoAreaConhecimento = Campos.areaConhecimento;
-  const campoDisciplina = Campos.disciplinas;
-  const campoMatriz = Campos.matriz;
-  const campoAnoMatriz = Campos.anoMatriz;
+  // 🚀 CAMPOS SIMPLIFICADOS - usando strings diretas ao invés de constantes
+  // Remoção de ~20 linhas de declarações desnecessárias
 
-  const campoCompetencia = Campos.competencia;
-  const campoHabilidade = Campos.habilidade;
-
-  const campoDificuldadeSugerida = Campos.dificuldadeSugerida;
-  const campoNivelItem = Campos.nivelItem;
-  const campoQuantidadeAlternativas = Campos.quantidadeAlternativas;
-  const campoTipoItem = Campos.tipoItem;
-  const campoSituacaoItem = Campos.situacaoItem;
-
-  const campoAssunto = Campos.assunto;
-  const campoSubAssunto = Campos.subAssunto;
-  const campoPalavraChave = Campos.palavraChave;
-  const campoSentencaDescritora = Campos.sentencaDescritora;
-  const campoObservacao = Campos.observacao;
-
-  const campoDiscriminacao = Campos.discriminacao;
-  const campoDificuldade = Campos.dificuldade;
-  const campoAcertoCasual = Campos.acertoCasual;
-  const campoParametroBTransformado = Campos.parametroBTransformado;
-  const campoMediaDesvioPadrao = Campos.mediaDesvioPadrao;
-
-  // watchers
-  const areaConhecimentoIdForm = Form.useWatch(Campos.areaConhecimento, form);
-  const disciplinaIdForm = Form.useWatch(Campos.disciplinas, form);
-  const matrizIdForm = Form.useWatch(Campos.matriz, form);
-
-  // Debug logs removidos - usando método obterDadosItem(id) para carregar dados
-
-  const competenciaIdForm = Form.useWatch(Campos.competencia, form);
-
-  const dificuldadeSugeridaIdForm = Form.useWatch(campoDificuldadeSugerida, form);
-  const nivelItemIdForm = Form.useWatch(campoNivelItem, form);
-  const quantidadeAlternativasForm = Form.useWatch(campoQuantidadeAlternativas, form);
-
-  const assuntoIdForm = Form.useWatch(campoAssunto, form);
+  // 🚀 WATCHERS REMOVIDOS - agora usa onChange direto!
+  // Eliminação completa de Form.useWatch para evitar conflitos e re-renders
 
   // listas
   const [listaAreaConhecimento, setListaAreaConhecimento] = useState<DefaultOptionType[]>([]);
@@ -99,343 +63,432 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
   // ✅ Estado local para palavras-chave (necessário para exibição das tags)
   const [palavrasChave, setPalavrasChave] = useState<string[] | undefined>([]);
 
-  // const [objTabConfiguracaoItemNovo, setObjTabConfiguracaoItemNovo] =
-  //   useState<ConfiguracaoItemNovoProps>({} as ConfiguracaoItemNovoProps);
+  // 🚀 HANDLERS onChange - Cascata limpa e sequencial
 
+  // Carrega Área de Conhecimento (inicial)
+  const carregarAreaConhecimento = useCallback(async () => {
+    const resposta = await configuracaoItemService.obterAreaConhecimento();
+    setListaAreaConhecimento(resposta?.length ? resposta : []);
+  }, []);
 
+  // 1️⃣ Área → Disciplinas
+  const handleAreaConhecimentoChange = useCallback(async (value: SelectValueType) => {
+    // Limpa campos dependentes
+    form?.setFieldValue(Campos.disciplinas, null);
+    form?.setFieldValue(Campos.matriz, null);
+    form?.setFieldValue(Campos.anoMatriz, null);
+    form?.setFieldValue(Campos.competencia, null);
+    form?.setFieldValue(Campos.habilidade, null);
+    form?.setFieldValue(Campos.assunto, null);
+    form?.setFieldValue(Campos.subAssunto, null);
 
-  //carregamento dos selects
-  const popularCampoSelectForm = useCallback(
-    async (
-      param: SelectValueType,
-      nomeCampo: Campos,
-      setLista: Dispatch<SetStateAction<DefaultOptionType[]>>,
-    ) => {
-      let resposta: DefaultOptionType[] = [];
-      const parametroValido = !validarCampoForm(param);
+    // Limpa listas dependentes
+    setListaDisciplinas([]);
+    setListaMatriz([]);
+    setListaAnosMatriz([]);
+    setListaCompetencias([]);
+    setListaHabilidades([]);
+    setListaAssuntos([]);
+    setListaSubAssuntos([]);
 
-      // Sinaliza início de carregamento para a cascata automática
-      switch (nomeCampo) {
-        case Campos.areaConhecimento:
-          localStorage.setItem('aguardandoAreaConhecimento', 'true');
-          break;
-        case Campos.disciplinas:
-          localStorage.setItem('aguardandoDisciplinas', 'true');
-          break;
-        case Campos.matriz:
-          localStorage.setItem('aguardandoMatriz', 'true');
-          break;
-        case Campos.competencia:
-          localStorage.setItem('aguardandoCompetencias', 'true');
-          break;
-        case Campos.habilidade:
-          localStorage.setItem('aguardandoHabilidade', 'true');
-          break;
-        case Campos.assunto:
-          localStorage.setItem('aguardandoAssuntos', 'true');
-          break;
-        case Campos.subAssunto:
-          localStorage.setItem('aguardandoSubAssuntos', 'true');
-          break;
-        default:
-          break;
-      }
-
-      switch (nomeCampo) {
-        case Campos.areaConhecimento:
-          resposta = await configuracaoItemService.obterAreaConhecimento();
-          break;
-        case Campos.disciplinas:
-          if (parametroValido)
-            resposta = await configuracaoItemService.obterDisciplinas(param);
-          break;
-        case Campos.matriz:
-          if (parametroValido)
-            resposta = await configuracaoItemService.obterMatriz(param);
-          break;
-        case Campos.competencia:
-          if (parametroValido)
-            resposta = await configuracaoItemService.obterCompetenciasMatriz(param);
-          break;
-        case Campos.habilidade:
-          if (parametroValido)
-            resposta = await configuracaoItemService.obterHabilidadesCompetencia(param);
-          break;
-        case Campos.quantidadeAlternativas:
-          resposta = await configuracaoItemService.obterQuantidadeAlternativas();
-          break;
-        case Campos.tipoItem:
-          resposta = await configuracaoItemService.obterTiposItem();
-          break;
-        case Campos.situacaoItem:
-          resposta = await configuracaoItemService.obterSituacoesItem();
-          break;
-        case Campos.assunto:
-          if (parametroValido)
-            resposta = await configuracaoItemService.obterAssuntos(param);
-          break;
-        case Campos.subAssunto:
-          if (parametroValido)
-            resposta = await configuracaoItemService.obterSubAssuntos(param);
-          break;
-        default:
-          break;
-      }
-
+    // Carrega disciplinas se área selecionada
+    if (value && !validarCampoForm(value)) {
+      const resposta = await configuracaoItemService.obterDisciplinas(value);
       if (resposta?.length) {
-        setLista(resposta);
+        setListaDisciplinas(resposta);
+        if (resposta.length === 1) {
+          form?.setFieldValue(Campos.disciplinas, resposta[0].value);
+        }
       } else {
-        setLista([]);
+        setListaDisciplinas([]);
+      }
+    }
+  }, [form]);
+
+  // 2️⃣ Disciplina → Matriz + Assuntos
+  const handleDisciplinaChange = useCallback(async (value: SelectValueType) => {
+    // Limpa campos dependentes
+    form?.setFieldValue(Campos.matriz, null);
+    form?.setFieldValue(Campos.anoMatriz, null);
+    form?.setFieldValue(Campos.competencia, null);
+    form?.setFieldValue(Campos.habilidade, null);
+    form?.setFieldValue(Campos.assunto, null);
+    form?.setFieldValue(Campos.subAssunto, null);
+
+    // Limpa listas dependentes
+    setListaMatriz([]);
+    setListaAnosMatriz([]);
+    setListaCompetencias([]);
+    setListaHabilidades([]);
+    setListaAssuntos([]);
+    setListaSubAssuntos([]);
+
+    if (value && !validarCampoForm(value)) {
+      // Carrega Matriz e Assuntos em paralelo
+      const [respostaMatriz, respostaAssuntos] = await Promise.all([
+        configuracaoItemService.obterMatriz(value),
+        configuracaoItemService.obterAssuntos(value)
+      ]);
+
+      // Matriz
+      if (respostaMatriz?.length) {
+        setListaMatriz(respostaMatriz);
+        if (respostaMatriz.length === 1) {
+          form?.setFieldValue(Campos.matriz, respostaMatriz[0].value);
+        }
+      } else {
+        setListaMatriz([]);
       }
 
-      // Sinaliza fim de carregamento (sucesso ou vazio) para a cascata automática
-      switch (nomeCampo) {
-        case Campos.areaConhecimento:
-          localStorage.removeItem('aguardandoAreaConhecimento');
-          break;
-        case Campos.disciplinas:
-          localStorage.removeItem('aguardandoDisciplinas');
-          break;
-        case Campos.matriz:
-          localStorage.removeItem('aguardandoMatriz');
-          break;
-        case Campos.competencia:
-          localStorage.removeItem('aguardandoCompetencias');
-          break;
-        case Campos.habilidade:
-          localStorage.removeItem('aguardandoHabilidade');
-          break;
-        case Campos.assunto:
-          localStorage.removeItem('aguardandoAssuntos');
-          break;
-        case Campos.subAssunto:
-          localStorage.removeItem('aguardandoSubAssuntos');
-          break;
-        default:
-          break;
+      // Assuntos
+      if (respostaAssuntos?.length) {
+        setListaAssuntos(respostaAssuntos);
+        if (respostaAssuntos.length === 1) {
+          form?.setFieldValue(Campos.assunto, respostaAssuntos[0].value);
+        }
+      } else {
+        setListaAssuntos([]);
       }
-    },
-    [form],
-  );
-
-  const obterAnosMatriz = useCallback(async () => {
-    if (!matrizIdForm) {
-      setListaAnosMatriz([]);
-      return;
     }
-    // Sinaliza início do carregamento de anos de matriz
-    localStorage.setItem('aguardandoAnoMatriz', 'true');
-    const resposta = await configuracaoItemService.obterAnosMatriz(matrizIdForm);
-    if (resposta?.length) {
-      setListaAnosMatriz(resposta);
-      if (resposta.length === 1) form?.setFieldValue(campoAnoMatriz, resposta[0].value);
-    } else {
-      setListaAnosMatriz([]);
-      form?.setFieldValue(campoAnoMatriz, null);
+  }, [form]);
+
+  // 3️⃣ Matriz → Ano + Competências
+  const handleMatrizChange = useCallback(async (value: SelectValueType) => {
+    // Limpa campos dependentes
+    form?.setFieldValue(Campos.anoMatriz, null);
+    form?.setFieldValue(Campos.competencia, null);
+    form?.setFieldValue(Campos.habilidade, null);
+
+    // Limpa listas dependentes
+    setListaAnosMatriz([]);
+    setListaCompetencias([]);
+    setListaHabilidades([]);
+
+    if (value && !validarCampoForm(value)) {
+      // Carrega Anos e Competências em paralelo
+      const [respostaAnos, respostaCompetencias] = await Promise.all([
+        configuracaoItemService.obterAnosMatriz(value),
+        configuracaoItemService.obterCompetenciasMatriz(value)
+      ]);
+
+      // Anos da matriz
+      if (respostaAnos?.length) {
+        setListaAnosMatriz(respostaAnos);
+        if (respostaAnos.length === 1) {
+          form?.setFieldValue(Campos.anoMatriz, respostaAnos[0].value);
+        }
+      }
+
+      // Competências
+      if (respostaCompetencias?.length) {
+        setListaCompetencias(respostaCompetencias);
+        if (respostaCompetencias.length === 1) {
+          form?.setFieldValue(Campos.competencia, respostaCompetencias[0].value);
+        }
+      } else {
+        setListaCompetencias([]);
+      }
     }
-    // Sinaliza fim do carregamento de anos de matriz
-    localStorage.removeItem('aguardandoAnoMatriz');
-  }, [form, matrizIdForm, campoAnoMatriz]);
+  }, [form]);
 
-  // ✅ Dificuldade sugerida - HTML FIXO apenas (máxima performance)
+  // 4️⃣ Competência → Habilidades
+  const handleCompetenciaChange = useCallback(async (value: SelectValueType) => {
+    // Limpa campos dependentes
+    form?.setFieldValue(Campos.habilidade, null);
+    setListaHabilidades([]);
 
-  // nivelitems
-  const obterListaNivelItem = useCallback(async () => {
-    const resposta = await configuracaoItemService.obterNivelItem();
-    if (resposta?.length > 0) {
-      setListaNivelItem(resposta);
-    } else {
-      setListaNivelItem([]);
-      form?.setFieldValue(campoNivelItem, null);
+    if (value && !validarCampoForm(value)) {
+      const resposta = await configuracaoItemService.obterHabilidadesCompetencia(value);
+      if (resposta?.length) {
+        setListaHabilidades(resposta);
+        if (resposta.length === 1) {
+          form?.setFieldValue(Campos.habilidade, resposta[0].value);
+        }
+      } else {
+        setListaHabilidades([]);
+      }
     }
-  }, [form, campoNivelItem]);
+  }, [form]);
 
-  //fim carregamento dos selects
+  // 5️⃣ Assunto → SubAssuntos
+  const handleAssuntoChange = useCallback(async (value: SelectValueType) => {
+    // Limpa campos dependentes
+    form?.setFieldValue(Campos.subAssunto, null);
+    setListaSubAssuntos([]);
 
-  //cascata dos selects
-  const obterAreaConhecimento = useCallback(() => {
-    popularCampoSelectForm(null, campoAreaConhecimento, setListaAreaConhecimento);
-  }, [campoAreaConhecimento, popularCampoSelectForm]);
-
-  useEffect(() => {
-    obterAreaConhecimento();
-  }, [obterAreaConhecimento]);
-
-  // ✅ Cascata limpa: área → disciplinas
-  useEffect(() => {
-    if (areaConhecimentoIdForm) {
-      popularCampoSelectForm(areaConhecimentoIdForm, campoDisciplina, setListaDisciplinas);
+    if (value && !validarCampoForm(value)) {
+      const resposta = await configuracaoItemService.obterSubAssuntos(value);
+      if (resposta?.length) {
+        setListaSubAssuntos(resposta);
+        if (resposta.length === 1) {
+          form?.setFieldValue(Campos.subAssunto, resposta[0].value);
+        }
+      } else {
+        setListaSubAssuntos([]);
+      }
     }
-  }, [areaConhecimentoIdForm, campoDisciplina, popularCampoSelectForm]);
+  }, [form]);
 
-  // 📡 Sinaliza quando disciplinas carregaram
-  useEffect(() => {
-    if (localStorage.getItem('aguardandoDisciplinas') === 'true' && listaDisciplinas.length > 0) {
-      localStorage.removeItem('aguardandoDisciplinas');
-    }
-  }, [listaDisciplinas.length]);
+  // 🚀 Carregamento de listas básicas (sem cascata)
+  const carregarListasBasicas = useCallback(async () => {
+    const [nivelItem, quantidadeAlternativas, tiposItem, situacoesItem] = await Promise.all([
+      configuracaoItemService.obterNivelItem(),
+      configuracaoItemService.obterQuantidadeAlternativas(),
+      configuracaoItemService.obterTiposItem(),
+      configuracaoItemService.obterSituacoesItem()
+    ]);
 
-  // ✅ Cascata limpa: disciplina → matriz
-  useEffect(() => {
-    if (disciplinaIdForm) {
-      popularCampoSelectForm(disciplinaIdForm, campoMatriz, setListaMatriz);
-    }
-  }, [disciplinaIdForm, campoMatriz, popularCampoSelectForm]);
+    setListaNivelItem(nivelItem?.length ? nivelItem : []);
+    setListaQuantidadeAlternativas(quantidadeAlternativas?.length ? quantidadeAlternativas : []);
+    setListaTiposItem(tiposItem?.length ? tiposItem : []);
+    setListaSituacoesItem(situacoesItem?.length ? situacoesItem : []);
+  }, []);
 
-  // 📡 Sinaliza quando matriz carregou
-  useEffect(() => {
-    if (localStorage.getItem('aguardandoMatriz') === 'true' && listaMatriz.length > 0) {
-      localStorage.removeItem('aguardandoMatriz');
-    }
-  }, [listaMatriz.length]);
 
-  useEffect(() => {
-    obterAnosMatriz();
-  }, [matrizIdForm, campoAnoMatriz, obterAnosMatriz]);
-
-  // ✅ Cascata limpa: matriz → competências
-  useEffect(() => {
-    if (matrizIdForm) {
-      popularCampoSelectForm(matrizIdForm, campoCompetencia, setListaCompetencias);
-    }
-  }, [matrizIdForm, campoCompetencia, popularCampoSelectForm]);
-
-  // 📡 Sinaliza quando competências carregaram
-  useEffect(() => {
-    if (localStorage.getItem('aguardandoCompetencias') === 'true' && listaCompetencias.length > 0) {
-      localStorage.removeItem('aguardandoCompetencias');
-    }
-  }, [listaCompetencias.length]);
-
-  // 📡 Sinaliza quando competências habilidade
-  useEffect(() => {
-    if (localStorage.getItem('aguardandoHabilidade') === 'true' && listaHabilidades.length > 0) {
-      localStorage.removeItem('aguardandoHabilidade');
-    }
-  }, [listaHabilidades.length]);
-
-  useEffect(() => {
-    popularCampoSelectForm(competenciaIdForm, campoHabilidade, setListaHabilidades);
-  }, [competenciaIdForm, campoHabilidade, popularCampoSelectForm]);
-
-  useEffect(() => {
-    if (disciplinaIdForm) {
-      popularCampoSelectForm(disciplinaIdForm, campoAssunto, setListaAssuntos);
-    }
-  }, [disciplinaIdForm, popularCampoSelectForm, campoAssunto]);
-
-  // ✅ Sinaliza quando assuntos carregam (para cascata automática)
-  useEffect(() => {
-    if (listaAssuntos?.length > 0) {
-      localStorage.removeItem('aguardandoAssuntos');
-    }
-  }, [listaAssuntos]);
-
-  useEffect(() => {
-    if (assuntoIdForm) {
-      popularCampoSelectForm(assuntoIdForm, campoSubAssunto, setListaSubAssuntos);
-    }
-  }, [assuntoIdForm, popularCampoSelectForm, campoSubAssunto]);
-
-  // ✅ Sinaliza quando subassuntos carregam (para cascata automática)
-  useEffect(() => {
-    if (listaSubAssuntos?.length > 0) {
-      localStorage.removeItem('aguardandoSubAssuntos');
-    }
-  }, [listaSubAssuntos]);
-
-  // ✅ Sinaliza quando anos da matriz carregam (para cascata automática)
-  useEffect(() => {
-    if (listaAnosMatriz?.length > 0) {
-      localStorage.removeItem('aguardandoAnoMatriz');
-    }
-  }, [listaAnosMatriz]);
-
-  // 🔄 Watch do campo palavrasChave para sincronizar com estado local
-  const valorPalavrasChaveFormulario = Form.useWatch(campoPalavraChave, form);
-  
-  useEffect(() => {
-    console.log('🔍 FormularioUnico - Valor palavrasChave mudou:', {
-      valorFormulario: valorPalavrasChaveFormulario,
-      tipoValor: typeof valorPalavrasChaveFormulario,
-      isArray: Array.isArray(valorPalavrasChaveFormulario),
-      estadoAtual: palavrasChave
-    });
-    
-    if (valorPalavrasChaveFormulario && Array.isArray(valorPalavrasChaveFormulario)) {
-      setPalavrasChave(valorPalavrasChaveFormulario);
-      console.log('✅ Estado palavrasChave atualizado via watch:', valorPalavrasChaveFormulario);
-    } else if (!valorPalavrasChaveFormulario) {
-      // Se não há valor, limpa o estado
-      setPalavrasChave([]);
-      console.log('🗑️ Estado palavrasChave limpo via watch');
-    }
-  }, [valorPalavrasChaveFormulario]);
 
   //fim cascata dos selects
 
+  // 🔄 CASCATA AUTOMÁTICA - Executada quando há dados no localStorage
+  const executarCascataAutomatica = useCallback(async () => {
+    console.log('🔄 Iniciando cascata automática...');
 
-  // Os Efeitos
-  // ✅ Reset inteligente: só reseta se REALMENTE vazio E primeira vez carregando E NÃO vindo de processo especial
+    try {
+      const itemSalvoStr = localStorage.getItem('itemAtual');
+      if (!itemSalvoStr) {
+        console.log('📂 Nenhum dados no localStorage - cascata automática cancelada');
+        return;
+      }
+
+      const itemSalvo = JSON.parse(itemSalvoStr);
+      const config = itemSalvo.configuracao;
+
+      if (!config) {
+        console.log('⚠️ Configuração não encontrada no localStorage');
+        return;
+      }
+
+      console.log('📋 Dados encontrados no localStorage:', config);
+
+      // 🔄 Sequência de cascata automática (igual manual, mas sem interação do usuário)
+
+      // 1️⃣ Área → carrega disciplinas
+      if (config.areaConhecimento) {
+        console.log('📝 [1/7] Processando área do conhecimento...');
+        form?.setFieldValue(Campos.areaConhecimento, config.areaConhecimento);
+
+        const resposta = await configuracaoItemService.obterDisciplinas(config.areaConhecimento);
+        if (resposta?.length) {
+          setListaDisciplinas(resposta);
+          if (resposta.length === 1) {
+            form?.setFieldValue(Campos.disciplinas, resposta[0].value);
+            console.log('✅ Auto-selecionada disciplina única:', resposta[0].value);
+          }
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 300)); // Aguarda processamento
+      }
+
+      // 2️⃣ Disciplina → carrega matriz + assuntos
+      if (config.disciplina) {
+        console.log('📝 [2/7] Processando disciplina...');
+        form?.setFieldValue(Campos.disciplinas, config.disciplina);
+
+        const [respostaMatriz, respostaAssuntos] = await Promise.all([
+          configuracaoItemService.obterMatriz(config.disciplina),
+          configuracaoItemService.obterAssuntos(config.disciplina)
+        ]);
+
+        // Matriz
+        if (respostaMatriz?.length) {
+          setListaMatriz(respostaMatriz);
+          if (respostaMatriz.length === 1) {
+            form?.setFieldValue(Campos.matriz, respostaMatriz[0].value);
+            console.log('✅ Auto-selecionada matriz única:', respostaMatriz[0].value);
+          }
+        }
+
+        // Assuntos
+        if (respostaAssuntos?.length) {
+          setListaAssuntos(respostaAssuntos);
+          if (respostaAssuntos.length === 1) {
+            form?.setFieldValue(Campos.assunto, respostaAssuntos[0].value);
+            console.log('✅ Auto-selecionado assunto único:', respostaAssuntos[0].value);
+          }
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 300));
+      }
+
+      // 3️⃣ Matriz → carrega anos + competências
+      if (config.matriz) {
+        console.log('📝 [3/7] Processando matriz...');
+        form?.setFieldValue(Campos.matriz, config.matriz);
+
+        const [respostaAnos, respostaCompetencias] = await Promise.all([
+          configuracaoItemService.obterAnosMatriz(config.matriz),
+          configuracaoItemService.obterCompetenciasMatriz(config.matriz)
+        ]);
+
+        // Anos da matriz
+        if (respostaAnos?.length) {
+          setListaAnosMatriz(respostaAnos);
+          if (respostaAnos.length === 1) {
+            form?.setFieldValue(Campos.anoMatriz, respostaAnos[0].value);
+            console.log('✅ Auto-selecionado ano único:', respostaAnos[0].value);
+          }
+        }
+
+        // Competências
+        if (respostaCompetencias?.length) {
+          setListaCompetencias(respostaCompetencias);
+          if (respostaCompetencias.length === 1) {
+            form?.setFieldValue(Campos.competencia, respostaCompetencias[0].value);
+            console.log('✅ Auto-selecionada competência única:', respostaCompetencias[0].value);
+          }
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 300));
+      }
+
+      // 4️⃣ Ano da matriz (se ainda não foi definido)
+      if (config.anoMatriz && form?.getFieldValue(Campos.anoMatriz) !== config.anoMatriz) {
+        console.log('📝 [4/7] Definindo ano da matriz específico...');
+        form?.setFieldValue(Campos.anoMatriz, config.anoMatriz);
+        await new Promise(resolve => setTimeout(resolve, 200));
+      }
+
+      // 5️⃣ Competência → carrega habilidades
+      if (config.competencia) {
+        console.log('📝 [5/7] Processando competência...');
+        form?.setFieldValue(Campos.competencia, config.competencia);
+
+        const resposta = await configuracaoItemService.obterHabilidadesCompetencia(config.competencia);
+        if (resposta?.length) {
+          setListaHabilidades(resposta);
+          if (resposta.length === 1) {
+            form?.setFieldValue(Campos.habilidade, resposta[0].value);
+            console.log('✅ Auto-selecionada habilidade única:', resposta[0].value);
+          }
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 300));
+      }
+
+      // 6️⃣ Assunto → carrega subassuntos
+      if (config.assunto) {
+        console.log('📝 [6/7] Processando assunto...');
+        form?.setFieldValue(Campos.assunto, config.assunto);
+
+        const resposta = await configuracaoItemService.obterSubAssuntos(config.assunto);
+        if (resposta?.length) {
+          setListaSubAssuntos(resposta);
+          if (resposta.length === 1) {
+            form?.setFieldValue(Campos.subAssunto, resposta[0].value);
+            console.log('✅ Auto-selecionado subassunto único:', resposta[0].value);
+          }
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 300));
+      }
+
+      // 7️⃣ Finalização - campos que não têm cascata
+      console.log('📝 [7/7] Definindo campos finais...');
+
+      if (config.habilidade) {
+        form?.setFieldValue(Campos.habilidade, config.habilidade);
+      }
+
+      if (config.subAssunto) {
+        form?.setFieldValue(Campos.subAssunto, config.subAssunto);
+      }
+
+      // Campos simples (sem cascata)
+      const camposSimples = {
+        situacaoItem: Campos.situacaoItem,
+        tipoItem: Campos.tipoItem,
+        quantidadeAlternativas: Campos.quantidadeAlternativas,
+        dificuldadeSugerida: Campos.dificuldadeSugerida,
+        nivelItem: Campos.nivelItem,
+        discriminacao: Campos.discriminacao,
+        dificuldade: Campos.dificuldade,
+        acertoCasual: Campos.acertoCasual,
+        palavrasChave: Campos.palavraChave,
+        parametroBTransformado: Campos.parametroBTransformado,
+        mediaDesvioPadrao: Campos.mediaDesvioPadrao,
+        sentencaDescritora: Campos.sentencaDescritora,
+        observacao: Campos.observacao,
+      };
+
+      Object.keys(camposSimples).forEach(key => {
+        const value = config[key];
+        const formFieldName = (camposSimples as any)[key];
+        if (value !== undefined && value !== null && formFieldName) {
+          form?.setFieldValue(formFieldName, value);
+          console.log(`📝 Campo ${formFieldName} restaurado:`, value);
+        }
+      });
+
+      // Palavras-chave (tratamento especial)
+      if (config.palavrasChave && Array.isArray(config.palavrasChave)) {
+        setPalavrasChave(config.palavrasChave);
+        form?.setFieldValue(Campos.palavraChave, config.palavrasChave);
+      }
+
+      console.log('✅ Cascata automática finalizada com sucesso!');
+
+    } catch (error) {
+      console.error('❌ Erro na cascata automática:', error);
+    }
+  }, [form]);
+
+  // Helper functions para validação de campos dependentes
+  const disciplinaIdForm = form?.getFieldValue(Campos.disciplinas);
+  const assuntoIdForm = form?.getFieldValue(Campos.assunto);
+
+  // ✅ useEffect - Carregamento inicial + Cascata Automática
   useEffect(() => {
-    const voltandoParaPrimeiraTela = localStorage.getItem('voltandoParaPrimeiraTela') === 'true';
+    const inicializarFormulario = async () => {
+      // 1️⃣ Carrega listas iniciais sempre
+      await Promise.all([
+        carregarAreaConhecimento(),
+        carregarListasBasicas()
+      ]);
 
-    if (!voltandoParaPrimeiraTela) {
+      // 2️⃣ Verifica se precisa executar cascata automática
+      const voltandoParaPrimeiraTela = localStorage.getItem('voltandoParaPrimeiraTela') === 'true';
+      const itemSalvoStr = localStorage.getItem('itemAtual');
+
+      if (voltandoParaPrimeiraTela || itemSalvoStr) {
+        console.log('🔄 Detectado dados no localStorage - executando cascata automática...');
+        localStorage.removeItem('voltandoParaPrimeiraTela'); // Limpa flag
+
+        // Aguarda um pouco para garantir que as listas iniciais foram carregadas
+        setTimeout(() => {
+          executarCascataAutomatica();
+        }, 500);
+
+        return; // Não faz reset se tem dados para carregar
+      }
+
+      // 3️⃣ Reset inteligente apenas se formulário vazio E sem dados no localStorage
       const valores = form?.getFieldsValue();
       const formularioVazio = !valores || Object.keys(valores).length === 0 ||
         Object.values(valores).every(v => !v || (Array.isArray(v) && v.length === 0));
 
-      // Só reseta se formulário TOTALMENTE vazio E lista carregou pela primeira vez
-      const primeiroCarregamento = listaAreaConhecimento.length > 0;
-
-      if (formularioVazio && primeiroCarregamento) {
-        // ✅ Delay pequeno para evitar conflito com outras validações
+      if (formularioVazio) {
+        console.log('🧹 Formulário vazio - aplicando reset limpo...');
         setTimeout(() => {
           form?.resetFields();
-          // Limpa erros de validação que possam ter aparecido
-          form?.setFields(Object.keys(form.getFieldsValue()).map(name => ({
+          form?.setFields(Object.keys(form?.getFieldsValue() || {}).map(name => ({
             name,
             errors: []
           })));
         }, 50);
-
-        // 🧹 Limpa flags de sessão quando reseta
-        sessionStorage.removeItem('populouViaVoltar');
       }
-    }
-  }, [form, listaAreaConhecimento]);
+    };
 
-  useEffect(() => {
-    // 🏗️ Carrega listas básicas no mount (dificuldade sugerida é HTML fixo)
-    obterListaNivelItem();
-    popularCampoSelectForm(null, campoQuantidadeAlternativas, setListaQuantidadeAlternativas);
-    popularCampoSelectForm(null, campoTipoItem, setListaTiposItem);
-    popularCampoSelectForm(null, campoSituacaoItem, setListaSituacoesItem);
-  }, []);
-
-
-
-
-
-  // ✅ UseEffect simples: carrega listas quando campos mudam (cascata normal)
-  // ✅ UseEffect para carregar Área de Conhecimento quando componente monta
-  useEffect(() => {
-    if (listaAreaConhecimento.length === 0) {
-      popularCampoSelectForm(null, campoAreaConhecimento, setListaAreaConhecimento);
-    }
-  }, []);
-
-  // 📡 Sinaliza quando área de conhecimento carregou (para o "Voltar")
-  useEffect(() => {
-    if (localStorage.getItem('aguardandoAreaConhecimento') === 'true' && listaAreaConhecimento.length > 0) {
-      localStorage.removeItem('aguardandoAreaConhecimento');
-    }
-  }, [listaAreaConhecimento.length]);
-
-
-
-  // �️ UseEffects para cascata simples de selects (sem complexidade de "Voltar")
-
+    inicializarFormulario();
+  }, [executarCascataAutomatica]); // Dependência da função de cascata
 
   return (
     <>
@@ -450,19 +503,21 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
               <SelectForm
                 form={form}
                 options={listaAreaConhecimento}
-                nomeCampo={campoAreaConhecimento}
-                label={'Área de conhecimento'}
+                nomeCampo={Campos.areaConhecimento}
+                label="Área de conhecimento"
                 campoObrigatorio={true}
                 disabled={false}
+                onChange={handleAreaConhecimentoChange}
               />
             </Col>
             <Col xs={24} md={12} className='card-campo'>
               <SelectForm
                 form={form}
                 options={listaDisciplinas}
-                nomeCampo={campoDisciplina}
-                label={'Componente curricular'}
+                nomeCampo={Campos.disciplinas}
+                label="Componente curricular"
                 campoObrigatorio={true}
+                onChange={handleDisciplinaChange}
               />
             </Col>
           </Row>
@@ -471,17 +526,18 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
               <SelectForm
                 form={form}
                 options={listaMatriz}
-                nomeCampo={campoMatriz}
-                label={'Matriz de avaliação'}
+                nomeCampo={Campos.matriz}
+                label="Matriz de avaliação"
                 campoObrigatorio={true}
+                onChange={handleMatrizChange}
               />
             </Col>
             <Col xs={24} md={12} className='card-campo'>
               <SelectForm
                 form={form}
                 options={listaAnosMatriz}
-                nomeCampo={campoAnoMatriz}
-                label={'Ano (ano escolar)'}
+                nomeCampo={Campos.anoMatriz}
+                label="Ano (ano escolar)"
                 campoObrigatorio={true}
               />
             </Col>
@@ -500,16 +556,17 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
               <SelectForm
                 form={form}
                 options={listaCompetencias}
-                nomeCampo={campoCompetencia}
+                nomeCampo={Campos.competencia}
                 label="Competência"
                 campoObrigatorio={true}
+                onChange={handleCompetenciaChange}
               />
             </Col>
             <Col xs={24} md={12} className="card-campo">
               <SelectForm
                 form={form}
                 options={listaHabilidades}
-                nomeCampo={campoHabilidade}
+                nomeCampo={Campos.habilidade}
                 label="Habilidade"
                 campoObrigatorio={true}
               />
@@ -526,8 +583,8 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
             <Col xs={24} md={12} className="card-campo">
               <Form.Item
                 label="Dificuldade sugerida"
-                name={campoDificuldadeSugerida}
-                rules={ruleCampoObrigatorioForm(dificuldadeSugeridaIdForm)}
+                name={Campos.dificuldadeSugerida}
+                rules={ruleCampoObrigatorioForm(form?.getFieldValue(Campos.dificuldadeSugerida))}
               >
                 {/* 🏃‍♂️ HTML FIXO: Opções conhecidas para carregamento instantâneo */}
                 <Radio.Group
@@ -535,8 +592,7 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
                   id="rblDificuldadeSugerida"
                   buttonStyle="solid"
                   optionType="button"
-                  value={dificuldadeSugeridaIdForm}
-                  onChange={(e) => form?.setFieldValue(campoDificuldadeSugerida, e.target.value)}
+                  onChange={(e) => form?.setFieldValue(Campos.dificuldadeSugerida, e.target.value)}
                 >
                   <Radio value={5}>1 - Muito Fácil</Radio>
                   <Radio value={1}>2 - Fácil</Radio>
@@ -551,7 +607,7 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
               <SelectForm
                 form={form}
                 options={listaNivelItem}
-                nomeCampo={campoNivelItem}
+                nomeCampo={Campos.nivelItem}
                 label="Nível do Item"
                 campoObrigatorio={false}
                 labelInValue={false}
@@ -564,10 +620,10 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
               <SelectForm
                 form={form}
                 options={listaQuantidadeAlternativas}
-                nomeCampo={campoQuantidadeAlternativas}
+                nomeCampo={Campos.quantidadeAlternativas}
                 label="Categoria do item e quantidade de alternativas*"
                 campoObrigatorio={true}
-                disabled={!nivelItemIdForm}
+                disabled={!form?.getFieldValue(Campos.nivelItem)}
                 labelInValue={false}
               />
             </Col>
@@ -579,7 +635,7 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
                 form={form}
                 options={listaTiposItem}
                 campoObrigatorio={true}
-                disabled={!quantidadeAlternativasForm}
+                disabled={!form?.getFieldValue(Campos.quantidadeAlternativas)}
               />
               <div className="caracteristicasItemTexto">
                 <p>
@@ -593,7 +649,7 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
               <SelectForm
                 form={form}
                 options={listaSituacoesItem}
-                nomeCampo={campoSituacaoItem}
+                nomeCampo={Campos.situacaoItem}
                 label="Situação do item"
                 campoObrigatorio={true}
                 labelInValue={false}
@@ -614,18 +670,19 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
               <SelectForm
                 form={form}
                 options={listaAssuntos}
-                nomeCampo={campoAssunto}
+                nomeCampo={Campos.assunto}
                 label={'Assunto'}
                 campoObrigatorio={false}
                 disabled={!disciplinaIdForm}
                 labelInValue={false}
+                onChange={handleAssuntoChange}
               />
             </Col>
             <Col xs={24} md={8} className='card-campo'>
               <SelectForm
                 form={form}
                 options={listaSubAssuntos}
-                nomeCampo={campoSubAssunto}
+                nomeCampo={Campos.subAssunto}
                 label={'Subassunto'}
                 campoObrigatorio={false}
                 disabled={!assuntoIdForm}
@@ -635,7 +692,7 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
             <Col xs={24} md={8} className='card-campo'>
               <Form.Item
                 label='Palavra-chave'
-                name={campoPalavraChave}
+                name={Campos.palavraChave}
                 // Campo não obrigatório - sem validação obrigatória
                 rules={[]}
               >
@@ -645,7 +702,7 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
                   setTags={(v) => {
                     const novasTags = v || [];
                     setPalavrasChave(novasTags);
-                    form?.setFieldValue(campoPalavraChave, novasTags);
+                    form?.setFieldValue(Campos.palavraChave, novasTags);
                   }}
                 />
               </Form.Item>
@@ -659,7 +716,7 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
             <Col xs={24} md={12} className='card-campo'>
               <Form.Item
                 label='Sentença Descritora'
-                name={campoSentencaDescritora}
+                name={Campos.sentencaDescritora}
               >
                 <TextArea
                   rows={4}
@@ -675,7 +732,7 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
             <Col xs={24} md={12} className='card-campo'>
               <Form.Item
                 label='Observação'
-                name={campoObservacao}
+                name={Campos.observacao}
               >
                 <TextArea
                   rows={4}
@@ -703,33 +760,33 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
             <Col xs={24} md={8} className='card-campo'>
               <Form.Item
                 label='Discriminação'
-                name={campoDiscriminacao}
+                name={Campos.discriminacao}
               >
                 <CampoNumero
-                  value={form?.getFieldValue(campoDiscriminacao)}
-                  onChange={(valor) => form?.setFieldValue(campoDiscriminacao, valor)}
+                  value={form?.getFieldValue(Campos.discriminacao)}
+                  onChange={(valor) => form?.setFieldValue(Campos.discriminacao, valor)}
                   placeholder='Exemplo: 1' />
               </Form.Item>
             </Col>
             <Col xs={24} md={8} className='card-campo'>
               <Form.Item
                 label='Dificuldade'
-                name={campoDificuldade}
+                name={Campos.dificuldade}
               >
                 <CampoNumero
-                  value={form?.getFieldValue(campoDificuldade)}
-                  onChange={(valor) => form?.setFieldValue(campoDificuldade, valor)}
+                  value={form?.getFieldValue(Campos.dificuldade)}
+                  onChange={(valor) => form?.setFieldValue(Campos.dificuldade, valor)}
                   placeholder='Exemplo: 2' />
               </Form.Item>
             </Col>
             <Col xs={24} md={8} className='card-campo'>
               <Form.Item
                 label='Acerto casual'
-                name={campoAcertoCasual}
+                name={Campos.acertoCasual}
               >
                 <CampoNumero
-                  value={form?.getFieldValue(campoAcertoCasual)}
-                  onChange={(valor) => form?.setFieldValue(campoAcertoCasual, valor)}
+                  value={form?.getFieldValue(Campos.acertoCasual)}
+                  onChange={(valor) => form?.setFieldValue(Campos.acertoCasual, valor)}
                   placeholder='Exemplo: 3' />
               </Form.Item>
             </Col>
@@ -739,11 +796,11 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
             <Col xs={24} md={12} className='card-campo'>
               <Form.Item
                 label='Parâmetro b transformado'
-                name={campoParametroBTransformado}
+                name={Campos.parametroBTransformado}
               >
                 <CampoNumero
-                  value={form?.getFieldValue(campoParametroBTransformado)}
-                  onChange={(valor) => form?.setFieldValue(campoParametroBTransformado, valor)}
+                  value={form?.getFieldValue(Campos.parametroBTransformado)}
+                  onChange={(valor) => form?.setFieldValue(Campos.parametroBTransformado, valor)}
                   placeholder='Exemplo: 4'
                 />
               </Form.Item>
@@ -756,11 +813,11 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
             <Col xs={24} md={12} className='card-campo'>
               <Form.Item
                 label='Média e desvio padrão'
-                name={campoMediaDesvioPadrao}
+                name={Campos.mediaDesvioPadrao}
               >
                 <CampoNumero
-                  value={form?.getFieldValue(campoMediaDesvioPadrao)}
-                  onChange={(valor) => form?.setFieldValue(campoMediaDesvioPadrao, valor)}
+                  value={form?.getFieldValue(Campos.mediaDesvioPadrao)}
+                  onChange={(valor) => form?.setFieldValue(Campos.mediaDesvioPadrao, valor)}
                   placeholder="Exemplo: 5"
                 />
               </Form.Item>
