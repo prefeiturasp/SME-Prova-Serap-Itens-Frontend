@@ -102,7 +102,7 @@ const ListagemResumoItemComponent: React.FC<listagemResumoItemProps> = ({ dados 
           <p>
             {item.textoBase && item.textoBase.trim() !== '' ? (
               <div dangerouslySetInnerHTML={{ __html: item.textoBase }} />
-            ) : (
+            ) : ( 
               <i>Texto base não cadastrado</i>
             )}
           </p>
