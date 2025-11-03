@@ -106,7 +106,7 @@
 }
 
 .tag-input {
-    background: #5A94D8;
+    background: #5A94D8 !important;
     color: #ffffff;
     padding: 0.3em 0 0.5em 0.5em;
 }
