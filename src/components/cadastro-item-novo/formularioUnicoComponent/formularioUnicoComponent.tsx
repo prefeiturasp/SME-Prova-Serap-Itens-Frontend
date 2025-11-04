@@ -355,20 +355,10 @@ const FormularioUnico: React.FC<FormProps> = ({ form }) => {
   const valorPalavrasChaveFormulario = Form.useWatch(campoPalavraChave, form);
   
   useEffect(() => {
-    console.log('🔍 FormularioUnico - Valor palavrasChave mudou:', {
-      valorFormulario: valorPalavrasChaveFormulario,
-      tipoValor: typeof valorPalavrasChaveFormulario,
-      isArray: Array.isArray(valorPalavrasChaveFormulario),
-      estadoAtual: palavrasChave
-    });
-    
     if (valorPalavrasChaveFormulario && Array.isArray(valorPalavrasChaveFormulario)) {
       setPalavrasChave(valorPalavrasChaveFormulario);
-      console.log('✅ Estado palavrasChave atualizado via watch:', valorPalavrasChaveFormulario);
     } else if (!valorPalavrasChaveFormulario) {
-      // Se não há valor, limpa o estado
       setPalavrasChave([]);
-      console.log('🗑️ Estado palavrasChave limpo via watch');
     }
   }, [valorPalavrasChaveFormulario]);
 
