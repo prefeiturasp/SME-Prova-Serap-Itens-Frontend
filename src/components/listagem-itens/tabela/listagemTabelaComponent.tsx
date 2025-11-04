@@ -1,4 +1,4 @@
-import { Card, Pagination, Select, Tag } from 'antd';
+import { Badge, Card, Pagination, Select, Tag } from 'antd';
 import React from 'react';
 import './listagemTabelaComponent.css';
 import type { ItemListagemDto } from '~/domain/dto/item-listagem-dto';
@@ -11,6 +11,7 @@ interface ListagemTabelaProps {
   totalRegistros: number;
   setPagina: (p: number) => void;
   itensPorPagina: number;
+  quantidadeFiltros: number;
   onItemClick?: (id: string) => void;
   selecionaPaginasOnChange: (value: any, option: any) => void;
 }
@@ -21,6 +22,7 @@ const ListagemTabela: React.FC<ListagemTabelaProps> = ({
   totalRegistros,
   setPagina,
   itensPorPagina,
+  quantidadeFiltros,
   onItemClick,
   selecionaPaginasOnChange,
 }) => {
@@ -55,7 +57,6 @@ const ListagemTabela: React.FC<ListagemTabelaProps> = ({
         return {};
     }
   };
-
   const inicio = (pagina - 1) * itensPorPagina;
   const fim = inicio + itensPorPagina;
 
@@ -70,8 +71,13 @@ const ListagemTabela: React.FC<ListagemTabelaProps> = ({
             </div>
           </div>
           <div className='listagem-tabela-filtrar'>
-            <img src={iconFilter} alt='Editar' width={24} height={24} />
-            FILTRAR
+            <img src={iconFilter} alt='Filtrar' width={24} height={24} />
+            <span className='filtro-label'>
+              FILTRAR
+              {quantidadeFiltros > 0 ? (
+                <Badge count={quantidadeFiltros} className='badge-quantidade-filtros' />
+              ) : null}
+            </span>
           </div>
         </div>
 

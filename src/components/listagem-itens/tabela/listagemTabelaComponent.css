@@ -38,16 +38,47 @@
 }
 
 .listagem-tabela-filtrar {
-  white-space: nowrap;
-  width: auto;
-  padding-left: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #5a94d8;
   font-family: Roboto;
   font-weight: 500;
   font-size: 20px;
-  color: #5a94d8;
-  display: flex;
+  position: relative;
+  cursor: pointer;
+}
+
+.filtro-label {
+  position: relative;
+  display: inline-flex;
   align-items: center;
-  justify-content: flex-end;
+  white-space: nowrap;
+}
+
+.filtro-label .badge-quantidade-filtros {
+  position: absolute;
+  top: 2px;
+  left: calc(100% + 1px);
+  right: auto;
+  z-index: 3;
+  pointer-events: auto;
+}
+
+.filtro-label .badge-quantidade-filtros .ant-badge-count,
+.filtro-label .badge-quantidade-filtros .ant-scroll-number {
+  display: inline-block;
+  transform: none !important;
+  transform-origin: left center !important;
+  min-width: 14px;
+  height: 14px;
+  line-height: 14px;
+  font-family: Roboto;
+  font-weight: 700;
+  font-size: 10px;
+  padding: 0 6px;
+  white-space: nowrap;
+  box-sizing: border-box;
 }
 
 .listagem-item-tabela {
