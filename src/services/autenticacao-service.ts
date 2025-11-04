@@ -8,7 +8,7 @@ const autenticarValidar = (codigo: string): Promise<AxiosResponse> =>
   api.post(`${URL_DEFAULT}/validar`, { codigo });
 
 const autenticarRevalidar = (token: string): Promise<AxiosResponse> =>
-  api.post(URL_AUTENTICACAO_REVALIDAR, { token });
+  api.post(`${URL_DEFAULT}/revalidar`, { token });
 
 export default {
   autenticarValidar,

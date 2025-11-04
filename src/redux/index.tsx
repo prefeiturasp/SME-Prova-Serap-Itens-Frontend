@@ -13,16 +13,21 @@ const persistedReducer = persistReducer(
   {
     key: 'SERAP-ITEM-PERSIST',
     storage: sessionStorage,
-    whitelist: ['auth', 'filtroPrincipal', 'areaConhecimento', 'disciplina', 'matriz', 'item', 'configuracaoItemNovo', 'elaboracaoItemNovo'],
+    whitelist: [
+      'auth',
+      'filtroPrincipal',
+      'areaConhecimento',
+      'disciplina',
+      'matriz',
+      'item',
+      'configuracaoItemNovo',
+      'elaboracaoItemNovo',
+    ],
   },
   rootReducerNovo,
-  
 );
 
-const store = createStore(
-  persistedReducer, 
-  composeWithDevTools(applyMiddleware(...middlewares))
-);
+const store = createStore(persistedReducer, composeWithDevTools(applyMiddleware(...middlewares)));
 
 // 🔍 Disponibilizar store globalmente para debug no console
 if (typeof window !== 'undefined') {
@@ -30,5 +35,6 @@ if (typeof window !== 'undefined') {
 }
 
 const persistor = persistStore(store);
+type RootState = ReturnType<typeof store.getState>;
 
-export { store, persistor };
+export { store, persistor, type RootState };
