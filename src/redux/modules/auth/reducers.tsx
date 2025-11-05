@@ -35,7 +35,6 @@ export const auth = produce((draft, action) => {
       draft.dataHoraExpiracao = null;
       draft.tipoPerfil = null;
 
-      // Remove do localStorage
       localStorage.removeItem('authToken');
       localStorage.removeItem('authExpiresAt');
       break;

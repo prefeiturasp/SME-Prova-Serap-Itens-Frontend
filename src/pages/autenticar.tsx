@@ -18,24 +18,6 @@ const Autenticar: React.FC<any> = () => {
     const storedToken = localStorage.getItem('authToken');
     const dataHoraExpiracao = localStorage.getItem('authExpiresAt');
 
-    if (storedToken && dataHoraExpiracao) {
-      const expiraEm = new Date(dataHoraExpiracao);
-      if (expiraEm > new Date()) {
-        dispatch(
-          setUserLogged({
-            token: storedToken,
-            dataHoraExpiracao: dataHoraExpiracao,
-          }),
-        );
-
-        navigate('/');
-
-        return;
-      } else {
-        dispatch(logout());
-      }
-    }
-
     if (codigo) {
       try {
         const resposta = await autenticacaoService.autenticarValidar(codigo);
@@ -50,7 +32,26 @@ const Autenticar: React.FC<any> = () => {
         navigate('/sem-acesso');
       }
     } else {
-      navigate('/sem-acesso');
+      if (storedToken && dataHoraExpiracao) {
+        const expiraEm = new Date(dataHoraExpiracao);
+        if (expiraEm > new Date()) {
+          dispatch(
+            setUserLogged({
+              token: storedToken,
+              dataHoraExpiracao: dataHoraExpiracao,
+            }),
+          );
+
+          navigate('/');
+
+          return;
+        } else {
+          dispatch(logout());
+          navigate('/sem-acesso');
+        }
+      } else {
+        navigate('/sem-acesso');
+      }
     }
   };
 

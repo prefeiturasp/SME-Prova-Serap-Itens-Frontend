@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import NaoAutenticado from '~/pages/403';
+import Autenticar from '~/pages/autenticar';
 import CadastrarItemNovo from '~/pages/itemNovo/cadastrar/cadastrarItemNovo';
 import CadastrarItemNovoElaboracao from '~/pages/itemNovo/cadastrar/cadastrarItemNovoElaboracao';
 import ListagemItens from '~/pages/listagemItens/listagemItens';
@@ -23,6 +24,8 @@ const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 const RoutesConfig: React.FC = () => {
   return (
     <Routes>
+      <Route path='/validar' element={<Autenticar />} />
+      <Route path='/sem-acesso' element={<NaoAutenticado />} />
       <Route
         path='/'
         element={
@@ -31,7 +34,6 @@ const RoutesConfig: React.FC = () => {
           </PrivateRoute>
         }
       />
-      <Route path='/sem-acesso' element={<NaoAutenticado />} />
       <Route
         path='/criacao'
         element={
