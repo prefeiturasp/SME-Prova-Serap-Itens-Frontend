@@ -59,20 +59,21 @@ const FiltroPrincipalNovo: React.FC<FiltroNovoProps> = ({ open, setOpen, }) => {
         //   }
     
           // 3️⃣ Reset inteligente apenas se formulário vazio E sem dados no localStorage
-          const valores = form?.getFieldsValue();
-          const formularioVazio = !valores || Object.keys(valores).length === 0 ||
-            Object.values(valores).every(v => !v || (Array.isArray(v) && v.length === 0));
-    
-          if (formularioVazio) {
-            console.log('🧹 Formulário vazio - aplicando reset limpo...');
-            setTimeout(() => {
+          // Aguarda o componente estar totalmente renderizado
+          setTimeout(() => {
+            const valores = form?.getFieldsValue();
+            const formularioVazio = !valores || Object.keys(valores).length === 0 ||
+              Object.values(valores).every(v => !v || (Array.isArray(v) && v.length === 0));
+      
+            if (formularioVazio) {
+              console.log('🧹 Formulário vazio - aplicando reset limpo...');
               form?.resetFields();
               form?.setFields(Object.keys(form?.getFieldsValue() || {}).map(name => ({
                 name,
                 errors: []
               })));
-            }, 50);
-          }
+            }
+          }, 100); // Aumentei para 100ms para garantir que o Form esteja conectado
         };
     
         inicializarFormulario();
@@ -86,14 +87,20 @@ const FiltroPrincipalNovo: React.FC<FiltroNovoProps> = ({ open, setOpen, }) => {
 
     // 1️⃣ Área → Disciplinas
     const handleAreaConhecimentoChange = useCallback(async (value: SelectValueType) => {
+        // Garante que o form está conectado antes de fazer operações
+        if (!form) {
+            console.warn('⚠️ Form não está disponível ainda');
+            return;
+        }
+
         // Limpa campos dependentes
-        form?.setFieldValue(Campos.disciplinas, null);
-        form?.setFieldValue(Campos.matriz, null);
-        form?.setFieldValue(Campos.anoMatriz, null);
-        form?.setFieldValue(Campos.competencia, null);
-        form?.setFieldValue(Campos.habilidade, null);
-        form?.setFieldValue(Campos.assunto, null);
-        form?.setFieldValue(Campos.subAssunto, null);
+        form.setFieldValue(Campos.disciplinas, null);
+        form.setFieldValue(Campos.matriz, null);
+        form.setFieldValue(Campos.anoMatriz, null);
+        form.setFieldValue(Campos.competencia, null);
+        form.setFieldValue(Campos.habilidade, null);
+        form.setFieldValue(Campos.assunto, null);
+        form.setFieldValue(Campos.subAssunto, null);
 
         // Limpa listas dependentes
         setListaDisciplinas([]);
@@ -109,8 +116,8 @@ const FiltroPrincipalNovo: React.FC<FiltroNovoProps> = ({ open, setOpen, }) => {
             const resposta = await configuracaoItemService.obterDisciplinas(value);
             if (resposta?.length) {
                 setListaDisciplinas(resposta);
-                if (resposta.length === 1) {
-                    form?.setFieldValue(Campos.disciplinas, resposta[0].value);
+                if (resposta?.length === 1 && form) {
+                    form.setFieldValue(Campos.disciplinas, resposta[0].value);
                 }
             } else {
                 setListaDisciplinas([]);
@@ -120,13 +127,19 @@ const FiltroPrincipalNovo: React.FC<FiltroNovoProps> = ({ open, setOpen, }) => {
 
     // 2️⃣ Disciplina → Matriz + Assuntos
     const handleDisciplinaChange = useCallback(async (value: SelectValueType) => {
+        // Garante que o form está conectado
+        if (!form) {
+            console.warn('⚠️ Form não está disponível ainda');
+            return;
+        }
+
         // Limpa campos dependentes
-        form?.setFieldValue(Campos.matriz, null);
-        form?.setFieldValue(Campos.anoMatriz, null);
-        form?.setFieldValue(Campos.competencia, null);
-        form?.setFieldValue(Campos.habilidade, null);
-        form?.setFieldValue(Campos.assunto, null);
-        form?.setFieldValue(Campos.subAssunto, null);
+        form.setFieldValue(Campos.matriz, null);
+        form.setFieldValue(Campos.anoMatriz, null);
+        form.setFieldValue(Campos.competencia, null);
+        form.setFieldValue(Campos.habilidade, null);
+        form.setFieldValue(Campos.assunto, null);
+        form.setFieldValue(Campos.subAssunto, null);
 
         // Limpa listas dependentes
         // setListaMatriz([]);

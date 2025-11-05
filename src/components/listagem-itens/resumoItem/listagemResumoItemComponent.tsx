@@ -92,20 +92,20 @@ const ListagemResumoItemComponent: React.FC<listagemResumoItemProps> = ({ dados 
         </div>
 
         <div className='resumo-item-conteudo-corpo'>
-          <p>
+          <div>
             {item.enunciado && item.enunciado.trim() !== '' ? (
               <div dangerouslySetInnerHTML={{ __html: item.enunciado }} />
             ) : (
               <i>Enunciado não cadastrado</i>
             )}
-          </p>
-          <p>
+          </div>
+          <div>
             {item.textoBase && item.textoBase.trim() !== '' ? (
               <div dangerouslySetInnerHTML={{ __html: item.textoBase }} />
             ) : ( 
               <i>Texto base não cadastrado</i>
             )}
-          </p>
+          </div>
           <p className='resumo-item-conteudo-corpo-fonte'>
             {item.fonte && item.fonte.trim() !== '' ? (
               <i dangerouslySetInnerHTML={{ __html: item.fonte }} />
