@@ -1,9 +1,10 @@
 import { Card, Pagination, Select, Tag } from 'antd';
-import React from 'react';
+import React, { useState } from 'react';
 import './listagemTabelaComponent.css';
 import type { ItemListagemDto } from '~/domain/dto/item-listagem-dto';
 import { Situacao, SituacaoDescricao } from '~/domain/enums/situacao';
 import iconFilter from '~/assets/filtrar.svg';
+import FiltroPrincipalNovo from '~/components/filtroPrincipalNovo/filtroPrincipalNovo';
 
 interface ListagemTabelaProps {
   dados: ItemListagemDto[];
@@ -59,6 +60,18 @@ const ListagemTabela: React.FC<ListagemTabelaProps> = ({
   const inicio = (pagina - 1) * itensPorPagina;
   const fim = inicio + itensPorPagina;
 
+  const [open, setOpen] = useState<boolean>(false);
+  
+  const handleOpenDrawer = () => {
+    console.log('Abrindo drawer');
+    setOpen(true);
+  };
+
+  const handleSetOpen = (value: boolean) => {
+    console.log('Mudando estado do drawer para:', value);
+    setOpen(value);
+  };
+
   return (
     <>
       <Card className='listagem-tabela'>
@@ -69,7 +82,7 @@ const ListagemTabela: React.FC<ListagemTabelaProps> = ({
               Selecione um item para conferir mais detalhes ao lado.
             </div>
           </div>
-          <div className='listagem-tabela-filtrar'>
+          <div className='listagem-tabela-filtrar' onClick={handleOpenDrawer} style={{ cursor: 'pointer' }}>
             <img src={iconFilter} alt='Editar' width={24} height={24} />
             FILTRAR
           </div>
@@ -204,6 +217,7 @@ const ListagemTabela: React.FC<ListagemTabelaProps> = ({
           </div>
         </div>
       </Card>
+      <FiltroPrincipalNovo open={open} setOpen={handleSetOpen} />
     </>
   );
 };
