@@ -1,9 +1,11 @@
 import { Card, Pagination, Select, Tag } from 'antd';
-import React from 'react';
+import React, { useState } from 'react';
 import './listagemTabelaComponent.css';
 import type { ItemListagemDto } from '~/domain/dto/item-listagem-dto';
 import { Situacao, SituacaoDescricao } from '~/domain/enums/situacao';
 import iconFilter from '~/assets/filtrar.svg';
+import FiltroPrincipalNovoComponent from '~/components/filtro-principal-novo/filtroPrincipalNovoComponent';
+
 
 interface ListagemTabelaProps {
   dados: ItemListagemDto[];
@@ -59,8 +61,20 @@ const ListagemTabela: React.FC<ListagemTabelaProps> = ({
   const inicio = (pagina - 1) * itensPorPagina;
   const fim = inicio + itensPorPagina;
 
+  
+  const [open, setOpen] = useState<boolean>(false);
+
+  const handleOpenDrawer = () => {
+    setOpen(true);
+  };
+
+  const handleSetOpen = (value: boolean) => {
+    setOpen(value);
+  };
+  
   return (
     <>
+      <FiltroPrincipalNovoComponent open={open} setOpen={handleSetOpen} />
       <Card className='listagem-tabela'>
         <div className='listagem-tabela-head'>
           <div className='listagem-tabela-texto'>
@@ -69,7 +83,7 @@ const ListagemTabela: React.FC<ListagemTabelaProps> = ({
               Selecione um item para conferir mais detalhes ao lado.
             </div>
           </div>
-          <div className='listagem-tabela-filtrar'>
+          <div className='listagem-tabela-filtrar' onClick={handleOpenDrawer} style={{ cursor: 'pointer' }}>
             <img src={iconFilter} alt='Editar' width={24} height={24} />
             FILTRAR
           </div>
@@ -156,7 +170,7 @@ const ListagemTabela: React.FC<ListagemTabelaProps> = ({
                       <b>Situação: </b>{' '}
                       {
                         SituacaoDescricao[
-                          item.situacao === null ? Situacao.Rascunho : item.situacao
+                        item.situacao === null ? Situacao.Rascunho : item.situacao
                         ]
                       }
                     </Tag>
@@ -203,7 +217,7 @@ const ListagemTabela: React.FC<ListagemTabelaProps> = ({
             />
           </div>
         </div>
-      </Card>
+      </Card>      
     </>
   );
 };
