@@ -243,34 +243,27 @@ const FormularioUnico: React.FC<FormularioUnicoProps> = ({ form, setCarregando }
   //fim cascata dos selects
 
   // 🔄 CASCATA AUTOMÁTICA - Executada quando há dados no localStorage
-  const executarCascataAutomatica = useCallback(async () => {
-    console.log('🔄 Iniciando cascata automática...');
+  const executarCascataAutomatica = useCallback(async () => {    
     
     // 🎯 Inicia animação de carregamento
     setCarregando?.(true);
 
     try {
       const itemSalvoStr = localStorage.getItem('itemAtual');
-      if (!itemSalvoStr) {
-        console.log('📂 Nenhum dados no localStorage - cascata automática cancelada');
+      if (!itemSalvoStr) {        
         return;
       }
 
       const itemSalvo = JSON.parse(itemSalvoStr);
       const config = itemSalvo.configuracao;
 
-      if (!config) {
-        console.log('⚠️ Configuração não encontrada no localStorage');
+      if (!config) {        
         return;
       }
-
-      console.log('📋 Dados encontrados no localStorage:', config);
-
       // 🔄 Sequência de cascata automática (igual manual, mas sem interação do usuário)
 
       // 1️⃣ Área → carrega disciplinas
       if (config.areaConhecimento) {
-        console.log('📝 [1/7] Processando área do conhecimento...');
         form?.setFieldValue(Campos.areaConhecimento, config.areaConhecimento);
 
         const resposta = await configuracaoItemService.obterDisciplinas(config.areaConhecimento);
@@ -278,7 +271,6 @@ const FormularioUnico: React.FC<FormularioUnicoProps> = ({ form, setCarregando }
           setListaDisciplinas(resposta);
           if (resposta.length === 1) {
             form?.setFieldValue(Campos.disciplinas, resposta[0].value);
-            console.log('✅ Auto-selecionada disciplina única:', resposta[0].value);
           }
         }
 
@@ -287,7 +279,6 @@ const FormularioUnico: React.FC<FormularioUnicoProps> = ({ form, setCarregando }
 
       // 2️⃣ Disciplina → carrega matriz + assuntos
       if (config.disciplina) {
-        console.log('📝 [2/7] Processando disciplina...');
         form?.setFieldValue(Campos.disciplinas, config.disciplina);
 
         const [respostaMatriz, respostaAssuntos] = await Promise.all([
@@ -300,7 +291,6 @@ const FormularioUnico: React.FC<FormularioUnicoProps> = ({ form, setCarregando }
           setListaMatriz(respostaMatriz);
           if (respostaMatriz.length === 1) {
             form?.setFieldValue(Campos.matriz, respostaMatriz[0].value);
-            console.log('✅ Auto-selecionada matriz única:', respostaMatriz[0].value);
           }
         }
 
@@ -309,7 +299,6 @@ const FormularioUnico: React.FC<FormularioUnicoProps> = ({ form, setCarregando }
           setListaAssuntos(respostaAssuntos);
           if (respostaAssuntos.length === 1) {
             form?.setFieldValue(Campos.assunto, respostaAssuntos[0].value);
-            console.log('✅ Auto-selecionado assunto único:', respostaAssuntos[0].value);
           }
         }
 
@@ -318,7 +307,6 @@ const FormularioUnico: React.FC<FormularioUnicoProps> = ({ form, setCarregando }
 
       // 3️⃣ Matriz → carrega anos + competências
       if (config.matriz) {
-        console.log('📝 [3/7] Processando matriz...');
         form?.setFieldValue(Campos.matriz, config.matriz);
 
         const [respostaAnos, respostaCompetencias] = await Promise.all([
@@ -331,7 +319,6 @@ const FormularioUnico: React.FC<FormularioUnicoProps> = ({ form, setCarregando }
           setListaAnosMatriz(respostaAnos);
           if (respostaAnos.length === 1) {
             form?.setFieldValue(Campos.anoMatriz, respostaAnos[0].value);
-            console.log('✅ Auto-selecionado ano único:', respostaAnos[0].value);
           }
         }
 
@@ -340,7 +327,6 @@ const FormularioUnico: React.FC<FormularioUnicoProps> = ({ form, setCarregando }
           setListaCompetencias(respostaCompetencias);
           if (respostaCompetencias.length === 1) {
             form?.setFieldValue(Campos.competencia, respostaCompetencias[0].value);
-            console.log('✅ Auto-selecionada competência única:', respostaCompetencias[0].value);
           }
         }
 
@@ -349,14 +335,12 @@ const FormularioUnico: React.FC<FormularioUnicoProps> = ({ form, setCarregando }
 
       // 4️⃣ Ano da matriz (se ainda não foi definido)
       if (config.anoMatriz && form?.getFieldValue(Campos.anoMatriz) !== config.anoMatriz) {
-        console.log('📝 [4/7] Definindo ano da matriz específico...');
         form?.setFieldValue(Campos.anoMatriz, config.anoMatriz);
         await new Promise(resolve => setTimeout(resolve, 200));
       }
 
       // 5️⃣ Competência → carrega habilidades
       if (config.competencia) {
-        console.log('📝 [5/7] Processando competência...');
         form?.setFieldValue(Campos.competencia, config.competencia);
 
         const resposta = await configuracaoItemService.obterHabilidadesCompetencia(config.competencia);
@@ -364,7 +348,6 @@ const FormularioUnico: React.FC<FormularioUnicoProps> = ({ form, setCarregando }
           setListaHabilidades(resposta);
           if (resposta.length === 1) {
             form?.setFieldValue(Campos.habilidade, resposta[0].value);
-            console.log('✅ Auto-selecionada habilidade única:', resposta[0].value);
           }
         }
 
@@ -373,7 +356,6 @@ const FormularioUnico: React.FC<FormularioUnicoProps> = ({ form, setCarregando }
 
       // 6️⃣ Assunto → carrega subassuntos
       if (config.assunto) {
-        console.log('📝 [6/7] Processando assunto...');
         form?.setFieldValue(Campos.assunto, config.assunto);
 
         const resposta = await configuracaoItemService.obterSubAssuntos(config.assunto);
@@ -381,7 +363,6 @@ const FormularioUnico: React.FC<FormularioUnicoProps> = ({ form, setCarregando }
           setListaSubAssuntos(resposta);
           if (resposta.length === 1) {
             form?.setFieldValue(Campos.subAssunto, resposta[0].value);
-            console.log('✅ Auto-selecionado subassunto único:', resposta[0].value);
           }
         }
 
@@ -389,7 +370,6 @@ const FormularioUnico: React.FC<FormularioUnicoProps> = ({ form, setCarregando }
       }
 
       // 7️⃣ Finalização - campos que não têm cascata
-      console.log('📝 [7/7] Definindo campos finais...');
 
       if (config.habilidade) {
         form?.setFieldValue(Campos.habilidade, config.habilidade);
@@ -421,7 +401,6 @@ const FormularioUnico: React.FC<FormularioUnicoProps> = ({ form, setCarregando }
         const formFieldName = (camposSimples as any)[key];
         if (value !== undefined && value !== null && formFieldName) {
           form?.setFieldValue(formFieldName, value);
-          console.log(`📝 Campo ${formFieldName} restaurado:`, value);
         }
       });
 
@@ -431,8 +410,6 @@ const FormularioUnico: React.FC<FormularioUnicoProps> = ({ form, setCarregando }
         form?.setFieldValue(Campos.palavraChave, config.palavrasChave);
       }
 
-      console.log('✅ Cascata automática finalizada com sucesso!');
-
     } catch (error) {
       console.error('❌ Erro na cascata automática:', error);
     } finally {
@@ -440,8 +417,7 @@ const FormularioUnico: React.FC<FormularioUnicoProps> = ({ form, setCarregando }
       setCarregando?.(false);
     }
   }, [form, setCarregando]);
-
-  // Helper functions para validação de campos dependentes
+  
   const disciplinaIdForm = form?.getFieldValue(Campos.disciplinas);
   const assuntoIdForm = form?.getFieldValue(Campos.assunto);
 
@@ -458,8 +434,7 @@ const FormularioUnico: React.FC<FormularioUnicoProps> = ({ form, setCarregando }
       const voltandoParaPrimeiraTela = localStorage.getItem('voltandoParaPrimeiraTela') === 'true';
       const itemSalvoStr = localStorage.getItem('itemAtual');
 
-      if (voltandoParaPrimeiraTela || itemSalvoStr) {
-        console.log('🔄 Detectado dados no localStorage - executando cascata automática...');
+      if (voltandoParaPrimeiraTela || itemSalvoStr) {        
         localStorage.removeItem('voltandoParaPrimeiraTela'); // Limpa flag
 
         // Aguarda um pouco para garantir que as listas iniciais foram carregadas
@@ -475,8 +450,7 @@ const FormularioUnico: React.FC<FormularioUnicoProps> = ({ form, setCarregando }
       const formularioVazio = !valores || Object.keys(valores).length === 0 ||
         Object.values(valores).every(v => !v || (Array.isArray(v) && v.length === 0));
 
-      if (formularioVazio) {
-        console.log('🧹 Formulário vazio - aplicando reset limpo...');
+      if (formularioVazio) {        
         setTimeout(() => {
           form?.resetFields();
           form?.setFields(Object.keys(form?.getFieldsValue() || {}).map(name => ({
