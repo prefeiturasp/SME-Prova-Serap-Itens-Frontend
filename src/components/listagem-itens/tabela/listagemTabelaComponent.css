@@ -15,22 +15,16 @@
 }
 
 .listagem-tabela-titulo {
-  font-family: Roboto;
   font-weight: 700;
-  font-style: Bold;
   font-size: 24px;
   line-height: 100%;
-  letter-spacing: 0%;
 }
 
 .listagem-tabela-subtitulo {
   padding-top: 8px;
-  font-family: Roboto;
   font-weight: 400;
-  font-style: Regular;
   font-size: 14px;
   line-height: 100%;
-  letter-spacing: 0%;
 }
 
 .listagem-tabela-texto {
@@ -41,7 +35,6 @@
   white-space: nowrap;
   width: auto;
   padding-left: 8px;
-  font-family: Roboto;
   font-weight: 500;
   font-size: 20px;
   color: #5a94d8;
@@ -50,25 +43,36 @@
   justify-content: flex-end;
 }
 
+.listagem-tabela-filtrar img {
+  margin-right: 4px;
+}
+
+.listagem-tabela-conteudo {
+  display: flex;
+  flex-direction: column;
+  margin-top: 16px;
+  max-height: 500px;
+  overflow-y: auto;
+  width: calc(100% + 24px);
+}
+
 .listagem-item-tabela {
   border-bottom: 1px solid #d5d5d5;
-
   padding: 10px;
   margin-right: 16px;
-
-  font-family: Roboto;
   color: #595959;
 }
 
 .listagem-item-tabela:hover {
-  border-bottom: 1px solid #d5d5d5;
-
-  padding: 10px;
-  font-family: Roboto, sans-serif;
-  color: #595959;
   cursor: pointer;
   transition: all 0.2s ease;
   background-color: #f5f5f5;
+}
+
+.listagem-item-tabela-conteudo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .listagem-item-tabela-head {
@@ -79,12 +83,29 @@
 
 .listagem-item-tabela-flex {
   flex: 1;
-  justify-content: center;
-  display: 'flex';
+  justify-content: left;
+  display: flex;
 }
 
 .listagem-item-tabela-auto {
   width: auto;
+}
+
+.listagem-item-tabela-rodape {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.listagem-item-tabela-rodape-info {
+  margin-top: 4px;
+}
+
+.listagem-item-tabela-paginacao {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 24px;
+  align-items: center;
 }
 
 .listagem-item-tabela-select {

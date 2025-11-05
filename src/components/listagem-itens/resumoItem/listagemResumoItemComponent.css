@@ -6,7 +6,7 @@
   align-items: center;
 }
 
-.yo {
+.resumo {
   margin: 0px;
   padding: 18px 32px 32px 32px;
   color: #595959;
@@ -156,9 +156,13 @@
 }
 
 .no-click {
-  pointer-events: none; /* 👈 stops all clicks inside */
+  pointer-events: none; 
 }
 
 .no-click .ant-radio-inner {
-  cursor: default !important; /* optional: remove hand cursor */
+  cursor: default !important; 
+}
+
+.resumo-item-conteudo-itens {
+  margin:0px 0px 10px 0px;
 }
