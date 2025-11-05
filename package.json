@@ -10,7 +10,7 @@
     "lint": "npx eslint src",
     "prettier": "npx prettier src --check",
     "test": "jest --watchAll",
-    "testfile": "npm run test src/pages/listagemItens/listagemItens.test.tsx --coverage",
+    "testfile": "npm run test src/components/listagem-itens/tabela/listagemTabelaComponent.test.tsx",
     "testcoverage": "jest --coverage",
     "testpipeline": "yarn tsc --noEmit"
   },
