@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React from "react";
 import {
     Button,
     Divider,
@@ -34,7 +34,7 @@ const FiltroPrincipalNovoComponent: React.FC<FiltroNovoProps> = ({ open, setOpen
     const [listaHabilidades, setListaHabilidades] = useState<DefaultOptionType[]>([]);
     const [listaQuantidadeAlternativas, setListaQuantidadeAlternativas] = useState<DefaultOptionType[]>([]);
     const [listaSituacoesItem, setListaSituacoesItem] = useState<DefaultOptionType[]>([]);
-    const [palavrasChave, setPalavrasChave] = useState<string[] | undefined>([]);
+    const [palavraChaveFiltro, setPalavraChaveFiltro] = useState<string[] | undefined>([]);
 
 
     const [jaInicializado, setJaInicializado] = useState(false);
@@ -126,15 +126,15 @@ const FiltroPrincipalNovoComponent: React.FC<FiltroNovoProps> = ({ open, setOpen
                 await new Promise(resolve => setTimeout(resolve, 300));
             }
 
-            if (filtroLocal.habilidade) {
+            if (filtroLocal.habilidadeFiltro) {
                 formFiltroLateral?.setFieldValue(CamposFiltroItens.habilidadeFiltro, filtroLocal.habilidadeFiltro);
             }
 
             const camposSimples = {
-                situacaoItem: CamposFiltroItens.situacaoItemFiltro,
+                situacaoItemFiltro: CamposFiltroItens.situacaoItemFiltro,
                 categoriaItemFiltro: CamposFiltroItens.categoriaItemFiltro,
                 //dificuldadeSugerida: CamposFiltroItens.dificuldadeSugeridaFiltro,
-                palavrasChave: CamposFiltroItens.palavraChaveFiltro,
+                palavraChaveFiltro: CamposFiltroItens.palavraChaveFiltro,
                 //informacoesEstatisticasFiltro: CamposFiltroItens.informacoesEstatisticasFiltro,
             };
 
@@ -146,9 +146,9 @@ const FiltroPrincipalNovoComponent: React.FC<FiltroNovoProps> = ({ open, setOpen
                 }
             });
 
-            if (filtroLocal.palavrasChave && Array.isArray(filtroLocal.palavrasChave)) {
-                setPalavrasChave(filtroLocal.palavrasChave);
-                formFiltroLateral?.setFieldValue(CamposFiltroItens.palavraChaveFiltro, filtroLocal.palavrasChaveFiltro);
+            if (filtroLocal.palavraChaveFiltro && Array.isArray(filtroLocal.palavraChaveFiltro)) {
+                setPalavraChaveFiltro(filtroLocal.palavraChaveFiltro);
+                formFiltroLateral?.setFieldValue(CamposFiltroItens.palavraChaveFiltro, filtroLocal.palavraChaveFiltro);
             }
 
         } catch (error) {
@@ -348,14 +348,14 @@ const FiltroPrincipalNovoComponent: React.FC<FiltroNovoProps> = ({ open, setOpen
         const values = formFiltroLateral.getFieldsValue(true);
 
         let palavrasChaveArray: string[] | null = null;
-        if (values?.palavraChave) {
-            if (Array.isArray(values.palavraChave)) {
-                const palavrasValidas = values.palavraChave.filter((p: string) => p && p.trim());
+        if (values?.palavraChaveFiltro) {
+            if (Array.isArray(values.palavraChaveFiltro)) {
+                const palavrasValidas = values.palavraChaveFiltro.filter((p: string) => p && p.trim());
                 palavrasChaveArray = palavrasValidas.length > 0 ? palavrasValidas : null;
-            } else if (typeof values.palavraChave === 'string' && values.palavraChave.trim()) {
-                palavrasChaveArray = values.palavraChave.includes(';')
-                    ? values.palavraChave.split(';').filter((p: string) => p && p.trim()).map((p: string) => p.trim())
-                    : [values.palavraChave.trim()];
+            } else if (typeof values.palavraChaveFiltro === 'string' && values.palavraChaveFiltro.trim()) {
+                palavrasChaveArray = values.palavraChaveFiltro.includes(';')
+                    ? values.palavraChaveFiltro.split(';').filter((p: string) => p && p.trim()).map((p: string) => p.trim())
+                    : [values.palavraChaveFiltro.trim()];
             }
         }
 
@@ -530,8 +530,6 @@ const FiltroPrincipalNovoComponent: React.FC<FiltroNovoProps> = ({ open, setOpen
                         <Divider className="separador" />
                         <div className="filtro-secao">
                             <h3 className="filtro-titulo">Palavra Chave</h3>
-                            <h1>Converter campo depois booleano(true/false)</h1>
-
                             <Form.Item
                                 label='Palavra-chave'
                                 name={CamposFiltroItens.palavraChaveFiltro}
@@ -539,11 +537,11 @@ const FiltroPrincipalNovoComponent: React.FC<FiltroNovoProps> = ({ open, setOpen
                                 rules={[]}
                             >
                                 <InputTag
-                                    valueForm={palavrasChave}
-                                    tags={palavrasChave}
+                                    valueForm={palavraChaveFiltro}
+                                    tags={palavraChaveFiltro}
                                     setTags={(v) => {
                                         const novasTags = v || [];
-                                        setPalavrasChave(novasTags);
+                                        setPalavraChaveFiltro(novasTags);
                                         formFiltroLateral?.setFieldValue(CamposFiltroItens.palavraChaveFiltro, novasTags);
                                     }}
                                 />
