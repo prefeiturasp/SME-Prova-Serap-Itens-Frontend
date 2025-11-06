@@ -15,6 +15,7 @@ import { DefaultOptionType } from 'antd/lib/select';
 import { validarCampoForm } from "~/utils/funcoes";
 import configuracaoItemService from "~/services/configuracaoItem-service";
 import { CamposFiltroItensProps } from "~/domain/interfaces/camposFiltroItensProps";
+import InputTag from "../input-tag";
 
 interface FiltroNovoProps {
     open: boolean;
@@ -27,6 +28,15 @@ const FiltroPrincipalNovoComponent: React.FC<FiltroNovoProps> = ({ open, setOpen
 
     const [listaAreaConhecimento, setListaAreaConhecimento] = useState<DefaultOptionType[]>([]);
     const [listaDisciplinas, setListaDisciplinas] = useState<DefaultOptionType[]>([]);
+    const [listaMatriz, setListaMatriz] = useState<DefaultOptionType[]>([]);
+    const [listaAnosMatriz, setListaAnosMatriz] = useState<DefaultOptionType[]>([]);
+    const [listaCompetencias, setListaCompetencias] = useState<DefaultOptionType[]>([]);
+    const [listaHabilidades, setListaHabilidades] = useState<DefaultOptionType[]>([]);
+    const [listaQuantidadeAlternativas, setListaQuantidadeAlternativas] = useState<DefaultOptionType[]>([]);
+    const [listaSituacoesItem, setListaSituacoesItem] = useState<DefaultOptionType[]>([]);
+    const [palavrasChave, setPalavrasChave] = useState<string[] | undefined>([]);
+
+
     const [jaInicializado, setJaInicializado] = useState(false);
 
     const [formId] = useState(() => `filtro-lateral-${Date.now()}-${Math.random().toString(36)}`);
@@ -42,7 +52,6 @@ const FiltroPrincipalNovoComponent: React.FC<FiltroNovoProps> = ({ open, setOpen
         try {
             const itemSalvo = JSON.parse(itemFiltro);
             const filtroLocal = itemSalvo.filtroLateral;
-
             if (!filtroLocal) {
                 return;
             }
@@ -50,7 +59,7 @@ const FiltroPrincipalNovoComponent: React.FC<FiltroNovoProps> = ({ open, setOpen
             if (filtroLocal.areaConhecimentoFiltro) {
                 formFiltroLateral?.setFieldValue(CamposFiltroItens.areaConhecimentoFiltro, filtroLocal.areaConhecimentoFiltro);
 
-                const resposta = await configuracaoItemService.obterDisciplinas(filtroLocal.areaConhecimento);
+                const resposta = await configuracaoItemService.obterDisciplinas(filtroLocal.areaConhecimentoFiltro);
                 if (resposta?.length) {
                     setListaDisciplinas(resposta);
                     if (resposta.length === 1) {
@@ -59,138 +68,88 @@ const FiltroPrincipalNovoComponent: React.FC<FiltroNovoProps> = ({ open, setOpen
                 }
                 await new Promise(resolve => setTimeout(resolve, 300));
             }
-            
+
             if (filtroLocal.disciplinaFiltro) {
-                formFiltroLateral?.setFieldValue(CamposFiltroItens.disciplinaFiltro, filtroLocal.diciplinaFiltro);
+                formFiltroLateral?.setFieldValue(CamposFiltroItens.disciplinaFiltro, filtroLocal.disciplinaFiltro);
 
-                // const [respostaMatriz, respostaAssuntos] = await Promise.all([
-                //     configuracaoItemService.obterMatriz(filtroLocal.disciplina),
-                //     configuracaoItemService.obterAssuntos(filtroLocal.disciplina)
-                // ]);
+                const respostaMatriz = await configuracaoItemService.obterMatriz(filtroLocal.disciplinaFiltro)
 
-                // Matriz
-                // if (respostaMatriz?.length) {
-                //     setListaMatriz(respostaMatriz);
-                //     if (respostaMatriz.length === 1) {
-                //         formFiltroLateral?.setFieldValue(CamposFiltroItens.matriz, respostaMatriz[0].value);
-                //     }
-                // }
-
-                // Assuntos
-                // if (respostaAssuntos?.length) {
-                //     setListaAssuntos(respostaAssuntos);
-                //     if (respostaAssuntos.length === 1) {
-                //         formFiltroLateral?.setFieldValue(CamposFiltroItens.assunto, respostaAssuntos[0].value);
-                //     }
-                // }
-
+                if (respostaMatriz?.length) {
+                    setListaMatriz(respostaMatriz);
+                    if (respostaMatriz.length === 1) {
+                        formFiltroLateral?.setFieldValue(CamposFiltroItens.matrizFiltro, respostaMatriz[0].value);
+                    }
+                }
                 await new Promise(resolve => setTimeout(resolve, 300));
             }
 
-            // 3️⃣ Matriz → carrega anos + competências
-            // if (filtroLocal.matriz) {
-            //     form?.setFieldValue(Campos.matriz, filtroLocal.matriz);
 
-            //     const [respostaAnos, respostaCompetencias] = await Promise.all([
-            //         configuracaoItemService.obterAnosMatriz(filtroLocal.matriz),
-            //         configuracaoItemService.obterCompetenciasMatriz(filtroLocal.matriz)
-            //     ]);
+            if (filtroLocal.matrizFiltro) {
+                formFiltroLateral?.setFieldValue(CamposFiltroItens.matrizFiltro, filtroLocal.matrizFiltro);
 
-            //     // Anos da matriz
-            //     if (respostaAnos?.length) {
-            //         setListaAnosMatriz(respostaAnos);
-            //         if (respostaAnos.length === 1) {
-            //             form?.setFieldValue(Campos.anoMatriz, respostaAnos[0].value);
-            //         }
-            //     }
+                const [respostaAnos, respostaCompetencias] = await Promise.all([
+                    configuracaoItemService.obterAnosMatriz(filtroLocal.matrizFiltro),
+                    configuracaoItemService.obterCompetenciasMatriz(filtroLocal.matrizFiltro)
+                ]);
 
-            //     // Competências
-            //     if (respostaCompetencias?.length) {
-            //         setListaCompetencias(respostaCompetencias);
-            //         if (respostaCompetencias.length === 1) {
-            //             form?.setFieldValue(Campos.competencia, respostaCompetencias[0].value);
-            //         }
-            //     }
+                if (respostaAnos?.length) {
+                    setListaAnosMatriz(respostaAnos);
+                    if (respostaAnos.length === 1) {
+                        formFiltroLateral?.setFieldValue(CamposFiltroItens.anoMatrizFiltro, respostaAnos[0].value);
+                    }
+                }
 
-            //     await new Promise(resolve => setTimeout(resolve, 300));
-            // }
+                if (respostaCompetencias?.length) {
+                    setListaCompetencias(respostaCompetencias);
+                    if (respostaCompetencias.length === 1) {
+                        formFiltroLateral?.setFieldValue(CamposFiltroItens.competenciaFiltro, respostaCompetencias[0].value);
+                    }
+                }
+                await new Promise(resolve => setTimeout(resolve, 300));
+            }
 
-            // 4️⃣ Ano da matriz (se ainda não foi definido)
-            // if (filtroLocal.anoMatriz && form?.getFieldValue(Campos.anoMatriz) !== filtroLocal.anoMatriz) {
-            //     form?.setFieldValue(Campos.anoMatriz, filtroLocal.anoMatriz);
-            //     await new Promise(resolve => setTimeout(resolve, 200));
-            // }
+            if (filtroLocal.anoMatriz && formFiltroLateral?.getFieldValue(CamposFiltroItens.anoMatrizFiltro) !== filtroLocal.anoMatriz) {
+                formFiltroLateral?.setFieldValue(CamposFiltroItens.anoMatrizFiltro, filtroLocal.anoMatriz);
+                await new Promise(resolve => setTimeout(resolve, 200));
+            }
 
-            // 5️⃣ Competência → carrega habilidades
-            // if (filtroLocal.competencia) {
-            //     form?.setFieldValue(Campos.competencia, filtroLocal.competencia);
+            if (filtroLocal.competenciaFiltro) {
+                formFiltroLateral?.setFieldValue(CamposFiltroItens.competenciaFiltro, filtroLocal.competenciaFiltro);
 
-            //     const resposta = await configuracaoItemService.obterHabilidadesCompetencia(filtroLocal.competencia);
-            //     if (resposta?.length) {
-            //         setListaHabilidades(resposta);
-            //         if (resposta.length === 1) {
-            //             form?.setFieldValue(Campos.habilidade, resposta[0].value);
-            //         }
-            //     }
+                const resposta = await configuracaoItemService.obterHabilidadesCompetencia(filtroLocal.competenciaFiltro);
+                if (resposta?.length) {
+                    setListaHabilidades(resposta);
+                    if (resposta.length === 1) {
+                        formFiltroLateral?.setFieldValue(CamposFiltroItens.habilidadeFiltro, resposta[0].value);
+                    }
+                }
+                await new Promise(resolve => setTimeout(resolve, 300));
+            }
 
-            //     await new Promise(resolve => setTimeout(resolve, 300));
-            // }
+            if (filtroLocal.habilidade) {
+                formFiltroLateral?.setFieldValue(CamposFiltroItens.habilidadeFiltro, filtroLocal.habilidadeFiltro);
+            }
 
-            // 6️⃣ Assunto → carrega subassuntos
-            // if (filtroLocal.assunto) {
-            //     form?.setFieldValue(Campos.assunto, filtroLocal.assunto);
+            const camposSimples = {
+                situacaoItem: CamposFiltroItens.situacaoItemFiltro,
+                categoriaItemFiltro: CamposFiltroItens.categoriaItemFiltro,
+                //dificuldadeSugerida: CamposFiltroItens.dificuldadeSugeridaFiltro,
+                palavrasChave: CamposFiltroItens.palavraChaveFiltro,
+                //informacoesEstatisticasFiltro: CamposFiltroItens.informacoesEstatisticasFiltro,
+            };
 
-            //     const resposta = await configuracaoItemService.obterSubAssuntos(filtroLocal.assunto);
-            //     if (resposta?.length) {
-            //         setListaSubAssuntos(resposta);
-            //         if (resposta.length === 1) {
-            //             form?.setFieldValue(Campos.subAssunto, resposta[0].value);
-            //         }
-            //     }
+            Object.keys(camposSimples).forEach(key => {
+                const value = filtroLocal[key];
+                const formFieldName = (camposSimples as any)[key];
+                if (value !== undefined && value !== null && formFieldName) {
+                    formFiltroLateral?.setFieldValue(formFieldName, value);
+                }
+            });
 
-            //     await new Promise(resolve => setTimeout(resolve, 300));
-            // }
-
-            // 7️⃣ Finalização - campos que não têm cascata
-
-            // if (filtroLocal.habilidade) {
-            //     form?.setFieldValue(Campos.habilidade, filtroLocal.habilidade);
-            // }
-
-            // if (filtroLocal.subAssunto) {
-            //     form?.setFieldValue(Campos.subAssunto, filtroLocal.subAssunto);
-            // }
-
-            // Campos simples (sem cascata)
-            // const camposSimples = {
-            //     situacaoItem: Campos.situacaoItem,
-            //     tipoItem: Campos.tipoItem,
-            //     quantidadeAlternativas: Campos.quantidadeAlternativas,
-            //     dificuldadeSugerida: Campos.dificuldadeSugerida,
-            //     nivelItem: Campos.nivelItem,
-            //     discriminacao: Campos.discriminacao,
-            //     dificuldade: Campos.dificuldade,
-            //     acertoCasual: Campos.acertoCasual,
-            //     palavrasChave: Campos.palavraChave,
-            //     parametroBTransformado: Campos.parametroBTransformado,
-            //     mediaDesvioPadrao: Campos.mediaDesvioPadrao,
-            //     sentencaDescritora: Campos.sentencaDescritora,
-            //     observacao: Campos.observacao,
-            // };
-
-            // Object.keys(camposSimples).forEach(key => {
-            //     const value = filtroLocal[key];
-            //     const formFieldName = (camposSimples as any)[key];
-            //     if (value !== undefined && value !== null && formFieldName) {
-            //         form?.setFieldValue(formFieldName, value);
-            //     }
-            // });
-
-            // Palavras-chave (tratamento especial)
-            // if (filtroLocal.palavrasChave && Array.isArray(filtroLocal.palavrasChave)) {
-            //     setPalavrasChave(filtroLocal.palavrasChave);
-            //     form?.setFieldValue(Campos.palavraChave, filtroLocal.palavrasChave);
-            // }
+            if (filtroLocal.palavrasChave && Array.isArray(filtroLocal.palavrasChave)) {
+                setPalavrasChave(filtroLocal.palavrasChave);
+                formFiltroLateral?.setFieldValue(CamposFiltroItens.palavraChaveFiltro, filtroLocal.palavrasChaveFiltro);
+            }
 
         } catch (error) {
             console.error('❌ Erro na cascata automática:', error);
@@ -208,7 +167,7 @@ const FiltroPrincipalNovoComponent: React.FC<FiltroNovoProps> = ({ open, setOpen
 
             await Promise.all([
                 carregarAreaConhecimento(),
-                //carregarListasBasicas()
+                carregarListasBasicas()
             ]);
 
             const pegandoFiltro = localStorage.getItem('itemFiltro');
@@ -244,31 +203,29 @@ const FiltroPrincipalNovoComponent: React.FC<FiltroNovoProps> = ({ open, setOpen
         inicializarFormulario();
     }, [open, jaInicializado]);
 
-
     const handleAreaConhecimentoChange = async (value: SelectValueType) => {
-
         if (!formFiltroLateral) {
             return;
         }
 
         //Limpa campos dependentes
         formFiltroLateral.setFieldValue(CamposFiltroItens.disciplinaFiltro, null);
-        // formFiltroLateral.setFieldValue(CamposFiltroItens.anoMatrizFiltro, null);
-        // formFiltroLateral.setFieldValue(CamposFiltroItens.categoriaItemFiltro, null);
-        // formFiltroLateral.setFieldValue(CamposFiltroItens.dificuldadeSugeridaFiltro, null);        
-        // formFiltroLateral.setFieldValue(CamposFiltroItens.situacaoItemFiltro, null);
-        // formFiltroLateral.setFieldValue(CamposFiltroItens.matrizFiltro, null);
-        // formFiltroLateral.setFieldValue(CamposFiltroItens.competenciaFiltro, null);
-        // formFiltroLateral.setFieldValue(CamposFiltroItens.habilidadeFiltro, null);        
+        formFiltroLateral.setFieldValue(CamposFiltroItens.matrizFiltro, null);
+        formFiltroLateral.setFieldValue(CamposFiltroItens.anoMatrizFiltro, null);
+        formFiltroLateral.setFieldValue(CamposFiltroItens.competenciaFiltro, null);
+        formFiltroLateral.setFieldValue(CamposFiltroItens.habilidadeFiltro, null);
+        //formFiltroLateral.setFieldValue(CamposFiltroItens.categoriaItemFiltro, null);
+        //formFiltroLateral.setFieldValue(CamposFiltroItens.dificuldadeSugeridaFiltro, null);        
+        // formFiltroLateral.setFieldValue(CamposFiltroItens.situacaoItemFiltro, null);               
         // formFiltroLateral.setFieldValue(CamposFiltroItens.informacoesEstatisticasFiltro, null);        
         // formFiltroLateral.setFieldValue(CamposFiltroItens.palavraChaveFiltro, null);
 
         // Limpa listas dependentes
         setListaDisciplinas([]);
-        // setListaMatriz([]);
-        // setListaAnosMatriz([]);
-        // setListaCompetencias([]);
-        // setListaHabilidades([]);
+        setListaMatriz([]);
+        setListaAnosMatriz([]);
+        setListaCompetencias([]);
+        setListaHabilidades([]);
 
         // Carrega disciplinas se área selecionada
         if (value && !validarCampoForm(value)) {
@@ -285,70 +242,135 @@ const FiltroPrincipalNovoComponent: React.FC<FiltroNovoProps> = ({ open, setOpen
     };
 
     const handleDisciplinaChange = async (value: SelectValueType) => {
-
         if (!formFiltroLateral) {
             return;
         }
 
-        // Limpa campos dependentes
         formFiltroLateral.setFieldValue(CamposFiltroItens.matrizFiltro, null);
-        // formFiltroLateral.setFieldValue(CamposFiltroItens.anoMatrizFiltro, null);
-        // formFiltroLateral.setFieldValue(CamposFiltroItens.competenciaFiltro, null);
-        // formFiltroLateral.setFieldValue(CamposFiltroItens.habilidadeFiltro, null);
+        formFiltroLateral.setFieldValue(CamposFiltroItens.anoMatrizFiltro, null);
+        formFiltroLateral.setFieldValue(CamposFiltroItens.competenciaFiltro, null);
+        formFiltroLateral.setFieldValue(CamposFiltroItens.habilidadeFiltro, null);
 
-        // Limpa listas dependentes
-        // setListaMatriz([]);
-        // setListaAnosMatriz([]);
-        // setListaCompetencias([]);
-        // setListaHabilidades([]);
-        // setListaAssuntos([]);
-        // setListaSubAssuntos([]);
+        setListaMatriz([]);
+        setListaAnosMatriz([]);
+        setListaCompetencias([]);
+        setListaHabilidades([]);
 
         if (value && !validarCampoForm(value)) {
-            const [respostaMatriz, respostaAssuntos] = await Promise.all([
-                configuracaoItemService.obterMatriz(value),
-                configuracaoItemService.obterAssuntos(value)
-            ]);
+            const respostaMatriz = await configuracaoItemService.obterMatriz(value);
 
-            // if (respostaMatriz?.length) {
-            //     setListaMatriz(respostaMatriz);
-            //     if (respostaMatriz.length === 1) {
-            //         form?.setFieldValue(CamposFiltroItens.matrizFiltro, respostaMatriz[0].value);
-            //     }
-            // } else {
-            //     setListaMatriz([]);
-            // }
-
-            // Assuntos
-            //   if (respostaAssuntos?.length) {
-            //     setListaAssuntos(respostaAssuntos);
-            //     if (respostaAssuntos.length === 1) {
-            //       form?.setFieldValue(CamposFiltroItens.assunto, respostaAssuntos[0].value);
-            //     }
-            //   } else {
-            //     setListaAssuntos([]);
-            //   }
+            if (respostaMatriz?.length) {
+                setListaMatriz(respostaMatriz);
+                if (respostaMatriz.length === 1) {
+                    formFiltroLateral?.setFieldValue(CamposFiltroItens.matrizFiltro, respostaMatriz[0].value);
+                }
+            } else {
+                setListaMatriz([]);
+            }
         }
     };
+
+    const handleMatrizChange = async (value: SelectValueType) => {
+        if (!formFiltroLateral) {
+            return;
+        }
+
+        formFiltroLateral?.setFieldValue(CamposFiltroItens.anoMatrizFiltro, null);
+        formFiltroLateral?.setFieldValue(CamposFiltroItens.competenciaFiltro, null);
+        formFiltroLateral?.setFieldValue(CamposFiltroItens.habilidadeFiltro, null);
+
+        setListaAnosMatriz([]);
+        setListaCompetencias([]);
+        setListaHabilidades([]);
+
+        if (value && !validarCampoForm(value)) {
+            const [respostaAnos, respostaCompetencias] = await Promise.all([
+                configuracaoItemService.obterAnosMatriz(value),
+                configuracaoItemService.obterCompetenciasMatriz(value)
+            ]);
+
+            if (respostaAnos?.length) {
+                setListaAnosMatriz(respostaAnos);
+                if (respostaAnos.length === 1) {
+                    formFiltroLateral?.setFieldValue(CamposFiltroItens.anoMatrizFiltro, respostaAnos[0].value);
+                }
+            }
+
+            if (respostaCompetencias?.length) {
+                setListaCompetencias(respostaCompetencias);
+                if (respostaCompetencias.length === 1) {
+                    formFiltroLateral?.setFieldValue(CamposFiltroItens.competenciaFiltro, respostaCompetencias[0].value);
+                }
+            } else {
+                setListaCompetencias([]);
+            }
+        }
+    };
+
+    const handleCompetenciaChange = async (value: SelectValueType) => {
+        if (!formFiltroLateral) {
+            return;
+        }
+
+        formFiltroLateral?.setFieldValue(CamposFiltroItens.habilidadeFiltro, null);
+        setListaHabilidades([]);
+
+        if (value && !validarCampoForm(value)) {
+            const resposta = await configuracaoItemService.obterHabilidadesCompetencia(value);
+            if (resposta?.length) {
+                setListaHabilidades(resposta);
+                if (resposta.length === 1) {
+                    formFiltroLateral?.setFieldValue(CamposFiltroItens.habilidadeFiltro, resposta[0].value);
+                }
+            } else {
+                setListaHabilidades([]);
+            }
+        }
+    };
+
+    const carregarListasBasicas = async () => {
+        // if (!formFiltroLateral) {
+        //     return;
+        // }
+        const [quantidadeAlternativas, situacoesItem] = await Promise.all([
+            configuracaoItemService.obterQuantidadeAlternativas(),
+            configuracaoItemService.obterSituacoesItem()
+        ]);
+
+        setListaQuantidadeAlternativas(quantidadeAlternativas?.length ? quantidadeAlternativas : []);
+        setListaSituacoesItem(situacoesItem?.length ? situacoesItem : []);
+        //dificuldadeSugerida
+        //Informações estatisticas
+    };
+
 
     const handleApplyFilters = () => {
         const values = formFiltroLateral.getFieldsValue(true);
 
-        // let palavrasChaveArray: string[] | null = null;
-        // if (values?.palavraChave) {
-        //     if (Array.isArray(values.palavraChave)) {
-        //         const palavrasValidas = values.palavraChave.filter((p: string) => p && p.trim());
-        //         palavrasChaveArray = palavrasValidas.length > 0 ? palavrasValidas : null;
-        //     } else if (typeof values.palavraChave === 'string' && values.palavraChave.trim()) {
-        //         palavrasChaveArray = values.palavraChave.includes(';')
-        //             ? values.palavraChave.split(';').filter((p: string) => p && p.trim()).map((p: string) => p.trim())
-        //             : [values.palavraChave.trim()];
-        //     }
-        // }
+        let palavrasChaveArray: string[] | null = null;
+        if (values?.palavraChave) {
+            if (Array.isArray(values.palavraChave)) {
+                const palavrasValidas = values.palavraChave.filter((p: string) => p && p.trim());
+                palavrasChaveArray = palavrasValidas.length > 0 ? palavrasValidas : null;
+            } else if (typeof values.palavraChave === 'string' && values.palavraChave.trim()) {
+                palavrasChaveArray = values.palavraChave.includes(';')
+                    ? values.palavraChave.split(';').filter((p: string) => p && p.trim()).map((p: string) => p.trim())
+                    : [values.palavraChave.trim()];
+            }
+        }
 
         const filtroDto: CamposFiltroItensProps = {
             areaConhecimentoFiltro: values.areaConhecimentoFiltro || null,
             disciplinaFiltro: values.disciplinaFiltro || null,
+            matrizFiltro: values.matrizFiltro || null,
+            anoMatrizFiltro: values.anoMatrizFiltro || null,
+            competenciaFiltro: values.competenciaFiltro || null,
+            habilidadeFiltro: values.habilidadeFiltro || null,
+            categoriaItemFiltro: values.categoriaItemFiltro || null,
+            situacaoItemFiltro: values.situacaoItemFiltro || null,
+            dificuldadeSugeridaFiltro: values.dificuldadeSugeridaFiltro || null,
+            informacoesEstatisticasFiltro: values.informacoesEstatisticasFiltro || null,
+            palavraChaveFiltro: palavrasChaveArray,
         }
         console.log('Aplicar filtros:', filtroDto);
 
@@ -419,6 +441,117 @@ const FiltroPrincipalNovoComponent: React.FC<FiltroNovoProps> = ({ open, setOpen
                                 campoObrigatorio={true}
                                 onChange={handleDisciplinaChange}
                             />
+                        </div>
+
+                        <Divider className="separador" />
+                        <div className="filtro-secao">
+                            <h3 className="filtro-titulo">Matriz</h3>
+                            <SelectForm
+                                form={formFiltroLateral}
+                                options={listaMatriz}
+                                nomeCampo={CamposFiltroItens.matrizFiltro}
+                                label="Matriz de avaliação"
+                                campoObrigatorio={true}
+                                onChange={handleMatrizChange}
+                            />
+                        </div>
+                        <Divider className="separador" />
+                        <div className="filtro-secao">
+                            <h3 className="filtro-titulo">Ano</h3>
+                            <SelectForm
+                                form={formFiltroLateral}
+                                options={listaAnosMatriz}
+                                nomeCampo={CamposFiltroItens.anoMatrizFiltro}
+                                label="Ano (ano escolar)"
+                                campoObrigatorio={true}
+                            />
+                        </div>
+                        <Divider className="separador" />
+                        <div className="filtro-secao">
+                            <h3 className="filtro-titulo">Competencia</h3>
+                            <SelectForm
+                                form={formFiltroLateral}
+                                options={listaCompetencias}
+                                nomeCampo={CamposFiltroItens.competenciaFiltro}
+                                label="Competência"
+                                campoObrigatorio={true}
+                                onChange={handleCompetenciaChange}
+                            />
+                        </div>
+                        <Divider className="separador" />
+                        <div className="filtro-secao">
+                            <h3 className="filtro-titulo">Habilidade</h3>
+                            <SelectForm
+                                form={formFiltroLateral}
+                                options={listaHabilidades}
+                                nomeCampo={CamposFiltroItens.habilidadeFiltro}
+                                label="Habilidade"
+                                campoObrigatorio={true}
+                            />
+                        </div>
+                        <Divider className="separador" />
+                        <div className="filtro-secao">
+                            <h3 className="filtro-titulo">Quantidade</h3>
+                            <SelectForm
+                                form={formFiltroLateral}
+                                options={listaQuantidadeAlternativas}
+                                nomeCampo={CamposFiltroItens.categoriaItemFiltro}
+                                label="Categoria do item e quantidade de alternativas*"
+                                campoObrigatorio={true}
+                                labelInValue={false}
+                            />
+                        </div>
+                        <Divider className="separador" />
+                        <div className="filtro-secao">
+                            <h3 className="filtro-titulo">Dificuldade Sugerida</h3>
+                            <h1>Converter campo depois</h1>
+
+                        </div>
+                        <Divider className="separador" />
+                        <div className="filtro-secao">
+                            <h3 className="filtro-titulo">Situação</h3>
+                            <SelectForm
+                                form={formFiltroLateral}
+                                options={listaSituacoesItem}
+                                nomeCampo={CamposFiltroItens.situacaoItemFiltro}
+                                label="Situação do item"
+                                campoObrigatorio={true}
+                                labelInValue={false}
+                            />
+                        </div>
+
+                        <Divider className="separador" />
+                        <div className="filtro-secao">
+                            <h3 className="filtro-titulo">Informações estatisticas</h3>
+                            <h1>Converter campo depois booleano(true/false)</h1>
+
+                        </div>
+
+                        <Divider className="separador" />
+                        <div className="filtro-secao">
+                            <h3 className="filtro-titulo">Palavra Chave</h3>
+                            <h1>Converter campo depois booleano(true/false)</h1>
+
+                            <Form.Item
+                                label='Palavra-chave'
+                                name={CamposFiltroItens.palavraChaveFiltro}
+                                // Campo não obrigatório - sem validação obrigatória
+                                rules={[]}
+                            >
+                                <InputTag
+                                    valueForm={palavrasChave}
+                                    tags={palavrasChave}
+                                    setTags={(v) => {
+                                        const novasTags = v || [];
+                                        setPalavrasChave(novasTags);
+                                        formFiltroLateral?.setFieldValue(CamposFiltroItens.palavraChaveFiltro, novasTags);
+                                    }}
+                                />
+                            </Form.Item>
+                            <div className="caracteristicasItemTexto">
+                                <p>Digite uma palavra e pressione "Enter" para adicioná-la.</p>
+                            </div>
+
                         </div>
 
                         <Divider className="separador" />
