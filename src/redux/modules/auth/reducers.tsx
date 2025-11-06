@@ -16,6 +16,12 @@ const initialState = {
 const SET_USER_LOGGED = 'auth/setUserLogged';
 const LOGOUT = 'auth/logout';
 
+export interface AuthProps {
+  token: string;
+  isAuthenticated: boolean;
+  dataHoraExpiracao: string;
+}
+
 export const auth = produce((draft, action) => {
   switch (action.type) {
     case SET_USER_LOGGED: {
