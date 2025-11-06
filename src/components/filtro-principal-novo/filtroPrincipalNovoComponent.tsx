@@ -24,6 +24,8 @@ interface FiltroNovoProps {
     // filtroDados: Filtro;
 }
 
+
+
 const FiltroPrincipalNovoComponent: React.FC<FiltroNovoProps> = ({ open, setOpen, }) => {
 
     const [listaAreaConhecimento, setListaAreaConhecimento] = useState<DefaultOptionType[]>([]);
@@ -35,17 +37,34 @@ const FiltroPrincipalNovoComponent: React.FC<FiltroNovoProps> = ({ open, setOpen
     const [listaQuantidadeAlternativas, setListaQuantidadeAlternativas] = useState<DefaultOptionType[]>([]);
     const [listaSituacoesItem, setListaSituacoesItem] = useState<DefaultOptionType[]>([]);
     const [palavraChaveFiltro, setPalavraChaveFiltro] = useState<string[] | undefined>([]);
+    const [listaDificuldadeSugerida, setListaDificuldadeSugerida] = useState<DefaultOptionType[]>([]);
+    const [listaInformacoesEstatisticas, setListaInformacoesEstatisticas] = useState<DefaultOptionType[]>([]);
 
-
+    
     const [jaInicializado, setJaInicializado] = useState(false);
 
     const [formId] = useState(() => `filtro-lateral-${Date.now()}-${Math.random().toString(36)}`);
     const [formFiltroLateral] = Form.useForm();
 
+    const infoEsta = [
+            {
+                descricao: "contém informações",
+                label: "contém informações",
+                valor: 'true',
+                value: 'true'
+            },
+            {
+                descricao: "não contém informações",
+                label: "não contém informações",
+                valor: 'false',
+                value: 'false'
+            }
+        ];
+
     const carregarAreaConhecimento = async () => {
         const resposta = await configuracaoItemService.obterAreaConhecimento();
         setListaAreaConhecimento(resposta?.length ? resposta : []);
-    };
+    };    
 
     const executarCascataAutomatica = async (itemFiltro: string) => {
         //setCarregando?.(true);
@@ -108,8 +127,8 @@ const FiltroPrincipalNovoComponent: React.FC<FiltroNovoProps> = ({ open, setOpen
                 await new Promise(resolve => setTimeout(resolve, 300));
             }
 
-            if (filtroLocal.anoMatriz && formFiltroLateral?.getFieldValue(CamposFiltroItens.anoMatrizFiltro) !== filtroLocal.anoMatriz) {
-                formFiltroLateral?.setFieldValue(CamposFiltroItens.anoMatrizFiltro, filtroLocal.anoMatriz);
+            if (filtroLocal.anoMatrizFiltro && formFiltroLateral?.getFieldValue(CamposFiltroItens.anoMatrizFiltro) !== filtroLocal.anoMatrizFiltro) {
+                formFiltroLateral?.setFieldValue(CamposFiltroItens.anoMatrizFiltro, filtroLocal.anoMatrizFiltro);
                 await new Promise(resolve => setTimeout(resolve, 200));
             }
 
@@ -133,9 +152,9 @@ const FiltroPrincipalNovoComponent: React.FC<FiltroNovoProps> = ({ open, setOpen
             const camposSimples = {
                 situacaoItemFiltro: CamposFiltroItens.situacaoItemFiltro,
                 categoriaItemFiltro: CamposFiltroItens.categoriaItemFiltro,
-                //dificuldadeSugerida: CamposFiltroItens.dificuldadeSugeridaFiltro,
+                dificuldadeSugeridaFiltro: CamposFiltroItens.dificuldadeSugeridaFiltro,
                 palavraChaveFiltro: CamposFiltroItens.palavraChaveFiltro,
-                //informacoesEstatisticasFiltro: CamposFiltroItens.informacoesEstatisticasFiltro,
+                informacoesEstatisticasFiltro: CamposFiltroItens.informacoesEstatisticasFiltro,
             };
 
             Object.keys(camposSimples).forEach(key => {
@@ -207,27 +226,19 @@ const FiltroPrincipalNovoComponent: React.FC<FiltroNovoProps> = ({ open, setOpen
         if (!formFiltroLateral) {
             return;
         }
-
-        //Limpa campos dependentes
+        
         formFiltroLateral.setFieldValue(CamposFiltroItens.disciplinaFiltro, null);
         formFiltroLateral.setFieldValue(CamposFiltroItens.matrizFiltro, null);
         formFiltroLateral.setFieldValue(CamposFiltroItens.anoMatrizFiltro, null);
         formFiltroLateral.setFieldValue(CamposFiltroItens.competenciaFiltro, null);
         formFiltroLateral.setFieldValue(CamposFiltroItens.habilidadeFiltro, null);
-        //formFiltroLateral.setFieldValue(CamposFiltroItens.categoriaItemFiltro, null);
-        //formFiltroLateral.setFieldValue(CamposFiltroItens.dificuldadeSugeridaFiltro, null);        
-        // formFiltroLateral.setFieldValue(CamposFiltroItens.situacaoItemFiltro, null);               
-        // formFiltroLateral.setFieldValue(CamposFiltroItens.informacoesEstatisticasFiltro, null);        
-        // formFiltroLateral.setFieldValue(CamposFiltroItens.palavraChaveFiltro, null);
 
-        // Limpa listas dependentes
         setListaDisciplinas([]);
         setListaMatriz([]);
         setListaAnosMatriz([]);
         setListaCompetencias([]);
         setListaHabilidades([]);
 
-        // Carrega disciplinas se área selecionada
         if (value && !validarCampoForm(value)) {
             const resposta = await configuracaoItemService.obterDisciplinas(value);
             if (resposta?.length) {
@@ -332,15 +343,17 @@ const FiltroPrincipalNovoComponent: React.FC<FiltroNovoProps> = ({ open, setOpen
         // if (!formFiltroLateral) {
         //     return;
         // }
-        const [quantidadeAlternativas, situacoesItem] = await Promise.all([
+        const [quantidadeAlternativas, situacoesItem, dificuldadeSugerida] = await Promise.all([
             configuracaoItemService.obterQuantidadeAlternativas(),
-            configuracaoItemService.obterSituacoesItem()
+            configuracaoItemService.obterSituacoesItem(),
+            configuracaoItemService.obterDificuldadeSugerida(),
         ]);
 
         setListaQuantidadeAlternativas(quantidadeAlternativas?.length ? quantidadeAlternativas : []);
         setListaSituacoesItem(situacoesItem?.length ? situacoesItem : []);
-        //dificuldadeSugerida
-        //Informações estatisticas
+        setListaDificuldadeSugerida(dificuldadeSugerida?.length ? dificuldadeSugerida : []);
+        
+        setListaInformacoesEstatisticas(infoEsta);
     };
 
 
@@ -358,7 +371,7 @@ const FiltroPrincipalNovoComponent: React.FC<FiltroNovoProps> = ({ open, setOpen
                     : [values.palavraChaveFiltro.trim()];
             }
         }
-
+        
         const filtroDto: CamposFiltroItensProps = {
             areaConhecimentoFiltro: values.areaConhecimentoFiltro || null,
             disciplinaFiltro: values.disciplinaFiltro || null,
@@ -379,14 +392,13 @@ const FiltroPrincipalNovoComponent: React.FC<FiltroNovoProps> = ({ open, setOpen
         itemFiltroAtualizado.filtroLateral = filtroDto;
         localStorage.setItem('itemFiltro', JSON.stringify(itemFiltroAtualizado));
 
-        // const consoleLog = localStorage.getItem('itemFiltro');
-        // console.log('itemFiltro atualizado no localStorage:', consoleLog);
-
+        
         setOpen(false);
     };
 
     const handleResetFilters = () => {
-        //Desenvolver lógica de reset dos filtros
+        localStorage.removeItem('itemFiltro');
+        setOpen(false);
     }
 
     useEffect(() => {
@@ -504,8 +516,14 @@ const FiltroPrincipalNovoComponent: React.FC<FiltroNovoProps> = ({ open, setOpen
                         <Divider className="separador" />
                         <div className="filtro-secao">
                             <h3 className="filtro-titulo">Dificuldade Sugerida</h3>
-                            <h1>Converter campo depois</h1>
-
+                            <SelectForm
+                                form={formFiltroLateral}
+                                options={listaDificuldadeSugerida}
+                                nomeCampo={CamposFiltroItens.dificuldadeSugeridaFiltro}
+                                label="Dificuldade Sugerida"
+                                campoObrigatorio={true}
+                                labelInValue={false}
+                            />
                         </div>
                         <Divider className="separador" />
                         <div className="filtro-secao">
@@ -523,8 +541,14 @@ const FiltroPrincipalNovoComponent: React.FC<FiltroNovoProps> = ({ open, setOpen
                         <Divider className="separador" />
                         <div className="filtro-secao">
                             <h3 className="filtro-titulo">Informações estatisticas</h3>
-                            <h1>Converter campo depois booleano(true/false)</h1>
-
+                            <SelectForm
+                                form={formFiltroLateral}
+                                options={listaInformacoesEstatisticas}
+                                nomeCampo={CamposFiltroItens.informacoesEstatisticasFiltro}
+                                label="Informações Estatísticas"
+                                campoObrigatorio={true}
+                                labelInValue={false}
+                            />
                         </div>
 
                         <Divider className="separador" />
