@@ -40,31 +40,31 @@ const FiltroPrincipalNovoComponent: React.FC<FiltroNovoProps> = ({ open, setOpen
     const [listaDificuldadeSugerida, setListaDificuldadeSugerida] = useState<DefaultOptionType[]>([]);
     const [listaInformacoesEstatisticas, setListaInformacoesEstatisticas] = useState<DefaultOptionType[]>([]);
 
-    
+
     const [jaInicializado, setJaInicializado] = useState(false);
 
     const [formId] = useState(() => `filtro-lateral-${Date.now()}-${Math.random().toString(36)}`);
     const [formFiltroLateral] = Form.useForm();
 
     const infoEsta = [
-            {
-                descricao: "contém informações",
-                label: "contém informações",
-                valor: 'true',
-                value: 'true'
-            },
-            {
-                descricao: "não contém informações",
-                label: "não contém informações",
-                valor: 'false',
-                value: 'false'
-            }
-        ];
+        {
+            descricao: "contém informações",
+            label: "contém informações",
+            valor: 'true',
+            value: 'true'
+        },
+        {
+            descricao: "não contém informações",
+            label: "não contém informações",
+            valor: 'false',
+            value: 'false'
+        }
+    ];
 
     const carregarAreaConhecimento = async () => {
         const resposta = await configuracaoItemService.obterAreaConhecimento();
         setListaAreaConhecimento(resposta?.length ? resposta : []);
-    };    
+    };
 
     const executarCascataAutomatica = async (itemFiltro: string) => {
         //setCarregando?.(true);
@@ -226,7 +226,7 @@ const FiltroPrincipalNovoComponent: React.FC<FiltroNovoProps> = ({ open, setOpen
         if (!formFiltroLateral) {
             return;
         }
-        
+
         formFiltroLateral.setFieldValue(CamposFiltroItens.disciplinaFiltro, null);
         formFiltroLateral.setFieldValue(CamposFiltroItens.matrizFiltro, null);
         formFiltroLateral.setFieldValue(CamposFiltroItens.anoMatrizFiltro, null);
@@ -352,7 +352,7 @@ const FiltroPrincipalNovoComponent: React.FC<FiltroNovoProps> = ({ open, setOpen
         setListaQuantidadeAlternativas(quantidadeAlternativas?.length ? quantidadeAlternativas : []);
         setListaSituacoesItem(situacoesItem?.length ? situacoesItem : []);
         setListaDificuldadeSugerida(dificuldadeSugerida?.length ? dificuldadeSugerida : []);
-        
+
         setListaInformacoesEstatisticas(infoEsta);
     };
 
@@ -371,7 +371,7 @@ const FiltroPrincipalNovoComponent: React.FC<FiltroNovoProps> = ({ open, setOpen
                     : [values.palavraChaveFiltro.trim()];
             }
         }
-        
+
         const filtroDto: CamposFiltroItensProps = {
             areaConhecimentoFiltro: values.areaConhecimentoFiltro || null,
             disciplinaFiltro: values.disciplinaFiltro || null,
@@ -392,12 +392,13 @@ const FiltroPrincipalNovoComponent: React.FC<FiltroNovoProps> = ({ open, setOpen
         itemFiltroAtualizado.filtroLateral = filtroDto;
         localStorage.setItem('itemFiltro', JSON.stringify(itemFiltroAtualizado));
 
-        
+
         setOpen(false);
     };
 
     const handleResetFilters = () => {
-        localStorage.removeItem('itemFiltro');
+        localStorage.setItem('itemFiltro', JSON.stringify({})); // zera o conteúdo
+        formFiltroLateral.resetFields();
         setOpen(false);
     }
 
