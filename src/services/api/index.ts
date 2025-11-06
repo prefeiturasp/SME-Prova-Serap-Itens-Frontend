@@ -93,10 +93,10 @@ api.interceptors.request.use(
     const { token, dataHoraExpiracao } = store.getState().auth;
 
     if (requestConfig?.url !== URL_AUTENTICACAO_REVALIDAR) {
-      return configPadraoAutenticacao(requestConfig, token, dataHoraExpiracao);
+      return configPadraoAutenticacao(requestConfig, token!, dataHoraExpiracao!);
     }
 
-    return configRevalidarAutenticacao(requestConfig, token);
+    return configRevalidarAutenticacao(requestConfig, token!);
   },
   (error) => Promise.reject(error),
 );
