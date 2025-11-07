@@ -99,7 +99,7 @@
 }
 
 .drawer-filtro-secao .select-custom .ant-select-selection-placeholder {
-    color: #FFFFFF !important;
+    color: #C0D6EB !important;
 }
 
 .drawer-texto-branco {
@@ -225,4 +225,8 @@
 .drawer-filtro-secao .tag-input {
     background: #FFFFFF !important;
     color: #5A94D8 !important;   
+}
+
+.drawer-filtro-secao .rti--input::placeholder {
+    color: #C0D6EB !important;
 }
