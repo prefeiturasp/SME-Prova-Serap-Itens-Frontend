@@ -398,7 +398,6 @@ const FiltroPrincipalNovoComponent: React.FC<FiltroNovoProps> = ({ open, setOpen
     const handleResetFilters = () => {
         localStorage.setItem('itemFiltro', JSON.stringify({})); // zera o conteúdo
         formFiltroLateral.resetFields();
-        setOpen(false);
     }
 
     useEffect(() => {
