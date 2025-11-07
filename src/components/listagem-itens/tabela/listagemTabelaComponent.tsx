@@ -1,10 +1,11 @@
-import { Button, Card, Pagination, Select, Tag } from 'antd';
-import React, { useState } from 'react';
+import { Badge, Button, Card, Pagination, Select, Tag } from 'antd';
+import React, { useEffect, useState } from 'react';
 import './listagemTabelaComponent.css';
 import type { ItemListagemDto } from '~/domain/dto/item-listagem-dto';
 import { Situacao, SituacaoDescricao } from '~/domain/enums/situacao';
 import iconFilter from '~/assets/filtrar.svg';
 import FiltroPrincipalNovoComponent from '~/components/filtro-principal-novo/filtroPrincipalNovoComponent';
+import type { FiltroItemDto } from '~/domain/dto/filtro-item-dto';
 
 interface ListagemTabelaProps {
   dados: ItemListagemDto[];
@@ -56,27 +57,69 @@ const ListagemTabela: React.FC<ListagemTabelaProps> = ({
         return {};
     }
   };
-
   const inicio = (pagina - 1) * itensPorPagina;
   const fim = inicio + itensPorPagina;
 
   const [open, setOpen] = useState<boolean>(false);
+  const [filtros, setFiltros] = useState<FiltroItemDto>(null!);
+  const [quantidadeFiltros, setQuantidadeFiltros] = React.useState<number>(0);
 
   const handleOpenDrawer = () => {
     setOpen(true);
+  };
+
+  const atualizaFiltros = () => {
+    const itemFiltro = localStorage.getItem('itemFiltro');
+    const itemFiltroAtualizado = JSON.parse(itemFiltro || '{}');
+    if (itemFiltroAtualizado.filtroLateral) {
+      console.log('Filtro lateral aplicado:', itemFiltroAtualizado.filtroLateral);
+      setFiltros({
+        areaConhecimentoId: itemFiltroAtualizado.filtroLateral.areaConhecimentoFiltro,
+        categoriaId: itemFiltroAtualizado.filtroLateral.categoriaItemFiltro,
+        competenciaId: itemFiltroAtualizado.filtroLateral.competenciaFiltro,
+        dificuldadeSugeridaId: itemFiltroAtualizado.filtroLateral.dificuldadeSugeridaFiltro,
+        disciplinaId: itemFiltroAtualizado.filtroLateral.disciplinaFiltro,
+        habilidadeId: itemFiltroAtualizado.filtroLateral.habilidadeFiltro,
+        informacoesEstatistica: itemFiltroAtualizado.filtroLateral.informacoesEstatisticasFiltro,
+        matrizId: itemFiltroAtualizado.filtroLateral.matrizFiltro,
+        palavraChave: itemFiltroAtualizado.filtroLateral.palavraChaveFiltro,
+        situacao: itemFiltroAtualizado.filtroLateral.situacaoItemFiltro,
+        anoMatrizId: itemFiltroAtualizado.filtroLateral.anoMatrizFiltro,
+        pagina: 1,
+        tamanhoPagina: itensPorPagina,
+      });
+    } else {
+      setFiltros(null!);
+    }
   };
 
   const handleSetOpen = (value: boolean) => {
     setOpen(value);
 
     if (value === false) {
-      const itemFiltro = localStorage.getItem('itemFiltro');
-      const itemFiltroAtualizado = JSON.parse(itemFiltro || '{}');
-      if (itemFiltroAtualizado.filtroLateral) {
-        console.log('Filtro lateral aplicado:', itemFiltroAtualizado.filtroLateral);
-      }
+      atualizaFiltros();
     }
   };
+
+  useEffect(() => {
+    const naoVazios = filtros
+      ? Object.entries(filtros)
+          .filter(([chave]) => !['pagina', 'tamanhoPagina', 'codigoItem'].includes(chave))
+          .filter(([_, valor]) => {
+            if (valor === null || valor === undefined) return false;
+            if (typeof valor === 'string' && valor.trim() === '') return false;
+            if (typeof valor === 'number' && valor === 0) return false;
+            if (Array.isArray(valor) && valor.length === 0) return false;
+            return true;
+          })
+      : [];
+
+    setQuantidadeFiltros(naoVazios.length);
+  }, [filtros]);
+
+  useEffect(() => {
+    atualizaFiltros();
+  }, []);
 
   return (
     <>
@@ -89,13 +132,14 @@ const ListagemTabela: React.FC<ListagemTabelaProps> = ({
               Selecione um item para conferir mais detalhes ao lado.
             </div>
           </div>
-          <Button
-            className='listagem-tabela-filtrar'
-            onClick={handleOpenDrawer}
-            style={{ cursor: 'pointer' }}
-          >
-            <img src={iconFilter} alt='Editar' width={24} height={24} />
-            FILTRAR
+          <Button className='listagem-tabela-filtrar' onClick={handleOpenDrawer}>
+            <img src={iconFilter} alt='Filtrar' width={24} height={24} />
+            <span className='filtro-label'>
+              FILTRAR
+              {quantidadeFiltros > 0 ? (
+                <Badge count={quantidadeFiltros} className='badge-quantidade-filtros' />
+              ) : null}
+            </span>
           </Button>
         </div>
 

@@ -16,6 +16,7 @@ import filtroSelectService from '~/services/filtro-select-service';
 import { DefaultOptionType } from 'antd/es/select';
 import { SelecioneDto } from '~/domain/dto/selecione-dto';
 import { converterSelecineDto } from '~/utils/converte-dto';
+import type { FiltroItemDto } from '~/domain/dto/filtro-item-dto';
 
 const ListagemItens: React.FC = () => {
   const linkRetorno = 'https://hom-serap.sme.prefeitura.sp.gov.br/';
@@ -26,13 +27,11 @@ const ListagemItens: React.FC = () => {
   const [totalRegistros, setTotalRegistro] = useState(0);
   const [selectItemLista, setSelectItemLista] = useState<DefaultOptionType[]>(null!);
   const [selectItemSelecionado, setSelectItemSelecionado] = useState<DefaultOptionType>(null!);
-
   const [tabelaItens, setTabelaItens] = useState<ItemListagemDto[]>([]);
   const [itemResumoVersao, setItemResumoVersao] = useState<ItemResumoVersaoDto>();
-
   const [codigoItemTabelaSelecionado, setCodigoItemTabelaSelecionado] = useState<string>('');
-
   const [loadingSelect, setLoadingSelect] = useState<boolean>(false);
+
   useEffect(() => {
     buscaDadosTabela();
   }, []);
