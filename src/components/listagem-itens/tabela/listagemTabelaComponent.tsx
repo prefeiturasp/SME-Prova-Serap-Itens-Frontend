@@ -97,136 +97,104 @@ const ListagemTabela: React.FC<ListagemTabelaProps> = ({
             FILTRAR
           </div>
         </div>
+        <div className='listagem-tabela-filtrar'>
+          <img src={iconFilter} alt='Filtrar' width={24} height={24} />
+          FILTRAR
+        </div>
+      </div>
 
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            marginTop: 16,
-            maxHeight: '500px',
-            overflowY: 'auto',
-            width: 'calc(100% + 24px)',
-          }}
-        >
-          {dados.map((item, index) => (
-            <div
-              key={index}
-              className='listagem-item-tabela'
-              onClick={() => onItemClick?.(item.id)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') onItemClick?.(item.id);
-              }}
-              role='button'
-              tabIndex={0}
-            >
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    flexWrap: 'wrap',
-                  }}
-                >
-                  <div className='listagem-item-tabela-head'>
-                    <div className='listagem-item-tabela-flex'>
-                      <b>Código do item: </b>
-                      {item.codigoItem}
-                    </div>
-                    <div className='listagem-item-tabela-auto'>
-                      <b>Componente curricular: </b>
-                      {item.disciplina}
-                    </div>
-                  </div>
+      <div className='listagem-tabela-conteudo'>
+        {dados.map((item, index) => (
+          <div
+            key={index}
+            className='listagem-item-tabela'
+            onClick={() => onItemClick?.(item.id)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') onItemClick?.(item.id);
+            }}
+            role='button'
+            tabIndex={0}
+          >
+            <div className='listagem-item-tabela-conteudo'>
+              <div className='listagem-item-tabela-head'>
+                <div className='listagem-item-tabela-flex'>
+                  <b>Código do item: </b>
+                  {item.codigoItem}
                 </div>
-
-                <div>
-                  <b>Enunciado do item:</b>
-                  <br></br>
-
-                  {item.enunciado && item.enunciado.trim() !== '' ? (
-                    <div dangerouslySetInnerHTML={{ __html: item.enunciado }} />
-                  ) : (
-                    <i>[Enunciado não cadastrado]</i>
-                  )}
+                <div className='listagem-item-tabela-auto'>
+                  <b>Componente curricular: </b>
+                  {item.disciplina}
                 </div>
+              </div>
 
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    flexWrap: 'wrap',
-                  }}
-                >
-                  <div style={{ marginTop: 4 }}>
-                    {item.dificuldade && (
-                      <Tag
-                        style={{
-                          borderRadius: '8px',
-                          marginRight: 8,
-                          ...corDificuldade(item.dificuldade),
-                        }}
-                      >
-                        <b>Dificuldade: </b> {item.dificuldade}
-                      </Tag>
-                    )}
+              <div>
+                <b>Enunciado do item:</b>
+                <br />
+                {item.enunciado && item.enunciado.trim() !== '' ? (
+                  <div dangerouslySetInnerHTML={{ __html: item.enunciado }} />
+                ) : (
+                  <i>[Enunciado não cadastrado]</i>
+                )}
+              </div>
 
+              <div className='listagem-item-tabela-rodape'>
+                <div className='listagem-item-tabela-rodape-info'>
+                  {item.dificuldade && (
                     <Tag
                       style={{
                         borderRadius: '8px',
-                        ...corSituacao(item.situacao === null ? Situacao.Rascunho : item.situacao),
+                        marginRight: 8,
+                        ...corDificuldade(item.dificuldade),
                       }}
                     >
-                      <b>Situação: </b>{' '}
-                      {
-                        SituacaoDescricao[
-                        item.situacao === null ? Situacao.Rascunho : item.situacao
-                        ]
-                      }
+                      <b>Dificuldade: </b> {item.dificuldade}
                     </Tag>
-                  </div>
-                  <div>
-                    <b>Data de criação: </b>
-                    {new Date(item.dataCriacao).toLocaleDateString('pt-BR')}
-                  </div>
+                  )}
+                  <Tag
+                    style={{
+                      borderRadius: '8px',
+                      ...corSituacao(item.situacao ?? Situacao.Rascunho),
+                    }}
+                  >
+                    <b>Situação: </b> {SituacaoDescricao[item.situacao ?? Situacao.Rascunho]}
+                  </Tag>
+                </div>
+                <div>
+                  <b>Data de criação: </b>
+                  {new Date(item.dataCriacao).toLocaleDateString('pt-BR')}
                 </div>
               </div>
             </div>
-          ))}
+          </div>
+        ))}
+      </div>
+
+      <div className='listagem-item-tabela-paginacao'>
+        <div className='listagem-item-tabela-auto'>
+          {`${inicio + 1}-${Math.min(fim, totalRegistros)} de ${totalRegistros} itens`}
         </div>
-
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 24 }}>
-          <div className='listagem-item-tabela-auto'>
-            {`${inicio + 1}-${Math.min(fim, totalRegistros)} de ${totalRegistros} itens`}
-          </div>
-
-          <div>
-            <Pagination
-              current={pagina}
-              total={totalRegistros}
-              pageSize={itensPorPagina}
-              onChange={(p) => setPagina(p)}
-              showSizeChanger={false}
-            />
-          </div>
-
-          <div>
-            <Select
-              className='listagem-item-tabela-select'
-              placeholder=''
-              defaultValue={10}
-              options={[
-                { value: 10, label: '10' },
-                { value: 20, label: '20' },
-                { value: 30, label: '30' },
-                { value: 40, label: '40' },
-                { value: 50, label: '50' },
-                { value: 100, label: '100' },
-              ]}
-              onChange={selecionaPaginasOnChange}
-            />
-          </div>
-        </div>
-      </Card>      
+        <Pagination
+          current={pagina}
+          total={totalRegistros}
+          pageSize={itensPorPagina}
+          onChange={setPagina}
+          showSizeChanger={false}
+        />
+        <Select
+          className='listagem-item-tabela-select'
+          defaultValue={10}
+          options={[
+            { value: 10, label: '10' },
+            { value: 20, label: '20' },
+            { value: 30, label: '30' },
+            { value: 40, label: '40' },
+            { value: 50, label: '50' },
+            { value: 100, label: '100' },
+          ]}
+          onChange={selecionaPaginasOnChange}
+        />
+      </div>
+    </Card>
     </>
   );
 };

@@ -1,5 +1,5 @@
 import { combineReducers } from 'redux';
-import auth from './auth/reducers';
+import { auth } from './auth/reducers';
 import filtroPrincipal from './filtro-principal/reducers';
 import geral from './geral/reducers';
 import areaConhecimento from './cadastroItem-novo/area-conhecimento/reducers';
