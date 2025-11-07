@@ -1,5 +1,6 @@
 export interface FiltroItemDto {
   areaConhecimentoId?: number;
+  categoriaId?: number;
   codigoItem?: string;
   disciplinaId?: number;
   matrizId?: number;
@@ -9,4 +10,7 @@ export interface FiltroItemDto {
   habilidadeId?: number;
   pagina: number;
   tamanhoPagina: number;
+  informacoesEstatistica?: boolean
+  palavraChave?: string;
+  anoMatrizId?: number;
 }

@@ -44,6 +44,12 @@
   font-size: 20px;
   position: relative;
   cursor: pointer;
+  border-color: transparent !important;
+  box-shadow: 0 0 0 transparent !important;
+}
+
+.listagem-tabela-filtrar:hover {
+  color: #5a94d8 !important;
 }
 
 .filtro-label {
@@ -89,10 +95,6 @@
   max-height: 500px;
   overflow-y: auto;
   width: calc(100% + 24px);
-}
-
-.listagem-tabela-filtrar img {
-  margin-right: 4px;
 }
 
 .listagem-tabela-conteudo {

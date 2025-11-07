@@ -27,25 +27,10 @@ const ListagemItens: React.FC = () => {
   const [totalRegistros, setTotalRegistro] = useState(0);
   const [selectItemLista, setSelectItemLista] = useState<DefaultOptionType[]>(null!);
   const [selectItemSelecionado, setSelectItemSelecionado] = useState<DefaultOptionType>(null!);
-  const [quantidadeFiltros, setQuantidadeFiltros] = React.useState<number>(0);
   const [tabelaItens, setTabelaItens] = useState<ItemListagemDto[]>([]);
   const [itemResumoVersao, setItemResumoVersao] = useState<ItemResumoVersaoDto>();
   const [codigoItemTabelaSelecionado, setCodigoItemTabelaSelecionado] = useState<string>('');
   const [loadingSelect, setLoadingSelect] = useState<boolean>(false);
-
-  const [filtros, setFiltros] = useState<FiltroItemDto>(null!);
-
-  useEffect(() => {
-    const naoVazios = Object.values(filtros).filter((valor) => {
-      if (valor === null || valor === undefined) return false;
-      if (typeof valor === 'string' && valor.trim() === '') return false;
-      if (typeof valor === 'number' && valor === 0) return false;
-      if (Array.isArray(valor) && valor.length === 0) return false;
-      return true;
-    });
-
-    setQuantidadeFiltros(naoVazios.length);
-  }, [filtros]);
 
   useEffect(() => {
     buscaDadosTabela();
@@ -190,7 +175,6 @@ const ListagemItens: React.FC = () => {
             totalRegistros={totalRegistros}
             setPagina={setPagina}
             itensPorPagina={itensPorPagina}
-            quantidadeFiltros={quantidadeFiltros}
             onItemClick={tabelaItemClick}
             selecionaPaginasOnChange={selecionaPaginasOnChange}
           ></ListagemTabela>
