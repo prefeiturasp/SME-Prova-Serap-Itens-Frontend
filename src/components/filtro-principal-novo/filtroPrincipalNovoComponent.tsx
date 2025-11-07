@@ -385,7 +385,6 @@ const FiltroPrincipalNovoComponent: React.FC<FiltroNovoProps> = ({ open, setOpen
             informacoesEstatisticasFiltro: values.informacoesEstatisticasFiltro || null,
             palavraChaveFiltro: palavrasChaveArray,
         }
-        console.log('Aplicar filtros:', filtroDto);
 
         const itemFiltro = localStorage.getItem('itemFiltro');
         const itemFiltroAtualizado = JSON.parse(itemFiltro || '{}');

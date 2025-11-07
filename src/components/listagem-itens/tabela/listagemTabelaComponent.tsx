@@ -70,6 +70,15 @@ const ListagemTabela: React.FC<ListagemTabelaProps> = ({
 
   const handleSetOpen = (value: boolean) => {
     setOpen(value);
+
+    //Pegando o filtro lateral do localStorage ao fechar o drawer
+    if(value === false){
+      const itemFiltro = localStorage.getItem('itemFiltro');
+      const itemFiltroAtualizado = JSON.parse(itemFiltro || '{}');
+      if(itemFiltroAtualizado.filtroLateral){
+        console.log('Filtro lateral aplicado:', itemFiltroAtualizado.filtroLateral);
+      }
+    }
   };
   
   return (
