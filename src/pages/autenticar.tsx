@@ -1,81 +1,65 @@
-import { Button, Result, Spin } from 'antd';
-import React, { useCallback, useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate, useParams } from 'react-router-dom';
-import styled from 'styled-components';
-import { AppState } from '~/redux';
-import { setIsAuthenticated } from '~/redux/modules/auth/actions';
-//import autenticacaoService from '~/services/autenticacao-service';
-
-import { voltarAoSerap } from '~/utils/converte-dto';
-
-const ContainerAutenticar = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-`;
+import { useEffect, useRef } from 'react';
+import { useDispatch } from 'react-redux';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { logout, setUserLogged } from '~/redux/modules/auth/reducers';
+import autenticacaoService from '~/services/autenticacao-service';
 
 const Autenticar: React.FC<any> = () => {
-  const navigate = useNavigate();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const codigo = searchParams.get('codigo');
+  const isExecuting = useRef(false);
 
-  const paramsRouter = useParams();
+  const verificarToken = async () => {
+    if (isExecuting.current) return;
+    isExecuting.current = true;
 
-  const isAuthenticated = useSelector((state: AppState) => state.auth.isAuthenticated);
+    const storedToken = localStorage.getItem('authToken');
+    const dataHoraExpiracao = localStorage.getItem('authExpiresAt');
 
-  const [autenticando, setAutenticando] = useState(true);
+    if (codigo) {
+      try {
+        const resposta = await autenticacaoService.autenticarValidar(codigo);
 
-  const validarCodigoLogin = useCallback(async () => {
-    // const codigo = paramsRouter?.codigoValidador || '';
-    setAutenticando(true);
+        const { token, dataHoraExpiracao } = resposta.data;
 
-    // const resposta = await autenticacaoService
-    //   .autenticarValidar(codigo)
-    //   .catch(() => setAutenticando(false));
+        dispatch(setUserLogged({ token, dataHoraExpiracao }));
 
-    // if (resposta?.data?.token) {
-      dispatch(setIsAuthenticated(true));
-      // dispatch(setToken(resposta.data.token));
-      // dispatch(setDataHoraExpiracao(resposta.data.dataHoraExpiracao));
-      navigate('/');
-    // } else {
-    //   setAutenticando(false);
-    //   dispatch(setIsAuthenticated(false));
-    //   dispatch(setToken(''));
-    //   dispatch(setDataHoraExpiracao(''));
-    // }
-  }, [navigate, dispatch, paramsRouter]);
+        navigate('/');
+      } catch (error) {
+        console.error('Erro ao autenticar:', error);
+        navigate('/sem-acesso');
+      }
+    } else {
+      if (storedToken && dataHoraExpiracao) {
+        const expiraEm = new Date(dataHoraExpiracao);
+        if (expiraEm > new Date()) {
+          dispatch(
+            setUserLogged({
+              token: storedToken,
+              dataHoraExpiracao: dataHoraExpiracao,
+            }),
+          );
+
+          navigate('/');
+
+          return;
+        } else {
+          dispatch(logout());
+          navigate('/sem-acesso');
+        }
+      } else {
+        navigate('/sem-acesso');
+      }
+    }
+  };
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      validarCodigoLogin();
-    } else {
-      navigate('/');
-    }
-  }, [isAuthenticated, navigate, validarCodigoLogin]);
+    verificarToken();
+  }, [codigo, dispatch, navigate]);
 
-  return (
-    <ContainerAutenticar>
-      {autenticando ? (
-        <Spin tip='Autenticando' size='large' />
-      ) : (
-        <Result
-          status='error'
-          title='Falha na autenticação'
-          extra={[
-            <Button type='primary' key='voltar' onClick={() => voltarAoSerap()}>
-              Voltar
-            </Button>,
-            <Button key='tentar-novamente' onClick={() => validarCodigoLogin()}>
-              Tentar novamente
-            </Button>,
-          ]}
-        />
-      )}
-    </ContainerAutenticar>
-  );
+  return <div>Autenticando...</div>;
 };
 
 export default Autenticar;

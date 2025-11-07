@@ -5,10 +5,11 @@ import { Campos } from '~/domain/enums/campos-cadastro-item';
 import Select from '~/components/select';
 import { validarCampoForm } from '~/utils/funcoes';
 import './select-form.css';
+import { CamposFiltroItens } from '~/domain/enums/campos-filtro-itens';
 
 interface SelectProps extends FormProps {
     label: string;
-    nomeCampo: Campos;
+    nomeCampo: Campos | CamposFiltroItens;
     options: DefaultOptionType[];
     campoObrigatorio: boolean;
     labelInValue?: boolean;

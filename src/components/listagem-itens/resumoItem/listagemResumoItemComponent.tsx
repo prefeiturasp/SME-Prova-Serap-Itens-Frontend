@@ -8,61 +8,13 @@ interface listagemResumoItemProps {
   dados?: any;
 }
 
-const dadosMockados = {
-  id: 289,
-  codigoItem: 13105,
-  textoBase:
-    "Certa manhã, João acordou cedo e decidiu preparar o café para sua mãe. Procurou o pão, o leite e o café, mas percebeu que o açúcar havia acabado. Mesmo assim, ele preparou o café e serviu com um sorriso, dizendo: 'Hoje o café está sem açúcar, mas cheio de carinho!'",
-  enunciado: 'O que o texto mostra sobre a atitude de João?',
-  fonte: 'Texto adaptado para fins pedagógicos.',
-  versaoItem: 1,
-  quantidadeVersoes: 1,
-  versoesDisponiveis: [
-    {
-      id: 289,
-      codigoItem: 13105,
-      versaoItem: 1,
-      dataCriacao: '23/10/2025',
-    },
-  ],
-  alternativas: [
-    {
-      id: 177,
-      itemId: 289,
-      descricao:
-        'Que ele quis fazer uma surpresa carinhosa para a mãe, mesmo com um pequeno problema.',
-      ordem: 1,
-      numeracao: 'A',
-    },
-    {
-      id: 178,
-      itemId: 289,
-      descricao: 'Que ele ficou bravo porque o açúcar havia acabado.',
-      ordem: 2,
-      numeracao: 'B',
-    },
-    {
-      id: 179,
-      itemId: 289,
-      descricao: 'Que ele desistiu de preparar o café quando percebeu a falta de açúcar.',
-      ordem: 3,
-      numeracao: 'C',
-    },
-    {
-      id: 180,
-      itemId: 289,
-      descricao: 'Que ele pediu para a mãe preparar o café porque não sabia fazer.',
-      ordem: 4,
-      numeracao: 'D',
-    },
-  ],
-};
-
 const ListagemResumoItemComponent: React.FC<listagemResumoItemProps> = ({ dados }) => {
-  const item = dados || dadosMockados;
+  const item = dados;
+
+  if (!item) return <></>;
 
   return (
-    <div className='yo'>
+    <div className='resumo'>
       <div className='resumo-item'>
         <div className='resumo-item-titulo'>Resumo do item</div>
 
@@ -92,29 +44,28 @@ const ListagemResumoItemComponent: React.FC<listagemResumoItemProps> = ({ dados 
         </div>
 
         <div className='resumo-item-conteudo-corpo'>
-          <p>
+          <div className='resumo-item-conteudo-itens'>
             {item.enunciado && item.enunciado.trim() !== '' ? (
               <div dangerouslySetInnerHTML={{ __html: item.enunciado }} />
             ) : (
               <i>Enunciado não cadastrado</i>
             )}
-          </p>
-          <p>
+          </div>
+          <div className='resumo-item-conteudo-itens'>
             {item.textoBase && item.textoBase.trim() !== '' ? (
               <div dangerouslySetInnerHTML={{ __html: item.textoBase }} />
-            ) : ( 
+            ) : (
               <i>Texto base não cadastrado</i>
             )}
-          </p>
-          <p className='resumo-item-conteudo-corpo-fonte'>
+          </div>
+          <div className='resumo-item-conteudo-corpo-fonte'>
             {item.fonte && item.fonte.trim() !== '' ? (
               <i dangerouslySetInnerHTML={{ __html: item.fonte }} />
             ) : (
               <i>Fonte não cadastrada</i>
             )}
-          </p>
-          <br></br>
-
+          </div>
+          <br />
           <Radio.Group className='radio-group-alterantivas no-click'>
             {item.alternativas.map((alt: any) => (
               <div key={alt.id} className='resumo-item-conteudo-corpo-alternativa'>

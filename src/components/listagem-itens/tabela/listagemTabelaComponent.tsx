@@ -1,9 +1,11 @@
-import { Badge, Card, Pagination, Select, Tag } from 'antd';
+import { Badge, Button, Card, Pagination, Select, Tag } from 'antd';
+import React, { useState } from 'react';
 import React from 'react';
 import './listagemTabelaComponent.css';
 import type { ItemListagemDto } from '~/domain/dto/item-listagem-dto';
 import { Situacao, SituacaoDescricao } from '~/domain/enums/situacao';
 import iconFilter from '~/assets/filtrar.svg';
+import FiltroPrincipalNovoComponent from '~/components/filtro-principal-novo/filtroPrincipalNovoComponent';
 
 interface ListagemTabelaProps {
   dados: ItemListagemDto[];
@@ -60,8 +62,27 @@ const ListagemTabela: React.FC<ListagemTabelaProps> = ({
   const inicio = (pagina - 1) * itensPorPagina;
   const fim = inicio + itensPorPagina;
 
+  const [open, setOpen] = useState<boolean>(false);
+
+  const handleOpenDrawer = () => {
+    setOpen(true);
+  };
+
+  const handleSetOpen = (value: boolean) => {
+    setOpen(value);
+
+    if (value === false) {
+      const itemFiltro = localStorage.getItem('itemFiltro');
+      const itemFiltroAtualizado = JSON.parse(itemFiltro || '{}');
+      if (itemFiltroAtualizado.filtroLateral) {
+        console.log('Filtro lateral aplicado:', itemFiltroAtualizado.filtroLateral);
+      }
+    }
+  };
+
   return (
     <>
+      <FiltroPrincipalNovoComponent open={open} setOpen={handleSetOpen} />
       <Card className='listagem-tabela'>
         <div className='listagem-tabela-head'>
           <div className='listagem-tabela-texto'>
@@ -70,7 +91,7 @@ const ListagemTabela: React.FC<ListagemTabelaProps> = ({
               Selecione um item para conferir mais detalhes ao lado.
             </div>
           </div>
-          <div className='listagem-tabela-filtrar'>
+          <div className='listagem-tabela-filtrar' onClick={handleOpenDrawer}>
             <img src={iconFilter} alt='Filtrar' width={24} height={24} />
             <span className='filtro-label'>
               FILTRAR
@@ -81,16 +102,7 @@ const ListagemTabela: React.FC<ListagemTabelaProps> = ({
           </div>
         </div>
 
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            marginTop: 16,
-            maxHeight: '500px',
-            overflowY: 'auto',
-            width: 'calc(100% + 24px)',
-          }}
-        >
+        <div className='listagem-tabela-conteudo'>
           {dados.map((item, index) => (
             <div
               key={index}
@@ -102,30 +114,21 @@ const ListagemTabela: React.FC<ListagemTabelaProps> = ({
               role='button'
               tabIndex={0}
             >
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    flexWrap: 'wrap',
-                  }}
-                >
-                  <div className='listagem-item-tabela-head'>
-                    <div className='listagem-item-tabela-flex'>
-                      <b>Código do item: </b>
-                      {item.codigoItem}
-                    </div>
-                    <div className='listagem-item-tabela-auto'>
-                      <b>Componente curricular: </b>
-                      {item.disciplina}
-                    </div>
+              <div className='listagem-item-tabela-conteudo'>
+                <div className='listagem-item-tabela-head'>
+                  <div className='listagem-item-tabela-flex'>
+                    <b>Código do item: </b>
+                    {item.codigoItem}
+                  </div>
+                  <div className='listagem-item-tabela-auto'>
+                    <b>Componente curricular: </b>
+                    {item.disciplina}
                   </div>
                 </div>
 
                 <div>
                   <b>Enunciado do item:</b>
-                  <br></br>
-
+                  <br />
                   {item.enunciado && item.enunciado.trim() !== '' ? (
                     <div dangerouslySetInnerHTML={{ __html: item.enunciado }} />
                   ) : (
@@ -133,14 +136,8 @@ const ListagemTabela: React.FC<ListagemTabelaProps> = ({
                   )}
                 </div>
 
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    flexWrap: 'wrap',
-                  }}
-                >
-                  <div style={{ marginTop: 4 }}>
+                <div className='listagem-item-tabela-rodape'>
+                  <div className='listagem-item-tabela-rodape-info'>
                     {item.dificuldade && (
                       <Tag
                         style={{
@@ -152,19 +149,13 @@ const ListagemTabela: React.FC<ListagemTabelaProps> = ({
                         <b>Dificuldade: </b> {item.dificuldade}
                       </Tag>
                     )}
-
                     <Tag
                       style={{
                         borderRadius: '8px',
-                        ...corSituacao(item.situacao === null ? Situacao.Rascunho : item.situacao),
+                        ...corSituacao(item.situacao ?? Situacao.Rascunho),
                       }}
                     >
-                      <b>Situação: </b>{' '}
-                      {
-                        SituacaoDescricao[
-                          item.situacao === null ? Situacao.Rascunho : item.situacao
-                        ]
-                      }
+                      <b>Situação: </b> {SituacaoDescricao[item.situacao ?? Situacao.Rascunho]}
                     </Tag>
                   </div>
                   <div>
@@ -177,37 +168,30 @@ const ListagemTabela: React.FC<ListagemTabelaProps> = ({
           ))}
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 24 }}>
+        <div className='listagem-item-tabela-paginacao'>
           <div className='listagem-item-tabela-auto'>
             {`${inicio + 1}-${Math.min(fim, totalRegistros)} de ${totalRegistros} itens`}
           </div>
-
-          <div>
-            <Pagination
-              current={pagina}
-              total={totalRegistros}
-              pageSize={itensPorPagina}
-              onChange={(p) => setPagina(p)}
-              showSizeChanger={false}
-            />
-          </div>
-
-          <div>
-            <Select
-              className='listagem-item-tabela-select'
-              placeholder=''
-              defaultValue={10}
-              options={[
-                { value: 10, label: '10' },
-                { value: 20, label: '20' },
-                { value: 30, label: '30' },
-                { value: 40, label: '40' },
-                { value: 50, label: '50' },
-                { value: 100, label: '100' },
-              ]}
-              onChange={selecionaPaginasOnChange}
-            />
-          </div>
+          <Pagination
+            current={pagina}
+            total={totalRegistros}
+            pageSize={itensPorPagina}
+            onChange={setPagina}
+            showSizeChanger={false}
+          />
+          <Select
+            className='listagem-item-tabela-select'
+            defaultValue={10}
+            options={[
+              { value: 10, label: '10' },
+              { value: 20, label: '20' },
+              { value: 30, label: '30' },
+              { value: 40, label: '40' },
+              { value: 50, label: '50' },
+              { value: 100, label: '100' },
+            ]}
+            onChange={selecionaPaginasOnChange}
+          />
         </div>
       </Card>
     </>
