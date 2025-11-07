@@ -1,0 +1,228 @@
+.drawer-title-custom {
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+    color: #FFFFFF;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.drawer-extra-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #FFFFFF;
+}
+
+.drawer-icone-filtro {
+    color: #FFFFFF;
+    fill: #FFFFFF;
+}
+
+.drawer-corpo {
+    background: #5A94D8 !important;
+    color: #FFFFFF !important;
+    font-family: Roboto, sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+}
+
+.drawer-btn-sair {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    box-shadow: none;
+}
+
+.drawer-seta-sair {
+    font-size: 20px;
+    color: #ffffff;
+}
+
+.ant-drawer-close {
+    display: none !important;
+}
+
+.ant-drawer-body {
+    border-top: #FFFFFF solid 1px !important;
+}
+
+.drawer-filtro-secao-margin {
+    margin-bottom: 2em !important;
+}
+
+.drawer-filtro-secao label {
+    color: #FFFFFF !important;
+    border: none !important;
+}
+
+.drawer-filtro-secao .select-custom .ant-select-selection-item {
+    color: #FFFFFF !important;
+    border-radius: 0px !important;
+}
+
+.drawer-filtro-secao .select-custom .ant-select-item-option-content {
+    color: #5A94D8 !important;
+    border-radius: 0px !important;
+}
+
+.drawer-filtro-secao .select-custom .ant-select-selection-item {
+    color: #FFFFFF !important;
+    background: #5A94D8 !important;
+    border-radius: 0px !important;
+}
+
+.drawer-filtro-secao .select-custom .ant-select-selector {
+    background: #5A94D8 !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    border-bottom: 1px solid #FFFFFF !important;
+    border-radius: 0px !important;
+    padding-left: 0px !important;
+}
+
+.drawer-filtro-secao .select-custom .ant-select-arrow svg {
+    color: #FFFFFF !important;
+}
+
+.drawer-filtro-secao .select-custom .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
+    background-color: #DDE9F5 !important;
+}
+
+.drawer-filtro-secao .select-custom .ant-select-item-option-selected:not(.ant-select-item-option-disabled) .ant-select-item-option-content {
+    color: #5A94D8 !important;
+}
+
+.drawer-filtro-secao .select-custom .ant-select-item-option:hover {
+    background-color: #DDE9F5 !important;
+}
+
+.drawer-filtro-secao .select-custom .ant-select-selection-placeholder {
+    color: #FFFFFF !important;
+}
+
+.drawer-texto-branco {
+    color: #FFFFFF;
+}
+
+.drawer-footer-btns {
+    padding-top: 2em;
+    border-top: #FFFFFF solid 1px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.drawer-bt-remover {
+    padding-right: 0.5em;
+}
+
+.drawer-bt-filtrar {
+    padding-left: 0.5em;
+}
+
+.drawer-bt-remover,
+.drawer-bt-filtrar {
+    width: 100%;
+    transition: all 0.2s ease-in-out;
+}
+
+.drawer-bt-remover button{
+    width: 100%;
+    background: #5A94D8;
+    color: #FFFFFF;
+    border: #FFFFFF solid 1px;
+    font-size: 14px;
+    font-family: Roboto, sans-serif;
+    transition: all 0.2s ease-in-out;
+}
+
+.drawer-bt-remover button:hover {
+    width: 100%;
+    background: #5A94D8 !important;
+    color: #FFFFFF !important;
+    border: #FFFFFF solid 1px !important;
+}
+
+.drawer-bt-filtrar button{
+    width: 100%;
+    background: #FFFFFF;
+    color: #5A94D8;
+    font-size: 14px;
+    font-family: Roboto, sans-serif;
+    transition: all 0.2s ease-in-out;
+}
+
+.drawer-bt-filtrar button.ant-btn-default:hover {
+    width: 100%;
+    background: #FFFFFF !important;
+    color: #5A94D8 !important;
+}
+
+
+/* Efeito Ripple (onda na água) */
+.drawer-bt-remover,
+.drawer-bt-filtrar {
+    position: relative;
+    overflow: hidden;
+}
+
+.drawer-bt-remover button,
+.drawer-bt-filtrar button {
+    position: relative;
+    overflow: hidden;
+}
+
+.drawer-bt-remover button::before,
+.drawer-bt-filtrar button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 1.5s ease-out, height 1.5s ease-out, opacity 1s ease-out;
+    opacity: 5;
+    pointer-events: none;
+}
+
+.drawer-bt-remover button:active::before {
+    width: 600px;
+    height: 600px;
+    background: rgba(255, 255, 255, 0.12);
+    opacity: 1;
+}
+
+.drawer-bt-filtrar button:active::before {
+    width: 600px;
+    height: 600px;
+    background: rgba(90, 148, 216, 0.12);
+    opacity: 1;
+}
+
+.drawer-filtro-secao input.ant-input {
+    color: #FFFFFF !important;
+    background: #5A94D8 !important;
+    border: none !important;
+    border-radius: 0px !important;
+    padding: 0.5em !important;
+}
+
+.drawer-filtro-secao .rti--container {
+    background: #5A94D8 !important;
+    color: #FFFFFF !important;
+    border-bottom: 1px solid #FFFFFF !important;
+    border-radius: 0px !important;
+}
+.drawer-filtro-secao .rti--container:hover {
+    border-bottom: 1px solid #FFFFFF !important;
+    border-radius: 0px !important;
+}
+
+.drawer-filtro-secao .tag-input {
+    background: #FFFFFF !important;
+    color: #5A94D8 !important;   
+}
