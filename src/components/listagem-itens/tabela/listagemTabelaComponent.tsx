@@ -6,6 +6,7 @@ import { Situacao, SituacaoDescricao } from '~/domain/enums/situacao';
 import iconFilter from '~/assets/filtrar.svg';
 import FiltroPrincipalNovoComponent from '~/components/filtro-principal-novo/filtroPrincipalNovoComponent';
 import type { FiltroItemDto } from '~/domain/dto/filtro-item-dto';
+import obterFiltrosLocalStorage from '~/utils/filtro-helper';
 
 interface ListagemTabelaProps {
   dados: ItemListagemDto[];
@@ -15,6 +16,7 @@ interface ListagemTabelaProps {
   itensPorPagina: number;
   onItemClick?: (id: string) => void;
   selecionaPaginasOnChange: (value: any, option: any) => void;
+  onChangeFiltro: () => void;
 }
 
 const ListagemTabela: React.FC<ListagemTabelaProps> = ({
@@ -25,19 +27,20 @@ const ListagemTabela: React.FC<ListagemTabelaProps> = ({
   itensPorPagina,
   onItemClick,
   selecionaPaginasOnChange,
+  onChangeFiltro,
 }) => {
   const corDificuldade = (nivel: string) => {
     switch (nivel) {
-      case 'Muito fácil':
-        return { color: '#595959', background: '#86E97A', border: '0' };
+      case 'Muito Fácil':
+        return { color: '#595959', backgroundColor: '#86E97A', border: '0' };
       case 'Fácil':
-        return { color: '#FFFFFF', background: '#21C45D', border: '0' };
+        return { color: '#FFFFFF', backgroundColor: '#21C45D', border: '0' };
       case 'Médio':
-        return { color: '#595959', background: '#F9C74F', border: '0' };
+        return { color: '#595959', backgroundColor: '#F9C74F', border: '0' };
       case 'Difícil':
-        return { color: '#FFFFFF', background: '#F3722C', border: '0' };
-      case 'Muito difícil':
-        return { color: '#FFFFFF', background: '#D62828', border: '0' };
+        return { color: '#FFFFFF', backgroundColor: '#F3722C', border: '0' };
+      case 'Muito Difícil':
+        return { color: '#FFFFFF', backgroundColor: '#D62828', border: '0' };
       default:
         return {};
     }
@@ -46,13 +49,13 @@ const ListagemTabela: React.FC<ListagemTabelaProps> = ({
   const corSituacao = (status: Situacao) => {
     switch (status) {
       case Situacao.Ativo:
-        return { color: '#FFFFFF', background: '#21C45D', border: '0' };
+        return { color: '#FFFFFF', backgroundColor: '#21C45D', border: '0' };
       case Situacao.Pendente:
-        return { color: '#595959', background: '#F9C74F', border: '0' };
+        return { color: '#595959', backgroundColor: '#F9C74F', border: '0' };
       case Situacao.Rascunho:
-        return { color: '#FFFFFF', background: '#B0B0B0', border: '0' };
+        return { color: '#FFFFFF', backgroundColor: '#B0B0B0', border: '0' };
       case Situacao.Inativo:
-        return { color: '#FFFFFF', background: '#D62828', border: '0' };
+        return { color: '#FFFFFF', backgroundColor: '#D62828', border: '0' };
       default:
         return {};
     }
@@ -69,27 +72,12 @@ const ListagemTabela: React.FC<ListagemTabelaProps> = ({
   };
 
   const atualizaFiltros = () => {
-    const itemFiltro = localStorage.getItem('itemFiltro');
-    const itemFiltroAtualizado = JSON.parse(itemFiltro || '{}');
-    if (itemFiltroAtualizado.filtroLateral) {
-      console.log('Filtro lateral aplicado:', itemFiltroAtualizado.filtroLateral);
-      setFiltros({
-        areaConhecimentoId: itemFiltroAtualizado.filtroLateral.areaConhecimentoFiltro,
-        categoriaId: itemFiltroAtualizado.filtroLateral.categoriaItemFiltro,
-        competenciaId: itemFiltroAtualizado.filtroLateral.competenciaFiltro,
-        dificuldadeSugeridaId: itemFiltroAtualizado.filtroLateral.dificuldadeSugeridaFiltro,
-        disciplinaId: itemFiltroAtualizado.filtroLateral.disciplinaFiltro,
-        habilidadeId: itemFiltroAtualizado.filtroLateral.habilidadeFiltro,
-        informacoesEstatistica: itemFiltroAtualizado.filtroLateral.informacoesEstatisticasFiltro,
-        matrizId: itemFiltroAtualizado.filtroLateral.matrizFiltro,
-        palavraChave: itemFiltroAtualizado.filtroLateral.palavraChaveFiltro,
-        situacao: itemFiltroAtualizado.filtroLateral.situacaoItemFiltro,
-        anoMatrizId: itemFiltroAtualizado.filtroLateral.anoMatrizFiltro,
-        pagina: 1,
-        tamanhoPagina: itensPorPagina,
-      });
+    const filtroLocalStoage = obterFiltrosLocalStorage();
+    if (filtroLocalStoage) {
+      console.log('Filtro lateral aplicado:', filtroLocalStoage);
+      setFiltros(filtroLocalStoage);
     } else {
-      setFiltros(null!);
+      setFiltros({});
     }
   };
 
@@ -98,13 +86,14 @@ const ListagemTabela: React.FC<ListagemTabelaProps> = ({
 
     if (value === false) {
       atualizaFiltros();
+      onChangeFiltro();
     }
   };
 
   useEffect(() => {
     const naoVazios = filtros
       ? Object.entries(filtros)
-          .filter(([chave]) => !['pagina', 'tamanhoPagina', 'codigoItem'].includes(chave))
+          .filter(([chave]) => !['codigoItem'].includes(chave))
           .filter(([_, valor]) => {
             if (valor === null || valor === undefined) return false;
             if (typeof valor === 'string' && valor.trim() === '') return false;
