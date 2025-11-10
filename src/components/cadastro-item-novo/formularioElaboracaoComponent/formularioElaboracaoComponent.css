@@ -94,6 +94,8 @@
     color: #AAAAAA;
     font-family: Roboto, sans-serif;
     font-size: 14px;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
 .card-video-buttom {

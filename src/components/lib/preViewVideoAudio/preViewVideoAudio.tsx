@@ -245,22 +245,21 @@ export const PreViewVideoAudio: React.FC<{
             // }
             >
                 <div style={{
-                    width: '100%',
-                    minWidth: '27.2em',
-                    height: '195px',
+                    height: '186px',
                     backgroundColor: '#000',
                     borderRadius: '6px',
                     display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'flex-end',
-                    alignContent: 'center',
-                    flexDirection: 'column',
+                    alignItems: 'flex-end',
+                    justifyContent: 'center',
+                    boxSizing: 'border-box',
                 }}>
                     <audio
                         id="preview-audio"
                         controls
                         preload="metadata"
-                        style={{ width: '100%' }}
+                        style={{
+                            maxWidth: '100%',
+                        }}
                         onPlay={() => {
                             console.log('🎵 Áudio começou a reproduzir');
                             setIsAudioPlaying(true);
