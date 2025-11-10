@@ -75,7 +75,7 @@
 .card-video-corpo {
     border: 1px solid #D5D5D5;
     border-radius: 6px;
-    padding: 16px;
+    display: flex;
 }
 
 .card-video-corpo-primeiro {
@@ -161,4 +161,50 @@
 
 :where(.css-diro6f).ant-radio-wrapper span.ant-radio+* {    
     width: 100%;
+}
+
+/* 📁 Inverte a ordem do upload: mostra lista de arquivos antes do botão */
+.upload-inverted .ant-upload-wrapper {
+    display: flex;
+    flex-direction: column;
+}
+
+.upload-inverted .ant-upload-list {
+    order: 1; /* Lista de arquivos primeiro */
+    margin-bottom: 16px !important;
+    margin-top: 0 !important;
+}
+
+.upload-inverted .ant-upload {
+    order: 2; /* Botão de upload por último */
+}
+
+/* Ajustes para quando não há arquivos na lista */
+.upload-inverted .ant-upload-list:empty {
+    display: none;
+}
+
+.card-video-titulo{
+    padding: 0;
+    margin: 0;
+    font-weight: bold;
+}
+
+.video-antD-edicao .ant-card-body{
+    padding: 0 !important;
+}
+
+.video-antD-edicao .ant-card-bordered{
+    border: none !important;
+}
+
+.video-padding,
+.audio-padding{
+    padding-top: 18px;
+    padding-left: 18px;
+    padding-right: 18px;
+}
+
+:where(.css-dev-only-do-not-override-diro6f).ant-upload-wrapper .ant-upload-list .ant-upload-list-item{
+    margin-top: 0 !important;
 }

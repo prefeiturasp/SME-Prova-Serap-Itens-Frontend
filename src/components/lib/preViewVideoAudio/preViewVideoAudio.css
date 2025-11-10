@@ -1,0 +1,16 @@
+.audio-preview{
+width: 100%;
+}
+
+.tela-audio-preview{
+    min-width: 100%;
+    width: 262px;
+    height: 150px;
+    background: black;
+    border-radius: 6px;
+}
+
+.card-telaAudio{
+   width: 100%;
+}
+
