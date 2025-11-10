@@ -16,7 +16,7 @@ import filtroSelectService from '~/services/filtro-select-service';
 import { DefaultOptionType } from 'antd/es/select';
 import { SelecioneDto } from '~/domain/dto/selecione-dto';
 import { converterSelecineDto } from '~/utils/converte-dto';
-import obterFiltrosLocalStorage from '~/utils/filtro-helper';
+import carregarFiltroDeItensDoLocalStorage from '~/utils/filtro-helper';
 
 const ListagemItens: React.FC = () => {
   const linkRetorno = 'https://hom-serap.sme.prefeitura.sp.gov.br/';
@@ -49,7 +49,7 @@ const ListagemItens: React.FC = () => {
   const buscaDadosTabela = async () => {
     try {
       const valorSelcionado: any = selectItemSelecionado?.value;
-      const filtros = obterFiltrosLocalStorage();
+      const filtros = carregarFiltroDeItensDoLocalStorage();
       const codigoItem: string = valorSelcionado?.label!;
       const resposta: PaginacaoDto<ItemListagemDto> = await itemService.obterListaItens(
         pagina,

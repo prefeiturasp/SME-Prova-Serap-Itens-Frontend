@@ -6,7 +6,7 @@ import { Situacao, SituacaoDescricao } from '~/domain/enums/situacao';
 import iconFilter from '~/assets/filtrar.svg';
 import FiltroPrincipalNovoComponent from '~/components/filtro-principal-novo/filtroPrincipalNovoComponent';
 import type { FiltroItemDto } from '~/domain/dto/filtro-item-dto';
-import obterFiltrosLocalStorage from '~/utils/filtro-helper';
+import carregarFiltroDeItensDoLocalStorage from '~/utils/filtro-helper';
 
 interface ListagemTabelaProps {
   dados: ItemListagemDto[];
@@ -72,9 +72,8 @@ const ListagemTabela: React.FC<ListagemTabelaProps> = ({
   };
 
   const atualizaFiltros = () => {
-    const filtroLocalStoage = obterFiltrosLocalStorage();
+    const filtroLocalStoage = carregarFiltroDeItensDoLocalStorage();
     if (filtroLocalStoage) {
-      console.log('Filtro lateral aplicado:', filtroLocalStoage);
       setFiltros(filtroLocalStoage);
     } else {
       setFiltros({});
