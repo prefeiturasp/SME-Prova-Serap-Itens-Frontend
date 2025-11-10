@@ -5,8 +5,11 @@ import type { ItemListagemDto } from '~/domain/dto/item-listagem-dto';
 import type { PaginacaoDto } from '~/domain/dto/paginacao-dto';
 import { ItemResumoVersaoDto } from '~/domain/dto/item-resumo-versao-dto';
 
-const obterListaItens = (filtro: FiltroItemDto): Promise<PaginacaoDto<ItemListagemDto>> => {
+const obterListaItens = (pagina: number, tamanhoPagina: number,  filtro: FiltroItemDto): Promise<PaginacaoDto<ItemListagemDto>> => {
   const params = converterDtoParaQueryString(filtro);
+  params.append('pagina', pagina?.toString() ?? '')
+  params.append('tamanhoPagina', tamanhoPagina?.toString() ?? '')
+  
   const url = `/api/v1/item?${params.toString()}`;
   return api.get<PaginacaoDto<ItemListagemDto>>(url).then((response) => response.data);
 };
