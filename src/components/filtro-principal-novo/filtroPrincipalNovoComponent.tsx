@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Divider, Drawer, Form, Space } from 'antd';
+import { Button, Drawer, Form } from 'antd';
 import { useEffect, useState } from 'react';
 import './filtroPrincipalNovoComponent.css';
 import SelectForm from '../select-form';
@@ -10,6 +10,7 @@ import { validarCampoForm } from '~/utils/funcoes';
 import configuracaoItemService from '~/services/configuracaoItem-service';
 import { CamposFiltroItensProps } from '~/domain/interfaces/camposFiltroItensProps';
 import InputTag from '../input-tag';
+import { ArrowRightOutlined } from '@ant-design/icons';
 
 interface FiltroNovoProps {
   open: boolean;
@@ -43,13 +44,13 @@ const FiltroPrincipalNovoComponent: React.FC<FiltroNovoProps> = ({ open, setOpen
   const infoEsta = [
     {
       descricao: 'contém informações',
-      label: 'contém informações',
+      label: 'Contém informações',
       valor: 'true',
       value: 'true',
     },
     {
       descricao: 'não contém informações',
-      label: 'não contém informações',
+      label: 'Não contém informações',
       valor: 'false',
       value: 'false',
     },
@@ -142,7 +143,7 @@ const FiltroPrincipalNovoComponent: React.FC<FiltroNovoProps> = ({ open, setOpen
       if (
         filtroLocal.anoMatrizFiltro &&
         formFiltroLateral?.getFieldValue(CamposFiltroItens.anoMatrizFiltro) !==
-          filtroLocal.anoMatrizFiltro
+        filtroLocal.anoMatrizFiltro
       ) {
         formFiltroLateral?.setFieldValue(
           CamposFiltroItens.anoMatrizFiltro,
@@ -404,9 +405,9 @@ const FiltroPrincipalNovoComponent: React.FC<FiltroNovoProps> = ({ open, setOpen
       ) {
         palavrasChaveArray = values.palavraChaveFiltro.includes(';')
           ? values.palavraChaveFiltro
-              .split(';')
-              .filter((p: string) => p && p.trim())
-              .map((p: string) => p.trim())
+            .split(';')
+            .filter((p: string) => p && p.trim())
+            .map((p: string) => p.trim())
           : [values.palavraChaveFiltro.trim()];
       }
     }
@@ -451,12 +452,34 @@ const FiltroPrincipalNovoComponent: React.FC<FiltroNovoProps> = ({ open, setOpen
   return (
     <>
       <Drawer
-        title='Filtrar'
+        title={
+          <div className="drawer-title-custom">
+            <svg className='drawer-icone-filtro' width="24" height="24" viewBox="0 0 24 24"
+              fill="#FFFFFF" xmlns="http://www.w3.org/2000/svg">
+              <path d="M3.75 7C3.75 6.80109 3.82902 6.61032 3.96967 6.46967C4.11032 6.32902 4.30109 6.25 4.5 6.25H19.5C19.6989 6.25 19.8897 6.32902 20.0303 6.46967C20.171 6.61032 20.25 6.80109 20.25 7C20.25 7.19891 20.171 7.38968 20.0303 7.53033C19.8897 7.67098 19.6989 7.75 19.5 7.75H4.5C4.30109 7.75 4.11032 7.67098 3.96967 7.53033C3.82902 7.38968 3.75 7.19891 3.75 7ZM6.25 12C6.25 11.8011 6.32902 11.6103 6.46967 11.4697C6.61032 11.329 6.80109 11.25 7 11.25H17C17.1989 11.25 17.3897 11.329 17.5303 11.4697C17.671 11.6103 17.75 11.8011 17.75 12C17.75 12.1989 17.671 12.3897 17.5303 12.5303C17.3897 12.671 17.1989 12.75 17 12.75H7C6.80109 12.75 6.61032 12.671 6.46967 12.5303C6.32902 12.3897 6.25 12.1989 6.25 12ZM9.25 17C9.25 16.8011 9.32902 16.6103 9.46967 16.4697C9.61032 16.329 9.80109 16.25 10 16.25H14C14.1989 16.25 14.3897 16.329 14.5303 16.4697C14.671 16.6103 14.75 16.8011 14.75 17C14.75 17.1989 14.671 17.3897 14.5303 17.5303C14.3897 17.671 14.1989 17.75 14 17.75H10C9.80109 17.75 9.61032 17.671 9.46967 17.5303C9.32902 17.3897 9.25 17.1989 9.25 17Z" />
+            </svg>
+            FILTRAR
+          </div>
+        }
+        extra={
+          <div className="drawer-extra-content">
+            <Button
+              className='drawer-btn-sair'
+              onClick={handleClose}
+              style={{ cursor: 'pointer' }}
+            >
+              <ArrowRightOutlined className='drawer-seta-sair' />
+            </Button>
+          </div>
+        }
         placement='right'
         width={400}
         open={open}
-        onClose={handleClose}
+        closeIcon={false}
         destroyOnClose={false}
+        maskClosable={true}
+        onClose={handleClose}
+        className='drawer-corpo'
       >
         <Form.Provider>
           <Form
@@ -466,132 +489,116 @@ const FiltroPrincipalNovoComponent: React.FC<FiltroNovoProps> = ({ open, setOpen
             name={formId}
             preserve={false}
           >
-            <Divider className='separador' />
-            <div className='filtro-secao'>
-              <h3 className='filtro-titulo'>Area Conhecimento</h3>
+
+            <div className='drawer-filtro-secao drawer-filtro-secao-margin'>
               <SelectForm
                 form={formFiltroLateral}
                 options={listaAreaConhecimento}
                 nomeCampo={CamposFiltroItens.areaConhecimentoFiltro}
                 label='Área de conhecimento'
-                campoObrigatorio={true}
+                campoObrigatorio={false}
                 disabled={false}
                 onChange={handleAreaConhecimentoChange}
               />
             </div>
 
-            <Divider className='separador' />
-            <div className='filtro-secao'>
-              <h3 className='filtro-titulo'>Disciplina</h3>
+            <div className='drawer-filtro-secao drawer-filtro-secao-margin'>
               <SelectForm
                 form={formFiltroLateral}
                 options={listaDisciplinas}
                 nomeCampo={CamposFiltroItens.disciplinaFiltro}
                 label='Componente curricular'
-                campoObrigatorio={true}
+                campoObrigatorio={false}
                 onChange={handleDisciplinaChange}
               />
             </div>
 
-            <Divider className='separador' />
-            <div className='filtro-secao'>
-              <h3 className='filtro-titulo'>Matriz</h3>
+            <div className='drawer-filtro-secao drawer-filtro-secao-margin'>
               <SelectForm
                 form={formFiltroLateral}
                 options={listaMatriz}
                 nomeCampo={CamposFiltroItens.matrizFiltro}
                 label='Matriz de avaliação'
-                campoObrigatorio={true}
+                campoObrigatorio={false}
                 onChange={handleMatrizChange}
               />
             </div>
-            <Divider className='separador' />
-            <div className='filtro-secao'>
-              <h3 className='filtro-titulo'>Ano</h3>
+
+            <div className='drawer-filtro-secao drawer-filtro-secao-margin'>
               <SelectForm
                 form={formFiltroLateral}
                 options={listaAnosMatriz}
                 nomeCampo={CamposFiltroItens.anoMatrizFiltro}
                 label='Ano (ano escolar)'
-                campoObrigatorio={true}
+                campoObrigatorio={false}
               />
             </div>
-            <Divider className='separador' />
-            <div className='filtro-secao'>
-              <h3 className='filtro-titulo'>Competencia</h3>
+
+            <div className='drawer-filtro-secao drawer-filtro-secao-margin'>
               <SelectForm
                 form={formFiltroLateral}
                 options={listaCompetencias}
                 nomeCampo={CamposFiltroItens.competenciaFiltro}
                 label='Competência'
-                campoObrigatorio={true}
+                campoObrigatorio={false}
                 onChange={handleCompetenciaChange}
               />
             </div>
-            <Divider className='separador' />
-            <div className='filtro-secao'>
-              <h3 className='filtro-titulo'>Habilidade</h3>
+
+            <div className='drawer-filtro-secao drawer-filtro-secao-margin'>
               <SelectForm
                 form={formFiltroLateral}
                 options={listaHabilidades}
                 nomeCampo={CamposFiltroItens.habilidadeFiltro}
                 label='Habilidade'
-                campoObrigatorio={true}
+                campoObrigatorio={false}
               />
             </div>
-            <Divider className='separador' />
-            <div className='filtro-secao'>
-              <h3 className='filtro-titulo'>Quantidade</h3>
+
+            <div className='drawer-filtro-secao drawer-filtro-secao-margin'>
               <SelectForm
                 form={formFiltroLateral}
                 options={listaQuantidadeAlternativas}
                 nomeCampo={CamposFiltroItens.categoriaItemFiltro}
                 label='Categoria do item e quantidade de alternativas*'
-                campoObrigatorio={true}
+                campoObrigatorio={false}
                 labelInValue={false}
               />
             </div>
-            <Divider className='separador' />
-            <div className='filtro-secao'>
-              <h3 className='filtro-titulo'>Dificuldade Sugerida</h3>
+
+            <div className='drawer-filtro-secao drawer-filtro-secao-margin'>
               <SelectForm
                 form={formFiltroLateral}
                 options={listaDificuldadeSugerida}
                 nomeCampo={CamposFiltroItens.dificuldadeSugeridaFiltro}
                 label='Dificuldade Sugerida'
-                campoObrigatorio={true}
+                campoObrigatorio={false}
                 labelInValue={false}
               />
             </div>
-            <Divider className='separador' />
-            <div className='filtro-secao'>
-              <h3 className='filtro-titulo'>Situação</h3>
+            <div className='drawer-filtro-secao drawer-filtro-secao-margin'>
               <SelectForm
                 form={formFiltroLateral}
                 options={listaSituacoesItem}
                 nomeCampo={CamposFiltroItens.situacaoItemFiltro}
                 label='Situação do item'
-                campoObrigatorio={true}
+                campoObrigatorio={false}
                 labelInValue={false}
               />
             </div>
 
-            <Divider className='separador' />
-            <div className='filtro-secao'>
-              <h3 className='filtro-titulo'>Informações estatisticas</h3>
+            <div className='drawer-filtro-secao drawer-filtro-secao-margin'>
               <SelectForm
                 form={formFiltroLateral}
                 options={listaInformacoesEstatisticas}
                 nomeCampo={CamposFiltroItens.informacoesEstatisticasFiltro}
                 label='Informações Estatísticas'
-                campoObrigatorio={true}
+                campoObrigatorio={false}
                 labelInValue={false}
               />
             </div>
 
-            <Divider className='separador' />
-            <div className='filtro-secao'>
-              <h3 className='filtro-titulo'>Palavra Chave</h3>
+            <div className='drawer-filtro-secao'>
               <Form.Item
                 label='Palavra-chave'
                 name={CamposFiltroItens.palavraChaveFiltro}
@@ -611,20 +618,22 @@ const FiltroPrincipalNovoComponent: React.FC<FiltroNovoProps> = ({ open, setOpen
                   }}
                 />
               </Form.Item>
-              <div className='caracteristicasItemTexto'>
+              <div className='drawer-texto-branco'>
                 <p>Digite uma palavra e pressione "Enter" para adicioná-la.</p>
               </div>
             </div>
-
-            <Divider className='separador' />
-            <Space size='small' wrap>
-              <Button className='botao-remover' onClick={handleResetFilters}>
-                Remover Filtros
-              </Button>
-              <Button type='primary' className='botao-filtrar' onClick={handleApplyFilters}>
-                Filtrar
-              </Button>
-            </Space>
+            <div className='drawer-footer-btns'>
+              <div className='drawer-bt-remover'>
+                <Button className='botao-remover' onClick={handleResetFilters}>
+                  Remover Filtros
+                </Button>
+              </div>
+              <div className='drawer-bt-filtrar'>
+                <Button className='botao-filtrar' onClick={handleApplyFilters}>
+                  Filtrar
+                </Button>
+              </div>
+            </div>
           </Form>
         </Form.Provider>
       </Drawer>
