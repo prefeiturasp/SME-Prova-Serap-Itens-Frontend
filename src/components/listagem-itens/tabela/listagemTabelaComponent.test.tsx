@@ -20,6 +20,7 @@ describe('ListagemTabela', () => {
 
   const setPaginaMock = jest.fn();
   const onItemClickMock = jest.fn();
+  const onChangeFiltro = jest.fn();
   const selecionaPaginasOnChangeMock = jest.fn();
 
   it('deve renderizar corretamente os dados na tabela', () => {
@@ -31,6 +32,7 @@ describe('ListagemTabela', () => {
         setPagina={setPaginaMock}
         itensPorPagina={10}
         onItemClick={onItemClickMock}
+        onChangeFiltro={onChangeFiltro}
         selecionaPaginasOnChange={selecionaPaginasOnChangeMock}
       />,
     );
@@ -52,6 +54,7 @@ describe('ListagemTabela', () => {
         itensPorPagina={10}
         onItemClick={onItemClickMock}
         selecionaPaginasOnChange={selecionaPaginasOnChangeMock}
+        onChangeFiltro={onChangeFiltro}
       />,
     );
 
