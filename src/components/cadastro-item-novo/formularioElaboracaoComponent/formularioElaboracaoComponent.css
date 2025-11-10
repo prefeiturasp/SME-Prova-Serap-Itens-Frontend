@@ -216,3 +216,17 @@
 :where(.css-dev-only-do-not-override-diro6f).ant-upload-wrapper .ant-upload-list .ant-upload-list-item {
     margin-top: 0 !important;
 }
+
+.audio-antD-edicao{
+    width: 50%;
+}
+.audio-padding{
+    width: 50%;
+}
+
+.video-antD-edicao{
+    width: 50%;
+}
+.video-padding{
+    width: 50%;
+}

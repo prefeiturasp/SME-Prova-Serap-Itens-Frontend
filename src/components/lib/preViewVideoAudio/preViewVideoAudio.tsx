@@ -245,7 +245,7 @@ export const PreViewVideoAudio: React.FC<{
             // }
             >
                 <div style={{
-                    height: '186px',
+                    height: '175px',
                     backgroundColor: '#000',
                     borderRadius: '6px',
                     display: 'flex',
@@ -258,7 +258,7 @@ export const PreViewVideoAudio: React.FC<{
                         controls
                         preload="metadata"
                         style={{
-                            maxWidth: '100%',
+                            width: '100%',
                         }}
                         onPlay={() => {
                             console.log('🎵 Áudio começou a reproduzir');
@@ -278,7 +278,7 @@ export const PreViewVideoAudio: React.FC<{
                         onError={(e) => {
                             console.error('❌ Erro no áudio:', e);
                         }}
-                    >---------------------------------
+                    >
                         {MOCK_AUDIO_URLS.map((url, index) => (
                             <source key={index} src={url} type="audio/mpeg" />
                         ))}
