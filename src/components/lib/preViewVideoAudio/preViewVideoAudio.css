@@ -1,16 +1,157 @@
-.audio-preview{
-width: 100%;
+.audio-preview {
+    width: 100%;
 }
 
-.tela-audio-preview{
+.tela-audio-preview {
     min-width: 100%;
     width: 262px;
     height: 150px;
-    background: black;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border-radius: 6px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    margin-bottom: 12px;
 }
 
-.card-telaAudio{
-   width: 100%;
+.audio-visual-content {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-align: center;
+    z-index: 2;
 }
 
+.audio-icon {
+    font-size: 32px;
+    margin-bottom: 8px;
+    opacity: 0.9;
+}
+
+.audio-title {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.audio-subtitle {
+    font-size: 11px;
+    opacity: 0.8;
+}
+
+/* Efeito de ondas sonoras animadas */
+.sound-waves {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+}
+
+.wave {
+    width: 3px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+    animation: wave 1.5s ease-in-out infinite;
+}
+
+.wave:nth-child(1) {
+    height: 10px;
+    animation-delay: 0s;
+}
+
+.wave:nth-child(2) {
+    height: 20px;
+    animation-delay: 0.1s;
+}
+
+.wave:nth-child(3) {
+    height: 15px;
+    animation-delay: 0.2s;
+}
+
+.wave:nth-child(4) {
+    height: 25px;
+    animation-delay: 0.3s;
+}
+
+.wave:nth-child(5) {
+    height: 12px;
+    animation-delay: 0.4s;
+}
+
+.wave:nth-child(6) {
+    height: 18px;
+    animation-delay: 0.5s;
+}
+
+.wave:nth-child(7) {
+    height: 22px;
+    animation-delay: 0.6s;
+}
+
+@keyframes wave {
+
+    0%,
+    100% {
+        transform: scaleY(1);
+        opacity: 0.3;
+    }
+
+    50% {
+        transform: scaleY(1.5);
+        opacity: 0.7;
+    }
+}
+
+/* Estado quando áudio está pausado/parado */
+.tela-audio-preview.paused .sound-waves {
+    opacity: 0.5;
+}
+
+.tela-audio-preview.paused .wave {
+    animation-play-state: paused;
+}
+
+/* Estado quando áudio está tocando */
+.tela-audio-preview.playing {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+}
+
+.tela-audio-preview.playing .sound-waves {
+    opacity: 1;
+}
+
+.tela-audio-preview.playing .wave {
+    animation-play-state: running;
+}
+
+/* Efeito de pulse no ícone quando tocando */
+.audio-visual-content.playing .audio-icon {
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+.card-telaAudio {
+    width: 100%;
+}

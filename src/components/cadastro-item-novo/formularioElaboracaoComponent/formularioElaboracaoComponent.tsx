@@ -729,7 +729,7 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                                             MP3, WAV até 10MB</p>
                                     </UploadArquivosSME>
                                 </div>
-                                <div>
+                                <div className="audio-antD-edicao">
                                     {/* 🎵 Preview do Áudio */}
                                     {/* {audioUrl && ( */}
                                     <PreViewVideoAudio src={audioUrl} tipo="audio/" form={form} campo={campoAudio} />

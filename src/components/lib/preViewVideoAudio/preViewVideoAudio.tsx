@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Card, Space, Typography, Button } from "antd";
+import { Card, Typography } from "antd";
 import { FormInstance } from "antd/lib/form/Form";
 const { Text } = Typography;
-import { PlayCircleOutlined, PauseCircleOutlined, DownloadOutlined, SoundOutlined } from '@ant-design/icons';
 import './preViewVideoAudio.css';
 
 
@@ -221,85 +220,79 @@ export const PreViewVideoAudio: React.FC<{
         );
     } else if (tipo.startsWith("audio/")) {
         return (
-            <div className="audio-preview">
-                <div className="tela-audio-preview">
+            <Card
+            // title="Preview do Áudio"
+            // size="small"
+            // style={{ marginTop: 16 }}
+            // extra={
+            //     <Space>
+            //         <Button
+            //             type="primary"
+            //             icon={isAudioPlaying ? <PauseCircleOutlined /> : <SoundOutlined />}
+            //             onClick={handleAudioPlay}
+            //             size="small"
+            //         >
+            //             {isAudioPlaying ? 'Pausar' : 'Reproduzir'}
+            //         </Button>
+            //         <Button
+            //             icon={<DownloadOutlined />}
+            //             onClick={handleDownloadAudio}
+            //             size="small"
+            //         >
+            //             Download
+            //         </Button>
+            //     </Space>
+            // }
+            >
+                <div style={{
+                    width: '100%',
+                    minWidth: '27.2em',
+                    height: '195px',
+                    backgroundColor: '#000',
+                    borderRadius: '6px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'flex-end',
+                    alignContent: 'center',
+                    flexDirection: 'column',
+                }}>
+                    <audio
+                        id="preview-audio"
+                        controls
+                        preload="metadata"
+                        style={{ width: '100%' }}
+                        onPlay={() => {
+                            console.log('🎵 Áudio começou a reproduzir');
+                            setIsAudioPlaying(true);
+                        }}
+                        onPause={() => {
+                            console.log('⏸️ Áudio pausado');
+                            setIsAudioPlaying(false);
+                        }}
+                        onEnded={() => {
+                            console.log('🏁 Áudio terminou');
+                            setIsAudioPlaying(false);
+                        }}
+                        onLoadedMetadata={() => {
+                            console.log('� Metadados do áudio carregados');
+                        }}
+                        onError={(e) => {
+                            console.error('❌ Erro no áudio:', e);
+                        }}
+                    >---------------------------------
+                        {MOCK_AUDIO_URLS.map((url, index) => (
+                            <source key={index} src={url} type="audio/mpeg" />
+                        ))}
+                        <Text type="secondary">
+                            Seu navegador não suporta o elemento de áudio.
+                            <br />
+                            <a href={audioUrl || MOCK_AUDIO_URLS[0]} target="_blank" rel="noopener noreferrer">
+                                Clique aqui para ouvir o áudio diretamente
+                            </a>
+                        </Text>
+                    </audio>
                 </div>
-                <Card
-                // title="Preview do Áudio"
-                // size="small"
-                // style={{ marginTop: 16 }}
-                // extra={
-                //     <Space>
-                //         <Button
-                //             type="primary"
-                //             icon={isAudioPlaying ? <PauseCircleOutlined /> : <SoundOutlined />}
-                //             onClick={handleAudioPlay}
-                //             size="small"
-                //         >
-                //             {isAudioPlaying ? 'Pausar' : 'Reproduzir'}
-                //         </Button>
-                //         <Button
-                //             icon={<DownloadOutlined />}
-                //             onClick={handleDownloadAudio}
-                //             size="small"
-                //         >
-                //             Download
-                //         </Button>
-                //     </Space>
-                // }
-                >
-                    <div className="card-telaAudio">
-                        <div style={{ marginBottom: 12 }}>
-                            <audio
-                                id="preview-audio"
-                                controls
-                                preload="auto"
-                                style={{ width: '100%' }}
-                                onPlay={() => {
-                                    console.log('🎵 Áudio começou a reproduzir');
-                                    setIsAudioPlaying(true);
-                                }}
-                                onPause={() => {
-                                    console.log('⏸️ Áudio pausado');
-                                    setIsAudioPlaying(false);
-                                }}
-                                onEnded={() => {
-                                    console.log('� Áudio terminou');
-                                    setIsAudioPlaying(false);
-                                }}
-                                onCanPlayThrough={() => {
-                                    console.log('✅ Áudio pode ser reproduzido completamente');
-                                }}
-                                onLoadStart={() => {
-                                    console.log('📥 Começou a carregar áudio');
-                                }}
-                                onError={(e) => {
-                                    const target = e.target as HTMLAudioElement;
-                                    console.error('❌ Erro no áudio:', {
-                                        error: target.error,
-                                        networkState: target.networkState,
-                                        readyState: target.readyState,
-                                        currentSrc: target.currentSrc
-                                    });
-                                }}
-                            >
-                                <source src="https://commondatastorage.googleapis.com/codeskulptor-demos/DDR_assets/Kangaroo_MusiQue_-_The_Neverwritten_Role_Playing_Game.mp3" type="audio/mpeg" />
-                                {/* <source src={"https://file-examples.com/storage/feb42d72566dd2085bca1b7/2017/11/file_example_WAV_1MG.wav"} type="audio/mpeg" /> */}
-                                {/* <source src="https://commondatastorage.googleapis.com/codeskulptor-assets/week7-brrring.m4a" type="audio/mp4" /> */}
-                                {/* <source src="https://www.soundjay.com/misc/sounds/bell-ringing-05.wav" type="audio/wav" /> */}
-
-                                <p>
-                                    Seu navegador não suporta o elemento de áudio.
-                                    <br />
-                                    <a href="https://commondatastorage.googleapis.com/codeskulptor-demos/DDR_assets/Kangaroo_MusiQue_-_The_Neverwritten_Role_Playing_Game.mp3" target="_blank" rel="noopener noreferrer">
-                                        Clique aqui para ouvir o áudio diretamente
-                                    </a>
-                                </p>
-                            </audio>
-                        </div>
-                    </div>
-                </Card>
-            </div>
+            </Card>
         );
     } else {
         return null;
