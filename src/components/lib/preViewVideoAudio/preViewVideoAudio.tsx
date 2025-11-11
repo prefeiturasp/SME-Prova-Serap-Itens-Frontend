@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Card, Typography } from "antd";
+import { Card, Typography, Button, Slider } from "antd";
+import { DownloadOutlined } from "@ant-design/icons";
 import { FormInstance } from "antd/lib/form/Form";
 const { Text } = Typography;
 import './preViewVideoAudio.css';
@@ -49,6 +50,25 @@ export const PreViewVideoAudio: React.FC<{
     const [audioUrl, setAudioUrl] = useState<string>('');
     const [isVideoPlaying, setIsVideoPlaying] = useState(false);
     const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+    
+    // Estados para controles customizados do vídeo
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [isMuted, setIsMuted] = useState(false);
+    const [currentTime, setCurrentTime] = useState(0);
+    const [duration, setDuration] = useState(0);
+    const [volume, setVolume] = useState(1);
+    const [isSeeking, setIsSeeking] = useState(false);
+    
+    // Estados para controles customizados do áudio
+    const [isAudioCustomPlaying, setIsAudioCustomPlaying] = useState(false);
+    const [isAudioCustomMuted, setIsAudioCustomMuted] = useState(false);
+    const [audioCurrentTime, setAudioCurrentTime] = useState(0);
+    const [audioDuration, setAudioDuration] = useState(0);
+    const [isAudioSeeking, setIsAudioSeeking] = useState(false);
+    
+    // Estados para loading de download
+    const [isDownloadingVideo, setIsDownloadingVideo] = useState(false);
+    const [isDownloadingAudio, setIsDownloadingAudio] = useState(false);
 
 
     // 🎬 MOCK: Simular que vídeo e áudio já foram feitos upload
@@ -130,21 +150,179 @@ export const PreViewVideoAudio: React.FC<{
         }
     };
 
-    const handleDownloadVideo = () => {
-        if (videoUrl) {
-            const link = document.createElement('a');
-            link.href = videoUrl;
-            link.download = 'video-exemplo.mp4';
-            link.click();
+    const handleDownloadVideo = async () => {
+        setIsDownloadingVideo(true);
+        try {
+            const videoElement = document.getElementById('preview-video') as HTMLVideoElement;
+            const url = videoElement?.currentSrc || MOCK_VIDEO_URLS[0];
+            
+            await downloadFile(url, 'video-exemplo.mp4', 'video');
+        } catch (error) {
+            console.error('❌ Erro no download do vídeo:', error);
+        } finally {
+            setIsDownloadingVideo(false);
         }
     };
 
-    const handleDownloadAudio = () => {
-        if (audioUrl) {
-            const link = document.createElement('a');
-            link.href = audioUrl;
-            link.download = 'audio-exemplo.wav';
-            link.click();
+    const handleDownloadAudio = async () => {
+        setIsDownloadingAudio(true);
+        try {
+            const audioElement = document.getElementById('preview-audio') as HTMLAudioElement;
+            const url = audioElement?.currentSrc || MOCK_AUDIO_URLS[0];
+            
+            await downloadFile(url, 'audio-exemplo.mp3', 'audio');
+        } catch (error) {
+            console.error('❌ Erro no download do áudio:', error);
+        } finally {
+            setIsDownloadingAudio(false);
+        }
+    };
+
+    // 🎬 Funções para controles customizados do vídeo
+    const handlePlay = async () => {
+        const videoElement = document.getElementById('preview-video') as HTMLVideoElement;
+        if (videoElement) {
+            try {
+                if (isPlaying) {
+                    videoElement.pause();
+                    setIsPlaying(false);
+                    console.log('🎬 Vídeo pausado via controle customizado');
+                } else {
+                    await videoElement.play();
+                    setIsPlaying(true);
+                    console.log('🎬 Vídeo reproduzindo via controle customizado');
+                }
+            } catch (error) {
+                console.error('❌ Erro ao reproduzir vídeo:', error);
+                setIsPlaying(false);
+            }
+        }
+    };
+
+    const handleMute = () => {
+        const videoElement = document.getElementById('preview-video') as HTMLVideoElement;
+        if (videoElement) {
+            videoElement.muted = !videoElement.muted;
+            setIsMuted(videoElement.muted);
+            console.log(`🔊 Vídeo ${videoElement.muted ? 'mutado' : 'desmutado'}`);
+        }
+    };
+
+    const handleSeek = (value: number) => {
+        const videoElement = document.getElementById('preview-video') as HTMLVideoElement;
+        if (videoElement && !isNaN(value)) {
+            setIsSeeking(true);
+            videoElement.currentTime = value;
+            setCurrentTime(value);
+            console.log(`⏯️ Vídeo avançado para: ${formatTime(value)}`);
+            
+            // Pequeno delay para evitar conflito com onTimeUpdate
+            setTimeout(() => setIsSeeking(false), 100);
+        }
+    };
+
+    const formatTime = (seconds: number): string => {
+        if (!seconds || isNaN(seconds) || seconds < 0) {
+            return '0:00';
+        }
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = Math.floor(seconds % 60);
+        return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+    };
+
+    // 📁 Função auxiliar para download que garante comportamento idêntico
+    const downloadFile = async (url: string, filename: string, type: 'video' | 'audio') => {
+        console.log(`🔽 Tentando download direto do ${type}:`, url);
+        
+        // Verificar se é possível fazer download direto (mesmo domínio ou CORS permitido)
+        try {
+            const response = await fetch(url, {
+                method: 'HEAD', // Apenas verificar se é acessível
+            });
+            
+            if (response.ok) {
+                // Se acessível, tentar download via blob
+                const fullResponse = await fetch(url);
+                const blob = await fullResponse.blob();
+                
+                const link = document.createElement('a');
+                const downloadUrl = window.URL.createObjectURL(blob);
+                
+                link.href = downloadUrl;
+                link.download = filename;
+                link.style.display = 'none';
+                
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                setTimeout(() => window.URL.revokeObjectURL(downloadUrl), 100);
+                console.log(`✅ Download direto do ${type} concluído`);
+                return;
+            }
+        } catch (fetchError) {
+            console.log(`⚠️ Download direto não possível, usando nova aba para ${type}`);
+        }
+        
+        // Se chegou aqui, usar nova aba
+        console.log(`🔗 Abrindo ${type} em nova aba para download`);
+        
+        const link = document.createElement('a');
+        link.href = url;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.download = filename;
+        
+        // Tentar forçar download mesmo em nova aba
+        link.setAttribute('download', filename);
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        console.log(`✅ ${type.charAt(0).toUpperCase() + type.slice(1)} aberto em nova aba`);
+    };
+
+    // 🎵 Funções para controles customizados do áudio
+    const handleAudioCustomPlay = async () => {
+        const audioElement = document.getElementById('preview-audio') as HTMLAudioElement;
+        if (audioElement) {
+            try {
+                if (isAudioCustomPlaying) {
+                    audioElement.pause();
+                    setIsAudioCustomPlaying(false);
+                    console.log('🎵 Áudio pausado via controle customizado');
+                } else {
+                    await audioElement.play();
+                    setIsAudioCustomPlaying(true);
+                    console.log('🎵 Áudio reproduzindo via controle customizado');
+                }
+            } catch (error) {
+                console.error('❌ Erro ao reproduzir áudio:', error);
+                setIsAudioCustomPlaying(false);
+            }
+        }
+    };
+
+    const handleAudioCustomMute = () => {
+        const audioElement = document.getElementById('preview-audio') as HTMLAudioElement;
+        if (audioElement) {
+            audioElement.muted = !audioElement.muted;
+            setIsAudioCustomMuted(audioElement.muted);
+            console.log(`🔊 Áudio ${audioElement.muted ? 'mutado' : 'desmutado'}`);
+        }
+    };
+
+    const handleAudioSeek = (value: number) => {
+        const audioElement = document.getElementById('preview-audio') as HTMLAudioElement;
+        if (audioElement && !isNaN(value)) {
+            setIsAudioSeeking(true);
+            audioElement.currentTime = value;
+            setAudioCurrentTime(value);
+            console.log(`⏯️ Áudio avançado para: ${formatTime(value)}`);
+            
+            // Pequeno delay para evitar conflito com onTimeUpdate
+            setTimeout(() => setIsAudioSeeking(false), 100);
         }
     };
 
@@ -177,24 +355,49 @@ export const PreViewVideoAudio: React.FC<{
                 <video
                     id="preview-video"
                     width="100%"
-                    controls
                     preload="metadata"
                     crossOrigin="anonymous"
-                    style={{ maxHeight: '200px', borderRadius: '6px' }}
+                    style={{ maxHeight: '400px', borderRadius: '6px' }}
                     onPlay={() => {
                         console.log('🎬 Evento onPlay disparado');
                         setIsVideoPlaying(true);
+                        setIsPlaying(true);
                     }}
                     onPause={() => {
                         console.log('⏸️ Evento onPause disparado');
                         setIsVideoPlaying(false);
+                        setIsPlaying(false);
                     }}
                     onEnded={() => {
                         console.log('🏁 Evento onEnded disparado');
                         setIsVideoPlaying(false);
+                        setIsPlaying(false);
                     }}
-                    onLoadedMetadata={() => {
-                        console.log('📊 Metadados do vídeo carregados');
+                    onLoadedMetadata={(e) => {
+                        const videoElement = e.target as HTMLVideoElement;
+                        if (!isNaN(videoElement.duration) && videoElement.duration > 0) {
+                            setDuration(videoElement.duration);
+                            setCurrentTime(0);
+                            console.log('📊 Metadados do vídeo carregados - Duração:', videoElement.duration);
+                        }
+                    }}
+                    onCanPlay={(e) => {
+                        const videoElement = e.target as HTMLVideoElement;
+                        // Fallback para garantir que a duração seja definida
+                        if (!duration && !isNaN(videoElement.duration) && videoElement.duration > 0) {
+                            setDuration(videoElement.duration);
+                        }
+                    }}
+                    onTimeUpdate={(e) => {
+                        const videoElement = e.target as HTMLVideoElement;
+                        // Só atualiza se não estiver fazendo seek manual
+                        if (!isSeeking && !isNaN(videoElement.currentTime)) {
+                            setCurrentTime(videoElement.currentTime);
+                        }
+                    }}
+                    onVolumeChange={(e) => {
+                        const videoElement = e.target as HTMLVideoElement;
+                        setIsMuted(videoElement.muted);
                     }}
                     onError={(e) => {
                         console.error('❌ Erro no vídeo:', e);
@@ -211,6 +414,71 @@ export const PreViewVideoAudio: React.FC<{
                         </a>
                     </Text>
                 </video>
+                <div 
+                    className="video-controls" 
+                    style={{
+                        marginTop: '12px',
+                        padding: '12px',
+                        backgroundColor: '#f5f5f5',
+                        borderRadius: '6px',
+                        border: '1px solid #d9d9d9',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        flexWrap: 'wrap'
+                    }}
+                >
+                    <Button 
+                        type="primary" 
+                        onClick={handlePlay}
+                        style={{ minWidth: '80px' }}
+                    >
+                        {isPlaying ? '⏸️ Pausar' : '▶️ Play'}
+                    </Button>
+                    <Button 
+                        onClick={handleMute}
+                        style={{ minWidth: '80px' }}
+                    >
+                        {isMuted ? '🔊 Unmute' : '🔇 Mute'}
+                    </Button>
+                    <Button 
+                        icon={isDownloadingVideo ? undefined : <DownloadOutlined />}
+                        onClick={handleDownloadVideo}
+                        loading={isDownloadingVideo}
+                        disabled={isDownloadingVideo}
+                        style={{ minWidth: '100px' }}
+                    >
+                        {isDownloadingVideo ? 'Baixando...' : 'Download'}
+                    </Button>
+                    <div style={{ flex: 1, minWidth: '200px' }}>
+                        <Slider
+                            value={currentTime}
+                            min={0}
+                            max={duration || 100}
+                            step={0.1}
+                            onChange={handleSeek}
+                            className="progress-slider"
+                            tooltip={{
+                                formatter: (value) => formatTime(value || 0)
+                            }}
+                            onAfterChange={() => {
+                                // Força uma sincronização após o seek
+                                const videoElement = document.getElementById('preview-video') as HTMLVideoElement;
+                                if (videoElement) {
+                                    setCurrentTime(videoElement.currentTime);
+                                }
+                            }}
+                        />
+                    </div>
+                    <span style={{ 
+                        fontSize: '12px', 
+                        color: '#666',
+                        minWidth: '80px',
+                        textAlign: 'center'
+                    }}>
+                        {formatTime(currentTime)} / {formatTime(duration)}
+                    </span>
+                </div>
                 {/* <div style={{ marginTop: 8 }}>
                         <Text type="secondary" style={{ fontSize: '12px' }}>
                             📁 {MOCK_VIDEO_UPLOADED.name} • {(MOCK_VIDEO_UPLOADED.size / 1024 / 1024).toFixed(1)} MB
@@ -249,31 +517,57 @@ export const PreViewVideoAudio: React.FC<{
                     backgroundColor: '#000',
                     borderRadius: '6px',
                     display: 'flex',
-                    alignItems: 'flex-end',
+                    alignItems: 'center',
                     justifyContent: 'center',
                     boxSizing: 'border-box',
+                    position: 'relative',
                 }}>
                     <audio
                         id="preview-audio"
-                        controls
                         preload="metadata"
                         style={{
-                            width: '100%',
+                            display: 'none',  // Esconder o player nativo
                         }}
                         onPlay={() => {
                             console.log('🎵 Áudio começou a reproduzir');
                             setIsAudioPlaying(true);
+                            setIsAudioCustomPlaying(true);
                         }}
                         onPause={() => {
                             console.log('⏸️ Áudio pausado');
                             setIsAudioPlaying(false);
+                            setIsAudioCustomPlaying(false);
                         }}
                         onEnded={() => {
                             console.log('🏁 Áudio terminou');
                             setIsAudioPlaying(false);
+                            setIsAudioCustomPlaying(false);
                         }}
-                        onLoadedMetadata={() => {
-                            console.log('� Metadados do áudio carregados');
+                        onLoadedMetadata={(e) => {
+                            const audioElement = e.target as HTMLAudioElement;
+                            if (!isNaN(audioElement.duration) && audioElement.duration > 0) {
+                                setAudioDuration(audioElement.duration);
+                                setAudioCurrentTime(0);
+                                console.log('📊 Metadados do áudio carregados - Duração:', audioElement.duration);
+                            }
+                        }}
+                        onCanPlay={(e) => {
+                            const audioElement = e.target as HTMLAudioElement;
+                            // Fallback para garantir que a duração seja definida
+                            if (!audioDuration && !isNaN(audioElement.duration) && audioElement.duration > 0) {
+                                setAudioDuration(audioElement.duration);
+                            }
+                        }}
+                        onTimeUpdate={(e) => {
+                            const audioElement = e.target as HTMLAudioElement;
+                            // Só atualiza se não estiver fazendo seek manual
+                            if (!isAudioSeeking && !isNaN(audioElement.currentTime)) {
+                                setAudioCurrentTime(audioElement.currentTime);
+                            }
+                        }}
+                        onVolumeChange={(e) => {
+                            const audioElement = e.target as HTMLAudioElement;
+                            setIsAudioCustomMuted(audioElement.muted);
                         }}
                         onError={(e) => {
                             console.error('❌ Erro no áudio:', e);
@@ -290,6 +584,88 @@ export const PreViewVideoAudio: React.FC<{
                             </a>
                         </Text>
                     </audio>
+                    
+                    {/* Ícone visual do áudio */}
+                    <div style={{
+                        color: 'white',
+                        fontSize: '48px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: '8px'
+                    }}>
+                        🎵
+                        <Text style={{ color: 'white', fontSize: '14px' }}>
+                            {isAudioCustomPlaying ? 'Reproduzindo...' : 'Áudio'}
+                        </Text>
+                    </div>
+                </div>
+                
+                {/* Controles customizados do áudio */}
+                <div 
+                    className="audio-controls" 
+                    style={{
+                        marginTop: '12px',
+                        padding: '12px',
+                        backgroundColor: '#f5f5f5',
+                        borderRadius: '6px',
+                        border: '1px solid #d9d9d9',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        flexWrap: 'wrap'
+                    }}
+                >
+                    <Button 
+                        type="primary" 
+                        onClick={handleAudioCustomPlay}
+                        style={{ minWidth: '80px' }}
+                    >
+                        {isAudioCustomPlaying ? '⏸️ Pausar' : '▶️ Play'}
+                    </Button>
+                    <Button 
+                        onClick={handleAudioCustomMute}
+                        style={{ minWidth: '80px' }}
+                    >
+                        {isAudioCustomMuted ? '🔊 Unmute' : '🔇 Mute'}
+                    </Button>
+                    <Button 
+                        icon={isDownloadingAudio ? undefined : <DownloadOutlined />}
+                        onClick={handleDownloadAudio}
+                        loading={isDownloadingAudio}
+                        disabled={isDownloadingAudio}
+                        style={{ minWidth: '100px' }}
+                    >
+                        {isDownloadingAudio ? 'Baixando...' : 'Download'}
+                    </Button>
+                    <div style={{ flex: 1, minWidth: '200px' }}>
+                        <Slider
+                            value={audioCurrentTime}
+                            min={0}
+                            max={audioDuration || 100}
+                            step={0.1}
+                            onChange={handleAudioSeek}
+                            className="progress-slider"
+                            tooltip={{
+                                formatter: (value) => formatTime(value || 0)
+                            }}
+                            onAfterChange={() => {
+                                // Força uma sincronização após o seek
+                                const audioElement = document.getElementById('preview-audio') as HTMLAudioElement;
+                                if (audioElement) {
+                                    setAudioCurrentTime(audioElement.currentTime);
+                                }
+                            }}
+                        />
+                    </div>
+                    <span style={{ 
+                        fontSize: '12px', 
+                        color: '#666',
+                        minWidth: '80px',
+                        textAlign: 'center'
+                    }}>
+                        {formatTime(audioCurrentTime)} / {formatTime(audioDuration)}
+                    </span>
                 </div>
             </Card>
         );
