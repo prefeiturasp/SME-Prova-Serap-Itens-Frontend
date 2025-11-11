@@ -16,7 +16,7 @@ import filtroSelectService from '~/services/filtro-select-service';
 import { DefaultOptionType } from 'antd/es/select';
 import { SelecioneDto } from '~/domain/dto/selecione-dto';
 import { converterSelecineDto } from '~/utils/converte-dto';
-import type { FiltroItemDto } from '~/domain/dto/filtro-item-dto';
+import carregarFiltroDeItensDoLocalStorage from '~/utils/filtro-helper';
 
 const ListagemItens: React.FC = () => {
   const linkRetorno = 'https://hom-serap.sme.prefeitura.sp.gov.br/';
@@ -37,7 +37,9 @@ const ListagemItens: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (pagina) buscaDadosTabela();
+    if (pagina) {
+      buscaDadosTabela();
+    }
   }, [selectItemSelecionado, pagina, itensPorPagina]);
 
   useEffect(() => {
@@ -47,13 +49,16 @@ const ListagemItens: React.FC = () => {
   const buscaDadosTabela = async () => {
     try {
       const valorSelcionado: any = selectItemSelecionado?.value;
-
+      const filtros = carregarFiltroDeItensDoLocalStorage();
       const codigoItem: string = valorSelcionado?.label!;
-      const resposta: PaginacaoDto<ItemListagemDto> = await itemService.obterListaItens({
-        codigoItem: codigoItem,
-        pagina: pagina,
-        tamanhoPagina: itensPorPagina,
-      });
+      const resposta: PaginacaoDto<ItemListagemDto> = await itemService.obterListaItens(
+        pagina,
+        itensPorPagina,
+        {
+          codigoItem: codigoItem,
+          ...filtros,
+        },
+      );
       setTabelaItens(resposta?.itens);
       setTotalRegistro(resposta?.totalRegistros);
     } catch (error) {
@@ -105,8 +110,12 @@ const ListagemItens: React.FC = () => {
     }
   };
 
-  const selecionaPaginasOnChange = async (valor: string, option: any) => {
-    console.log(valor, option);
+  const onChangeFiltro = () => {
+    if (pagina != 1) setPagina(1);
+    else buscaDadosTabela();
+  };
+
+  const selecionaPaginasOnChange = async (valor: string) => {
     setItensPorPagina(Number(valor));
   };
 
@@ -177,6 +186,7 @@ const ListagemItens: React.FC = () => {
             itensPorPagina={itensPorPagina}
             onItemClick={tabelaItemClick}
             selecionaPaginasOnChange={selecionaPaginasOnChange}
+            onChangeFiltro={onChangeFiltro}
           ></ListagemTabela>
         </div>
         <div className='listagem-conteudo-direita'>

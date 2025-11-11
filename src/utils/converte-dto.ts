@@ -15,14 +15,22 @@ export const voltarAoSerap = () => {
   window.location.replace(URL_SERAP);
 };
 
-export const converterDtoParaQueryString = <T extends Record<string, any>>(dto: T): string => {
+export const converterDtoParaQueryString = <T extends Record<string, any>>(dto: T): URLSearchParams => {
   const params = new URLSearchParams();
 
   Object.entries(dto).forEach(([key, value]) => {
-    if (value !== undefined && value !== null && value !== '' && value !== '0') {
+    if (value === undefined || value === null || value === '' || value === '0') return;
+
+    if (Array.isArray(value)) {
+      value.forEach((v) => {
+        if (v !== undefined && v !== null && v !== '' && v !== '0') {
+          params.append(key, String(v));
+        }
+      });
+    } else {
       params.append(key, String(value));
     }
   });
 
-  return params.toString();
+  return params;
 };

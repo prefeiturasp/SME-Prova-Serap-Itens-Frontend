@@ -1,16 +1,14 @@
 export interface FiltroItemDto {
   areaConhecimentoId?: number;
-  categoriaId?: number;
   codigoItem?: string;
   disciplinaId?: number;
+  anoMatrizId?: number;
   matrizId?: number;
   competenciaId?: number;
   dificuldadeSugeridaId?: number;
   situacao?: number;
   habilidadeId?: number;
-  pagina: number;
-  tamanhoPagina: number;
+  palavrasChave?: string[];
   informacoesEstatistica?: boolean
-  palavraChave?: string;
-  anoMatrizId?: number;
+  categoriaId?: number;
 }
