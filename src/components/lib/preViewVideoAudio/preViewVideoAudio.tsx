@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Card, Typography, Button, Slider } from "antd";
-import { DownloadOutlined } from "@ant-design/icons";
+import { DownloadOutlined, FullscreenOutlined, FullscreenExitOutlined } from "@ant-design/icons";
 import { FormInstance } from "antd/lib/form/Form";
 const { Text } = Typography;
 import './preViewVideoAudio.css';
@@ -69,6 +69,9 @@ export const PreViewVideoAudio: React.FC<{
     // Estados para loading de download
     const [isDownloadingVideo, setIsDownloadingVideo] = useState(false);
     const [isDownloadingAudio, setIsDownloadingAudio] = useState(false);
+    
+    // Estado para fullscreen
+    const [isFullscreen, setIsFullscreen] = useState(false);
 
 
     // 🎬 MOCK: Simular que vídeo e áudio já foram feitos upload
@@ -220,6 +223,68 @@ export const PreViewVideoAudio: React.FC<{
             setTimeout(() => setIsSeeking(false), 100);
         }
     };
+
+    // 🔍 Função para controlar fullscreen do vídeo
+    const handleFullscreen = async () => {
+        const videoElement = document.getElementById('preview-video') as HTMLVideoElement;
+        if (videoElement) {
+            try {
+                if (!document.fullscreenElement) {
+                    // Entrar em fullscreen
+                    if (videoElement.requestFullscreen) {
+                        await videoElement.requestFullscreen();
+                    } else if ((videoElement as any).webkitRequestFullscreen) {
+                        // Safari
+                        await (videoElement as any).webkitRequestFullscreen();
+                    } else if ((videoElement as any).msRequestFullscreen) {
+                        // IE/Edge
+                        await (videoElement as any).msRequestFullscreen();
+                    }
+                    setIsFullscreen(true);
+                    console.log('🔍 Vídeo em tela cheia');
+                } else {
+                    // Sair do fullscreen
+                    if (document.exitFullscreen) {
+                        await document.exitFullscreen();
+                    } else if ((document as any).webkitExitFullscreen) {
+                        // Safari
+                        await (document as any).webkitExitFullscreen();
+                    } else if ((document as any).msExitFullscreen) {
+                        // IE/Edge
+                        await (document as any).msExitFullscreen();
+                    }
+                    setIsFullscreen(false);
+                    console.log('🔍 Saindo da tela cheia');
+                }
+            } catch (error) {
+                console.error('❌ Erro ao alterar fullscreen:', error);
+                alert('Seu navegador não suporta tela cheia ou bloqueou a funcionalidade.');
+            }
+        }
+    };
+
+    // 🔍 Listener para detectar mudanças de fullscreen
+    useEffect(() => {
+        const handleFullscreenChange = () => {
+            const isInFullscreen = !!(
+                document.fullscreenElement ||
+                (document as any).webkitFullscreenElement ||
+                (document as any).msFullscreenElement
+            );
+            setIsFullscreen(isInFullscreen);
+        };
+
+        // Adicionar listeners para diferentes navegadores
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+        document.addEventListener('msfullscreenchange', handleFullscreenChange);
+        
+        return () => {
+            document.removeEventListener('fullscreenchange', handleFullscreenChange);
+            document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+            document.removeEventListener('msfullscreenchange', handleFullscreenChange);
+        };
+    }, []);
 
     const formatTime = (seconds: number): string => {
         if (!seconds || isNaN(seconds) || seconds < 0) {
@@ -440,6 +505,13 @@ export const PreViewVideoAudio: React.FC<{
                         style={{ minWidth: '80px' }}
                     >
                         {isMuted ? '🔊 Unmute' : '🔇 Mute'}
+                    </Button>
+                    <Button 
+                        icon={isFullscreen ? <FullscreenExitOutlined /> : <FullscreenOutlined />}
+                        onClick={handleFullscreen}
+                        style={{ minWidth: '100px' }}
+                    >
+                        {isFullscreen ? 'Sair Tela Cheia' : 'Tela Cheia'}
                     </Button>
                     <Button 
                         icon={isDownloadingVideo ? undefined : <DownloadOutlined />}
