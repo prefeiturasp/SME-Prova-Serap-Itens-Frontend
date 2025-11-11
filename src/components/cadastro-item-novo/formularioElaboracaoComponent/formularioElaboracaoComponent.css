@@ -79,7 +79,7 @@
 }
 
 .card-video-corpo-primeiro {
-    @media screen and (min-width: 768px) {
+    @media screen and (min-width: 991px) {
         margin-right: 1em;
     }
 }

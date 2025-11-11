@@ -86,14 +86,14 @@ export const PreViewVideoAudio: React.FC<{
 
     if (tipo.startsWith("video/")) {
         return (
-            <Card>
+            <Card className="ContainerVideoPai">
                 <video
                     id="preview-video"
                     width="100%"
                     controls
                     preload="metadata"
                     crossOrigin="anonymous"
-                    style={{ maxHeight: '200px', borderRadius: '6px' }}
+                    className="propsVideo"
                     onError={(e) => {
                         console.error('❌ Erro no vídeo:', e);
                     }}
@@ -117,7 +117,8 @@ export const PreViewVideoAudio: React.FC<{
                 <div className="telaPretaAudio">
                     <div className="iconeTelaPretaAudio">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="#FFFFFF" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M2 10V13M6 6V17M10 3V21M14 8V15M18 5V18M22 10V13" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M2 10V13M6 6V17M10 3V21M14 8V15M18 5V18M22 10V13" 
+                            stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
                     </div>
                     <audio

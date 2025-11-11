@@ -651,7 +651,7 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                 </div>
                 <div className='card-corpo'>
                     <Row>
-                        <Col xs={24} md={12} className='card-campo-elaboracao'>
+                        <Col xs={24} sm={24} md={24} lg={12} className='card-campo-elaboracao'>
                             <div className="card-video-corpo card-video-corpo-primeiro upload-inverted">
                                 <div className="video-padding">
                                     <p className="card-video-titulo">Arquivo</p>
@@ -696,7 +696,7 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                                 </div>
                             </div>
                         </Col>
-                        <Col xs={24} md={12} className='card-campo-elaboracao'>
+                        <Col xs={24} sm={24} md={24} lg={12} className='card-campo-elaboracao'>
                             <div className="card-video-corpo upload-inverted">
                                 <div className="audio-padding">
                                     <p className="card-video-titulo">Arquivo</p>
