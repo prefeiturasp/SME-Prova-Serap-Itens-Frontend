@@ -259,6 +259,7 @@ export const PreViewVideoAudio: React.FC<{
                         preload="metadata"
                         style={{
                             width: '100%',
+                            backgroundColor: '#f3f3f3',
                         }}
                         onPlay={() => {
                             console.log('🎵 Áudio começou a reproduzir');
