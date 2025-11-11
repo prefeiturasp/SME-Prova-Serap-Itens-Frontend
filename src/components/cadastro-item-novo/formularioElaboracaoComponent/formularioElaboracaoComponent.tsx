@@ -15,6 +15,7 @@ import { Campos } from "~/domain/enums/campos-cadastro-item";
 
 //services
 import arquivoService from "~/services/arquivo-service";
+import { PreViewVideoAudio } from "~/components/lib/preViewVideoAudio/preViewVideoAudio";
 
 const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
     if (!form) {
@@ -43,7 +44,11 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
     const [isModalBVisible, setIsModalBVisible] = useState(false);
     const [isModalCVisible, setIsModalCVisible] = useState(false);
     const [isModalDVisible, setIsModalDVisible] = useState(false);
-    
+
+    // Estados para preview de mídia
+    // const [videoUrl, setVideoUrl] = useState<string>('');
+    // const [audioUrl, setAudioUrl] = useState<string>('');
+
     // 🛡️ Estados para controlar se os TextEditors devem ser renderizados (proteção contra erro de produção)
     const [renderTextEditorA, setRenderTextEditorA] = useState(true);
     const [renderTextEditorB, setRenderTextEditorB] = useState(true);
@@ -105,7 +110,7 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
         if (itemSalvo) {
             try {
                 const item = JSON.parse(itemSalvo);
-                
+
                 const safeString = (value: any): string => {
                     if (value === null || value === undefined) return '';
                     return String(value);
@@ -121,7 +126,7 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                 setJustificativaD(safeString(item.elaboracao?.justificativaD));
             } catch (error) {
                 console.error('❌ Erro ao carregar dados do localStorage:', error);
-                
+
                 setAlternativaA('');
                 setAlternativaB('');
                 setAlternativaC('');
@@ -134,7 +139,7 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
         }
     }, []);
 
-    let showModal = (nomeModal: string) => {
+    const showModal = (nomeModal: string) => {
         switch (nomeModal) {
             case "modalA":
                 setIsModalAVisible(true);
@@ -153,7 +158,7 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
         }
     };
 
-    let handleOk = (nomeModal: string) => {
+    const handleOk = (nomeModal: string) => {
         switch (nomeModal) {
             case "modalA":
                 setIsModalAVisible(false);
@@ -172,19 +177,19 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
         }
     };
 
-    let handleCancel = (nomeModal: string) => {
+    const handleCancel = (nomeModal: string) => {
         switch (nomeModal) {
 
             case "modalA":
                 // 🛡️ Desabilita TextEditor temporariamente para evitar erro em produção
                 setRenderTextEditorA(false);
-                
+
                 setTimeout(() => {
                     setIsModalAVisible(false);
                     setAlternativaA('');
                     setJustificativaA('');
                     form?.resetFields([campoAlternativaA, campoJustificativaA]);
-                    
+
                     const itemAtualA = localStorage.getItem('itemAtual');
                     if (itemAtualA) {
                         const item = JSON.parse(itemAtualA);
@@ -194,7 +199,7 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                             localStorage.setItem('itemAtual', JSON.stringify(item));
                         }
                     }
-                    
+
                     // 🔄 Reabilita TextEditor após fechar modal
                     setTimeout(() => setRenderTextEditorA(true), 100);
                 }, 50);
@@ -202,13 +207,13 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
             case "modalB":
                 // 🛡️ Desabilita TextEditor temporariamente para evitar erro em produção
                 setRenderTextEditorB(false);
-                
+
                 setTimeout(() => {
                     setIsModalBVisible(false);
                     setAlternativaB('');
                     setJustificativaB('');
                     form?.resetFields([campoAlternativaB, campoJustificativaB]);
-                    
+
                     const itemAtualB = localStorage.getItem('itemAtual');
                     if (itemAtualB) {
                         const item = JSON.parse(itemAtualB);
@@ -218,7 +223,7 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                             localStorage.setItem('itemAtual', JSON.stringify(item));
                         }
                     }
-                    
+
                     // 🔄 Reabilita TextEditor após fechar modal
                     setTimeout(() => setRenderTextEditorB(true), 100);
                 }, 50);
@@ -226,13 +231,13 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
             case "modalC":
                 // 🛡️ Desabilita TextEditor temporariamente para evitar erro em produção
                 setRenderTextEditorC(false);
-                
+
                 setTimeout(() => {
                     setIsModalCVisible(false);
                     setAlternativaC('');
                     setJustificativaC('');
                     form?.resetFields([campoAlternativaC, campoJustificativaC]);
-                    
+
                     const itemAtualC = localStorage.getItem('itemAtual');
                     if (itemAtualC) {
                         const item = JSON.parse(itemAtualC);
@@ -242,7 +247,7 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                             localStorage.setItem('itemAtual', JSON.stringify(item));
                         }
                     }
-                    
+
                     // 🔄 Reabilita TextEditor após fechar modal
                     setTimeout(() => setRenderTextEditorC(true), 100);
                 }, 50);
@@ -250,13 +255,13 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
             case "modalD":
                 // 🛡️ Desabilita TextEditor temporariamente para evitar erro em produção
                 setRenderTextEditorD(false);
-                
+
                 setTimeout(() => {
                     setIsModalDVisible(false);
                     setAlternativaD('');
                     setJustificativaD('');
                     form?.resetFields([campoAlternativaD, campoJustificativaD]);
-                    
+
                     const itemAtualD = localStorage.getItem('itemAtual');
                     if (itemAtualD) {
                         const item = JSON.parse(itemAtualD);
@@ -266,7 +271,7 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                             localStorage.setItem('itemAtual', JSON.stringify(item));
                         }
                     }
-                    
+
                     // 🔄 Reabilita TextEditor após fechar modal
                     setTimeout(() => setRenderTextEditorD(true), 100);
                 }, 50);
@@ -275,7 +280,6 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                 break;
         }
     };
-
 
 
     return (
@@ -647,74 +651,92 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                 </div>
                 <div className='card-corpo'>
                     <Row>
-                        <Col xs={24} md={12} className='card-campo-elaboracao'>
-                            <div className="card-video-corpo card-video-corpo-primeiro">
-                                <p className="titulo">Arquivo</p>
-                                <UploadArquivosSME
-                                    form={form}
-                                    isDraggerUpload={false}
-                                    uploadService={arquivoService.uploadVideo}
-                                    formItemProps={{
-                                        name: campoVideo,
-                                    }}
-                                    uploadProps={{
-                                        maxCount: 1,
-                                        showUploadList: {
-                                            downloadIcon: false,
-                                        },
-                                    }}
-                                    tiposArquivosPermitidos={[
-                                        'video/mp4',
-                                        'video/webm',
-                                        'video/ogg',
-                                        'application/ogg',
-                                        'video/x-flv',
-                                        'application/x-mpegURL',
-                                        'video/MP2T',
-                                        'video/3gpp',
-                                        'video/quicktime',
-                                        'video/x-msvideo',
-                                        'video/x-ms-wmv',
-                                    ]}
-                                >
-                                    <ButtonPrimary className="card-video-buttom">
-                                        Escolher outro vídeo
-                                    </ButtonPrimary>
-                                    <p className="descricao">Formatos suportados: .mp4, .MOV, .WEBM até 10MB</p>
-                                </UploadArquivosSME>
+                        <Col xs={24} sm={24} md={24} lg={12} className='card-campo-elaboracao'>
+                            <div className="card-video-corpo card-video-corpo-primeiro upload-inverted">
+                                <div className="video-padding">
+                                    <p className="card-video-titulo">Arquivo</p>
+                                    <UploadArquivosSME
+                                        form={form}
+                                        isDraggerUpload={false}
+                                        uploadService={arquivoService.uploadVideo}
+                                        formItemProps={{
+                                            name: campoVideo,
+                                        }}
+                                        uploadProps={{
+                                            maxCount: 1,
+                                            showUploadList: {
+                                                downloadIcon: false,
+                                            },
+                                        }}
+                                        tiposArquivosPermitidos={[
+                                            'video/mp4',
+                                            'video/webm',
+                                            'video/ogg',
+                                            'application/ogg',
+                                            'video/x-flv',
+                                            'application/x-mpegURL',
+                                            'video/MP2T',
+                                            'video/3gpp',
+                                            'video/quicktime',
+                                            'video/x-msvideo',
+                                            'video/x-ms-wmv',
+                                        ]}
+                                    >
+                                        <ButtonPrimary className="card-video-buttom">
+                                            Escolher outro vídeo
+                                        </ButtonPrimary>
+                                        <p className="descricao">Formatos suportados: .mp4, .MOV, .WEBM até 10MB</p>
+                                    </UploadArquivosSME>
+                                </div>
+                                <div className="video-antD-edicao">
+                                    {/* 🎬 Preview do Vídeo */}
+                                    {/* {videoUrl && ( */}
+                                    {/* src={videoUrl} */}
+                                    <PreViewVideoAudio tipo="video/" form={form} campo={campoVideo} />
+                                    {/* )} */}
+                                </div>
                             </div>
                         </Col>
-                        <Col xs={24} md={12} className='card-campo-elaboracao'>
-                            <div className="card-video-corpo">
-                                <p className="titulo">Arquivo</p>
-                                <UploadArquivosSME
-                                    form={form}
-                                    isDraggerUpload={false}
-                                    uploadService={arquivoService.uploadAudio}
-                                    formItemProps={{
-                                        name: campoAudio,
-                                    }}
-                                    uploadProps={{
-                                        maxCount: 1,
-                                        showUploadList: {
-                                            downloadIcon: false,
-                                        },
-                                    }}
-                                    tiposArquivosPermitidos={[
-                                        'audio/mpeg',
-                                        'audio/mp4',
-                                        'audio/mp3',
-                                        'audio/vnd.wav',
-                                        'audio/x-ms-wma',
-                                        'audio/ogg',
-                                    ]}
-                                >
-                                    <ButtonPrimary className="card-video-buttom">
-                                        Escolher outro áudio
-                                    </ButtonPrimary>
-                                    <p className="descricao">Formatos suportados:
-                                        MP3, WAV até 10MB</p>
-                                </UploadArquivosSME>
+                        <Col xs={24} sm={24} md={24} lg={12} className='card-campo-elaboracao'>
+                            <div className="card-video-corpo upload-inverted">
+                                <div className="audio-padding">
+                                    <p className="card-video-titulo">Arquivo</p>
+                                    <UploadArquivosSME
+                                        form={form}
+                                        isDraggerUpload={false}
+                                        uploadService={arquivoService.uploadAudio}
+                                        formItemProps={{
+                                            name: campoAudio,
+                                        }}
+                                        uploadProps={{
+                                            maxCount: 1,
+                                            showUploadList: {
+                                                downloadIcon: false,
+                                            },
+                                        }}
+                                        tiposArquivosPermitidos={[
+                                            'audio/mpeg',
+                                            'audio/mp4',
+                                            'audio/mp3',
+                                            'audio/vnd.wav',
+                                            'audio/x-ms-wma',
+                                            'audio/ogg',
+                                        ]}
+                                    >
+                                        <ButtonPrimary className="card-video-buttom">
+                                            Escolher outro áudio
+                                        </ButtonPrimary>
+                                        <p className="descricao">Formatos suportados:
+                                            MP3, WAV até 10MB</p>
+                                    </UploadArquivosSME>
+                                </div>
+                                <div className="audio-antD-edicao">
+                                    {/* 🎵 Preview do Áudio */}
+                                    {/* {audioUrl && ( */}
+                                    {/* src={audioUrl} */}
+                                    <PreViewVideoAudio tipo="audio/" form={form} campo={campoAudio} />
+                                    {/* )} */}
+                                </div>
                             </div>
                         </Col>
                     </Row>

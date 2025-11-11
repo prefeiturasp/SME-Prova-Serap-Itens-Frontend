@@ -1,0 +1,90 @@
+.audio-preview {
+    width: 100%;
+}
+
+.tela-audio-preview {
+    min-width: 100%;
+    width: 262px;
+    height: 150px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 6px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    margin-bottom: 12px;
+}
+
+.audio-visual-content {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-align: center;
+    z-index: 2;
+}
+
+.audio-icon {
+    font-size: 32px;
+    margin-bottom: 8px;
+    opacity: 0.9;
+}
+
+.audio-title {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.audio-subtitle {
+    font-size: 11px;
+    opacity: 0.8;
+}
+
+.card-telaAudio {
+    width: 100%;
+}
+
+.telaPretaAudio {
+    height: 175px;
+    background-color: #000;
+    border-radius: 6px;
+}
+
+.iconeTelaPretaAudio{
+    width: 100%;
+    text-align: center;
+    position: absolute;
+    bottom: 105px;
+}
+
+.telaPretaControle{
+    width: 100%;
+    background-color: #f3f3f3;
+    position: absolute; 
+    bottom: 0;
+    left: 0;
+}
+
+.ContainerVideoPai.ant-card {
+    width: 100%;
+    height: 175px;
+    padding: 0; /* ← Remove padding do Card */
+}
+
+.ContainerVideoPai .ant-card-body {
+    padding: 0 !important; /* ← Remove padding interno */
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.propsVideo {
+    border-radius: 6px;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover;
+}
