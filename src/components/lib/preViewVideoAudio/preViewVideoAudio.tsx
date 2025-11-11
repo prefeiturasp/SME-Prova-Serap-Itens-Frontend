@@ -36,13 +36,12 @@ const MOCK_AUDIO_UPLOADED = {
     status: 'done',
     uid: `audio-mock-${Date.now()}`,
 };
-
+//src: string;
 export const PreViewVideoAudio: React.FC<{
-    src: string;
     tipo: string;
     form: FormInstance<any> | undefined
     campo: string;
-}> = ({ src, tipo, form, campo }) => {
+}> = ({tipo, form, campo }) => {
 
     // Estados para preview de mídia
     const [videoUrl, setVideoUrl] = useState<string>('');

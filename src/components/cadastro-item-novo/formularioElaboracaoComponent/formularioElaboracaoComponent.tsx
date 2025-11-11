@@ -46,8 +46,8 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
     const [isModalDVisible, setIsModalDVisible] = useState(false);
 
     // Estados para preview de mídia
-    const [videoUrl, setVideoUrl] = useState<string>('');
-    const [audioUrl, setAudioUrl] = useState<string>('');
+    // const [videoUrl, setVideoUrl] = useState<string>('');
+    // const [audioUrl, setAudioUrl] = useState<string>('');
 
     // 🛡️ Estados para controlar se os TextEditors devem ser renderizados (proteção contra erro de produção)
     const [renderTextEditorA, setRenderTextEditorA] = useState(true);
@@ -691,7 +691,8 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                                 <div className="video-antD-edicao">
                                     {/* 🎬 Preview do Vídeo */}
                                     {/* {videoUrl && ( */}
-                                    <PreViewVideoAudio src={videoUrl} tipo="video/" form={form} campo={campoVideo} />
+                                    {/* src={videoUrl} */}
+                                    <PreViewVideoAudio tipo="video/" form={form} campo={campoVideo} />
                                     {/* )} */}
                                 </div>
                             </div>
@@ -732,7 +733,8 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                                 <div className="audio-antD-edicao">
                                     {/* 🎵 Preview do Áudio */}
                                     {/* {audioUrl && ( */}
-                                    <PreViewVideoAudio src={audioUrl} tipo="audio/" form={form} campo={campoAudio} />
+                                    {/* src={audioUrl} */}
+                                    <PreViewVideoAudio tipo="audio/" form={form} campo={campoAudio} />
                                     {/* )} */}
                                 </div>
                             </div>
