@@ -59,8 +59,8 @@ const ListagemItens: React.FC = () => {
           ...filtros,
         },
       );
-      setTabelaItens(resposta?.itens);
-      setTotalRegistro(resposta?.totalRegistros);
+      setTabelaItens(resposta?.itens ?? []);
+      setTotalRegistro(resposta?.totalRegistros ?? 0);
     } catch (error) {
       console.log(error);
     }
