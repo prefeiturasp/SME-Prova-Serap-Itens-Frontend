@@ -47,8 +47,6 @@ export const PreViewVideoAudio: React.FC<{
     // Estados para preview de mídia
     const [videoUrl, setVideoUrl] = useState<string>('');
     const [audioUrl, setAudioUrl] = useState<string>('');
-    const [isVideoPlaying, setIsVideoPlaying] = useState(false);
-    const [isAudioPlaying, setIsAudioPlaying] = useState(false);
 
 
     // 🎬 MOCK: Simular que vídeo e áudio já foram feitos upload
@@ -85,95 +83,10 @@ export const PreViewVideoAudio: React.FC<{
         return () => clearTimeout(mockTimer);
     }, [form]);
 
-    // 🎬 Funções para controle de mídia
-    const handleVideoPlay = async () => {
-        const videoElement = document.getElementById('preview-video') as HTMLVideoElement;
-        if (videoElement) {
-            try {
-                if (isVideoPlaying) {
-                    videoElement.pause();
-                    setIsVideoPlaying(false);
-                    console.log('🎬 Vídeo pausado');
-                } else {
-                    await videoElement.play();
-                    setIsVideoPlaying(true);
-                    console.log('🎬 Vídeo reproduzindo');
-                }
-            } catch (error) {
-                console.error('❌ Erro ao reproduzir vídeo:', error);
-                setIsVideoPlaying(false);
-            }
-        } else {
-            console.warn('⚠️ Elemento de vídeo não encontrado');
-        }
-    };
-
-    const handleAudioPlay = async () => {
-        const audioElement = document.getElementById('preview-audio') as HTMLAudioElement;
-        if (audioElement) {
-            try {
-                if (isAudioPlaying) {
-                    audioElement.pause();
-                    setIsAudioPlaying(false);
-                    console.log('🎵 Áudio pausado');
-                } else {
-                    await audioElement.play();
-                    setIsAudioPlaying(true);
-                    console.log('🎵 Áudio reproduzindo');
-                }
-            } catch (error) {
-                console.error('❌ Erro ao reproduzir áudio:', error);
-                setIsAudioPlaying(false);
-            }
-        } else {
-            console.warn('⚠️ Elemento de áudio não encontrado');
-        }
-    };
-
-    const handleDownloadVideo = () => {
-        if (videoUrl) {
-            const link = document.createElement('a');
-            link.href = videoUrl;
-            link.download = 'video-exemplo.mp4';
-            link.click();
-        }
-    };
-
-    const handleDownloadAudio = () => {
-        if (audioUrl) {
-            const link = document.createElement('a');
-            link.href = audioUrl;
-            link.download = 'audio-exemplo.wav';
-            link.click();
-        }
-    };
 
     if (tipo.startsWith("video/")) {
         return (
-            <Card
-            // title="Preview do Vídeo"
-            // size="small"
-            // style={{ marginTop: 16 }}
-            // extra={
-            //     <Space>
-            //         <Button
-            //             type="primary"
-            //             icon={isVideoPlaying ? <PauseCircleOutlined /> : <PlayCircleOutlined />}
-            //             onClick={handleVideoPlay}
-            //             size="small"
-            //         >
-            //             {isVideoPlaying ? 'Pausar' : 'Reproduzir'}
-            //         </Button>
-            //         <Button
-            //             icon={<DownloadOutlined />}
-            //             onClick={handleDownloadVideo}
-            //             size="small"
-            //         >
-            //             Download
-            //         </Button>
-            //     </Space>
-            // }
-            >
+            <Card>
                 <video
                     id="preview-video"
                     width="100%"
@@ -181,21 +94,6 @@ export const PreViewVideoAudio: React.FC<{
                     preload="metadata"
                     crossOrigin="anonymous"
                     style={{ maxHeight: '200px', borderRadius: '6px' }}
-                    onPlay={() => {
-                        console.log('🎬 Evento onPlay disparado');
-                        setIsVideoPlaying(true);
-                    }}
-                    onPause={() => {
-                        console.log('⏸️ Evento onPause disparado');
-                        setIsVideoPlaying(false);
-                    }}
-                    onEnded={() => {
-                        console.log('🏁 Evento onEnded disparado');
-                        setIsVideoPlaying(false);
-                    }}
-                    onLoadedMetadata={() => {
-                        console.log('📊 Metadados do vídeo carregados');
-                    }}
                     onError={(e) => {
                         console.error('❌ Erro no vídeo:', e);
                     }}
@@ -211,71 +109,22 @@ export const PreViewVideoAudio: React.FC<{
                         </a>
                     </Text>
                 </video>
-                {/* <div style={{ marginTop: 8 }}>
-                        <Text type="secondary" style={{ fontSize: '12px' }}>
-                            📁 {MOCK_VIDEO_UPLOADED.name} • {(MOCK_VIDEO_UPLOADED.size / 1024 / 1024).toFixed(1)} MB
-                        </Text>
-                    </div> */}
             </Card>
         );
     } else if (tipo.startsWith("audio/")) {
         return (
-            <Card
-            // title="Preview do Áudio"
-            // size="small"
-            // style={{ marginTop: 16 }}
-            // extra={
-            //     <Space>
-            //         <Button
-            //             type="primary"
-            //             icon={isAudioPlaying ? <PauseCircleOutlined /> : <SoundOutlined />}
-            //             onClick={handleAudioPlay}
-            //             size="small"
-            //         >
-            //             {isAudioPlaying ? 'Pausar' : 'Reproduzir'}
-            //         </Button>
-            //         <Button
-            //             icon={<DownloadOutlined />}
-            //             onClick={handleDownloadAudio}
-            //             size="small"
-            //         >
-            //             Download
-            //         </Button>
-            //     </Space>
-            // }
-            >
-                <div style={{
-                    height: '175px',
-                    backgroundColor: '#000',
-                    borderRadius: '6px',
-                    display: 'flex',
-                    alignItems: 'flex-end',
-                    justifyContent: 'center',
-                    boxSizing: 'border-box',
-                }}>
+            <Card>
+                <div className="telaPretaAudio">
+                    <div className="iconeTelaPretaAudio">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="#FFFFFF" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M2 10V13M6 6V17M10 3V21M14 8V15M18 5V18M22 10V13" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </div>
                     <audio
                         id="preview-audio"
                         controls
                         preload="metadata"
-                        style={{
-                            width: '100%',
-                            backgroundColor: '#f3f3f3',
-                        }}
-                        onPlay={() => {
-                            console.log('🎵 Áudio começou a reproduzir');
-                            setIsAudioPlaying(true);
-                        }}
-                        onPause={() => {
-                            console.log('⏸️ Áudio pausado');
-                            setIsAudioPlaying(false);
-                        }}
-                        onEnded={() => {
-                            console.log('🏁 Áudio terminou');
-                            setIsAudioPlaying(false);
-                        }}
-                        onLoadedMetadata={() => {
-                            console.log('� Metadados do áudio carregados');
-                        }}
+                        className="telaPretaControle"                        
                         onError={(e) => {
                             console.error('❌ Erro no áudio:', e);
                         }}
