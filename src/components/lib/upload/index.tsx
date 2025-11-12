@@ -2,6 +2,8 @@ import { InboxOutlined } from '@ant-design/icons';
 import { Form, FormInstance, FormItemProps, Upload } from 'antd';
 import { DraggerProps, RcFile, UploadFile } from 'antd/es/upload';
 import { notification } from '~/components/lib/notification';
+import { UploadArquivoRequestDto } from '~/domain/dto/UploadArquivoRequestDto';
+import { createUploadRequest, isValidFileType } from '~/utils/upload-utils';
 
 import React, { PropsWithChildren } from 'react';
 import styled from 'styled-components';
@@ -17,7 +19,8 @@ export const permiteInserirFormato = (arquivo: any, tiposArquivosPermitidos: str
     const permiteTipo = tiposArquivosPermitidos.find((tipo) => tipo === arquivo?.type);
     return !!permiteTipo;
   }
-  return false;
+  // Fallback: verifica se é um tipo de arquivo suportado (video/audio)
+  return isValidFileType(arquivo?.type);
 };
 
 const downloadBlob = (data: any, fileName: string) => {
@@ -58,7 +61,7 @@ type UploadArquivosProps = {
   tiposArquivosPermitidos: string[];
   tamanhoMaxUploadPorArquivo?: number;
   downloadService?: (codigosArquivo: string) => any;
-  uploadService: (formData: FormData, configuracaoHeader: any) => any;
+  uploadService: (uploadData: UploadArquivoRequestDto) => any;
 } & PropsWithChildren;
 
 const TAMANHO_PADRAO_MAXIMO_UPLOAD = 10;
@@ -114,41 +117,44 @@ const UploadArquivosSME: React.FC<UploadArquivosProps> = (props) => {
     return true;
   };
 
-  const customRequestDefault = (options: any) => {
+  const customRequestDefault = async (options: any) => {
     const { onSuccess, onError, file, onProgress } = options;
 
-    const fmData = new FormData();
+    try {
+      // Simula progresso inicial
+      onProgress({ percent: 10 }, file);
 
-    const config = {
-      headers: { 'content-type': 'multipart/form-data' },
-      onUploadProgress: (event: any) => {
-        onProgress({ percent: (event.loaded / event.total) * 100 }, file);
-      },
-    };
+      // Cria o objeto de upload com os dados do arquivo
+      const uploadData = await createUploadRequest(file);
+      
+      // Simula progresso durante conversão
+      onProgress({ percent: 50 }, file);
 
-    fmData.append('file', file);
+      // Chama o serviço de upload
+      const resposta = await uploadService(uploadData);
+      
+      // Simula progresso final
+      onProgress({ percent: 100 }, file);
 
-    uploadService(fmData, config)
-      .then((resposta: any) => {
-        if (resposta?.status === HttpStatusCode.Ok) {
-          file.idFile = resposta?.data?.idFile;
-          file.fileLink = resposta?.data?.fileLink;
-          onSuccess(file, file.idFile);
-        } else {
-          notification.error({
-            message: 'Erro',
-            description: 'Erro ao tentar inserir o arquivo',
-          });
-          onError({});
-        }
-      })
-      .catch((e: any) => {
+      if (resposta?.status === HttpStatusCode.Ok) {
+        file.idFile = resposta?.data?.idFile;
+        file.fileLink = resposta?.data?.fileLink;
+        onSuccess(file, file.idFile);
+      } else {
         notification.error({
           message: 'Erro',
           description: 'Erro ao tentar inserir o arquivo',
         });
-        onError({ event: e });
+        onError({});
+      }
+    } catch (e: any) {
+      console.error('Erro no upload:', e);
+      notification.error({
+        message: 'Erro',
+        description: 'Erro ao tentar inserir o arquivo',
       });
+      onError({ event: e });
+    }
   };
 
   const onRemoveDefault = async (arquivo: UploadFile<any>) => {

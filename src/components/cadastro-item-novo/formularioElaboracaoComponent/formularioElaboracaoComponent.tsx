@@ -45,9 +45,28 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
     const [isModalCVisible, setIsModalCVisible] = useState(false);
     const [isModalDVisible, setIsModalDVisible] = useState(false);
 
-    // Estados para preview de mídia
-    // const [videoUrl, setVideoUrl] = useState<string>('');
-    // const [audioUrl, setAudioUrl] = useState<string>('');
+    // Estados para preview de mídia (removidos - agora usando lógica baseada em arquivos)
+
+    // Watch dos arquivos para obter IDs quando disponíveis
+    const videoFiles = Form.useWatch(campoVideo, form);
+    const audioFiles = Form.useWatch(campoAudio, form);
+
+    // Função para obter fonte do arquivo (ID ou URL)
+    const getFileSrc = (files: any[]): string | number | undefined => {
+        if (!files || files.length === 0) return undefined;
+        
+        const file = files[0];
+        // Se tem idFile, usa o ID para buscar do backend
+        if (file.idFile) {
+            return file.idFile;
+        }
+        // Se tem fileLink, usa a URL direta
+        if (file.fileLink) {
+            return file.fileLink;
+        }
+        // Fallback para URL se disponível
+        return file.url || undefined;
+    };
 
     // 🛡️ Estados para controlar se os TextEditors devem ser renderizados (proteção contra erro de produção)
     const [renderTextEditorA, setRenderTextEditorA] = useState(true);
@@ -690,10 +709,12 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                                 </div>
                                 <div className="video-antD-edicao">
                                     {/* 🎬 Preview do Vídeo */}
-                                    {/* {videoUrl && ( */}
-                                    {/* src={videoUrl} */}
-                                    <PreViewVideoAudio tipo="video/" form={form} campo={campoVideo} />
-                                    {/* )} */}
+                                    <PreViewVideoAudio 
+                                        src={getFileSrc(videoFiles)} 
+                                        tipo="video/mp4" 
+                                        form={form} 
+                                        campo={campoVideo} 
+                                    />
                                 </div>
                             </div>
                         </Col>
@@ -732,10 +753,12 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                                 </div>
                                 <div className="audio-antD-edicao">
                                     {/* 🎵 Preview do Áudio */}
-                                    {/* {audioUrl && ( */}
-                                    {/* src={audioUrl} */}
-                                    <PreViewVideoAudio tipo="audio/" form={form} campo={campoAudio} />
-                                    {/* )} */}
+                                    <PreViewVideoAudio 
+                                        src={getFileSrc(audioFiles)} 
+                                        tipo="audio/mp3" 
+                                        form={form} 
+                                        campo={campoAudio} 
+                                    />
                                 </div>
                             </div>
                         </Col>

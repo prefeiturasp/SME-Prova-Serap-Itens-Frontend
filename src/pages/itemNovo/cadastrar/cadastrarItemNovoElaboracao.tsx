@@ -15,9 +15,11 @@ import FormularioElaboracaoComponent from "~/components/cadastro-item-novo/formu
 // Types
 import { ItemNovoDto } from '~/domain/dto/itemNovo-dto';
 import { AltenativaDto } from '~/domain/dto/AltenativaDto';
+import { VideoArquivoDto, AudioArquivoDto } from '~/domain/dto/ArquivoMidiaDto';
 
 // Services
 import configuracaoItemService from '~/services/configuracaoItem-service';
+import arquivoService from '~/services/arquivo-service';
 
 // Usaremos estado local + localStorage
 
@@ -56,8 +58,8 @@ export interface ElaboracaoLocalProps {
     fonte?: string;
     enunciado?: string;
     codigoItem?: string;
-    video?: any[];
-    audio?: any[];
+    video?: VideoArquivoDto | null;
+    audio?: AudioArquivoDto | null;
     alternativaA?: string;
     justificativaA?: string;
     alternativaB?: string;
@@ -72,6 +74,9 @@ export interface ElaboracaoLocalProps {
     idAlternativaC?: number | null;
     idAlternativaD?: number | null;
     alternativasDto?: AltenativaDto[];
+    // IDs dos arquivos de mídia
+    ArquivoVideoId?: number | null;
+    ArquivoAudioId?: number | null;
 }
 
 const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
@@ -326,13 +331,13 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
                 };
 
                 // ✅ Mapeia dados de elaboração do backend (incluindo alternativas)
-                const elaboracaoItemRetorno = {
+                let elaboracaoItemRetorno: ElaboracaoLocalProps = {
                     textoBase: resposta.data.textoBase || '',
                     fonte: resposta.data.fonte || '',
                     enunciado: resposta.data.enunciado || '',
                     codigoItem: resposta.data.codigoItem,
-                    video: [], // TODO: mapear arquivos se necessário
-                    audio: [], // TODO: mapear arquivos se necessário 
+                    video: null, // Será preenchido com dados do arquivo se existir
+                    audio: null, // Será preenchido com dados do arquivo se existir
                     alternativaA: resposta.data.alternativas?.find((a: any) => a.numeracao === 'A')?.descricao || '',
                     justificativaA: resposta.data.alternativas?.find((a: any) => a.numeracao === 'A')?.justificativa || '',
                     alternativaB: resposta.data.alternativas?.find((a: any) => a.numeracao === 'B')?.descricao || '',
@@ -347,7 +352,46 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
                     idAlternativaB: resposta.data.alternativas?.find((a: any) => a.numeracao === 'B')?.id || null,
                     idAlternativaC: resposta.data.alternativas?.find((a: any) => a.numeracao === 'C')?.id || null,
                     idAlternativaD: resposta.data.alternativas?.find((a: any) => a.numeracao === 'D')?.id || null,
+                    // 📁 IDs dos arquivos de mídia
+                    ArquivoVideoId: resposta.data.arquivoVideoId || null,
+                    ArquivoAudioId: resposta.data.arquivoAudioId || null,
                 };
+
+                // 📁 Carrega dados dos arquivos se existirem IDs
+                try {
+                    if (elaboracaoItemRetorno.ArquivoVideoId || elaboracaoItemRetorno.ArquivoAudioId) {
+                        console.log('📁 Carregando dados dos arquivos associados ao item...');
+                        const arquivosResponse = await arquivoService.obterArquivosPorItemId(itemId);
+                        
+                        if (arquivosResponse?.data) {
+                            console.log('✅ Dados dos arquivos carregados:', arquivosResponse.data);
+                            
+                            // Se existe vídeo, cria objeto para o campo
+                            if (arquivosResponse.data.videoCaminho && arquivosResponse.data.videoNome) {
+                                elaboracaoItemRetorno.video = {
+                                    idFile: elaboracaoItemRetorno.ArquivoVideoId || undefined,
+                                    fileLink: arquivosResponse.data.videoCaminho,
+                                    name: arquivosResponse.data.videoNome,
+                                    status: 'done',
+                                    uid: `video-${elaboracaoItemRetorno.ArquivoVideoId}`,
+                                };
+                            }
+                            
+                            // Se existe áudio, cria objeto para o campo
+                            if (arquivosResponse.data.audioCaminho && arquivosResponse.data.audioNome) {
+                                elaboracaoItemRetorno.audio = {
+                                    idFile: elaboracaoItemRetorno.ArquivoAudioId || undefined,
+                                    fileLink: arquivosResponse.data.audioCaminho,
+                                    name: arquivosResponse.data.audioNome,
+                                    status: 'done',
+                                    uid: `audio-${elaboracaoItemRetorno.ArquivoAudioId}`,
+                                };
+                            }
+                        }
+                    }
+                } catch (arquivoError) {
+                    console.warn('⚠️ Erro ao carregar dados dos arquivos, continuando sem eles:', arquivoError);
+                }
 
                 console.log('🎯 Configuração mapeada:', configuracaoItemRetorno);
                 console.log('🎯 Elaboração mapeada com alternativas:', elaboracaoItemRetorno);
@@ -427,8 +471,9 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
                 [campoFonte]: elaboracaoItemNovo.fonte,
                 [campoEnunciado]: elaboracaoItemNovo.enunciado,
                 [campoCodigoItem]: elaboracaoItemNovo.codigoItem,
-                [campoVideo]: elaboracaoItemNovo.video,
-                [campoAudio]: elaboracaoItemNovo.audio,
+                // Converte objeto para array para o Ant Design Upload
+                [campoVideo]: elaboracaoItemNovo.video ? [elaboracaoItemNovo.video] : [],
+                [campoAudio]: elaboracaoItemNovo.audio ? [elaboracaoItemNovo.audio] : [],
                 [campoAlternativaA]: elaboracaoItemNovo.alternativaA,
                 [campoJustificativaA]: elaboracaoItemNovo.justificativaA,
                 [campoAlternativaB]: elaboracaoItemNovo.alternativaB,
@@ -456,8 +501,9 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
                 fonte: values[campoFonte] || '',
                 enunciado: values[campoEnunciado] || '',
                 codigoItem: values[campoCodigoItem] || '', // Ensure codigoItem is retrieved from the form
-                video: values[campoVideo] || [],
-                audio: values[campoAudio] || [],
+                // Converte array de volta para objeto (Ant Design Upload usa arrays)
+                video: values[campoVideo]?.[0] || null,
+                audio: values[campoAudio]?.[0] || null,
                 alternativaA: values[campoAlternativaA] || '',
                 justificativaA: values[campoJustificativaA] || '',
                 alternativaB: values[campoAlternativaB] || '',
@@ -472,6 +518,9 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
                 idAlternativaB: elaboracaoItemNovo?.idAlternativaB || null,
                 idAlternativaC: elaboracaoItemNovo?.idAlternativaC || null,
                 idAlternativaD: elaboracaoItemNovo?.idAlternativaD || null,
+                // 📁 IDs dos arquivos de mídia (response?.data?.idFile do upload)
+                ArquivoVideoId: values[campoVideo]?.[0]?.idFile || elaboracaoItemNovo?.ArquivoVideoId || null,
+                ArquivoAudioId: values[campoAudio]?.[0]?.idFile || elaboracaoItemNovo?.ArquivoAudioId || null,
             };
 
             // Atualiza estado local com dados do formulário

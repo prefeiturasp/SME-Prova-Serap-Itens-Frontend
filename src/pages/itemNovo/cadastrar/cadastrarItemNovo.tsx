@@ -14,6 +14,7 @@ import { AltenativaDto } from '~/domain/dto/AltenativaDto';
 import { DadosIniciais } from '~/domain/enums/campos-cadastro-item';
 
 import { ItemNovoDto } from '~/domain/dto/itemNovo-dto';
+import { VideoArquivoDto, AudioArquivoDto } from '~/domain/dto/ArquivoMidiaDto';
 import { SelectValueType } from '~/domain/type/select';
 import CadastrarItemHeaderComponent from './cadastrarItemHeaderComponent';
 import CadastrarItemRodapeComponent from './cadastrarItemRodapeComponent';
@@ -23,8 +24,8 @@ interface ElaboracaoLocalProps {
     fonte?: string;
     enunciado?: string;
     codigoItem?: string;
-    video?: any[];
-    audio?: any[];
+    video?: VideoArquivoDto | null;
+    audio?: AudioArquivoDto | null;
     alternativaA?: string;
     justificativaA?: string;
     alternativaB?: string;
@@ -35,6 +36,9 @@ interface ElaboracaoLocalProps {
     justificativaD?: string;
     alternativaCorreta?: 'A' | 'B' | 'C' | 'D';
     alternativasDto?: AltenativaDto[];
+    // IDs dos arquivos de mídia
+    ArquivoVideoId?: number | null;
+    ArquivoAudioId?: number | null;
 }
 
 // ✅ Tipo movido do Redux para cá
@@ -321,11 +325,11 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
         }
 
         // Arquivos de mídia a partir da elaboração salva
-        if (elaboracaoLS?.video?.length) {
-            dto.arquivoVideoId = elaboracaoLS.video?.[0]?.idFile;
+        if (elaboracaoLS?.video) {
+            dto.arquivoVideoId = elaboracaoLS.video.idFile;
         }
-        if (elaboracaoLS?.audio?.length) {
-            dto.arquivoAudioId = elaboracaoLS.audio?.[0]?.idFile;
+        if (elaboracaoLS?.audio) {
+            dto.arquivoAudioId = elaboracaoLS.audio.idFile;
         }
 
         // 🔍 Log final do DTO antes de enviar
