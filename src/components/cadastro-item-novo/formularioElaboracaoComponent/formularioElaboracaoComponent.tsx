@@ -47,26 +47,35 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
 
     // Estados para preview de mídia (removidos - agora usando lógica baseada em arquivos)
 
-    // Watch dos arquivos para obter IDs quando disponíveis
-    const videoFiles = Form.useWatch(campoVideo, form);
-    const audioFiles = Form.useWatch(campoAudio, form);
+    // Estados para os caminhos dos arquivos carregados
+    const [videoCaminho, setVideoCaminho] = useState<string>('');
+    const [audioCaminho, setAudioCaminho] = useState<string>('');
 
-    // Função para obter fonte do arquivo (ID ou URL)
-    const getFileSrc = (files: any[]): string | number | undefined => {
-        if (!files || files.length === 0) return undefined;
-        
-        const file = files[0];
-        // Se tem idFile, usa o ID para buscar do backend
-        if (file.idFile) {
-            return file.idFile;
-        }
-        // Se tem fileLink, usa a URL direta
-        if (file.fileLink) {
-            return file.fileLink;
-        }
-        // Fallback para URL se disponível
-        return file.url || undefined;
-    };
+    // Carrega caminhos dos arquivos quando componente monta
+    useEffect(() => {
+        const carregarCaminhosArquivos = async () => {
+            try {
+                const itemSalvo = localStorage.getItem('itemAtual');
+                if (itemSalvo) {
+                    const item = JSON.parse(itemSalvo);
+                    if (item.id) {
+                        console.log('🎬 Carregando caminhos dos arquivos para itemId:', item.id);
+                        const resposta = await arquivoService.obterArquivosPorItemId(item.id);
+                        
+                        if (resposta?.data) {
+                            console.log('✅ Caminhos dos arquivos carregados:', resposta.data);
+                            setVideoCaminho(resposta.data.videoCaminho || '');
+                            setAudioCaminho(resposta.data.audioCaminho || '');
+                        }
+                    }
+                }
+            } catch (error) {
+                console.warn('⚠️ Erro ao carregar caminhos dos arquivos:', error);
+            }
+        };
+
+        carregarCaminhosArquivos();
+    }, []);
 
     // 🛡️ Estados para controlar se os TextEditors devem ser renderizados (proteção contra erro de produção)
     const [renderTextEditorA, setRenderTextEditorA] = useState(true);
@@ -710,7 +719,7 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                                 <div className="video-antD-edicao">
                                     {/* 🎬 Preview do Vídeo */}
                                     <PreViewVideoAudio 
-                                        src={getFileSrc(videoFiles)} 
+                                        src={videoCaminho} 
                                         tipo="video/mp4" 
                                         form={form} 
                                         campo={campoVideo} 
@@ -754,7 +763,7 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                                 <div className="audio-antD-edicao">
                                     {/* 🎵 Preview do Áudio */}
                                     <PreViewVideoAudio 
-                                        src={getFileSrc(audioFiles)} 
+                                        src={audioCaminho} 
                                         tipo="audio/mp3" 
                                         form={form} 
                                         campo={campoAudio} 
