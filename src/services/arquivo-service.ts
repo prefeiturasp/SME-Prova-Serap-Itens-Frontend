@@ -12,7 +12,7 @@ const uploadVideo = (audioVideo: UploadArquivoRequestDto) => {
   }
 
   return api.post<RetornoUploadArquivoDto>(
-    `${URL_DEFAULT}/Arquivo/Upload`,
+    `${URL_DEFAULT}/Upload/AudioVideo`,
     audioVideo,
     {
       headers: {
@@ -29,7 +29,7 @@ const uploadAudio = (audioVideo: UploadArquivoRequestDto) => {
   }
 
   return api.post<RetornoUploadArquivoDto>(
-    `${URL_DEFAULT}/Arquivo/Upload`,
+    `${URL_DEFAULT}/Upload/AudioVideo`,
     audioVideo,
     {
       headers: {
