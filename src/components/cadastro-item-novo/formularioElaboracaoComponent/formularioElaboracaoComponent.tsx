@@ -121,7 +121,14 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
 
     // Memoizações para evitar criação de objetos/arrays inline que forçam re-renders
     const videoFormItemProps = useMemo(() => ({ name: campoVideo }), [campoVideo]);
-    const videoUploadProps = useMemo(() => ({ maxCount: 1, showUploadList: { downloadIcon: false } }), []);
+    const videoUploadProps = useMemo(() => ({ 
+        maxCount: 1, 
+        showUploadList: { 
+            showDownloadIcon: false,
+            showRemoveIcon: true,
+            showPreviewIcon: false
+        } 
+    }), []);
     const videoTiposArquivos = useMemo(() => [
         'video/mp4',
         'video/webm',
@@ -137,7 +144,14 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
     ], []);
 
     const audioFormItemProps = useMemo(() => ({ name: campoAudio }), [campoAudio]);
-    const audioUploadProps = useMemo(() => ({ maxCount: 1, showUploadList: { downloadIcon: false } }), []);
+    const audioUploadProps = useMemo(() => ({ 
+        maxCount: 1, 
+        showUploadList: { 
+            showDownloadIcon: false,
+            showRemoveIcon: true,
+            showPreviewIcon: false
+        } 
+    }), []); 
     const audioTiposArquivos = useMemo(() => [
         'audio/mpeg',
         'audio/mp4',

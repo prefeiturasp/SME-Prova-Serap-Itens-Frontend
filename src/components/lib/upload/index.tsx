@@ -145,10 +145,22 @@ const UploadArquivosSME: React.FC<UploadArquivosProps> = (props) => {
             if (!item.elaboracao) item.elaboracao = {};
             
             if (file.type?.startsWith('video/')) {
-              item.elaboracao.video = { idFile: file.idFile };
+              item.elaboracao.video = { 
+                idFile: file.idFile,
+                fileLink: file.fileLink,
+                nomeVideo: file.name, // Nome do arquivo para o frontend
+                uid: file.uid, // Mantém o uid se estiver sendo usado
+                status: file.status // Mantém o status se estiver sendo usado
+              };
               item.elaboracao.ArquivoVideoId = file.idFile; // Salva o ID do vídeo
             } else if (file.type?.startsWith('audio/')) {
-              item.elaboracao.audio = { idFile: file.idFile };
+              item.elaboracao.audio = { 
+                idFile: file.idFile,
+                fileLink: file.fileLink,
+                nomeAudio: file.name, // Nome do arquivo para o frontend
+                uid: file.uid, // Mantém o uid se estiver sendo usado
+                status: file.status // Mantém o status se estiver sendo usado
+              };
               item.elaboracao.ArquivoAudioId = file.idFile; // Salva o ID do áudio
             }
             
@@ -157,11 +169,15 @@ const UploadArquivosSME: React.FC<UploadArquivosProps> = (props) => {
           }
           
           // Atualiza o campo do formulário com o arquivo contendo idFile
+          // Preserva TODAS as propriedades originais do arquivo, especialmente o name
           const arquivoAtualizado = {
             ...file,
+            name: file.name, // Garante que o nome original seja preservado
             idFile: file.idFile,
             fileLink: file.fileLink,
-            status: 'done'
+            status: 'done',
+            percent: 100, // Garante que está 100% completo
+            response: resposta.data // Mantém a resposta para referência
           };
           
           // Atualiza o valor do campo no formulário
@@ -174,7 +190,11 @@ const UploadArquivosSME: React.FC<UploadArquivosProps> = (props) => {
         }
 
         // Chama onSuccess com status correto
+        // Garante que todas as propriedades importantes sejam preservadas
         file.status = 'done'; // Define status como concluído
+        file.percent = 100; // Define progresso como 100%
+        file.response = resposta.data; // Adiciona resposta para referência
+        
         onSuccess(resposta.data, file);
       } else {
         const errorMsg = resposta?.data?.message || 'Erro no upload';
@@ -187,10 +207,15 @@ const UploadArquivosSME: React.FC<UploadArquivosProps> = (props) => {
     } catch (error: any) {
       let errorMsg = 'Erro no upload';
       
-      if (error && typeof error === 'object') {
-        errorMsg = error?.response?.data?.message || error?.message || errorMsg;
-      } else if (typeof error === 'string') {
-        errorMsg = error;
+      try {
+        if (error && typeof error === 'object') {
+          errorMsg = error?.response?.data?.message || error?.message || errorMsg;
+        } else if (typeof error === 'string') {
+          errorMsg = error;
+        }
+      } catch (parseError) {
+        console.warn('Erro ao processar erro:', parseError);
+        errorMsg = 'Erro desconhecido no upload';
       }
       
       notification.error({
@@ -198,7 +223,15 @@ const UploadArquivosSME: React.FC<UploadArquivosProps> = (props) => {
         description: errorMsg,
       });
       
-      onError(new Error(errorMsg));
+      try {
+        if (typeof onError === 'function') {
+          onError(new Error(errorMsg));
+        } else {
+          console.warn('onError não é uma função válida');
+        }
+      } catch (callbackError) {
+        console.error('Erro ao chamar onError:', callbackError);
+      }
     }
   };
 
@@ -258,9 +291,11 @@ const UploadArquivosSME: React.FC<UploadArquivosProps> = (props) => {
         if (item.elaboracao) {
           if (file.type?.startsWith('video/')) {
             delete item.elaboracao.video;
+            item.elaboracao.ArquivoVideoId = null; // Remove o ID também
             console.log('📹 Vídeo removido do localStorage');
           } else if (file.type?.startsWith('audio/')) {
             delete item.elaboracao.audio;
+            item.elaboracao.ArquivoAudioId = null; // Remove o ID também
             console.log('🎵 Áudio removido do localStorage');
           }
           localStorage.setItem('itemAtual', JSON.stringify(item));
@@ -283,17 +318,26 @@ const UploadArquivosSME: React.FC<UploadArquivosProps> = (props) => {
     }
 
     // Para arquivo único, mantém apenas o arquivo atual
-    const arquivoAtual = fileList.find((f: any) => f.uid === file.uid && f.status !== 'removed');
-    const novoValor = arquivoAtual ? [arquivoAtual] : [];
-
-    // Arquivo carregado com sucesso
-    if (status === 'done') {
+    let arquivoAtual = fileList.find((f: any) => f.uid === file.uid && f.status !== 'removed');
+    
+    // Se o arquivo foi processado com sucesso, garante que tenha todas as propriedades necessárias
+    if (arquivoAtual && status === 'done') {
+      arquivoAtual = {
+        ...arquivoAtual,
+        name: arquivoAtual.name || file.name, // Preserva o nome original
+        idFile: arquivoAtual.idFile || file.idFile,
+        fileLink: arquivoAtual.fileLink || file.fileLink,
+        status: 'done',
+        percent: 100
+      };
+      
       notification.success({
         message: 'Upload Concluído',
-        description: `${file.name} foi carregado com sucesso`,
+        description: `${arquivoAtual.name} foi carregado com sucesso`,
       });
     }
-
+    
+    const novoValor = arquivoAtual ? [arquivoAtual] : [];
     setNovoValor(novoValor);
   };
 
@@ -329,7 +373,7 @@ const UploadArquivosSME: React.FC<UploadArquivosProps> = (props) => {
           name='file'
           listType='text'
           fileList={listaDeArquivos}
-          showUploadList={{ showDownloadIcon: true }}
+          showUploadList={uploadProps?.showUploadList || { showDownloadIcon: true, showRemoveIcon: true }}
           onRemove={uploadProps?.onRemove || onRemoveDefault}
           onChange={uploadProps?.onChange || onChangeDefault}
           onDownload={uploadProps?.onDownload || onDownloadDefault}
