@@ -11,6 +11,7 @@ import configuracaoItemService from '~/services/configuracaoItem-service';
 import { CamposFiltroItensProps } from '~/domain/interfaces/camposFiltroItensProps';
 import InputTag from '../input-tag';
 import { ArrowRightOutlined } from '@ant-design/icons';
+import carregarFiltroDeItensDoLocalStorage from '~/utils/filtro-helper';
 
 interface FiltroNovoProps {
   open: boolean;
@@ -37,6 +38,7 @@ const FiltroPrincipalNovoComponent: React.FC<FiltroNovoProps> = ({ open, setOpen
   >([]);
 
   const [jaInicializado, setJaInicializado] = useState(false);
+  const [desabilitarFiltrar, setDesabilitarFiltrar] = useState(false);
 
   const [formId] = useState(() => `filtro-lateral-${Date.now()}-${Math.random().toString(36)}`);
   const [formFiltroLateral] = Form.useForm();
@@ -207,49 +209,43 @@ const FiltroPrincipalNovoComponent: React.FC<FiltroNovoProps> = ({ open, setOpen
     }
   };
 
-  useEffect(() => {
-    if (!open || jaInicializado) return;
+  const inicializarFormulario = async () => {
+    setJaInicializado(true);
 
-    const inicializarFormulario = async () => {
-      setJaInicializado(true);
+    await Promise.all([carregarAreaConhecimento(), carregarListasBasicas()]);
 
-      await Promise.all([carregarAreaConhecimento(), carregarListasBasicas()]);
+    const pegandoFiltro = localStorage.getItem('itemFiltro');
+    if (pegandoFiltro) {
+      setTimeout(() => {
+        executarCascataAutomatica(pegandoFiltro);
+      }, 500);
+      return;
+    }
 
-      const pegandoFiltro = localStorage.getItem('itemFiltro');
-      if (pegandoFiltro) {
-        setTimeout(() => {
-          executarCascataAutomatica(pegandoFiltro);
-        }, 500);
+    setTimeout(() => {
+      if (!formFiltroLateral) {
         return;
       }
+      const valores = formFiltroLateral.getFieldsValue();
+      const formularioVazio =
+        !valores ||
+        Object.keys(valores || {}).length === 0 ||
+        Object.values(valores || {}).every((v) => !v || (Array.isArray(v) && v?.length === 0));
 
-      setTimeout(() => {
-        if (!formFiltroLateral) {
-          return;
+      if (formularioVazio) {
+        formFiltroLateral.resetFields();
+        const fieldKeys = Object.keys(formFiltroLateral.getFieldsValue() || {});
+        if (fieldKeys?.length > 0) {
+          formFiltroLateral.setFields(
+            fieldKeys.map((name) => ({
+              name,
+              errors: [],
+            })),
+          );
         }
-        const valores = formFiltroLateral.getFieldsValue();
-        const formularioVazio =
-          !valores ||
-          Object.keys(valores || {}).length === 0 ||
-          Object.values(valores || {}).every((v) => !v || (Array.isArray(v) && v?.length === 0));
-
-        if (formularioVazio) {
-          formFiltroLateral.resetFields();
-          const fieldKeys = Object.keys(formFiltroLateral.getFieldsValue() || {});
-          if (fieldKeys?.length > 0) {
-            formFiltroLateral.setFields(
-              fieldKeys.map((name) => ({
-                name,
-                errors: [],
-              })),
-            );
-          }
-        }
-      }, 500);
-    };
-
-    inicializarFormulario();
-  }, [open, jaInicializado]);
+      }
+    }, 500);
+  };
 
   const handleAreaConhecimentoChange = async (value: SelectValueType) => {
     if (!formFiltroLateral) {
@@ -440,19 +436,78 @@ const FiltroPrincipalNovoComponent: React.FC<FiltroNovoProps> = ({ open, setOpen
     setPalavraChaveFiltro([]);
   };
 
-  useEffect(() => {
-    if (open) {
-      //setSelectedFilters(filtrosSelecionados);
-    }
-  }, [open]);
+  const quantidadeFiltroStorage = (): number => {
+    const filtros = carregarFiltroDeItensDoLocalStorage();
+    const naoVazios = filtros
+      ? Object.entries(filtros)
+          .filter(([chave]) => !['codigoItem'].includes(chave))
+          .filter(([_, valor]) => {
+            if (valor === null || valor === undefined) return false;
+            if (typeof valor === 'string' && valor.trim() === '') return false;
+            if (typeof valor === 'number' && valor === 0) return false;
+            if (Array.isArray(valor) && valor.length === 0) return false;
+            return true;
+          })
+      : [];
+
+    const quantidadeFiltrosStorage = naoVazios?.length ?? 0;
+    return quantidadeFiltrosStorage;
+  };
+
+  const verificarDesabilitarFiltrar = () => {
+    const quantidadeNaoVazios = quantidadeFiltroStorage();
+    setDesabilitarFiltrar(quantidadeNaoVazios == 0);
+  };
+
+  const validarForm = () => {
+    const valores = formFiltroLateral.getFieldsValue(true);
+    const existeValorForm = Object.values(valores || {}).some((v) => {
+      if (v === null || v === undefined) return false;
+      if (typeof v === 'string') return v.trim() !== '';
+      if (Array.isArray(v)) return v.length > 0;
+      if (typeof v === 'object') return Object.keys(v).length > 0;
+      return true;
+    });
+    setDesabilitarFiltrar(!existeValorForm && !(palavraChaveFiltro!.length > 0));
+  };
+
+  const onChangeFormValue = () => {
+    validarForm();
+  };
 
   const handleClose = () => {
     setOpen(false);
   };
 
+  const drawerOpenChange = (open: boolean) => {
+    if (!open) {
+      const quantidadeNaoVazios = quantidadeFiltroStorage();
+      if (quantidadeNaoVazios == 0) {
+        formFiltroLateral.resetFields();
+        setPalavraChaveFiltro([]);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (open) {
+      verificarDesabilitarFiltrar();
+    }
+  }, [open]);
+
+  useEffect(() => {
+    if (!open || jaInicializado) return;
+    inicializarFormulario();
+  }, [open, jaInicializado]);
+
+  useEffect(() => {
+    validarForm();
+  }, [palavraChaveFiltro]);
+
   return (
     <>
       <Drawer
+        afterOpenChange={drawerOpenChange}
         title={
           <div className='drawer-title-custom'>
             <svg
@@ -491,6 +546,7 @@ const FiltroPrincipalNovoComponent: React.FC<FiltroNovoProps> = ({ open, setOpen
             id={formId}
             name={formId}
             preserve={false}
+            onValuesChange={onChangeFormValue}
           >
             <div className='drawer-filtro-secao drawer-filtro-secao-margin'>
               <SelectForm
@@ -631,7 +687,11 @@ const FiltroPrincipalNovoComponent: React.FC<FiltroNovoProps> = ({ open, setOpen
                 </Button>
               </div>
               <div className='drawer-bt-filtrar'>
-                <Button className='botao-filtrar' onClick={handleApplyFilters}>
+                <Button
+                  className='botao-filtrar'
+                  onClick={handleApplyFilters}
+                  disabled={desabilitarFiltrar}
+                >
                   Filtrar
                 </Button>
               </div>
