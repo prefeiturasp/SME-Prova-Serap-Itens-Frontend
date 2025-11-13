@@ -123,6 +123,21 @@ const ListagemItens: React.FC = () => {
     setCodigoItemTabelaSelecionado(id);
   };
 
+  useEffect(() => {
+    return () => {
+      localStorage.removeItem('itemFiltro');
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      localStorage.removeItem('itemFiltro');
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, []);
+
   return (
     <div className='listagem-pagina'>
       <div className='cadastrarItemHeader'>
