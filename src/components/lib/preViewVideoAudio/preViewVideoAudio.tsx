@@ -3,35 +3,21 @@ import { Card, Typography } from "antd";
 const { Text } = Typography;
 import './preViewVideoAudio.css';
 
-const MOCK_VIDEO_URLS = [
-    "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-    "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
-    "https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4"
-];
-
-const MOCK_AUDIO_URLS = [
-    "https://commondatastorage.googleapis.com/codeskulptor-demos/DDR_assets/Kangaroo_MusiQue_-_The_Neverwritten_Role_Playing_Game.mp3",
-];
-
 export const PreViewVideoAudio: React.FC<{
-    src: string; // Sempre será uma URL string direta
+    src: string; // URL do arquivo ou vazio
     tipo: string;
     form?: any; // Mantido para compatibilidade
     campo?: string; // Mantido para compatibilidade
 }> = ({ src, tipo }) => {
 
-    // 🎬 MOCK: Fallback para quando não há arquivo
-    const getMockUrl = (): string => {
-        if (tipo.startsWith("video/")) {
-            return MOCK_VIDEO_URLS[0];
-        } else if (tipo.startsWith("audio/")) {
-            return MOCK_AUDIO_URLS[0];
-        }
-        return '';
-    };
-
-    // URL final para usar no preview
-    const finalUrl = src || getMockUrl();
+    // 🚫 Se não há src, não renderiza nada
+    if (!src) {
+        return (
+            <Card className="ContainerVideoPai">
+                <Text type="secondary">Nenhum arquivo carregado</Text>
+            </Card>
+        );
+    }
 
     if (tipo.startsWith("video/")) {
         return (
@@ -43,19 +29,15 @@ export const PreViewVideoAudio: React.FC<{
                     preload="metadata"
                     crossOrigin="anonymous"
                     className="propsVideo"
-                    src={finalUrl}
+                    src={src}
                     onError={(e) => {
                         console.error('❌ Erro no vídeo:', e);
                     }}
                 >
-                    {/* Fallback sources caso a URL principal falhe */}
-                    {MOCK_VIDEO_URLS.map((url, index) => (
-                        <source key={index} src={url} type="video/mp4" />
-                    ))}
                     <Text type="secondary">
-                        Seu navegador não suporta o elemento de vídeo ou as URLs não estão acessíveis.
+                        Seu navegador não suporta o elemento de vídeo.
                         <br />
-                        <a href={finalUrl} target="_blank" rel="noopener noreferrer">
+                        <a href={src} target="_blank" rel="noopener noreferrer">
                             Clique aqui para abrir o vídeo diretamente
                         </a>
                     </Text>
@@ -80,19 +62,15 @@ export const PreViewVideoAudio: React.FC<{
                         controls
                         preload="metadata"
                         className="telaPretaControle"
-                        src={finalUrl}
+                        src={src}
                         onError={(e) => {
                             console.error('❌ Erro no áudio:', e);
                         }}
                     >
-                        {/* Fallback sources caso a URL principal falhe */}
-                        {MOCK_AUDIO_URLS.map((url, index) => (
-                            <source key={index} src={url} type="audio/mpeg" />
-                        ))}
                         <Text type="secondary">
                             Seu navegador não suporta o elemento de áudio.
                             <br />
-                            <a href={finalUrl} target="_blank" rel="noopener noreferrer">
+                            <a href={src} target="_blank" rel="noopener noreferrer">
                                 Clique aqui para ouvir o áudio diretamente
                             </a>
                         </Text>

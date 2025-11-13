@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { Col, Form, FormProps, Input, Row, Radio, Modal, Button } from "antd";
 import { TextEditor } from "~/components/lib/editor";
 import { EditOutlined } from '@ant-design/icons';
@@ -119,6 +119,34 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
         setJustificativaD(value || '');
     };
 
+    // Memoizações para evitar criação de objetos/arrays inline que forçam re-renders
+    const videoFormItemProps = useMemo(() => ({ name: campoVideo }), [campoVideo]);
+    const videoUploadProps = useMemo(() => ({ maxCount: 1, showUploadList: { downloadIcon: false } }), []);
+    const videoTiposArquivos = useMemo(() => [
+        'video/mp4',
+        'video/webm',
+        'video/ogg',
+        'application/ogg',
+        'video/x-flv',
+        'application/x-mpegURL',
+        'video/MP2T',
+        'video/3gpp',
+        'video/quicktime',
+        'video/x-msvideo',
+        'video/x-ms-wmv',
+    ], []);
+
+    const audioFormItemProps = useMemo(() => ({ name: campoAudio }), [campoAudio]);
+    const audioUploadProps = useMemo(() => ({ maxCount: 1, showUploadList: { downloadIcon: false } }), []);
+    const audioTiposArquivos = useMemo(() => [
+        'audio/mpeg',
+        'audio/mp4',
+        'audio/mp3',
+        'audio/vnd.wav',
+        'audio/x-ms-wma',
+        'audio/ogg',
+    ], []);
+
     // 🛡️ Função helper para renderização condicional de TextEditor
     const renderTextEditorSafe = (shouldRender: boolean, value: string, onChange: (value: any) => void, placeholder: string) => {
         if (shouldRender) {
@@ -167,7 +195,7 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
         }
     }, []);
 
-    const showModal = (nomeModal: string) => {
+    const showModal = useCallback((nomeModal: string) => {
         switch (nomeModal) {
             case "modalA":
                 setIsModalAVisible(true);
@@ -184,7 +212,7 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
             default:
                 break;
         }
-    };
+    }, []);
 
     const handleOk = (nomeModal: string) => {
         switch (nomeModal) {
@@ -687,28 +715,9 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                                         form={form}
                                         isDraggerUpload={false}
                                         uploadService={arquivoService.uploadVideo}
-                                        formItemProps={{
-                                            name: campoVideo,
-                                        }}
-                                        uploadProps={{
-                                            maxCount: 1,
-                                            showUploadList: {
-                                                downloadIcon: false,
-                                            },
-                                        }}
-                                        tiposArquivosPermitidos={[
-                                            'video/mp4',
-                                            'video/webm',
-                                            'video/ogg',
-                                            'application/ogg',
-                                            'video/x-flv',
-                                            'application/x-mpegURL',
-                                            'video/MP2T',
-                                            'video/3gpp',
-                                            'video/quicktime',
-                                            'video/x-msvideo',
-                                            'video/x-ms-wmv',
-                                        ]}
+                                        formItemProps={videoFormItemProps}
+                                        uploadProps={videoUploadProps}
+                                        tiposArquivosPermitidos={videoTiposArquivos}
                                     >
                                         <ButtonPrimary className="card-video-buttom">
                                             Escolher outro vídeo
@@ -735,23 +744,9 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
                                         form={form}
                                         isDraggerUpload={false}
                                         uploadService={arquivoService.uploadAudio}
-                                        formItemProps={{
-                                            name: campoAudio,
-                                        }}
-                                        uploadProps={{
-                                            maxCount: 1,
-                                            showUploadList: {
-                                                downloadIcon: false,
-                                            },
-                                        }}
-                                        tiposArquivosPermitidos={[
-                                            'audio/mpeg',
-                                            'audio/mp4',
-                                            'audio/mp3',
-                                            'audio/vnd.wav',
-                                            'audio/x-ms-wma',
-                                            'audio/ogg',
-                                        ]}
+                                        formItemProps={audioFormItemProps}
+                                        uploadProps={audioUploadProps}
+                                        tiposArquivosPermitidos={audioTiposArquivos}
                                     >
                                         <ButtonPrimary className="card-video-buttom">
                                             Escolher outro áudio
