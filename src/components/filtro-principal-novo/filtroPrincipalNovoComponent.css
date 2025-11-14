@@ -203,6 +203,16 @@
     opacity: 1;
 }
 
+.drawer-bt-filtrar button.botao-filtrar:disabled{
+    background-color: #C0D6EB;
+    color: #5A94D8;
+}
+
+.drawer-bt-filtrar button.botao-filtrar:disabled:hover {
+    background-color: #C0D6EB !important;
+    color: #5A94D8 !important;
+}
+
 .drawer-filtro-secao input.ant-input {
     color: #FFFFFF !important;
     background: #5A94D8 !important;

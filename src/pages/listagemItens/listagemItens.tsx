@@ -59,8 +59,8 @@ const ListagemItens: React.FC = () => {
           ...filtros,
         },
       );
-      setTabelaItens(resposta?.itens);
-      setTotalRegistro(resposta?.totalRegistros);
+      setTabelaItens(resposta?.itens ?? []);
+      setTotalRegistro(resposta?.totalRegistros ?? 0);
     } catch (error) {
       console.log(error);
     }
@@ -122,6 +122,21 @@ const ListagemItens: React.FC = () => {
   const tabelaItemClick = (id: string) => {
     setCodigoItemTabelaSelecionado(id);
   };
+
+  useEffect(() => {
+    return () => {
+      localStorage.removeItem('itemFiltro');
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      localStorage.removeItem('itemFiltro');
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, []);
 
   return (
     <div className='listagem-pagina'>
