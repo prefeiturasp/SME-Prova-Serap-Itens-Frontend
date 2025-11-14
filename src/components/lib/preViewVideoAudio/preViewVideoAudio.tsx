@@ -16,13 +16,13 @@ export const PreViewVideoAudio: React.FC<{
             <Card className="ContainerVideoPai">
                 <div className="telaNula">
                     <div className="iconeNula">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="#D5D5D5" xmlns="http://www.w3.org/2000/svg">
+                        {/* <svg width="24" height="24" viewBox="0 0 24 24" fill="#D5D5D5" xmlns="http://www.w3.org/2000/svg">
                             <path d="M2 10V13M6 6V17M10 3V21M14 8V15M18 5V18M22 10V13" 
                                 stroke="white" 
                                 strokeWidth="2" 
                                 strokeLinecap="round" 
                                 strokeLinejoin="round" />
-                        </svg>
+                        </svg> */}
                     </div>                    
                 </div>
             </Card>
