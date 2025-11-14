@@ -17,7 +17,8 @@ import { Campos } from "~/domain/enums/campos-cadastro-item";
 import arquivoService from "~/services/arquivo-service";
 import { PreViewVideoAudio } from "~/components/lib/preViewVideoAudio/preViewVideoAudio";
 
-const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
+const FormularioElaboracaoComponent: React.FC<FormProps & {videoCaminho: string, audioCaminho: string}> = 
+({ form, videoCaminho, audioCaminho }) => {
     if (!form) {
         return null;
     }
@@ -48,34 +49,34 @@ const FormularioElaboracaoComponent: React.FC<FormProps> = ({ form }) => {
     // Estados para preview de mídia (removidos - agora usando lógica baseada em arquivos)
 
     // Estados para os caminhos dos arquivos carregados
-    const [videoCaminho, setVideoCaminho] = useState<string>('');
-    const [audioCaminho, setAudioCaminho] = useState<string>('');
+    // const [videoCaminho, setVideoCaminho] = useState<string>('');
+    // const [audioCaminho, setAudioCaminho] = useState<string>('');
 
     // Carrega caminhos dos arquivos quando componente monta
-    useEffect(() => {
-        const carregarCaminhosArquivos = async () => {
-            try {
-                const itemSalvo = localStorage.getItem('itemAtual');
-                if (itemSalvo) {
-                    const item = JSON.parse(itemSalvo);
-                    if (item.id) {
-                        console.log('🎬 Carregando caminhos dos arquivos para itemId:', item.id);
-                        const resposta = await arquivoService.obterArquivosPorItemId(item.id);
+    // useEffect(() => {
+    //     const carregarCaminhosArquivos = async () => {
+    //         try {
+    //             const itemSalvo = localStorage.getItem('itemAtual');
+    //             if (itemSalvo) {
+    //                 const item = JSON.parse(itemSalvo);
+    //                 if (item.id) {
+    //                     console.log('🎬 Carregando caminhos dos arquivos para itemId:', item.id);
+    //                     const resposta = await arquivoService.obterArquivosPorItemId(item.id);
                         
-                        if (resposta?.data) {
-                            console.log('✅ Caminhos dos arquivos carregados:', resposta.data);
-                            setVideoCaminho(resposta.data.videoCaminho || '');
-                            setAudioCaminho(resposta.data.audioCaminho || '');
-                        }
-                    }
-                }
-            } catch (error) {
-                console.warn('⚠️ Erro ao carregar caminhos dos arquivos:', error);
-            }
-        };
+    //                     if (resposta?.data) {
+    //                         console.log('✅ Caminhos dos arquivos carregados:', resposta.data);
+    //                         setVideoCaminho(resposta.data.videoCaminho || '');
+    //                         setAudioCaminho(resposta.data.audioCaminho || '');
+    //                     }
+    //                 }
+    //             }
+    //         } catch (error) {
+    //             console.warn('⚠️ Erro ao carregar caminhos dos arquivos:', error);
+    //         }
+    //     };
 
-        carregarCaminhosArquivos();
-    }, []);
+    //     carregarCaminhosArquivos();
+    // }, []);
 
     // 🛡️ Estados para controlar se os TextEditors devem ser renderizados (proteção contra erro de produção)
     const [renderTextEditorA, setRenderTextEditorA] = useState(true);
