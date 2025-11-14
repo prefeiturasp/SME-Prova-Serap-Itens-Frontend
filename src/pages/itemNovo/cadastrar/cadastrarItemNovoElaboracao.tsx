@@ -330,65 +330,6 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
     const campoJustificativaD = Campos.justificativaD;
     const campoAlternativaCorreta = Campos.alternativaCorreta;
 
-    // 📁 FUNÇÃO PARA LIMPAR APENAS ARQUIVOS DE MÍDIA PARA PERMITIR NOVOS UPLOADS
-    const limparArquivosMidiaDoLocalStorage = useCallback((tipo: 'video' | 'audio' | 'ambos' = 'ambos') => {
-        try {
-            const itemSalvo = localStorage.getItem('itemAtual');
-            if (itemSalvo) {
-                const item = JSON.parse(itemSalvo);
-                
-                if (!item.videoAudio) {
-                    item.videoAudio = {};
-                }
-                
-                // 🗑️ LIMPA ARQUIVOS CONFORME TIPO ESPECIFICADO
-                if (tipo === 'video' || tipo === 'ambos') {
-                    item.videoAudio.videoTemp = undefined;
-                    item.videoAudio.videoSalvo = undefined;
-                    console.log('🗑️ Vídeo removido do localStorage');
-                }
-                
-                if (tipo === 'audio' || tipo === 'ambos') {
-                    item.videoAudio.audioTemp = undefined;
-                    item.videoAudio.audioSalvo = undefined;
-                    console.log('🗑️ Áudio removido do localStorage');
-                }
-                
-                localStorage.setItem('itemAtual', JSON.stringify(item));
-                
-                // 🔄 ATUALIZA ESTADOS LOCAIS
-                if (tipo === 'video' || tipo === 'ambos') {
-                    setVideoCaminho('');
-                    setVideoAudioData(prev => ({
-                        ...prev,
-                        videoTemp: undefined,
-                        videoSalvo: undefined
-                    }));
-                }
-                
-                if (tipo === 'audio' || tipo === 'ambos') {
-                    setAudioCaminho('');
-                    setVideoAudioData(prev => ({
-                        ...prev,
-                        audioTemp: undefined,
-                        audioSalvo: undefined
-                    }));
-                }
-                
-                // 🔄 LIMPA CAMPOS DO FORM
-                if (tipo === 'video' || tipo === 'ambos') {
-                    form.setFieldValue(campoVideo, []);
-                }
-                if (tipo === 'audio' || tipo === 'ambos') {
-                    form.setFieldValue(campoAudio, []);
-                }
-                
-                console.log('🧹 Limpeza de mídia concluída:', { tipo, videoAudio: item.videoAudio });
-            }
-        } catch (error) {
-            console.error('❌ Erro ao limpar arquivos de mídia do localStorage:', error);
-        }
-    }, [form, campoVideo, campoAudio]);
 
     // 🔄 FUNÇÃO PARA SINCRONIZAR FORM COM LOCALSTORAGE (localStorage como fonte da verdade)
     const sincronizarFormComLocalStorage = useCallback((forcarSincronizacao = false) => {
