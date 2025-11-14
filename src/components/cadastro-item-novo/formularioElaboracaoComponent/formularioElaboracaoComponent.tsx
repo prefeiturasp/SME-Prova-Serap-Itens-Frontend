@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, useCallback } from "react";
+import React, { useEffect, useState, useMemo, useCallback, Dispatch, SetStateAction } from "react";
 import { Col, Form, FormProps, Input, Row, Radio, Modal, Button } from "antd";
 import { TextEditor } from "~/components/lib/editor";
 import { EditOutlined } from '@ant-design/icons';
@@ -13,12 +13,37 @@ import ButtonPrimary from "~/components/lib/button/primary";
 // Enums
 import { Campos } from "~/domain/enums/campos-cadastro-item";
 
+// Types
+import { VideoArquivoDto, AudioArquivoDto } from '~/domain/dto/ArquivoMidiaDto';
+
 //services
 import arquivoService from "~/services/arquivo-service";
 import { PreViewVideoAudio } from "~/components/lib/preViewVideoAudio/preViewVideoAudio";
 
-const FormularioElaboracaoComponent: React.FC<FormProps & {videoCaminho: string, audioCaminho: string}> = 
-({ form, videoCaminho, audioCaminho }) => {
+// Interface para props de video/audio
+interface VideoAudioProps {
+    videoTemp?: VideoArquivoDto;
+    audioTemp?: AudioArquivoDto;
+    videoSalvo?: VideoArquivoDto;
+    audioSalvo?: AudioArquivoDto;
+}
+
+const FormularioElaboracaoComponent: React.FC<FormProps & {
+    videoCaminho: string;
+    audioCaminho: string;
+    videoAudioData?: VideoAudioProps;
+    setVideoAudioData?: Dispatch<SetStateAction<VideoAudioProps>>;
+    setVideoCaminho?: Dispatch<SetStateAction<string>>;
+    setAudioCaminho?: Dispatch<SetStateAction<string>>;
+}> = ({ 
+    form, 
+    videoCaminho, 
+    audioCaminho,
+    videoAudioData,
+    setVideoAudioData,
+    setVideoCaminho,
+    setAudioCaminho
+}) => {
     if (!form) {
         return null;
     }
@@ -175,6 +200,122 @@ const FormularioElaboracaoComponent: React.FC<FormProps & {videoCaminho: string,
         }
         return <div style={{ minHeight: '100px', backgroundColor: '#f5f5f5' }}>Carregando...</div>;
     };
+
+    // 🎬 FUNÇÃO PARA ATUALIZAR DADOS DE VÍDEO NO UPLOAD (localStorage como fonte da verdade)
+    const handleVideoUpload = useCallback((videoFile: VideoArquivoDto) => {
+        console.log('🎬 Novo vídeo upado:', videoFile);
+        
+        // 💾 SALVA PRIMEIRO NO LOCALSTORAGE (fonte da verdade)
+        const itemSalvo = localStorage.getItem('itemAtual');
+        if (itemSalvo) {
+            const item = JSON.parse(itemSalvo);
+            if (!item.videoAudio) item.videoAudio = {};
+            item.videoAudio.videoTemp = videoFile;
+            localStorage.setItem('itemAtual', JSON.stringify(item));
+            console.log('💾 Vídeo temporário salvo no localStorage:', videoFile.name);
+        }
+        
+        // 🔄 ATUALIZA ESTADOS REACT BASEADO NO LOCALSTORAGE
+        if (setVideoAudioData && setVideoCaminho) {
+            setVideoAudioData(prev => ({
+                ...prev,
+                videoTemp: videoFile
+            }));
+            
+            // Atualiza caminho para preview
+            if (videoFile.fileLink) {
+                setVideoCaminho(videoFile.fileLink);
+            }
+        }
+        
+        // 📝 FORÇA SINCRONIZAÇÃO DO FORM (sem sobrescrever outros dados)
+        if (form) {
+            // Não usa setFieldValue direto para evitar conflitos
+            setTimeout(() => {
+                form.setFieldValue(campoVideo, [videoFile]);
+            }, 100);
+        }
+    }, [setVideoAudioData, setVideoCaminho, form, campoVideo]);
+
+    // 🎵 FUNÇÃO PARA ATUALIZAR DADOS DE ÁUDIO NO UPLOAD (localStorage como fonte da verdade)
+    const handleAudioUpload = useCallback((audioFile: AudioArquivoDto) => {
+        console.log('🎵 Novo áudio upado:', audioFile);
+        
+        // 💾 SALVA PRIMEIRO NO LOCALSTORAGE (fonte da verdade)
+        const itemSalvo = localStorage.getItem('itemAtual');
+        if (itemSalvo) {
+            const item = JSON.parse(itemSalvo);
+            if (!item.videoAudio) item.videoAudio = {};
+            item.videoAudio.audioTemp = audioFile;
+            localStorage.setItem('itemAtual', JSON.stringify(item));
+            console.log('💾 Áudio temporário salvo no localStorage:', audioFile.name);
+        }
+        
+        // 🔄 ATUALIZA ESTADOS REACT BASEADO NO LOCALSTORAGE
+        if (setVideoAudioData && setAudioCaminho) {
+            setVideoAudioData(prev => ({
+                ...prev,
+                audioTemp: audioFile
+            }));
+            
+            // Atualiza caminho para preview
+            if (audioFile.fileLink) {
+                setAudioCaminho(audioFile.fileLink);
+            }
+        }
+        
+        // 📝 FORÇA SINCRONIZAÇÃO DO FORM (sem sobrescrever outros dados)
+        if (form) {
+            // Não usa setFieldValue direto para evitar conflitos
+            setTimeout(() => {
+                form.setFieldValue(campoAudio, [audioFile]);
+            }, 100);
+        }
+    }, [setVideoAudioData, setAudioCaminho, form, campoAudio]);
+
+    // 💾 CARREGA DADOS DO LOCALSTORAGE PARA O FORM (localStorage como fonte da verdade)
+    const carregarDadosDoLocalStorage = useCallback(() => {
+        try {
+            const itemSalvo = localStorage.getItem('itemAtual');
+            if (itemSalvo && form) {
+                const item = JSON.parse(itemSalvo);
+                
+                console.log('🔍 [DEBUG] Carregando do localStorage:', {
+                    videoSalvo: item.videoAudio?.videoSalvo?.name,
+                    videoTemp: item.videoAudio?.videoTemp?.name,
+                    audioSalvo: item.videoAudio?.audioSalvo?.name,
+                    audioTemp: item.videoAudio?.audioTemp?.name,
+                });
+
+                if (item.videoAudio) {
+                    // 🎬 Prioriza arquivo temporário (recém-upado) sobre salvo
+                    const videoParaForm = item.videoAudio.videoTemp || item.videoAudio.videoSalvo;
+                    const audioParaForm = item.videoAudio.audioTemp || item.videoAudio.audioSalvo;
+                    
+                    if (videoParaForm) {
+                        console.log('🎬 Carregando vídeo do localStorage para Form:', videoParaForm.name);
+                        form.setFieldValue(campoVideo, [videoParaForm]);
+                    }
+                    
+                    if (audioParaForm) {
+                        console.log('🎵 Carregando áudio do localStorage para Form:', audioParaForm.name);
+                        form.setFieldValue(campoAudio, [audioParaForm]);
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('❌ Erro ao carregar dados do localStorage para Form:', error);
+        }
+    }, [form, campoVideo, campoAudio]);
+
+    // 📄 MONTA ARQUIVO INICIAL NO FORM - executa quando componente monta ou dados mudam
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            carregarDadosDoLocalStorage();
+        }, 200); // Pequeno delay para garantir que localStorage está sincronizado
+        
+        return () => clearTimeout(timeoutId);
+    }, [videoAudioData, carregarDadosDoLocalStorage]);
 
     useEffect(() => {
         const itemSalvo = localStorage.getItem('itemAtual');
@@ -731,11 +872,33 @@ const FormularioElaboracaoComponent: React.FC<FormProps & {videoCaminho: string,
                                         isDraggerUpload={false}
                                         uploadService={arquivoService.uploadVideo}
                                         formItemProps={videoFormItemProps}
-                                        uploadProps={videoUploadProps}
+                                        uploadProps={{
+                                            ...videoUploadProps,
+                                            onChange: (info: any) => {
+                                                const { fileList } = info;
+                                                if (fileList.length > 0) {
+                                                    const file = fileList[fileList.length - 1];
+                                                    if (file.status === 'done' && file.idFile && file.fileLink) {
+                                                        const videoFile: VideoArquivoDto = {
+                                                            idFile: file.idFile,
+                                                            fileLink: file.fileLink,
+                                                            name: file.name,
+                                                            status: 'done',
+                                                            uid: file.uid,
+                                                            type: file.type
+                                                        };
+                                                        handleVideoUpload(videoFile);
+                                                    }
+                                                }
+                                            }
+                                        }}
                                         tiposArquivosPermitidos={videoTiposArquivos}
                                     >
                                         <ButtonPrimary className="card-video-buttom">
-                                            Escolher outro vídeo
+                                            {videoAudioData?.videoSalvo || videoAudioData?.videoTemp 
+                                                ? 'Escolher outro vídeo' 
+                                                : 'Escolher vídeo'
+                                            }
                                         </ButtonPrimary>
                                         <p className="descricao">Formatos suportados: .mp4, .MOV, .WEBM até 10MB</p>
                                     </UploadArquivosSME>
@@ -746,7 +909,8 @@ const FormularioElaboracaoComponent: React.FC<FormProps & {videoCaminho: string,
                                         src={videoCaminho} 
                                         tipo="video/mp4" 
                                         form={form} 
-                                        campo={campoVideo} 
+                                        campo={campoVideo}
+                                        fileName={videoAudioData?.videoTemp?.name || videoAudioData?.videoSalvo?.name}
                                     />
                                 </div>
                             </div>
@@ -760,11 +924,33 @@ const FormularioElaboracaoComponent: React.FC<FormProps & {videoCaminho: string,
                                         isDraggerUpload={false}
                                         uploadService={arquivoService.uploadAudio}
                                         formItemProps={audioFormItemProps}
-                                        uploadProps={audioUploadProps}
+                                        uploadProps={{
+                                            ...audioUploadProps,
+                                            onChange: (info: any) => {
+                                                const { fileList } = info;
+                                                if (fileList.length > 0) {
+                                                    const file = fileList[fileList.length - 1];
+                                                    if (file.status === 'done' && file.idFile && file.fileLink) {
+                                                        const audioFile: AudioArquivoDto = {
+                                                            idFile: file.idFile,
+                                                            fileLink: file.fileLink,
+                                                            name: file.name,
+                                                            status: 'done',
+                                                            uid: file.uid,
+                                                            type: file.type
+                                                        };
+                                                        handleAudioUpload(audioFile);
+                                                    }
+                                                }
+                                            }
+                                        }}
                                         tiposArquivosPermitidos={audioTiposArquivos}
                                     >
                                         <ButtonPrimary className="card-video-buttom">
-                                            Escolher outro áudio
+                                            {videoAudioData?.audioSalvo || videoAudioData?.audioTemp 
+                                                ? 'Escolher outro áudio' 
+                                                : 'Escolher áudio'
+                                            }
                                         </ButtonPrimary>
                                         <p className="descricao">Formatos suportados:
                                             MP3, WAV até 10MB</p>
@@ -776,7 +962,8 @@ const FormularioElaboracaoComponent: React.FC<FormProps & {videoCaminho: string,
                                         src={audioCaminho} 
                                         tipo="audio/mp3" 
                                         form={form} 
-                                        campo={campoAudio} 
+                                        campo={campoAudio}
+                                        fileName={videoAudioData?.audioTemp?.name || videoAudioData?.audioSalvo?.name}
                                     />
                                 </div>
                             </div>

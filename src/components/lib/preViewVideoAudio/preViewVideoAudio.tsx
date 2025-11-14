@@ -6,24 +6,48 @@ import './preViewVideoAudio.css';
 export const PreViewVideoAudio: React.FC<{
     src: string; // URL do arquivo ou vazio
     tipo: string;
-    form?: any; // Mantido para compatibilidade
-    campo?: string; // Mantido para compatibilidade
-}> = ({ src, tipo }) => {
+    form?: any; // Para acessar dados do formulário
+    campo?: string; // Nome do campo no formulário
+    fileName?: string; // Nome do arquivo opcional
+}> = ({ src, tipo, form, campo, fileName }) => {
 
-    // 🚫 Se não há src, não renderiza nada
+    // 📄 Tenta obter informações do arquivo do formulário
+    const arquivoInfo = form && campo ? form.getFieldValue(campo)?.[0] : null;
+    const nomeArquivo = fileName || arquivoInfo?.name || '';
+
+    // 🚫 Se não há src, mostra informações básicas
     if (!src) {
         return (
             <Card className="ContainerVideoPai">
                 <div className="telaNula">
                     <div className="iconeNula">
-                        {/* <svg width="24" height="24" viewBox="0 0 24 24" fill="#D5D5D5" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M2 10V13M6 6V17M10 3V21M14 8V15M18 5V18M22 10V13" 
-                                stroke="white" 
-                                strokeWidth="2" 
-                                strokeLinecap="round" 
-                                strokeLinejoin="round" />
-                        </svg> */}
-                    </div>                    
+                        {tipo.startsWith("video/") ? (
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="#D5D5D5" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
+                                <polyline points="14,2 14,8 20,8"/>
+                                <polygon points="10 12 16 8 10 4"/>
+                            </svg>
+                        ) : (
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="#D5D5D5" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M2 10V13M6 6V17M10 3V21M14 8V15M18 5V18M22 10V13" 
+                                    stroke="#D5D5D5" 
+                                    strokeWidth="2" 
+                                    strokeLinecap="round" 
+                                    strokeLinejoin="round" />
+                            </svg>
+                        )}
+                    </div>
+                    {nomeArquivo && (
+                        <div style={{ 
+                            marginTop: '8px', 
+                            fontSize: '12px', 
+                            color: '#666',
+                            textAlign: 'center',
+                            wordBreak: 'break-all'
+                        }}>
+                            {nomeArquivo}
+                        </div>
+                    )}
                 </div>
             </Card>
         );
