@@ -156,17 +156,9 @@ const FormularioElaboracaoComponent: React.FC<FormProps & {
         } 
     }), []);
     const videoTiposArquivos = useMemo(() => [
-        'video/mp4',
-        'video/webm',
-        'video/ogg',
-        'application/ogg',
-        'video/x-flv',
-        'application/x-mpegURL',
-        'video/MP2T',
-        'video/3gpp',
-        'video/quicktime',
-        'video/x-msvideo',
-        'video/x-ms-wmv',
+        'video/mp4',        // MP4
+        'video/quicktime',  // MOV
+        'video/webm',       // WEBM
     ], []);
 
     const audioFormItemProps = useMemo(() => ({ name: campoAudio }), [campoAudio]);
@@ -179,12 +171,8 @@ const FormularioElaboracaoComponent: React.FC<FormProps & {
         } 
     }), []); 
     const audioTiposArquivos = useMemo(() => [
-        'audio/mpeg',
-        'audio/mp4',
-        'audio/mp3',
-        'audio/vnd.wav',
-        'audio/x-ms-wma',
-        'audio/ogg',
+        'audio/mpeg',       // MP3
+        'audio/wav',        // WAV
     ], []);
 
     // 🛡️ Função helper para renderização condicional de TextEditor
@@ -930,6 +918,7 @@ const FormularioElaboracaoComponent: React.FC<FormProps & {
                                                 const { fileList } = info;
                                                 if (fileList.length > 0) {
                                                     const file = fileList[fileList.length - 1];
+                                                    
                                                     if (file.status === 'done' && file.idFile && file.fileLink) {
                                                         const audioFile: AudioArquivoDto = {
                                                             idFile: file.idFile,
@@ -939,6 +928,7 @@ const FormularioElaboracaoComponent: React.FC<FormProps & {
                                                             uid: file.uid,
                                                             type: file.type
                                                         };
+                                                        console.log('🎵 Upload de áudio concluído:', audioFile.name);
                                                         handleAudioUpload(audioFile);
                                                     }
                                                 }
@@ -952,8 +942,7 @@ const FormularioElaboracaoComponent: React.FC<FormProps & {
                                                 : 'Escolher áudio'
                                             }
                                         </ButtonPrimary>
-                                        <p className="descricao">Formatos suportados:
-                                            MP3, WAV até 10MB</p>
+                                        <p className="descricao">Formatos suportados: .MP3, .WAV até 10MB</p>
                                     </UploadArquivosSME>
                                 </div>
                                 <div className="audio-antD-edicao">

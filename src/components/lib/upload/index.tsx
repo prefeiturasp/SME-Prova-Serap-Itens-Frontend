@@ -9,11 +9,21 @@ import styled from 'styled-components';
 
 const { Dragger } = Upload;
 
+// 📢 Função helper para notificações padronizada
+type TipoMensagem = 'success' | 'info' | 'warning' | 'error';
+const mensagem = (tipo: TipoMensagem, titulo: string, descricao: string) => {
+  notification[tipo]({
+    message: titulo,
+    description: descricao,
+  });
+};
+
 export const permiteInserirFormato = (arquivo: any, tiposArquivosPermitidos: string[]) => {
   if (tiposArquivosPermitidos?.length) {
     const permiteTipo = tiposArquivosPermitidos.find((tipo) => tipo === arquivo?.type);
     return !!permiteTipo;
   }
+  
   // Fallback: verifica se é um tipo de arquivo suportado (video/audio)
   return arquivo?.type?.startsWith('video/') || arquivo?.type?.startsWith('audio/');
 };
@@ -86,33 +96,61 @@ const UploadArquivosSME: React.FC<UploadArquivosProps> = (props) => {
     }
   };
 
-  const excedeuLimiteMaximo = (arquivo: File) => {
-    const tamanhoArquivo = arquivo.size / 1024 / 1024;
 
-    return tamanhoArquivo > tamanhoMaxUploadPorArquivo;
-  };
 
   const beforeUploadDefault = (arquivo: RcFile) => {
+    const isAudio = arquivo.type?.startsWith('audio/');
+    const isVideo = arquivo.type?.startsWith('video/');
+    const tamanhoMB = arquivo.size / 1024 / 1024;
+    
     console.log('🔍 Validando arquivo antes do upload:', {
       name: arquivo.name,
       type: arquivo.type,
-      size: `${(arquivo.size / 1024 / 1024).toFixed(2)}MB`
+      size: `${tamanhoMB.toFixed(2)}MB`,
+      isAudio: isAudio,
+      isVideo: isVideo,
+      tiposPermitidos: tiposArquivosPermitidos
     });
 
+    // 📝 VALIDAÇÃO DE FORMATO ESPECÍFICA
     if (!permiteInserirFormato(arquivo, tiposArquivosPermitidos)) {
-      const formatosPermitidos = tiposArquivosPermitidos.join(', ');
-      notification.error({
-        message: 'Formato Não Permitido',
-        description: `Formatos aceitos: ${formatosPermitidos}`,
+      let mensagemFormato = '';
+      
+      if (isVideo) {
+        mensagemFormato = 'Formato de vídeo não permitido. Use apenas: MP4, MOV ou WEBM';
+      } else if (isAudio) {
+        mensagemFormato = 'Formato de áudio não permitido. Use apenas: MP3 ou WAV';
+      } else {
+        mensagemFormato = `Formato não permitido. Tipos aceitos: ${tiposArquivosPermitidos.join(', ')}`;
+      }
+      
+      console.error('❌ Formato não permitido:', {
+        arquivoTipo: arquivo.type,
+        formatosPermitidos: tiposArquivosPermitidos
       });
+      
+      mensagem('error', 'Formato Inválido', mensagemFormato);
       return false;
     }
 
-    if (excedeuLimiteMaximo(arquivo)) {
-      notification.error({
-        message: 'Arquivo Muito Grande',
-        description: `Tamanho máximo permitido: ${tamanhoMaxUploadPorArquivo}MB`,
+    // 📏 VALIDAÇÃO DE TAMANHO ESPECÍFICA (10MB)
+    if (tamanhoMB > 10) {
+      let mensagemTamanho = '';
+      
+      if (isVideo) {
+        mensagemTamanho = `Vídeo muito grande (${tamanhoMB.toFixed(1)}MB). Tamanho máximo: 10MB`;
+      } else if (isAudio) {
+        mensagemTamanho = `Áudio muito grande (${tamanhoMB.toFixed(1)}MB). Tamanho máximo: 10MB`;
+      } else {
+        mensagemTamanho = `Arquivo muito grande (${tamanhoMB.toFixed(1)}MB). Tamanho máximo: 10MB`;
+      }
+      
+      console.error('❌ Arquivo muito grande:', {
+        tamanhoAtual: `${tamanhoMB.toFixed(2)}MB`,
+        tamanhoMaximo: '10MB'
       });
+      
+      mensagem('error', 'Arquivo Muito Grande', mensagemTamanho);
       return false;
     }
 
@@ -122,8 +160,11 @@ const UploadArquivosSME: React.FC<UploadArquivosProps> = (props) => {
 
   const customRequestDefault = async (options: any) => {
     const { onSuccess, onError, file, onProgress } = options;
+    const isAudio = file.type?.startsWith('audio/');
 
     try {
+      console.log(`${isAudio ? '🎵' : '🎬'} Iniciando upload:`, file.name);
+      
       onProgress({ percent: 30 });
       
       // Chama o serviço de upload
@@ -198,10 +239,7 @@ const UploadArquivosSME: React.FC<UploadArquivosProps> = (props) => {
         onSuccess(resposta.data, file);
       } else {
         const errorMsg = resposta?.data?.message || 'Erro no upload';
-        notification.error({
-          message: 'Erro no Upload',
-          description: errorMsg,
-        });
+        mensagem('error', 'Erro no Upload', errorMsg);
         onError(new Error(errorMsg));
       }
     } catch (error: any) {
@@ -218,10 +256,7 @@ const UploadArquivosSME: React.FC<UploadArquivosProps> = (props) => {
         errorMsg = 'Erro desconhecido no upload';
       }
       
-      notification.error({
-        message: 'Erro no Upload',
-        description: errorMsg,
-      });
+      mensagem('error', 'Erro no Upload', errorMsg);
       
       try {
         if (typeof onError === 'function') {
@@ -257,20 +292,14 @@ const UploadArquivosSME: React.FC<UploadArquivosProps> = (props) => {
       // Remove localmente
       removeArquivo(arquivo);
       
-      notification.success({
-        message: 'Arquivo Removido',
-        description: `${arquivo.name} foi removido com sucesso`,
-      });
+      mensagem('success', 'Arquivo Removido', `${arquivo.name} foi removido com sucesso`);
       
       // Retorna true para permitir a remoção
       return true;
     } catch (error) {
       console.error('❌ Erro ao remover arquivo:', error);
       
-      notification.error({
-        message: 'Erro ao Remover',
-        description: `Erro ao remover ${arquivo.name}. ${error instanceof Error ? error.message : 'Tente novamente.'}`,
-      });
+      mensagem('error', 'Erro ao Remover', `Erro ao remover ${arquivo.name}. ${error instanceof Error ? error.message : 'Tente novamente.'}`);
       
       // Retorna false para cancelar a remoção em caso de erro
       return false;
@@ -331,10 +360,7 @@ const UploadArquivosSME: React.FC<UploadArquivosProps> = (props) => {
         percent: 100
       };
       
-      notification.success({
-        message: 'Upload Concluído',
-        description: `${arquivoAtual.name} foi carregado com sucesso`,
-      });
+      mensagem('success', 'Upload Concluído', `${arquivoAtual.name} foi carregado com sucesso`);
     }
     
     const novoValor = arquivoAtual ? [arquivoAtual] : [];
@@ -349,10 +375,7 @@ const UploadArquivosSME: React.FC<UploadArquivosProps> = (props) => {
           downloadBlob(resposta.data, arquivo.name);
         })
         .catch(() =>
-          notification.error({
-            message: 'Erro',
-            description: 'Erro ao tentar fazer download',
-          }),
+          mensagem('error', 'Erro', 'Erro ao tentar fazer download')
         );
     }
   };
