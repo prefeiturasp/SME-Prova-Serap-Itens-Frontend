@@ -1,86 +1,58 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Card, Typography } from "antd";
-import { FormInstance } from "antd/lib/form/Form";
 const { Text } = Typography;
 import './preViewVideoAudio.css';
 
-
-const MOCK_VIDEO_URLS = [
-    "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-    "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
-    "https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4"
-];
-
-const MOCK_AUDIO_URLS = [
-    "https://commondatastorage.googleapis.com/codeskulptor-demos/DDR_assets/Kangaroo_MusiQue_-_The_Neverwritten_Role_Playing_Game.mp3",
-    // "https://file-examples.com/storage/feb42d72566dd2085bca1b7/2017/11/file_example_WAV_1MG.wav"
-    // "https://www.soundjay.com/misc/sounds/bell-ringing-05.wav",    
-    // "https://commondatastorage.googleapis.com/codeskulptor-assets/week7-brrring.m4a",
-
-];
-
-const MOCK_VIDEO_UPLOADED = {
-    url: MOCK_VIDEO_URLS[0],
-    name: 'video-exemplo.mp4',
-    size: 1048576, // 1MB
-    type: 'video/mp4',
-    status: 'done',
-    uid: `video-mock-${Date.now()}`,
-};
-
-const MOCK_AUDIO_UPLOADED = {
-    url: MOCK_AUDIO_URLS[0],
-    name: 'audio-exemplo.wav',
-    size: 512000, // 500KB
-    type: 'audio/wav',
-    status: 'done',
-    uid: `audio-mock-${Date.now()}`,
-};
-//src: string;
 export const PreViewVideoAudio: React.FC<{
+    src: string; // URL do arquivo ou vazio
     tipo: string;
-    form: FormInstance<any> | undefined
-    campo: string;
-}> = ({tipo, form, campo }) => {
+    form?: any; // Para acessar dados do formulário
+    campo?: string; // Nome do campo no formulário
+    fileName?: string; // Nome do arquivo opcional
+}> = ({ src, tipo, form, campo, fileName }) => {
 
-    // Estados para preview de mídia
-    const [videoUrl, setVideoUrl] = useState<string>('');
-    const [audioUrl, setAudioUrl] = useState<string>('');
+    // 📄 Tenta obter informações do arquivo do formulário
+    const arquivoInfo = form && campo ? form.getFieldValue(campo)?.[0] : null;
+    const nomeArquivo = fileName || arquivoInfo?.name || '';
 
+    // 🚫 Se não há src, mostra informações básicas
+    if (!src) {
+        return (
+            <Card className="ContainerVideoPai">
+                <div className="telaNula">
+                    <div className="iconeNula">
+                        {tipo.startsWith("video/") ? (
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="#D5D5D5" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
+                                <polyline points="14,2 14,8 20,8"/>
+                                <polygon points="10 12 16 8 10 4"/>
+                            </svg>
+                        ) : (
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="#D5D5D5" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M2 10V13M6 6V17M10 3V21M14 8V15M18 5V18M22 10V13" 
+                                    stroke="#D5D5D5" 
+                                    strokeWidth="2" 
+                                    strokeLinecap="round" 
+                                    strokeLinejoin="round" />
+                            </svg>
+                        )}
+                    </div>
+                    {nomeArquivo && (
+                        <div style={{ 
+                            marginTop: '8px', 
+                            fontSize: '12px', 
+                            color: '#666',
+                            textAlign: 'center',
+                            wordBreak: 'break-all'
+                        }}>
+                            {nomeArquivo}
+                        </div>
+                    )}
+                </div>
+            </Card>
+        );
+    }
 
-    // 🎬 MOCK: Simular que vídeo e áudio já foram feitos upload
-    useEffect(() => {
-        const mockTimer = setTimeout(() => {
-            if (form) {
-                console.log('🎬 Simulando upload já feito - Vídeo e Áudio');
-
-                // Simula vídeo já carregado
-                form.setFieldValue(campo, [MOCK_VIDEO_UPLOADED]);
-                setVideoUrl(MOCK_VIDEO_UPLOADED.url);
-
-                // Simula áudio já carregado  
-                form.setFieldValue(campo, [MOCK_AUDIO_UPLOADED]);
-                setAudioUrl(MOCK_AUDIO_UPLOADED.url);
-
-                console.log('✅ Mock aplicado:', {
-                    video: {
-                        name: MOCK_VIDEO_UPLOADED.name,
-                        url: MOCK_VIDEO_UPLOADED.url,
-                        fallbackUrls: MOCK_VIDEO_URLS
-                    },
-                    audio: {
-                        name: MOCK_AUDIO_UPLOADED.name,
-                        url: MOCK_AUDIO_UPLOADED.url,
-                        fallbackUrls: MOCK_AUDIO_URLS
-                    }
-                });
-
-                console.log('✅ Mock de vídeo e áudio aplicado com sucesso');
-            }
-        }, 1000); // Aguarda 1 segundo para simular carregamento
-
-        return () => clearTimeout(mockTimer);
-    }, [form]);
 
 
     if (tipo.startsWith("video/")) {
@@ -91,22 +63,33 @@ export const PreViewVideoAudio: React.FC<{
                     width="100%"
                     controls
                     preload="metadata"
-                    crossOrigin="anonymous"
                     className="propsVideo"
+                    src={src}
                     onError={(e) => {
-                        console.error('❌ Erro no vídeo:', e);
+                        const video = e.currentTarget as HTMLVideoElement;
+                        console.error('❌ Erro CORS ao carregar vídeo:', {
+                            src,
+                            error: video.error,
+                            networkState: video.networkState,
+                            readyState: video.readyState,
+                            message: 'Possível problema de CORS - Backend precisa configurar Access-Control-Allow-Origin'
+                        });
                     }}
                 >
-                    {MOCK_VIDEO_URLS.map((url, index) => (
-                        <source key={index} src={url} type="video/mp4" />
-                    ))}
-                    <Text type="secondary">
-                        Seu navegador não suporta o elemento de vídeo ou as URLs não estão acessíveis.
-                        <br />
-                        <a href={videoUrl} target="_blank" rel="noopener noreferrer">
-                            Clique aqui para abrir o vídeo diretamente
+                    <div style={{ textAlign: 'center', padding: '20px' }}>
+                        <Text type="secondary">
+                            Seu navegador não suporta o elemento de vídeo ou há um problema de CORS.
+                        </Text>
+                        <br /><br />
+                        <a href={src} target="_blank" rel="noopener noreferrer" 
+                           style={{ color: '#1890ff', textDecoration: 'underline' }}>
+                            📹 Abrir vídeo em nova aba
                         </a>
-                    </Text>
+                        <br /><br />
+                        <Text type="secondary" style={{ fontSize: '12px', color: '#999' }}>
+                            Se o vídeo não carregar, é necessário configurar CORS no servidor.
+                        </Text>
+                    </div>
                 </video>
             </Card>
         );
@@ -117,25 +100,26 @@ export const PreViewVideoAudio: React.FC<{
                     <div className="iconeTelaPretaAudio">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="#FFFFFF" xmlns="http://www.w3.org/2000/svg">
                             <path d="M2 10V13M6 6V17M10 3V21M14 8V15M18 5V18M22 10V13" 
-                            stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                stroke="white" 
+                                strokeWidth="2" 
+                                strokeLinecap="round" 
+                                strokeLinejoin="round" />
                         </svg>
                     </div>
                     <audio
                         id="preview-audio"
                         controls
                         preload="metadata"
-                        className="telaPretaControle"                        
+                        className="telaPretaControle"
+                        src={src}
                         onError={(e) => {
                             console.error('❌ Erro no áudio:', e);
                         }}
                     >
-                        {MOCK_AUDIO_URLS.map((url, index) => (
-                            <source key={index} src={url} type="audio/mpeg" />
-                        ))}
                         <Text type="secondary">
                             Seu navegador não suporta o elemento de áudio.
                             <br />
-                            <a href={audioUrl || MOCK_AUDIO_URLS[0]} target="_blank" rel="noopener noreferrer">
+                            <a href={src} target="_blank" rel="noopener noreferrer">
                                 Clique aqui para ouvir o áudio diretamente
                             </a>
                         </Text>

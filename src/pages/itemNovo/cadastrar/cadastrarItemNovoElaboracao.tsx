@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Button, Form, FormProps, notification, Spin } from 'antd';
 import { useNavigate } from "react-router";
 import { cloneDeep } from 'lodash';
@@ -15,6 +15,7 @@ import FormularioElaboracaoComponent from "~/components/cadastro-item-novo/formu
 // Types
 import { ItemNovoDto } from '~/domain/dto/itemNovo-dto';
 import { AltenativaDto } from '~/domain/dto/AltenativaDto';
+import { VideoArquivoDto, AudioArquivoDto } from '~/domain/dto/ArquivoMidiaDto';
 
 // Services
 import configuracaoItemService from '~/services/configuracaoItem-service';
@@ -56,8 +57,6 @@ export interface ElaboracaoLocalProps {
     fonte?: string;
     enunciado?: string;
     codigoItem?: string;
-    video?: any[];
-    audio?: any[];
     alternativaA?: string;
     justificativaA?: string;
     alternativaB?: string;
@@ -72,6 +71,16 @@ export interface ElaboracaoLocalProps {
     idAlternativaC?: number | null;
     idAlternativaD?: number | null;
     alternativasDto?: AltenativaDto[];
+    // IDs dos arquivos de mídia
+    ArquivoVideoId?: number | null;
+    ArquivoAudioId?: number | null;
+}
+
+export interface videoAudioProps {
+    videoTemp?: VideoArquivoDto;
+    audioTemp?: AudioArquivoDto;
+    videoSalvo?: VideoArquivoDto;
+    audioSalvo?: AudioArquivoDto;
 }
 
 const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
@@ -84,12 +93,27 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
     // const [messageApi, contextHolder] = message.useMessage();
     const [carregando, setCarregando] = useState(false);
     const [verificacaoInicialFeita, setVerificacaoInicialFeita] = useState(false);
+    // 🔄 CONTROLE PARA EVITAR LOOP INFINITO NA SINCRONIZAÇÃO
+    const [sincronizandoForm, setSincronizandoForm] = useState(false);
+    const [ultimaSincronizacao, setUltimaSincronizacao] = useState<string>('');
+    // 🔄 REF PARA CONTROLAR TIMEOUT DE SALVAMENTO
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     const [itemId, setItemId] = useState<number>(0);
     const [codigoItemEstado, setCodigoItemEstado] = useState<string>('');
     const [configuracaoItemNovo, setConfiguracaoItemNovoLocal] = useState<Partial<ConfiguracaoItemNovoProps>>({});
     const [elaboracaoItemNovo, setElaboracaoItemNovoLocal] = useState<ElaboracaoLocalProps>({});
 
+    const [videoCaminho, setVideoCaminho] = useState<string>('');
+    const [audioCaminho, setAudioCaminho] = useState<string>('');
+    
+    // 📁 ESTADOS PARA GERENCIAR ARQUIVOS DE MÍDIA
+    const [videoAudioData, setVideoAudioData] = useState<videoAudioProps>({
+        videoSalvo: undefined,
+        audioSalvo: undefined,
+        videoTemp: undefined,
+        audioTemp: undefined,
+    });
 
     type tipoMsg = 'success' | 'info' | 'warning' | 'error';
     const [api, contextHolder] = notification.useNotification();
@@ -107,6 +131,24 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
             const itemSalvo = localStorage.getItem('itemAtual');
             if (itemSalvo) {
                 const item = JSON.parse(itemSalvo);
+
+                // 📁 CARREGA DADOS DE VIDEO E AUDIO
+                if (item.videoAudio) {
+                    setVideoAudioData(item.videoAudio);
+                    
+                    // Define caminhos para preview - prioriza arquivo temporário (recém-upado) se existir
+                    const videoPath = item.videoAudio.videoTemp?.fileLink || item.videoAudio.videoSalvo?.fileLink || '';
+                    const audioPath = item.videoAudio.audioTemp?.fileLink || item.videoAudio.audioSalvo?.fileLink || '';
+                    
+                    setVideoCaminho(videoPath);
+                    setAudioCaminho(audioPath);
+                    
+                    console.log('📁 Video/Audio carregados:', {
+                        videoPath,
+                        audioPath,
+                        videoAudio: item.videoAudio
+                    });
+                }
 
                 // Normaliza palavrasChave - converte string separada por ';' em array
                 if (item.configuracao && item.configuracao.palavrasChave) {
@@ -150,6 +192,8 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
             console.error('❌ Erro ao limpar localStorage:', error);
         }
     }, []);
+
+
 
     const voltar = async () => {
         console.log('🔙 Voltando para primeira tela - recarregando dados completos...');
@@ -286,6 +330,69 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
     const campoJustificativaD = Campos.justificativaD;
     const campoAlternativaCorreta = Campos.alternativaCorreta;
 
+
+    // 🔄 FUNÇÃO PARA SINCRONIZAR FORM COM LOCALSTORAGE (localStorage como fonte da verdade)
+    const sincronizarFormComLocalStorage = useCallback((forcarSincronizacao = false) => {
+        try {
+            // 🚫 EVITA LOOP INFINITO - não sincroniza se já estiver sincronizando
+            if (sincronizandoForm && !forcarSincronizacao) {
+                console.log('🔄 Sincronização já em andamento, pulando...');
+                return;
+            }
+
+            const itemSalvo = localStorage.getItem('itemAtual');
+            if (itemSalvo) {
+                const item = JSON.parse(itemSalvo);
+                
+                // 🔍 VERIFICA SE REALMENTE PRECISA SINCRONIZAR
+                const hashAtual = JSON.stringify(item.videoAudio || {});
+                if (hashAtual === ultimaSincronizacao && !forcarSincronizacao) {
+                    console.log('🔄 Dados de mídia não mudaram, pulando sincronização');
+                    return;
+                }
+
+                setSincronizandoForm(true);
+                
+                // 📁 SINCRONIZA CAMPOS DE VÍDEO/ÁUDIO DO LOCALSTORAGE PARA O FORM
+                if (item.videoAudio) {
+                    // Prioriza temporário sobre salvo (como deve ser)
+                    const videoAtual = item.videoAudio.videoTemp || item.videoAudio.videoSalvo;
+                    const audioAtual = item.videoAudio.audioTemp || item.videoAudio.audioSalvo;
+                    
+                    // 🔄 SINCRONIZA APENAS SE DIFERENTES DO FORM ATUAL
+                    const formVideo = form.getFieldValue(campoVideo);
+                    const formAudio = form.getFieldValue(campoAudio);
+                    
+                    if (videoAtual && (!formVideo || formVideo[0]?.uid !== videoAtual.uid)) {
+                        console.log('🎬 Sincronizando vídeo do localStorage para Form:', videoAtual.name);
+                        form.setFieldValue(campoVideo, [videoAtual]);
+                    } else if (!videoAtual && formVideo?.length > 0) {
+                        console.log('🗑️ Limpando campo vídeo no Form');
+                        form.setFieldValue(campoVideo, []);
+                    }
+                    
+                    if (audioAtual && (!formAudio || formAudio[0]?.uid !== audioAtual.uid)) {
+                        console.log('🎵 Sincronizando áudio do localStorage para Form:', audioAtual.name);
+                        form.setFieldValue(campoAudio, [audioAtual]);
+                    } else if (!audioAtual && formAudio?.length > 0) {
+                        console.log('🗑️ Limpando campo áudio no Form');
+                        form.setFieldValue(campoAudio, []);
+                    }
+                }
+                
+                setUltimaSincronizacao(hashAtual);
+                
+                // 🕐 PEQUENO DELAY PARA EVITAR LOOP
+                setTimeout(() => {
+                    setSincronizandoForm(false);
+                }, 100);
+            }
+        } catch (error) {
+            console.error('❌ Erro ao sincronizar Form com localStorage:', error);
+            setSincronizandoForm(false);
+        }
+    }, [form, campoVideo, campoAudio, sincronizandoForm, ultimaSincronizacao]);
+
     // 🎯 Função para carregar dados completos do backend via obterItemComAlternativas
     const obterItemComAlternativasEPopular = useCallback(async (itemId: number) => {
         try {
@@ -326,13 +433,11 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
                 };
 
                 // ✅ Mapeia dados de elaboração do backend (incluindo alternativas)
-                const elaboracaoItemRetorno = {
+                let elaboracaoItemRetorno: ElaboracaoLocalProps = {
                     textoBase: resposta.data.textoBase || '',
                     fonte: resposta.data.fonte || '',
                     enunciado: resposta.data.enunciado || '',
-                    codigoItem: resposta.data.codigoItem,
-                    video: [], // TODO: mapear arquivos se necessário
-                    audio: [], // TODO: mapear arquivos se necessário 
+                    codigoItem: resposta.data.codigoItem,                    
                     alternativaA: resposta.data.alternativas?.find((a: any) => a.numeracao === 'A')?.descricao || '',
                     justificativaA: resposta.data.alternativas?.find((a: any) => a.numeracao === 'A')?.justificativa || '',
                     alternativaB: resposta.data.alternativas?.find((a: any) => a.numeracao === 'B')?.descricao || '',
@@ -347,6 +452,44 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
                     idAlternativaB: resposta.data.alternativas?.find((a: any) => a.numeracao === 'B')?.id || null,
                     idAlternativaC: resposta.data.alternativas?.find((a: any) => a.numeracao === 'C')?.id || null,
                     idAlternativaD: resposta.data.alternativas?.find((a: any) => a.numeracao === 'D')?.id || null,
+                    // 📁 IDs dos arquivos de mídia
+                    ArquivoVideoId: resposta.data.video?.arquivoId || null,
+                    ArquivoAudioId: resposta.data.audio?.arquivoId || null,
+                };
+
+                // 🎬 OBJETO VIDEO SALVO - apenas se existir no backend
+                let videoSalvo: VideoArquivoDto | undefined = undefined;
+                if (resposta.data.video?.arquivoId) {
+                    videoSalvo = {
+                        idFile: resposta.data.video.arquivoId,
+                        fileLink: resposta.data.video.caminho || undefined,
+                        name: resposta.data.video.nomeArquivo || undefined,
+                        status: 'done',
+                        uid: `video-${resposta.data.video.arquivoId}`,
+                        type: resposta.data.video.contentType || undefined,
+                    };
+                }
+
+                // 🎵 OBJETO AUDIO SALVO - apenas se existir no backend
+                let audioSalvo: AudioArquivoDto | undefined = undefined;
+                if (resposta.data.audio?.arquivoId) {
+                    audioSalvo = {
+                        idFile: resposta.data.audio.arquivoId,
+                        fileLink: resposta.data.audio.caminho || undefined,
+                        name: resposta.data.audio.nomeArquivo || undefined,
+                        status: 'done',
+                        uid: `audio-${resposta.data.audio.arquivoId}`,
+                        type: resposta.data.audio.contentType || undefined,
+                    };
+                }
+
+                // 📁 OBJETO COMPLETO DE VIDEO E AUDIO
+                let videoAudio: videoAudioProps = {
+                    videoSalvo: videoSalvo,
+                    audioSalvo: audioSalvo,
+                    // videoTemp e audioTemp serão gerenciados no componente quando houver uploads
+                    videoTemp: undefined,
+                    audioTemp: undefined,
                 };
 
                 console.log('🎯 Configuração mapeada:', configuracaoItemRetorno);
@@ -357,13 +500,19 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
                 setCodigoItemEstado(configuracaoItemRetorno.codigoItem || '');
                 setConfiguracaoItemNovoLocal(configuracaoItemRetorno);
                 setElaboracaoItemNovoLocal(elaboracaoItemRetorno);
+                
+                // 📁 Atualiza dados de vídeo e áudio
+                setVideoAudioData(videoAudio);
+                if (videoSalvo?.fileLink) setVideoCaminho(videoSalvo.fileLink);
+                if (audioSalvo?.fileLink) setAudioCaminho(audioSalvo.fileLink);
 
                 // ✅ Salva dados completos no localStorage
                 const itemParaLocalStorage = {
                     id: itemId,
                     codigoItem: configuracaoItemRetorno.codigoItem,
                     configuracao: configuracaoItemRetorno,
-                    elaboracao: elaboracaoItemRetorno
+                    elaboracao: elaboracaoItemRetorno,
+                    videoAudio: videoAudio,
                 };
                 localStorage.setItem('itemAtual', JSON.stringify(itemParaLocalStorage));
                 console.log('💾 Dados completos salvos no localStorage:', itemParaLocalStorage);
@@ -419,33 +568,37 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
         executarCarregamento();
     }, []); // 🎯 SEM dependências - executa só quando componente monta
 
-    // Carrega dados locais no form quando o componente monta
-    useEffect(() => {
-        if (elaboracaoItemNovo && form) {
-            form.setFieldsValue({
-                [campoTextoBase]: elaboracaoItemNovo.textoBase,
-                [campoFonte]: elaboracaoItemNovo.fonte,
-                [campoEnunciado]: elaboracaoItemNovo.enunciado,
-                [campoCodigoItem]: elaboracaoItemNovo.codigoItem,
-                [campoVideo]: elaboracaoItemNovo.video,
-                [campoAudio]: elaboracaoItemNovo.audio,
-                [campoAlternativaA]: elaboracaoItemNovo.alternativaA,
-                [campoJustificativaA]: elaboracaoItemNovo.justificativaA,
-                [campoAlternativaB]: elaboracaoItemNovo.alternativaB,
-                [campoJustificativaB]: elaboracaoItemNovo.justificativaB,
-                [campoAlternativaC]: elaboracaoItemNovo.alternativaC,
-                [campoJustificativaC]: elaboracaoItemNovo.justificativaC,
-                [campoAlternativaD]: elaboracaoItemNovo.alternativaD,
-                [campoJustificativaD]: elaboracaoItemNovo.justificativaD,
-                [campoAlternativaCorreta]: elaboracaoItemNovo.alternativaCorreta || 'A', // Default para A
-            });
-        }
-    }, [elaboracaoItemNovo, form, campoTextoBase, campoFonte, campoEnunciado, campoCodigoItem,
-        campoVideo, campoAudio, campoAlternativaA, campoJustificativaA, campoAlternativaB,
-        campoJustificativaB, campoAlternativaC, campoJustificativaC, campoAlternativaD,
-        campoJustificativaD, campoAlternativaCorreta]);
 
-    // � Função para salvar dados atuais do formulário no localStorage
+
+    // 📋 CARREGA DADOS INICIAIS NO FORM (APENAS QUANDO codigoItem MUDA)
+    useEffect(() => {
+        if (elaboracaoItemNovo?.codigoItem && form) {
+            console.log('📋 Carregando dados iniciais no form para:', elaboracaoItemNovo.codigoItem);
+            form.setFieldsValue({
+                [campoTextoBase]: elaboracaoItemNovo.textoBase || '',
+                [campoFonte]: elaboracaoItemNovo.fonte || '',
+                [campoEnunciado]: elaboracaoItemNovo.enunciado || '',
+                [campoCodigoItem]: elaboracaoItemNovo.codigoItem || '',
+                [campoAlternativaA]: elaboracaoItemNovo.alternativaA || '',
+                [campoJustificativaA]: elaboracaoItemNovo.justificativaA || '',
+                [campoAlternativaB]: elaboracaoItemNovo.alternativaB || '',
+                [campoJustificativaB]: elaboracaoItemNovo.justificativaB || '',
+                [campoAlternativaC]: elaboracaoItemNovo.alternativaC || '',
+                [campoJustificativaC]: elaboracaoItemNovo.justificativaC || '',
+                [campoAlternativaD]: elaboracaoItemNovo.alternativaD || '',
+                [campoJustificativaD]: elaboracaoItemNovo.justificativaD || '',
+                [campoAlternativaCorreta]: elaboracaoItemNovo.alternativaCorreta || 'A',
+            });
+            
+            // 🎬 SINCRONIZA MÍDIA SE NECESSÁRIO (UMA VEZ SÓ)
+            if (videoAudioData.videoSalvo || videoAudioData.audioSalvo) {
+                console.log('🎬 Sincronizando mídia inicial...');
+                setTimeout(() => sincronizarFormComLocalStorage(true), 300);
+            }
+        }
+    }, [elaboracaoItemNovo?.codigoItem]); // SÓ QUANDO codigoItem MUDA
+
+    // 📄 Função para salvar dados atuais do formulário no localStorage
     const salvarDadosFormularioNoLocalStorage = useCallback(() => {
         try {
             const values = form.getFieldsValue(true); // Ensure all fields are retrieved
@@ -455,9 +608,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
                 textoBase: values[campoTextoBase] || '',
                 fonte: values[campoFonte] || '',
                 enunciado: values[campoEnunciado] || '',
-                codigoItem: values[campoCodigoItem] || '', // Ensure codigoItem is retrieved from the form
-                video: values[campoVideo] || [],
-                audio: values[campoAudio] || [],
+                codigoItem: values[campoCodigoItem] || '', // Ensure codigoItem is retrieved from the form                
                 alternativaA: values[campoAlternativaA] || '',
                 justificativaA: values[campoJustificativaA] || '',
                 alternativaB: values[campoAlternativaB] || '',
@@ -472,6 +623,9 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
                 idAlternativaB: elaboracaoItemNovo?.idAlternativaB || null,
                 idAlternativaC: elaboracaoItemNovo?.idAlternativaC || null,
                 idAlternativaD: elaboracaoItemNovo?.idAlternativaD || null,
+                // 📁 IDs dos arquivos de mídia (response?.data?.idFile do upload)
+                ArquivoVideoId: values[campoVideo]?.[0]?.idFile || elaboracaoItemNovo?.ArquivoVideoId || null,
+                ArquivoAudioId: values[campoAudio]?.[0]?.idFile || elaboracaoItemNovo?.ArquivoAudioId || null,
             };
 
             // Atualiza estado local com dados do formulário
@@ -480,40 +634,56 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
             configuracaoItemNovo.codigoItem = values[campoCodigoItem] || '';
             setConfiguracaoItemNovoLocal(configuracaoItemNovo);
 
+            // 📁 PRESERVA DADOS DE VIDEOAUDIO DO LOCALSTORAGE (não do Form)
+            const itemAtualLocalStorage = localStorage.getItem('itemAtual');
+            let videoAudioPreservado = videoAudioData;
+            
+            if (itemAtualLocalStorage) {
+                const itemAtual = JSON.parse(itemAtualLocalStorage);
+                if (itemAtual.videoAudio) {
+                    // Preserva estrutura existente do localStorage
+                    videoAudioPreservado = itemAtual.videoAudio;
+                    console.log('📁 Preservando videoAudio do localStorage:', {
+                        videoSalvo: videoAudioPreservado.videoSalvo?.name || 'N/A',
+                        audioSalvo: videoAudioPreservado.audioSalvo?.name || 'N/A',
+                        videoTemp: videoAudioPreservado.videoTemp?.name || 'N/A',
+                        audioTemp: videoAudioPreservado.audioTemp?.name || 'N/A',
+                    });
+                }
+            }
+
             // Salva no localStorage dados atuais
             const itemParaLocalStorage = {
                 id: itemId,
                 codigoItem: values[campoCodigoItem] || '', // Save codigoItem in the localStorage object
                 configuracao: configuracaoItemNovo,
-                elaboracao: elaboracaoAtual // Dados atuais do formulário
+                elaboracao: elaboracaoAtual, // Dados atuais do formulário
+                videoAudio: videoAudioPreservado // USA dados preservados do localStorage, não do estado React
             };
 
             localStorage.setItem('itemAtual', JSON.stringify(itemParaLocalStorage));
-            console.log('💾 Dados do formulário salvos no localStorage:', itemParaLocalStorage.elaboracao);
+            console.log('💾 Dados do formulário salvos no localStorage:', {
+                elaboracao: itemParaLocalStorage.elaboracao,
+                videoAudio: itemParaLocalStorage.videoAudio
+            });
 
         } catch (error) {
             console.error('❌ Erro ao salvar dados do formulário no localStorage:', error);
         }
-    }, [form, itemId, configuracaoItemNovo,
+    }, [form, itemId, configuracaoItemNovo, videoAudioData, elaboracaoItemNovo,
         campoTextoBase, campoFonte, campoEnunciado, campoCodigoItem,
         campoVideo, campoAudio, campoAlternativaA, campoJustificativaA,
         campoAlternativaB, campoJustificativaB, campoAlternativaC, campoJustificativaC,
         campoAlternativaD, campoJustificativaD, campoAlternativaCorreta]);
 
-    // �🔄 Watch mudanças nos campos e salva automaticamente no localStorage
-    const watchedValues = Form.useWatch([], form);
-    useEffect(() => {
+    // ✅ FUNÇÃO PARA SALVAR COM DEBOUNCE (SEM WATCH)
+    const salvarComDebounce = useCallback(() => {
         // Só salva se tem dados essenciais
-        if (itemId > 0 && (configuracaoItemNovo?.codigoItem || codigoItemEstado) && watchedValues) {
-            // Debounce para não salvar muito frequentemente
-            const timeoutId = setTimeout(() => {
-                console.log('🔄 Campo alterado, salvando no localStorage...', Object.keys(watchedValues));
-                salvarDadosFormularioNoLocalStorage();
-            }, 1000); // 1 segundo de debounce
-
-            return () => clearTimeout(timeoutId);
+        if (itemId > 0 && (configuracaoItemNovo?.codigoItem || codigoItemEstado)) {
+            console.log('📝 Campo alterado manualmente, salvando no localStorage...');
+            salvarDadosFormularioNoLocalStorage();
         }
-    }, [watchedValues, itemId, configuracaoItemNovo?.codigoItem, codigoItemEstado, salvarDadosFormularioNoLocalStorage]);
+    }, [itemId, configuracaoItemNovo?.codigoItem, codigoItemEstado, salvarDadosFormularioNoLocalStorage]);
 
     // Método para gerar o DTO para salvar
     const gerarItemSalvar = useCallback(() => {
@@ -696,6 +866,30 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
                     mensagem('success', 'Sucesso', 'Rascunho de item salvo com sucesso');
                     console.log('✅ Rascunho salvo com ID:', resp.data);
 
+                    // 🔄 MOVE ARQUIVOS TEMPORÁRIOS PARA SALVOS
+                    if (videoAudioData.videoTemp || videoAudioData.audioTemp) {
+                        const novoVideoAudio = {
+                            ...videoAudioData,
+                            // Move temporários para salvos
+                            videoSalvo: videoAudioData.videoTemp || videoAudioData.videoSalvo,
+                            audioSalvo: videoAudioData.audioTemp || videoAudioData.audioSalvo,
+                            // Limpa temporários
+                            videoTemp: undefined,
+                            audioTemp: undefined,
+                        };
+                        setVideoAudioData(novoVideoAudio);
+                        
+                        // Atualiza localStorage
+                        const itemAtualizado = localStorage.getItem('itemAtual');
+                        if (itemAtualizado) {
+                            const item = JSON.parse(itemAtualizado);
+                            item.videoAudio = novoVideoAudio;
+                            localStorage.setItem('itemAtual', JSON.stringify(item));
+                        }
+                        
+                        console.log('🔄 Arquivos movidos de temporário para salvo após salvar rascunho');
+                    }
+
                     // 🔄 USA NOVA FUNÇÃO: Carrega dados completos atualizados do backend
                     try {
                         console.log('🔄 Recarregando dados completos após salvar rascunho...');
@@ -786,6 +980,15 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
         setCodigoItemEstado('');
         setConfiguracaoItemNovoLocal({});
         setElaboracaoItemNovoLocal({});
+        // 🧹 Limpa dados de vídeo e áudio
+        setVideoAudioData({
+            videoSalvo: undefined,
+            audioSalvo: undefined,
+            videoTemp: undefined,
+            audioTemp: undefined,
+        });
+        setVideoCaminho('');
+        setAudioCaminho('');
         form.resetFields();
         setCarregando(false);
 
@@ -815,6 +1018,19 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
                     layout='vertical'
                     autoComplete='off'
                     initialValues={initialValuesForm}
+                    onValuesChange={(changedValues) => {
+                        // 📝 SALVA AUTOMATICAMENTE QUANDO CAMPOS MUDAM (SEM LOOP)
+                        if (itemId > 0 && (configuracaoItemNovo?.codigoItem || codigoItemEstado)) {
+                            // Debounce para não salvar muito frequentemente
+                            if (timeoutRef.current) {
+                                clearTimeout(timeoutRef.current);
+                            }
+                            timeoutRef.current = setTimeout(() => {
+                                console.log('📝 Campo alterado via onChange, salvando...', Object.keys(changedValues));
+                                salvarComDebounce();
+                            }, 1500);
+                        }
+                    }}
                     style={{
                         margin: 0,
                     }}
@@ -833,7 +1049,15 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
                             </div>
                         </div>
 
-                        <FormularioElaboracaoComponent form={form} />
+                        <FormularioElaboracaoComponent 
+                            form={form} 
+                            videoCaminho={videoCaminho} 
+                            audioCaminho={audioCaminho}
+                            videoAudioData={videoAudioData}
+                            setVideoAudioData={setVideoAudioData}
+                            setVideoCaminho={setVideoCaminho}
+                            setAudioCaminho={setAudioCaminho}
+                        />
 
                         <div className='cadastrarItem-botoes'>
                             <div className='cadastrarItem-btn'>

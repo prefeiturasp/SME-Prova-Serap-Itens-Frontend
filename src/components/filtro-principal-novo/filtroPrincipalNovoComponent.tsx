@@ -618,7 +618,7 @@ const FiltroPrincipalNovoComponent: React.FC<FiltroNovoProps> = ({ open, setOpen
                 form={formFiltroLateral}
                 options={listaQuantidadeAlternativas}
                 nomeCampo={CamposFiltroItens.categoriaItemFiltro}
-                label='Categoria do item e quantidade de alternativas*'
+                label='Categoria do item e quantidade de alternativas'
                 campoObrigatorio={false}
                 labelInValue={false}
               />
@@ -629,7 +629,7 @@ const FiltroPrincipalNovoComponent: React.FC<FiltroNovoProps> = ({ open, setOpen
                 form={formFiltroLateral}
                 options={listaDificuldadeSugerida}
                 nomeCampo={CamposFiltroItens.dificuldadeSugeridaFiltro}
-                label='Dificuldade Sugerida'
+                label='Dificuldade sugerida'
                 campoObrigatorio={false}
                 labelInValue={false}
               />
@@ -650,7 +650,7 @@ const FiltroPrincipalNovoComponent: React.FC<FiltroNovoProps> = ({ open, setOpen
                 form={formFiltroLateral}
                 options={listaInformacoesEstatisticas}
                 nomeCampo={CamposFiltroItens.informacoesEstatisticasFiltro}
-                label='Informações Estatísticas'
+                label='Informações estatísticas'
                 campoObrigatorio={false}
                 labelInValue={false}
               />

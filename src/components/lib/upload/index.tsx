@@ -1,23 +1,31 @@
 import { InboxOutlined } from '@ant-design/icons';
-import { Form, FormInstance, FormItemProps, Upload } from 'antd';
+import { Form, FormInstance, FormItemProps, Upload, notification } from 'antd';
 import { DraggerProps, RcFile, UploadFile } from 'antd/es/upload';
-import { notification } from '~/components/lib/notification';
+import arquivoService from '~/services/arquivo-service';
 
 import React, { PropsWithChildren } from 'react';
 import styled from 'styled-components';
 
 const { Dragger } = Upload;
 
-enum HttpStatusCode {
-  Ok = 200,
-}
+// 📢 Função helper para notificações padronizada
+type TipoMensagem = 'success' | 'info' | 'warning' | 'error';
+const mensagem = (tipo: TipoMensagem, titulo: string, descricao: string) => {
+  console.log('📢 Exibindo notificação:', { tipo, titulo, descricao });
+  notification[tipo]({
+    message: titulo,
+    description: descricao,
+  });
+};
 
 export const permiteInserirFormato = (arquivo: any, tiposArquivosPermitidos: string[]) => {
   if (tiposArquivosPermitidos?.length) {
     const permiteTipo = tiposArquivosPermitidos.find((tipo) => tipo === arquivo?.type);
     return !!permiteTipo;
   }
-  return false;
+  
+  // Fallback: verifica se é um tipo de arquivo suportado (video/audio)
+  return arquivo?.type?.startsWith('video/') || arquivo?.type?.startsWith('audio/');
 };
 
 const downloadBlob = (data: any, fileName: string) => {
@@ -58,7 +66,7 @@ type UploadArquivosProps = {
   tiposArquivosPermitidos: string[];
   tamanhoMaxUploadPorArquivo?: number;
   downloadService?: (codigosArquivo: string) => any;
-  uploadService: (formData: FormData, configuracaoHeader: any) => any;
+  uploadService: (arquivo: File) => any;
 } & PropsWithChildren;
 
 const TAMANHO_PADRAO_MAXIMO_UPLOAD = 10;
@@ -82,125 +90,283 @@ const UploadArquivosSME: React.FC<UploadArquivosProps> = (props) => {
 
   const listaDeArquivos = Form.useWatch(formItemProps.name, form);
 
-  const setNovoValor = (novoMap: any) => {
+  const setNovoValor = (novoValor: any) => {
     if (form && form.setFieldValue) {
-      form.setFieldValue(formItemProps.name, novoMap);
+      form.setFieldValue(formItemProps.name, novoValor);
     }
   };
 
-  const excedeuLimiteMaximo = (arquivo: File) => {
-    const tamanhoArquivo = arquivo.size / 1024 / 1024;
 
-    return tamanhoArquivo > tamanhoMaxUploadPorArquivo;
-  };
 
   const beforeUploadDefault = (arquivo: RcFile) => {
+    const isAudio = arquivo.type?.startsWith('audio/');
+    const isVideo = arquivo.type?.startsWith('video/');
+    const tamanhoMB = arquivo.size / 1024 / 1024;
+    
+    console.log('🔍 Validando arquivo antes do upload:', {
+      name: arquivo.name,
+      type: arquivo.type,
+      size: `${tamanhoMB.toFixed(2)}MB`,
+      isAudio: isAudio,
+      isVideo: isVideo,
+      tiposPermitidos: tiposArquivosPermitidos
+    });
+
+    // 📝 VALIDAÇÃO DE FORMATO ESPECÍFICA
     if (!permiteInserirFormato(arquivo, tiposArquivosPermitidos)) {
-      notification.error({
-        message: 'Erro',
-        description: 'Formato não permitido',
+      let mensagemFormato = '';
+      
+      if (isVideo) {
+        mensagemFormato = 'Formato de vídeo não permitido. Use apenas: MP4, MOV ou WEBM';
+      } else if (isAudio) {
+        mensagemFormato = 'Formato de áudio não permitido. Use apenas: MP3 ou WAV';
+      } else {
+        mensagemFormato = `Formato não permitido. Tipos aceitos: ${tiposArquivosPermitidos.join(', ')}`;
+      }
+      
+      console.error('❌ Formato não permitido:', {
+        arquivoTipo: arquivo.type,
+        formatosPermitidos: tiposArquivosPermitidos
       });
+      
+      console.log('🚨 Chamando mensagem de erro:', mensagemFormato);
+      mensagem('error', 'Formato Inválido', mensagemFormato);
+      console.log('🚨 Após chamar mensagem de erro');
       return false;
     }
 
-    if (excedeuLimiteMaximo(arquivo)) {
-      notification.error({
-        message: 'Erro',
-        description: `Tamanho máximo ${tamanhoMaxUploadPorArquivo}MB`,
+    // 📏 VALIDAÇÃO DE TAMANHO ESPECÍFICA (10MB)
+    if (tamanhoMB > 10) {
+      let mensagemTamanho = '';
+      
+      if (isVideo) {
+        mensagemTamanho = `Vídeo muito grande (${tamanhoMB.toFixed(1)}MB). Tamanho máximo: 10MB`;
+      } else if (isAudio) {
+        mensagemTamanho = `Áudio muito grande (${tamanhoMB.toFixed(1)}MB). Tamanho máximo: 10MB`;
+      } else {
+        mensagemTamanho = `Arquivo muito grande (${tamanhoMB.toFixed(1)}MB). Tamanho máximo: 10MB`;
+      }
+      
+      console.error('❌ Arquivo muito grande:', {
+        tamanhoAtual: `${tamanhoMB.toFixed(2)}MB`,
+        tamanhoMaximo: '10MB'
       });
+      
+      mensagem('error', 'Arquivo Muito Grande', mensagemTamanho);
       return false;
     }
 
+    console.log('✅ Arquivo aprovado para upload');
     return true;
   };
 
-  const customRequestDefault = (options: any) => {
+  const customRequestDefault = async (options: any) => {
     const { onSuccess, onError, file, onProgress } = options;
+    const isAudio = file.type?.startsWith('audio/');
 
-    const fmData = new FormData();
+    try {
+      console.log(`${isAudio ? '🎵' : '🎬'} Iniciando upload:`, file.name);
+      
+      onProgress({ percent: 30 });
+      
+      // Chama o serviço de upload
+      const resposta = await uploadService(file);
+      
+      onProgress({ percent: 100 });
 
-    const config = {
-      headers: { 'content-type': 'multipart/form-data' },
-      onUploadProgress: (event: any) => {
-        onProgress({ percent: (event.loaded / event.total) * 100 }, file);
-      },
-    };
+      // Verifica se foi bem-sucedido
+      if (resposta?.status >= 200 && resposta?.status < 300 && resposta?.data) {
+        // Atribui dados do arquivo
+        if (resposta.data.idFile) file.idFile = resposta.data.idFile;
+        if (resposta.data.fileLink) file.fileLink = resposta.data.fileLink;
 
-    fmData.append('file', file);
-
-    uploadService(fmData, config)
-      .then((resposta: any) => {
-        if (resposta?.status === HttpStatusCode.Ok) {
-          file.idFile = resposta?.data?.idFile;
-          file.fileLink = resposta?.data?.fileLink;
-          onSuccess(file, file.idFile);
-        } else {
-          notification.error({
-            message: 'Erro',
-            description: 'Erro ao tentar inserir o arquivo',
-          });
-          onError({});
+        // Salva no localStorage e atualiza o campo do formulário
+        try {
+          const itemAtual = localStorage.getItem('itemAtual');
+          if (itemAtual && file.idFile) {
+            const item = JSON.parse(itemAtual);
+            if (!item.elaboracao) item.elaboracao = {};
+            
+            if (file.type?.startsWith('video/')) {
+              item.elaboracao.video = { 
+                idFile: file.idFile,
+                fileLink: file.fileLink,
+                nomeVideo: file.name, // Nome do arquivo para o frontend
+                uid: file.uid, // Mantém o uid se estiver sendo usado
+                status: file.status // Mantém o status se estiver sendo usado
+              };
+              item.elaboracao.ArquivoVideoId = file.idFile; // Salva o ID do vídeo
+            } else if (file.type?.startsWith('audio/')) {
+              item.elaboracao.audio = { 
+                idFile: file.idFile,
+                fileLink: file.fileLink,
+                nomeAudio: file.name, // Nome do arquivo para o frontend
+                uid: file.uid, // Mantém o uid se estiver sendo usado
+                status: file.status // Mantém o status se estiver sendo usado
+              };
+              item.elaboracao.ArquivoAudioId = file.idFile; // Salva o ID do áudio
+            }
+            
+            localStorage.setItem('itemAtual', JSON.stringify(item));
+            console.log('💾 ArquivoId salvo no localStorage:', file.idFile);
+          }
+          
+          // Atualiza o campo do formulário com o arquivo contendo idFile
+          // Preserva TODAS as propriedades originais do arquivo, especialmente o name
+          const arquivoAtualizado = {
+            ...file,
+            name: file.name, // Garante que o nome original seja preservado
+            idFile: file.idFile,
+            fileLink: file.fileLink,
+            status: 'done',
+            percent: 100, // Garante que está 100% completo
+            response: resposta.data // Mantém a resposta para referência
+          };
+          
+          // Atualiza o valor do campo no formulário
+          if (form && form.setFieldValue) {
+            form.setFieldValue(formItemProps.name, [arquivoAtualizado]);
+          }
+          
+        } catch (error) {
+          console.warn('Erro ao salvar no localStorage:', error);
         }
-      })
-      .catch((e: any) => {
-        notification.error({
-          message: 'Erro',
-          description: 'Erro ao tentar inserir o arquivo',
-        });
-        onError({ event: e });
-      });
-  };
 
-  const onRemoveDefault = async (arquivo: UploadFile<any>) => {
-    if (arquivo.xhr) {
-      notification.success({
-        message: 'Sucesso',
-        description: `Arquivo ${arquivo.name} excluído com sucesso`,
-      });
-      return true;
+        // Chama onSuccess com status correto
+        // Garante que todas as propriedades importantes sejam preservadas
+        file.status = 'done'; // Define status como concluído
+        file.percent = 100; // Define progresso como 100%
+        file.response = resposta.data; // Adiciona resposta para referência
+        
+        onSuccess(resposta.data, file);
+      } else {
+        const errorMsg = resposta?.data?.message || 'Erro no upload';
+        mensagem('error', 'Erro no Upload', errorMsg);
+        onError(new Error(errorMsg));
+      }
+    } catch (error: any) {
+      let errorMsg = 'Erro no upload';
+      
+      try {
+        if (error && typeof error === 'object') {
+          errorMsg = error?.response?.data?.message || error?.message || errorMsg;
+        } else if (typeof error === 'string') {
+          errorMsg = error;
+        }
+      } catch (parseError) {
+        console.warn('Erro ao processar erro:', parseError);
+        errorMsg = 'Erro desconhecido no upload';
+      }
+      
+      mensagem('error', 'Erro no Upload', errorMsg);
+      
+      try {
+        if (typeof onError === 'function') {
+          onError(new Error(errorMsg));
+        } else {
+          console.warn('onError não é uma função válida');
+        }
+      } catch (callbackError) {
+        console.error('Erro ao chamar onError:', callbackError);
+      }
     }
-    return false;
   };
 
-  const atualizaListaArquivos = (fileList: any, file: UploadFile<any>) => {
-    const novaLista = fileList.filter((item: any) => item.uid !== file.uid);
-    const novoMap = [...novaLista];
+  const onRemoveDefault = async (arquivo: UploadFile<any>): Promise<boolean> => {
+    console.log('🗑️ Usuário solicitou remoção do arquivo:', arquivo.name);
+    
+    try {
+      // Se o arquivo tem idFile, remove do servidor também
+      const arquivoComId = arquivo as any;
+      if (arquivoComId.idFile) {
+        console.log('🌐 Removendo arquivo do servidor:', arquivoComId.idFile);
+        
+        try {
+          // Tenta remover do servidor, mas não quebra se falhar
+          await arquivoService.removerArquivo(arquivoComId.idFile);
+          console.log('✅ Arquivo removido do servidor com sucesso');
+        } catch (serverError) {
+          console.warn('⚠️ Erro ao remover do servidor, mas continuando com remoção local:', serverError);
+          // Continua mesmo se falhar no servidor
+        }
+      }
+      
+      // Remove localmente
+      removeArquivo(arquivo);
+      
+      mensagem('success', 'Arquivo Removido', `${arquivo.name} foi removido com sucesso`);
+      
+      // Retorna true para permitir a remoção
+      return true;
+    } catch (error) {
+      console.error('❌ Erro ao remover arquivo:', error);
+      
+      mensagem('error', 'Erro ao Remover', `Erro ao remover ${arquivo.name}. ${error instanceof Error ? error.message : 'Tente novamente.'}`);
+      
+      // Retorna false para cancelar a remoção em caso de erro
+      return false;
+    }
+  };
 
-    setNovoValor(novoMap);
+  const removeArquivo = (file: UploadFile<any>) => {
+    console.log('🗑️ Removendo arquivo:', file.name);
+    
+    // Para arquivo único, limpa completamente o campo
+    setNovoValor([]);
+    
+    // Remove do localStorage também
+    try {
+      const itemAtual = localStorage.getItem('itemAtual');
+      if (itemAtual) {
+        const item = JSON.parse(itemAtual);
+        if (item.elaboracao) {
+          if (file.type?.startsWith('video/')) {
+            delete item.elaboracao.video;
+            item.elaboracao.ArquivoVideoId = null; // Remove o ID também
+            console.log('📹 Vídeo removido do localStorage');
+          } else if (file.type?.startsWith('audio/')) {
+            delete item.elaboracao.audio;
+            item.elaboracao.ArquivoAudioId = null; // Remove o ID também
+            console.log('🎵 Áudio removido do localStorage');
+          }
+          localStorage.setItem('itemAtual', JSON.stringify(item));
+        }
+      }
+    } catch (error) {
+      console.warn('⚠️ Erro ao remover do localStorage:', error);
+    }
   };
 
   const onChangeDefault = ({ file, fileList }: any) => {
+    if (!file) return;
+    
     const { status } = file;
 
-    if (excedeuLimiteMaximo(file)) {
-      atualizaListaArquivos(fileList, file);
+    // Arquivo com erro - remove completamente
+    if (status === 'error') {
+      removeArquivo(file);
       return;
     }
 
-    if (!permiteInserirFormato(file, tiposArquivosPermitidos)) {
-      atualizaListaArquivos(fileList, file);
-      return;
+    // Para arquivo único, mantém apenas o arquivo atual
+    let arquivoAtual = fileList.find((f: any) => f.uid === file.uid && f.status !== 'removed');
+    
+    // Se o arquivo foi processado com sucesso, garante que tenha todas as propriedades necessárias
+    if (arquivoAtual && status === 'done') {
+      arquivoAtual = {
+        ...arquivoAtual,
+        name: arquivoAtual.name || file.name, // Preserva o nome original
+        idFile: arquivoAtual.idFile || file.idFile,
+        fileLink: arquivoAtual.fileLink || file.fileLink,
+        status: 'done',
+        percent: 100
+      };
+      
+      mensagem('success', 'Upload Concluído', `${arquivoAtual.name} foi carregado com sucesso`);
     }
-
-    const novoMap = [...fileList]?.filter((f) => f?.status !== 'removed');
-
-    if (status === 'done') {
-      notification.success({
-        message: 'Sucesso',
-        description: `${file.name} arquivo carregado com sucesso`,
-      });
-    } else if (status === 'error') {
-      atualizaListaArquivos(fileList, file);
-      return;
-    }
-
-    if (status === 'done' || status === 'removed') {
-      if (form && form.setFieldValue) {
-        form.setFieldValue(formItemProps.name, novoMap);
-      }
-    }
-
-    setNovoValor(novoMap);
+    
+    const novoValor = arquivoAtual ? [arquivoAtual] : [];
+    setNovoValor(novoValor);
   };
 
   const onDownloadDefault = (arquivo: UploadFile<any>) => {
@@ -211,10 +377,7 @@ const UploadArquivosSME: React.FC<UploadArquivosProps> = (props) => {
           downloadBlob(resposta.data, arquivo.name);
         })
         .catch(() =>
-          notification.error({
-            message: 'Erro',
-            description: 'Erro ao tentar fazer download',
-          }),
+          mensagem('error', 'Erro', 'Erro ao tentar fazer download')
         );
     }
   };
@@ -235,7 +398,7 @@ const UploadArquivosSME: React.FC<UploadArquivosProps> = (props) => {
           name='file'
           listType='text'
           fileList={listaDeArquivos}
-          showUploadList={{ showDownloadIcon: true }}
+          showUploadList={uploadProps?.showUploadList || { showDownloadIcon: true, showRemoveIcon: true }}
           onRemove={uploadProps?.onRemove || onRemoveDefault}
           onChange={uploadProps?.onChange || onChangeDefault}
           onDownload={uploadProps?.onDownload || onDownloadDefault}
