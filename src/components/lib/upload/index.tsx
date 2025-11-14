@@ -1,7 +1,6 @@
 import { InboxOutlined } from '@ant-design/icons';
-import { Form, FormInstance, FormItemProps, Upload } from 'antd';
+import { Form, FormInstance, FormItemProps, Upload, notification } from 'antd';
 import { DraggerProps, RcFile, UploadFile } from 'antd/es/upload';
-import { notification } from '~/components/lib/notification';
 import arquivoService from '~/services/arquivo-service';
 
 import React, { PropsWithChildren } from 'react';
@@ -12,6 +11,7 @@ const { Dragger } = Upload;
 // 📢 Função helper para notificações padronizada
 type TipoMensagem = 'success' | 'info' | 'warning' | 'error';
 const mensagem = (tipo: TipoMensagem, titulo: string, descricao: string) => {
+  console.log('📢 Exibindo notificação:', { tipo, titulo, descricao });
   notification[tipo]({
     message: titulo,
     description: descricao,
@@ -129,7 +129,9 @@ const UploadArquivosSME: React.FC<UploadArquivosProps> = (props) => {
         formatosPermitidos: tiposArquivosPermitidos
       });
       
+      console.log('🚨 Chamando mensagem de erro:', mensagemFormato);
       mensagem('error', 'Formato Inválido', mensagemFormato);
+      console.log('🚨 Após chamar mensagem de erro');
       return false;
     }
 
