@@ -19,6 +19,8 @@ export const PreViewVideoAudio: React.FC<{
         );
     }
 
+
+
     if (tipo.startsWith("video/")) {
         return (
             <Card className="ContainerVideoPai">
@@ -27,20 +29,33 @@ export const PreViewVideoAudio: React.FC<{
                     width="100%"
                     controls
                     preload="metadata"
-                    crossOrigin="anonymous"
                     className="propsVideo"
                     src={src}
                     onError={(e) => {
-                        console.error('❌ Erro no vídeo:', e);
+                        const video = e.currentTarget as HTMLVideoElement;
+                        console.error('❌ Erro CORS ao carregar vídeo:', {
+                            src,
+                            error: video.error,
+                            networkState: video.networkState,
+                            readyState: video.readyState,
+                            message: 'Possível problema de CORS - Backend precisa configurar Access-Control-Allow-Origin'
+                        });
                     }}
                 >
-                    <Text type="secondary">
-                        Seu navegador não suporta o elemento de vídeo.
-                        <br />
-                        <a href={src} target="_blank" rel="noopener noreferrer">
-                            Clique aqui para abrir o vídeo diretamente
+                    <div style={{ textAlign: 'center', padding: '20px' }}>
+                        <Text type="secondary">
+                            Seu navegador não suporta o elemento de vídeo ou há um problema de CORS.
+                        </Text>
+                        <br /><br />
+                        <a href={src} target="_blank" rel="noopener noreferrer" 
+                           style={{ color: '#1890ff', textDecoration: 'underline' }}>
+                            📹 Abrir vídeo em nova aba
                         </a>
-                    </Text>
+                        <br /><br />
+                        <Text type="secondary" style={{ fontSize: '12px', color: '#999' }}>
+                            Se o vídeo não carregar, é necessário configurar CORS no servidor.
+                        </Text>
+                    </div>
                 </video>
             </Card>
         );
