@@ -103,16 +103,43 @@ const UploadArquivosSME: React.FC<UploadArquivosProps> = (props) => {
     const isVideo = arquivo.type?.startsWith('video/');
     const tamanhoMB = arquivo.size / 1024 / 1024;
     
+    // Detecta o tipo de campo baseado nos tipos permitidos
+    const campoEhVideo = tiposArquivosPermitidos.some(tipo => tipo.startsWith('video/'));
+    const campoEhAudio = tiposArquivosPermitidos.some(tipo => tipo.startsWith('audio/'));
+    
     console.log('🔍 Validando arquivo antes do upload:', {
       name: arquivo.name,
       type: arquivo.type,
       size: `${tamanhoMB.toFixed(2)}MB`,
       isAudio: isAudio,
       isVideo: isVideo,
+      campoEhVideo: campoEhVideo,
+      campoEhAudio: campoEhAudio,
       tiposPermitidos: tiposArquivosPermitidos
     });
 
-    // 📝 VALIDAÇÃO DE FORMATO ESPECÍFICA
+    // 🚨 VALIDAÇÃO 1: VERIFICA SE O TIPO DE ARQUIVO CORRESPONDE AO TIPO DE CAMPO
+    if (campoEhVideo && !isVideo) {
+      console.error('❌ Tentativa de enviar arquivo não-vídeo para campo de vídeo');
+      mensagem(
+        'error', 
+        'Formato Incorreto', 
+        'Este campo aceita apenas arquivos de vídeo. Por favor, selecione um arquivo de vídeo (MP4, MOV ou WEBM).'
+      );
+      return false;
+    }
+    
+    if (campoEhAudio && !isAudio) {
+      console.error('❌ Tentativa de enviar arquivo não-áudio para campo de áudio');
+      mensagem(
+        'error', 
+        'Formato Incorreto', 
+        'Este campo aceita apenas arquivos de áudio. Por favor, selecione um arquivo de áudio (MP3 ou WAV).'
+      );
+      return false;
+    }
+
+    // 📝 VALIDAÇÃO 2: FORMATO ESPECÍFICA (após confirmar que é o tipo certo)
     if (!permiteInserirFormato(arquivo, tiposArquivosPermitidos)) {
       let mensagemFormato = '';
       
@@ -135,7 +162,7 @@ const UploadArquivosSME: React.FC<UploadArquivosProps> = (props) => {
       return false;
     }
 
-    // 📏 VALIDAÇÃO DE TAMANHO ESPECÍFICA (10MB)
+    // 📏 VALIDAÇÃO 3: TAMANHO ESPECÍFICA (10MB)
     if (tamanhoMB > 10) {
       let mensagemTamanho = '';
       
@@ -389,6 +416,11 @@ const UploadArquivosSME: React.FC<UploadArquivosProps> = (props) => {
     return listaDeArquivos;
   };
 
+  // 🎯 Gera o atributo accept baseado nos tipos permitidos
+  const acceptTypes = tiposArquivosPermitidos.length > 0 
+    ? tiposArquivosPermitidos.join(',') 
+    : undefined;
+
   const ComponentUpload = isDraggerUpload ? Dragger : Upload;
 
   return (
@@ -398,6 +430,7 @@ const UploadArquivosSME: React.FC<UploadArquivosProps> = (props) => {
           name='file'
           listType='text'
           fileList={listaDeArquivos}
+          accept={acceptTypes}
           showUploadList={uploadProps?.showUploadList || { showDownloadIcon: true, showRemoveIcon: true }}
           onRemove={uploadProps?.onRemove || onRemoveDefault}
           onChange={uploadProps?.onChange || onChangeDefault}
