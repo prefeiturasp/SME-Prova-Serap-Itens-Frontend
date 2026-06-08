@@ -1,6 +1,4 @@
 import React from "react";
-
-//css
 import './cadastrarItemRodapeComponent.css';
 
 const CadastrarItemRodapeComponent: React.FC = () => {

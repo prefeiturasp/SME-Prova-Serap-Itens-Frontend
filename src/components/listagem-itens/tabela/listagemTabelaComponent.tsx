@@ -7,6 +7,7 @@ import iconFilter from '~/assets/filtrar.svg';
 import FiltroPrincipalNovoComponent from '~/components/filtro-principal-novo/filtroPrincipalNovoComponent';
 import type { FiltroItemDto } from '~/domain/dto/filtro-item-dto';
 import carregarFiltroDeItensDoLocalStorage from '~/utils/filtro-helper';
+import { htmlSeguro } from '~/utils/html-seguro';
 
 interface ListagemTabelaProps {
   dados: ItemListagemDto[];
@@ -15,7 +16,7 @@ interface ListagemTabelaProps {
   setPagina: (p: number) => void;
   itensPorPagina: number;
   onItemClick?: (id: string) => void;
-  selecionaPaginasOnChange: (value: any, option: any) => void;
+  selecionaPaginasOnChange: (value: number) => void;
   onChangeFiltro: () => void;
 }
 
@@ -159,7 +160,7 @@ const ListagemTabela: React.FC<ListagemTabelaProps> = ({
                   <b>Enunciado do item:</b>
                   <br />
                   {item.enunciado && item.enunciado.trim() !== '' ? (
-                    <div dangerouslySetInnerHTML={{ __html: item.enunciado }} />
+                    <div dangerouslySetInnerHTML={htmlSeguro(item.enunciado)} />
                   ) : (
                     <i>[Enunciado não cadastrado]</i>
                   )}

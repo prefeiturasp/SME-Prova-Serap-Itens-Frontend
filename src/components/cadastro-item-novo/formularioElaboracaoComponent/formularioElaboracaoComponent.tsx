@@ -2,25 +2,16 @@ import React, { useEffect, useState, useMemo, useCallback, Dispatch, SetStateAct
 import { Col, Form, FormProps, Input, Row, Radio, Modal, Button } from "antd";
 import { TextEditor } from "~/components/lib/editor";
 import { EditOutlined } from '@ant-design/icons';
-
-//css
 import './formularioElaboracaoComponent.css';
-
-// components personalizados
 import UploadArquivosSME from "~/components/lib/upload";
 import ButtonPrimary from "~/components/lib/button/primary";
-
-// Enums
 import { Campos } from "~/domain/enums/campos-cadastro-item";
-
-// Types
 import { VideoArquivoDto, AudioArquivoDto } from '~/domain/dto/ArquivoMidiaDto';
-
-//services
 import arquivoService from "~/services/arquivo-service";
 import { PreViewVideoAudio } from "~/components/lib/preViewVideoAudio/preViewVideoAudio";
+import { atualizarItemAtual, lerItemAtual } from '~/utils/item-atual-storage';
+import { htmlSeguro } from '~/utils/html-seguro';
 
-// Interface para props de video/audio
 interface VideoAudioProps {
     videoTemp?: VideoArquivoDto;
     audioTemp?: AudioArquivoDto;
@@ -48,7 +39,6 @@ const FormularioElaboracaoComponent: React.FC<FormProps & {
         return null;
     }
 
-    // Campos
     const campoTextoBase = Campos.textoBase;
     const campoFonte = Campos.fonte;
     const campoEnunciado = Campos.enunciado;
@@ -65,51 +55,16 @@ const FormularioElaboracaoComponent: React.FC<FormProps & {
     const campoJustificativaD = Campos.justificativaD;
     const campoAlternativaCorreta = Campos.alternativaCorreta;
 
-    // Estado para controlar a visibilidade do modal
     const [isModalAVisible, setIsModalAVisible] = useState(false);
     const [isModalBVisible, setIsModalBVisible] = useState(false);
     const [isModalCVisible, setIsModalCVisible] = useState(false);
     const [isModalDVisible, setIsModalDVisible] = useState(false);
 
-    // Estados para preview de mídia (removidos - agora usando lógica baseada em arquivos)
-
-    // Estados para os caminhos dos arquivos carregados
-    // const [videoCaminho, setVideoCaminho] = useState<string>('');
-    // const [audioCaminho, setAudioCaminho] = useState<string>('');
-
-    // Carrega caminhos dos arquivos quando componente monta
-    // useEffect(() => {
-    //     const carregarCaminhosArquivos = async () => {
-    //         try {
-    //             const itemSalvo = localStorage.getItem('itemAtual');
-    //             if (itemSalvo) {
-    //                 const item = JSON.parse(itemSalvo);
-    //                 if (item.id) {
-    //                     console.log('🎬 Carregando caminhos dos arquivos para itemId:', item.id);
-    //                     const resposta = await arquivoService.obterArquivosPorItemId(item.id);
-                        
-    //                     if (resposta?.data) {
-    //                         console.log('✅ Caminhos dos arquivos carregados:', resposta.data);
-    //                         setVideoCaminho(resposta.data.videoCaminho || '');
-    //                         setAudioCaminho(resposta.data.audioCaminho || '');
-    //                     }
-    //                 }
-    //             }
-    //         } catch (error) {
-    //             console.warn('⚠️ Erro ao carregar caminhos dos arquivos:', error);
-    //         }
-    //     };
-
-    //     carregarCaminhosArquivos();
-    // }, []);
-
-    // 🛡️ Estados para controlar se os TextEditors devem ser renderizados (proteção contra erro de produção)
     const [renderTextEditorA, setRenderTextEditorA] = useState(true);
     const [renderTextEditorB, setRenderTextEditorB] = useState(true);
     const [renderTextEditorC, setRenderTextEditorC] = useState(true);
     const [renderTextEditorD, setRenderTextEditorD] = useState(true);
 
-    //Exibe os valores do radio
     const [alternativaA, setAlternativaA] = useState<string>('');
     const [alternativaB, setAlternativaB] = useState<string>('');
     const [alternativaC, setAlternativaC] = useState<string>('');
@@ -145,7 +100,6 @@ const FormularioElaboracaoComponent: React.FC<FormProps & {
         setJustificativaD(value || '');
     };
 
-    // Memoizações para evitar criação de objetos/arrays inline que forçam re-renders
     const videoFormItemProps = useMemo(() => ({ name: campoVideo }), [campoVideo]);
     const videoUploadProps = useMemo(() => ({ 
         maxCount: 1, 
@@ -175,8 +129,7 @@ const FormularioElaboracaoComponent: React.FC<FormProps & {
         'audio/wav',        // WAV
     ], []);
 
-    // 🛡️ Função helper para renderização condicional de TextEditor
-    const renderTextEditorSafe = (shouldRender: boolean, value: string, onChange: (value: any) => void, placeholder: string) => {
+    const renderTextEditorSafe = (shouldRender: boolean, value: string, onChange: (value: string) => void, placeholder: string) => {
         if (shouldRender) {
             return (
                 <TextEditor
@@ -189,153 +142,127 @@ const FormularioElaboracaoComponent: React.FC<FormProps & {
         return <div style={{ minHeight: '100px', backgroundColor: '#f5f5f5' }}>Carregando...</div>;
     };
 
-    // 🎬 FUNÇÃO PARA ATUALIZAR DADOS DE VÍDEO NO UPLOAD (localStorage como fonte da verdade)
     const handleVideoUpload = useCallback((videoFile: VideoArquivoDto) => {
-        console.log('🎬 Novo vídeo upado:', videoFile);
-        
-        // 💾 SALVA PRIMEIRO NO LOCALSTORAGE (fonte da verdade)
-        const itemSalvo = localStorage.getItem('itemAtual');
-        if (itemSalvo) {
-            const item = JSON.parse(itemSalvo);
-            if (!item.videoAudio) item.videoAudio = {};
-            item.videoAudio.videoTemp = videoFile;
-            localStorage.setItem('itemAtual', JSON.stringify(item));
-            console.log('💾 Vídeo temporário salvo no localStorage:', videoFile.name);
-        }
-        
-        // 🔄 ATUALIZA ESTADOS REACT BASEADO NO LOCALSTORAGE
+        atualizarItemAtual(item => ({
+            ...item,
+            videoAudio: {
+                ...(item.videoAudio || {}),
+                videoTemp: videoFile,
+            },
+        }));
+
         if (setVideoAudioData && setVideoCaminho) {
             setVideoAudioData(prev => ({
                 ...prev,
                 videoTemp: videoFile
             }));
-            
-            // Atualiza caminho para preview
+
             if (videoFile.fileLink) {
                 setVideoCaminho(videoFile.fileLink);
             }
         }
-        
-        // 📝 FORÇA SINCRONIZAÇÃO DO FORM (sem sobrescrever outros dados)
-        if (form) {
-            // Não usa setFieldValue direto para evitar conflitos
-            setTimeout(() => {
-                form.setFieldValue(campoVideo, [videoFile]);
-            }, 100);
-        }
+
+        form?.setFieldValue(campoVideo, [videoFile]);
     }, [setVideoAudioData, setVideoCaminho, form, campoVideo]);
 
-    // 🎵 FUNÇÃO PARA ATUALIZAR DADOS DE ÁUDIO NO UPLOAD (localStorage como fonte da verdade)
     const handleAudioUpload = useCallback((audioFile: AudioArquivoDto) => {
-        console.log('🎵 Novo áudio upado:', audioFile);
-        
-        // 💾 SALVA PRIMEIRO NO LOCALSTORAGE (fonte da verdade)
-        const itemSalvo = localStorage.getItem('itemAtual');
-        if (itemSalvo) {
-            const item = JSON.parse(itemSalvo);
-            if (!item.videoAudio) item.videoAudio = {};
-            item.videoAudio.audioTemp = audioFile;
-            localStorage.setItem('itemAtual', JSON.stringify(item));
-            console.log('💾 Áudio temporário salvo no localStorage:', audioFile.name);
-        }
-        
-        // 🔄 ATUALIZA ESTADOS REACT BASEADO NO LOCALSTORAGE
+        atualizarItemAtual(item => ({
+            ...item,
+            videoAudio: {
+                ...(item.videoAudio || {}),
+                audioTemp: audioFile,
+            },
+        }));
+
         if (setVideoAudioData && setAudioCaminho) {
             setVideoAudioData(prev => ({
                 ...prev,
                 audioTemp: audioFile
             }));
-            
-            // Atualiza caminho para preview
+
             if (audioFile.fileLink) {
                 setAudioCaminho(audioFile.fileLink);
             }
         }
-        
-        // 📝 FORÇA SINCRONIZAÇÃO DO FORM (sem sobrescrever outros dados)
-        if (form) {
-            // Não usa setFieldValue direto para evitar conflitos
-            setTimeout(() => {
-                form.setFieldValue(campoAudio, [audioFile]);
-            }, 100);
-        }
+
+        form?.setFieldValue(campoAudio, [audioFile]);
     }, [setVideoAudioData, setAudioCaminho, form, campoAudio]);
 
-    // 💾 CARREGA DADOS DO LOCALSTORAGE PARA O FORM (localStorage como fonte da verdade)
     const carregarDadosDoLocalStorage = useCallback(() => {
-        try {
-            const itemSalvo = localStorage.getItem('itemAtual');
-            if (itemSalvo && form) {
-                const item = JSON.parse(itemSalvo);
-                
-                console.log('🔍 [DEBUG] Carregando do localStorage:', {
-                    videoSalvo: item.videoAudio?.videoSalvo?.name,
-                    videoTemp: item.videoAudio?.videoTemp?.name,
-                    audioSalvo: item.videoAudio?.audioSalvo?.name,
-                    audioTemp: item.videoAudio?.audioTemp?.name,
-                });
+        const item = lerItemAtual();
+        if (!item || !form || !item.videoAudio) {
+            return;
+        }
 
-                if (item.videoAudio) {
-                    // 🎬 Prioriza arquivo temporário (recém-upado) sobre salvo
-                    const videoParaForm = item.videoAudio.videoTemp || item.videoAudio.videoSalvo;
-                    const audioParaForm = item.videoAudio.audioTemp || item.videoAudio.audioSalvo;
-                    
-                    if (videoParaForm) {
-                        console.log('🎬 Carregando vídeo do localStorage para Form:', videoParaForm.name);
-                        form.setFieldValue(campoVideo, [videoParaForm]);
-                    }
-                    
-                    if (audioParaForm) {
-                        console.log('🎵 Carregando áudio do localStorage para Form:', audioParaForm.name);
-                        form.setFieldValue(campoAudio, [audioParaForm]);
-                    }
-                }
-            }
-        } catch (error) {
-            console.error('❌ Erro ao carregar dados do localStorage para Form:', error);
+        const videoParaForm = item.videoAudio.videoTemp || item.videoAudio.videoSalvo;
+        const audioParaForm = item.videoAudio.audioTemp || item.videoAudio.audioSalvo;
+
+        if (videoParaForm) {
+            form.setFieldValue(campoVideo, [videoParaForm]);
+        }
+
+        if (audioParaForm) {
+            form.setFieldValue(campoAudio, [audioParaForm]);
         }
     }, [form, campoVideo, campoAudio]);
 
-    // 📄 MONTA ARQUIVO INICIAL NO FORM - executa quando componente monta ou dados mudam
     useEffect(() => {
-        const timeoutId = setTimeout(() => {
-            carregarDadosDoLocalStorage();
-        }, 200); // Pequeno delay para garantir que localStorage está sincronizado
-        
-        return () => clearTimeout(timeoutId);
+        carregarDadosDoLocalStorage();
     }, [videoAudioData, carregarDadosDoLocalStorage]);
 
-    useEffect(() => {
-        const itemSalvo = localStorage.getItem('itemAtual');
-        if (itemSalvo) {
-            try {
-                const item = JSON.parse(itemSalvo);
+    const safeString = (value: unknown): string => {
+        if (value === null || value === undefined) return '';
+        return String(value);
+    };
 
-                const safeString = (value: any): string => {
-                    if (value === null || value === undefined) return '';
-                    return String(value);
+    const limparDadosAlternativa = useCallback(
+        (
+            campoAlternativa: Campos,
+            campoJustificativa: Campos,
+            alternativaKey: 'alternativaA' | 'alternativaB' | 'alternativaC' | 'alternativaD',
+            justificativaKey: 'justificativaA' | 'justificativaB' | 'justificativaC' | 'justificativaD',
+        ) => {
+            form?.resetFields([campoAlternativa, campoJustificativa]);
+
+            atualizarItemAtual(item => {
+                const elaboracao = {
+                    ...(item.elaboracao || {}),
+                    [alternativaKey]: '',
+                    [justificativaKey]: '',
                 };
 
-                setAlternativaA(safeString(item.elaboracao?.alternativaA));
-                setAlternativaB(safeString(item.elaboracao?.alternativaB));
-                setAlternativaC(safeString(item.elaboracao?.alternativaC));
-                setAlternativaD(safeString(item.elaboracao?.alternativaD));
-                setJustificativaA(safeString(item.elaboracao?.justificativaA));
-                setJustificativaB(safeString(item.elaboracao?.justificativaB));
-                setJustificativaC(safeString(item.elaboracao?.justificativaC));
-                setJustificativaD(safeString(item.elaboracao?.justificativaD));
-            } catch (error) {
-                console.error('❌ Erro ao carregar dados do localStorage:', error);
+                return {
+                    ...item,
+                    elaboracao,
+                };
+            });
+        },
+        [form],
+    );
 
-                setAlternativaA('');
-                setAlternativaB('');
-                setAlternativaC('');
-                setAlternativaD('');
-                setJustificativaA('');
-                setJustificativaB('');
-                setJustificativaC('');
-                setJustificativaD('');
+    useEffect(() => {
+        try {
+            const item = lerItemAtual();
+            if (!item) {
+                return;
             }
+            setAlternativaA(safeString(item.elaboracao?.alternativaA));
+            setAlternativaB(safeString(item.elaboracao?.alternativaB));
+            setAlternativaC(safeString(item.elaboracao?.alternativaC));
+            setAlternativaD(safeString(item.elaboracao?.alternativaD));
+            setJustificativaA(safeString(item.elaboracao?.justificativaA));
+            setJustificativaB(safeString(item.elaboracao?.justificativaB));
+            setJustificativaC(safeString(item.elaboracao?.justificativaC));
+            setJustificativaD(safeString(item.elaboracao?.justificativaD));
+        } catch {
+            setAlternativaA('');
+            setAlternativaB('');
+            setAlternativaC('');
+            setAlternativaD('');
+            setJustificativaA('');
+            setJustificativaB('');
+            setJustificativaC('');
+            setJustificativaD('');
         }
     }, []);
 
@@ -381,100 +308,36 @@ const FormularioElaboracaoComponent: React.FC<FormProps & {
         switch (nomeModal) {
 
             case "modalA":
-                // 🛡️ Desabilita TextEditor temporariamente para evitar erro em produção
                 setRenderTextEditorA(false);
-
-                setTimeout(() => {
-                    setIsModalAVisible(false);
-                    setAlternativaA('');
-                    setJustificativaA('');
-                    form?.resetFields([campoAlternativaA, campoJustificativaA]);
-
-                    const itemAtualA = localStorage.getItem('itemAtual');
-                    if (itemAtualA) {
-                        const item = JSON.parse(itemAtualA);
-                        if (item.elaboracao) {
-                            item.elaboracao.alternativaA = '';
-                            item.elaboracao.justificativaA = '';
-                            localStorage.setItem('itemAtual', JSON.stringify(item));
-                        }
-                    }
-
-                    // 🔄 Reabilita TextEditor após fechar modal
-                    setTimeout(() => setRenderTextEditorA(true), 100);
-                }, 50);
+                setIsModalAVisible(false);
+                setAlternativaA('');
+                setJustificativaA('');
+                limparDadosAlternativa(campoAlternativaA, campoJustificativaA, 'alternativaA', 'justificativaA');
+                Promise.resolve().then(() => setRenderTextEditorA(true));
                 break;
             case "modalB":
-                // 🛡️ Desabilita TextEditor temporariamente para evitar erro em produção
                 setRenderTextEditorB(false);
-
-                setTimeout(() => {
-                    setIsModalBVisible(false);
-                    setAlternativaB('');
-                    setJustificativaB('');
-                    form?.resetFields([campoAlternativaB, campoJustificativaB]);
-
-                    const itemAtualB = localStorage.getItem('itemAtual');
-                    if (itemAtualB) {
-                        const item = JSON.parse(itemAtualB);
-                        if (item.elaboracao) {
-                            item.elaboracao.alternativaB = '';
-                            item.elaboracao.justificativaB = '';
-                            localStorage.setItem('itemAtual', JSON.stringify(item));
-                        }
-                    }
-
-                    // 🔄 Reabilita TextEditor após fechar modal
-                    setTimeout(() => setRenderTextEditorB(true), 100);
-                }, 50);
+                setIsModalBVisible(false);
+                setAlternativaB('');
+                setJustificativaB('');
+                limparDadosAlternativa(campoAlternativaB, campoJustificativaB, 'alternativaB', 'justificativaB');
+                Promise.resolve().then(() => setRenderTextEditorB(true));
                 break;
             case "modalC":
-                // 🛡️ Desabilita TextEditor temporariamente para evitar erro em produção
                 setRenderTextEditorC(false);
-
-                setTimeout(() => {
-                    setIsModalCVisible(false);
-                    setAlternativaC('');
-                    setJustificativaC('');
-                    form?.resetFields([campoAlternativaC, campoJustificativaC]);
-
-                    const itemAtualC = localStorage.getItem('itemAtual');
-                    if (itemAtualC) {
-                        const item = JSON.parse(itemAtualC);
-                        if (item.elaboracao) {
-                            item.elaboracao.alternativaC = '';
-                            item.elaboracao.justificativaC = '';
-                            localStorage.setItem('itemAtual', JSON.stringify(item));
-                        }
-                    }
-
-                    // 🔄 Reabilita TextEditor após fechar modal
-                    setTimeout(() => setRenderTextEditorC(true), 100);
-                }, 50);
+                setIsModalCVisible(false);
+                setAlternativaC('');
+                setJustificativaC('');
+                limparDadosAlternativa(campoAlternativaC, campoJustificativaC, 'alternativaC', 'justificativaC');
+                Promise.resolve().then(() => setRenderTextEditorC(true));
                 break;
             case "modalD":
-                // 🛡️ Desabilita TextEditor temporariamente para evitar erro em produção
                 setRenderTextEditorD(false);
-
-                setTimeout(() => {
-                    setIsModalDVisible(false);
-                    setAlternativaD('');
-                    setJustificativaD('');
-                    form?.resetFields([campoAlternativaD, campoJustificativaD]);
-
-                    const itemAtualD = localStorage.getItem('itemAtual');
-                    if (itemAtualD) {
-                        const item = JSON.parse(itemAtualD);
-                        if (item.elaboracao) {
-                            item.elaboracao.alternativaD = '';
-                            item.elaboracao.justificativaD = '';
-                            localStorage.setItem('itemAtual', JSON.stringify(item));
-                        }
-                    }
-
-                    // 🔄 Reabilita TextEditor após fechar modal
-                    setTimeout(() => setRenderTextEditorD(true), 100);
-                }, 50);
+                setIsModalDVisible(false);
+                setAlternativaD('');
+                setJustificativaD('');
+                limparDadosAlternativa(campoAlternativaD, campoJustificativaD, 'alternativaD', 'justificativaD');
+                Promise.resolve().then(() => setRenderTextEditorD(true));
                 break;
             default:
                 break;
@@ -563,11 +426,11 @@ const FormularioElaboracaoComponent: React.FC<FormProps & {
                                                 ? "mostrar-card" : "esconder-card"} `}>
                                                 <div>
                                                     <div className="card-radio-label">Alternativa:</div>
-                                                    <div className="card-radio-texto" dangerouslySetInnerHTML={{ __html: alternativaA || '' }} />
+                                                    <div className="card-radio-texto" dangerouslySetInnerHTML={htmlSeguro(alternativaA)} />
                                                 </div>
                                                 <div>
                                                     <div className="card-radio-label">Justificativa:</div>
-                                                    <div className="card-radio-texto" dangerouslySetInnerHTML={{ __html: justificativaA || '' }} />
+                                                    <div className="card-radio-texto" dangerouslySetInnerHTML={htmlSeguro(justificativaA)} />
 
                                                 </div>
                                             </div>
@@ -591,11 +454,11 @@ const FormularioElaboracaoComponent: React.FC<FormProps & {
                                                 ? "mostrar-card" : "esconder-card"} `}>
                                                 <div>
                                                     <div className="card-radio-label">Alternativa:</div>
-                                                    <div className="card-radio-texto" dangerouslySetInnerHTML={{ __html: alternativaB || '' }} />
+                                                    <div className="card-radio-texto" dangerouslySetInnerHTML={htmlSeguro(alternativaB)} />
                                                 </div>
                                                 <div>
                                                     <div className="card-radio-label">Justificativa:</div>
-                                                    <div className="card-radio-texto" dangerouslySetInnerHTML={{ __html: justificativaB || '' }} />
+                                                    <div className="card-radio-texto" dangerouslySetInnerHTML={htmlSeguro(justificativaB)} />
                                                 </div>
                                             </div>
                                         </div>
@@ -617,11 +480,11 @@ const FormularioElaboracaoComponent: React.FC<FormProps & {
                                                 ? "mostrar-card" : "esconder-card"} `}>
                                                 <div>
                                                     <div className="card-radio-label">Alternativa:</div>
-                                                    <div className="card-radio-texto" dangerouslySetInnerHTML={{ __html: alternativaC || '' }} />
+                                                    <div className="card-radio-texto" dangerouslySetInnerHTML={htmlSeguro(alternativaC)} />
                                                 </div>
                                                 <div>
                                                     <div className="card-radio-label">Justificativa:</div>
-                                                    <div className="card-radio-texto" dangerouslySetInnerHTML={{ __html: justificativaC || '' }} />
+                                                    <div className="card-radio-texto" dangerouslySetInnerHTML={htmlSeguro(justificativaC)} />
                                                 </div>
                                             </div>
                                         </div>
@@ -643,11 +506,11 @@ const FormularioElaboracaoComponent: React.FC<FormProps & {
                                                 ? "mostrar-card" : "esconder-card"} `}>
                                                 <div>
                                                     <div className="card-radio-label">Alternativa:</div>
-                                                    <div className="card-radio-texto" dangerouslySetInnerHTML={{ __html: alternativaD || '' }} />
+                                                    <div className="card-radio-texto" dangerouslySetInnerHTML={htmlSeguro(alternativaD)} />
                                                 </div>
                                                 <div>
                                                     <div className="card-radio-label">Justificativa:</div>
-                                                    <div className="card-radio-texto" dangerouslySetInnerHTML={{ __html: justificativaD || '' }} />
+                                                    <div className="card-radio-texto" dangerouslySetInnerHTML={htmlSeguro(justificativaD)} />
                                                 </div>
                                             </div>
                                         </div>
@@ -892,7 +755,6 @@ const FormularioElaboracaoComponent: React.FC<FormProps & {
                                     </UploadArquivosSME>
                                 </div>
                                 <div className="video-antD-edicao">
-                                    {/* 🎬 Preview do Vídeo */}
                                     <PreViewVideoAudio 
                                         src={videoCaminho} 
                                         tipo="video/mp4" 
@@ -928,7 +790,6 @@ const FormularioElaboracaoComponent: React.FC<FormProps & {
                                                             uid: file.uid,
                                                             type: file.type
                                                         };
-                                                        console.log('🎵 Upload de áudio concluído:', audioFile.name);
                                                         handleAudioUpload(audioFile);
                                                     }
                                                 }
@@ -946,7 +807,6 @@ const FormularioElaboracaoComponent: React.FC<FormProps & {
                                     </UploadArquivosSME>
                                 </div>
                                 <div className="audio-antD-edicao">
-                                    {/* 🎵 Preview do Áudio */}
                                     <PreViewVideoAudio 
                                         src={audioCaminho} 
                                         tipo="audio/mp3" 
@@ -985,3 +845,4 @@ const FormularioElaboracaoComponent: React.FC<FormProps & {
 }
 
 export default FormularioElaboracaoComponent;
+
