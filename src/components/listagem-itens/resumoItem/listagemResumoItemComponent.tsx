@@ -3,9 +3,23 @@ import './listagemResumoItemComponent.css';
 import { Button, Radio } from 'antd';
 import iconEdit from '~/assets/icon-editar.svg';
 import iconDelete from '~/assets/icon-remover.svg';
+import { htmlSeguro } from '~/utils/html-seguro';
+interface AlternativaResumoViewModel {
+  id: number | string;
+  numeracao: string;
+  descricao: string;
+}
+
+interface ItemResumoViewModel {
+  codigoItem?: string | number;
+  enunciado?: string;
+  textoBase?: string;
+  fonte?: string;
+  alternativas?: AlternativaResumoViewModel[];
+}
 
 interface listagemResumoItemProps {
-  dados?: any;
+  dados?: ItemResumoViewModel;
 }
 
 const ListagemResumoItemComponent: React.FC<listagemResumoItemProps> = ({ dados }) => {
@@ -46,33 +60,33 @@ const ListagemResumoItemComponent: React.FC<listagemResumoItemProps> = ({ dados 
         <div className='resumo-item-conteudo-corpo'>
           <div className='resumo-item-conteudo-itens'>
             {item.enunciado && item.enunciado.trim() !== '' ? (
-              <div dangerouslySetInnerHTML={{ __html: item.enunciado }} />
+              <div dangerouslySetInnerHTML={htmlSeguro(item.enunciado)} />
             ) : (
               <i>Enunciado não cadastrado</i>
             )}
           </div>
           <div className='resumo-item-conteudo-itens'>
             {item.textoBase && item.textoBase.trim() !== '' ? (
-              <div dangerouslySetInnerHTML={{ __html: item.textoBase }} />
+              <div dangerouslySetInnerHTML={htmlSeguro(item.textoBase)} />
             ) : (
               <i>Texto base não cadastrado</i>
             )}
           </div>
           <div className='resumo-item-conteudo-corpo-fonte'>
             {item.fonte && item.fonte.trim() !== '' ? (
-              <i dangerouslySetInnerHTML={{ __html: item.fonte }} />
+              <i dangerouslySetInnerHTML={htmlSeguro(item.fonte)} />
             ) : (
               <i>Fonte não cadastrada</i>
             )}
           </div>
           <br />
           <Radio.Group className='radio-group-alterantivas no-click'>
-            {item.alternativas.map((alt: any) => (
+            {(item.alternativas ?? []).map((alt: AlternativaResumoViewModel) => (
               <div key={alt.id} className='resumo-item-conteudo-corpo-alternativa'>
                 <Radio value={alt.numeracao}>
                   <div className='radio-alternativa-conteudo'>
                     <b>{alt.numeracao})</b>{' '}
-                    <div dangerouslySetInnerHTML={{ __html: alt.descricao }}></div>
+                    <div dangerouslySetInnerHTML={htmlSeguro(alt.descricao)}></div>
                   </div>
                 </Radio>
               </div>

@@ -17,6 +17,7 @@ import { DefaultOptionType } from 'antd/es/select';
 import { SelecioneDto } from '~/domain/dto/selecione-dto';
 import { converterSelecineDto } from '~/utils/converte-dto';
 import carregarFiltroDeItensDoLocalStorage from '~/utils/filtro-helper';
+import { limparStorageFiltroListagem } from '~/utils/fluxo-item-storage';
 
 const ListagemItens: React.FC = () => {
   const linkRetorno = 'https://hom-serap.sme.prefeitura.sp.gov.br/';
@@ -48,9 +49,8 @@ const ListagemItens: React.FC = () => {
 
   const buscaDadosTabela = async () => {
     try {
-      const valorSelcionado: any = selectItemSelecionado?.value;
       const filtros = carregarFiltroDeItensDoLocalStorage();
-      const codigoItem: string = valorSelcionado?.label!;
+      const codigoItem = (selectItemSelecionado?.label as string) ?? '';
       const resposta: PaginacaoDto<ItemListagemDto> = await itemService.obterListaItens(
         pagina,
         itensPorPagina,
@@ -61,8 +61,9 @@ const ListagemItens: React.FC = () => {
       );
       setTabelaItens(resposta?.itens ?? []);
       setTotalRegistro(resposta?.totalRegistros ?? 0);
-    } catch (error) {
-      console.log(error);
+    } catch {
+      setTabelaItens([]);
+      setTotalRegistro(0);
     }
   };
 
@@ -74,11 +75,12 @@ const ListagemItens: React.FC = () => {
     setItemResumoVersao(resposta);
   };
 
-  const selecionaItemOnChange = async (value: string, option: any) => {
+  const selecionaItemOnChange = async (value: string, option: DefaultOptionType) => {
     setPagina(1);
     if (value) {
+      const label = typeof option.label === 'string' ? option.label : String(option.label ?? '');
       const obj: AntDesignDto = {
-        label: option.label,
+        label,
         value: value,
       };
       setSelectItemSelecionado(obj);
@@ -95,7 +97,9 @@ const ListagemItens: React.FC = () => {
 
       setLoadingSelect(true);
 
-      if (value?.length >= 3 || selectItemSelecionado.length >= 3) {
+      const labelSelecionado = String(selectItemSelecionado?.label ?? '');
+
+      if (value.length >= 3 || labelSelecionado.length >= 3) {
         const resposta: SelecioneDto[] = await filtroSelectService.obterListaItems(value);
         setSelectItemLista(converterSelecineDto(resposta));
       } else {
@@ -103,8 +107,8 @@ const ListagemItens: React.FC = () => {
         setCodigoItemTabelaSelecionado('');
         setSelectItemLista([]);
       }
-    } catch (error) {
-      console.log(error);
+    } catch {
+      setSelectItemLista([]);
     } finally {
       setLoadingSelect(false);
     }
@@ -115,8 +119,8 @@ const ListagemItens: React.FC = () => {
     else buscaDadosTabela();
   };
 
-  const selecionaPaginasOnChange = async (valor: string) => {
-    setItensPorPagina(Number(valor));
+  const selecionaPaginasOnChange = (valor: number) => {
+    setItensPorPagina(valor);
   };
 
   const tabelaItemClick = (id: string) => {
@@ -125,13 +129,13 @@ const ListagemItens: React.FC = () => {
 
   useEffect(() => {
     return () => {
-      localStorage.removeItem('itemFiltro');
+      limparStorageFiltroListagem();
     };
   }, []);
 
   useEffect(() => {
     const handleBeforeUnload = () => {
-      localStorage.removeItem('itemFiltro');
+      limparStorageFiltroListagem();
     };
 
     window.addEventListener('beforeunload', handleBeforeUnload);

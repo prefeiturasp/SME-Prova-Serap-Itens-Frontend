@@ -2,8 +2,6 @@ import React from 'react';
 import { Col, Row } from 'antd';
 import { Link } from 'react-router-dom';
 import { ArrowLeftOutlined, RightOutlined } from '@ant-design/icons';
-
-//css
 import './cadastrarItemHeaderComponent.css';
 
 const CadastrarItemHeaderComponent: React.FC<{ pagina: number }> = ({ pagina }) => {
