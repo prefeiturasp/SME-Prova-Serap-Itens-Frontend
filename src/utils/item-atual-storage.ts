@@ -38,9 +38,7 @@ export const salvarItemAtual = (item: ItemAtual): void => {
   localStorage.setItem(ITEM_ATUAL_KEY, JSON.stringify(item));
 };
 
-export const atualizarItemAtual = (
-  updater: (item: ItemAtual) => ItemAtual,
-): ItemAtual | null => {
+export const atualizarItemAtual = (updater: (item: ItemAtual) => ItemAtual): ItemAtual | null => {
   const itemAtual = lerItemAtual();
   if (!itemAtual) return null;
   const itemAtualizado = updater(itemAtual);

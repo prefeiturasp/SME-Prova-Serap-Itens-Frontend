@@ -1,18 +1,15 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from 'react';
 import { Col, Form, FormProps, Row, Radio } from 'antd';
 import { DefaultOptionType } from 'antd/lib/select';
 import { SelectValueType } from '~/domain/type/select';
-import { Campos } from "~/domain/enums/campos-cadastro-item";
+import { Campos } from '~/domain/enums/campos-cadastro-item';
 import SelectForm from '~/components/select-form';
-import TextArea from "antd/es/input/TextArea";
-import InputTag from "~/components/input-tag";
-import TipoItem from "~/components/cadastro-item/campos/tipo-item";
-import { CampoNumero } from "~/components/cadastro-item/campo-numero";
+import TextArea from 'antd/es/input/TextArea';
+import InputTag from '~/components/input-tag';
+import TipoItem from '~/components/cadastro-item/campos/tipo-item';
+import { CampoNumero } from '~/components/cadastro-item/campo-numero';
 import configuracaoItemService from '~/services/configuracaoItem-service';
-import {
-  ruleCampoObrigatorioForm,
-  validarCampoForm
-} from "~/utils/funcoes";
+import { ruleCampoObrigatorioForm, validarCampoForm } from '~/utils/funcoes';
 import { STORAGE_KEYS } from '~/utils/fluxo-item-storage';
 import '../cards/identificacaoComponent/identificacaoComponent.css';
 import '../cards/caracteristicasItemComponet/caracteristicaItemComponent.css';
@@ -30,7 +27,9 @@ const FormularioUnico: React.FC<FormularioUnicoProps> = ({ form, setCarregando }
   const [listaCompetencias, setListaCompetencias] = useState<DefaultOptionType[]>([]);
   const [listaHabilidades, setListaHabilidades] = useState<DefaultOptionType[]>([]);
   const [listaNivelItem, setListaNivelItem] = useState<DefaultOptionType[]>([]);
-  const [listaQuantidadeAlternativas, setListaQuantidadeAlternativas] = useState<DefaultOptionType[]>([]);
+  const [listaQuantidadeAlternativas, setListaQuantidadeAlternativas] = useState<
+    DefaultOptionType[]
+  >([]);
   const [listaTiposItem, setListaTiposItem] = useState<DefaultOptionType[]>([]);
   const [listaSituacoesItem, setListaSituacoesItem] = useState<DefaultOptionType[]>([]);
 
@@ -41,137 +40,152 @@ const FormularioUnico: React.FC<FormularioUnicoProps> = ({ form, setCarregando }
     const resposta = await configuracaoItemService.obterAreaConhecimento();
     setListaAreaConhecimento(resposta?.length ? resposta : []);
   }, []);
-  const handleAreaConhecimentoChange = useCallback(async (value: SelectValueType) => {
-    form?.setFieldValue(Campos.disciplinas, null);
-    form?.setFieldValue(Campos.matriz, null);
-    form?.setFieldValue(Campos.anoMatriz, null);
-    form?.setFieldValue(Campos.competencia, null);
-    form?.setFieldValue(Campos.habilidade, null);
-    form?.setFieldValue(Campos.assunto, null);
-    form?.setFieldValue(Campos.subAssunto, null);
-    setListaDisciplinas([]);
-    setListaMatriz([]);
-    setListaAnosMatriz([]);
-    setListaCompetencias([]);
-    setListaHabilidades([]);
-    setListaAssuntos([]);
-    setListaSubAssuntos([]);
-    if (value && !validarCampoForm(value)) {
-      const resposta = await configuracaoItemService.obterDisciplinas(value);
-      if (resposta?.length) {
-        setListaDisciplinas(resposta);
-        if (resposta.length === 1) {
-          form?.setFieldValue(Campos.disciplinas, resposta[0].value);
+  const handleAreaConhecimentoChange = useCallback(
+    async (value: SelectValueType) => {
+      form?.setFieldValue(Campos.disciplinas, null);
+      form?.setFieldValue(Campos.matriz, null);
+      form?.setFieldValue(Campos.anoMatriz, null);
+      form?.setFieldValue(Campos.competencia, null);
+      form?.setFieldValue(Campos.habilidade, null);
+      form?.setFieldValue(Campos.assunto, null);
+      form?.setFieldValue(Campos.subAssunto, null);
+      setListaDisciplinas([]);
+      setListaMatriz([]);
+      setListaAnosMatriz([]);
+      setListaCompetencias([]);
+      setListaHabilidades([]);
+      setListaAssuntos([]);
+      setListaSubAssuntos([]);
+      if (value && !validarCampoForm(value)) {
+        const resposta = await configuracaoItemService.obterDisciplinas(value);
+        if (resposta?.length) {
+          setListaDisciplinas(resposta);
+          if (resposta.length === 1) {
+            form?.setFieldValue(Campos.disciplinas, resposta[0].value);
+          }
+        } else {
+          setListaDisciplinas([]);
         }
-      } else {
-        setListaDisciplinas([]);
       }
-    }
-  }, [form]);
-  const handleDisciplinaChange = useCallback(async (value: SelectValueType) => {
-    form?.setFieldValue(Campos.matriz, null);
-    form?.setFieldValue(Campos.anoMatriz, null);
-    form?.setFieldValue(Campos.competencia, null);
-    form?.setFieldValue(Campos.habilidade, null);
-    form?.setFieldValue(Campos.assunto, null);
-    form?.setFieldValue(Campos.subAssunto, null);
-    setListaMatriz([]);
-    setListaAnosMatriz([]);
-    setListaCompetencias([]);
-    setListaHabilidades([]);
-    setListaAssuntos([]);
-    setListaSubAssuntos([]);
+    },
+    [form],
+  );
+  const handleDisciplinaChange = useCallback(
+    async (value: SelectValueType) => {
+      form?.setFieldValue(Campos.matriz, null);
+      form?.setFieldValue(Campos.anoMatriz, null);
+      form?.setFieldValue(Campos.competencia, null);
+      form?.setFieldValue(Campos.habilidade, null);
+      form?.setFieldValue(Campos.assunto, null);
+      form?.setFieldValue(Campos.subAssunto, null);
+      setListaMatriz([]);
+      setListaAnosMatriz([]);
+      setListaCompetencias([]);
+      setListaHabilidades([]);
+      setListaAssuntos([]);
+      setListaSubAssuntos([]);
 
-    if (value && !validarCampoForm(value)) {
-      const [respostaMatriz, respostaAssuntos] = await Promise.all([
-        configuracaoItemService.obterMatriz(value),
-        configuracaoItemService.obterAssuntos(value)
-      ]);
-      if (respostaMatriz?.length) {
-        setListaMatriz(respostaMatriz);
-        if (respostaMatriz.length === 1) {
-          form?.setFieldValue(Campos.matriz, respostaMatriz[0].value);
+      if (value && !validarCampoForm(value)) {
+        const [respostaMatriz, respostaAssuntos] = await Promise.all([
+          configuracaoItemService.obterMatriz(value),
+          configuracaoItemService.obterAssuntos(value),
+        ]);
+        if (respostaMatriz?.length) {
+          setListaMatriz(respostaMatriz);
+          if (respostaMatriz.length === 1) {
+            form?.setFieldValue(Campos.matriz, respostaMatriz[0].value);
+          }
+        } else {
+          setListaMatriz([]);
         }
-      } else {
-        setListaMatriz([]);
-      }
-      if (respostaAssuntos?.length) {
-        setListaAssuntos(respostaAssuntos);
-        if (respostaAssuntos.length === 1) {
-          form?.setFieldValue(Campos.assunto, respostaAssuntos[0].value);
+        if (respostaAssuntos?.length) {
+          setListaAssuntos(respostaAssuntos);
+          if (respostaAssuntos.length === 1) {
+            form?.setFieldValue(Campos.assunto, respostaAssuntos[0].value);
+          }
+        } else {
+          setListaAssuntos([]);
         }
-      } else {
-        setListaAssuntos([]);
       }
-    }
-  }, [form]);
-  const handleMatrizChange = useCallback(async (value: SelectValueType) => {
-    form?.setFieldValue(Campos.anoMatriz, null);
-    form?.setFieldValue(Campos.competencia, null);
-    form?.setFieldValue(Campos.habilidade, null);
-    setListaAnosMatriz([]);
-    setListaCompetencias([]);
-    setListaHabilidades([]);
+    },
+    [form],
+  );
+  const handleMatrizChange = useCallback(
+    async (value: SelectValueType) => {
+      form?.setFieldValue(Campos.anoMatriz, null);
+      form?.setFieldValue(Campos.competencia, null);
+      form?.setFieldValue(Campos.habilidade, null);
+      setListaAnosMatriz([]);
+      setListaCompetencias([]);
+      setListaHabilidades([]);
 
-    if (value && !validarCampoForm(value)) {
-      const [respostaAnos, respostaCompetencias] = await Promise.all([
-        configuracaoItemService.obterAnosMatriz(value),
-        configuracaoItemService.obterCompetenciasMatriz(value)
-      ]);
-      if (respostaAnos?.length) {
-        setListaAnosMatriz(respostaAnos);
-        if (respostaAnos.length === 1) {
-          form?.setFieldValue(Campos.anoMatriz, respostaAnos[0].value);
+      if (value && !validarCampoForm(value)) {
+        const [respostaAnos, respostaCompetencias] = await Promise.all([
+          configuracaoItemService.obterAnosMatriz(value),
+          configuracaoItemService.obterCompetenciasMatriz(value),
+        ]);
+        if (respostaAnos?.length) {
+          setListaAnosMatriz(respostaAnos);
+          if (respostaAnos.length === 1) {
+            form?.setFieldValue(Campos.anoMatriz, respostaAnos[0].value);
+          }
+        }
+        if (respostaCompetencias?.length) {
+          setListaCompetencias(respostaCompetencias);
+          if (respostaCompetencias.length === 1) {
+            form?.setFieldValue(Campos.competencia, respostaCompetencias[0].value);
+          }
+        } else {
+          setListaCompetencias([]);
         }
       }
-      if (respostaCompetencias?.length) {
-        setListaCompetencias(respostaCompetencias);
-        if (respostaCompetencias.length === 1) {
-          form?.setFieldValue(Campos.competencia, respostaCompetencias[0].value);
-        }
-      } else {
-        setListaCompetencias([]);
-      }
-    }
-  }, [form]);
-  const handleCompetenciaChange = useCallback(async (value: SelectValueType) => {
-    form?.setFieldValue(Campos.habilidade, null);
-    setListaHabilidades([]);
+    },
+    [form],
+  );
+  const handleCompetenciaChange = useCallback(
+    async (value: SelectValueType) => {
+      form?.setFieldValue(Campos.habilidade, null);
+      setListaHabilidades([]);
 
-    if (value && !validarCampoForm(value)) {
-      const resposta = await configuracaoItemService.obterHabilidadesCompetencia(value);
-      if (resposta?.length) {
-        setListaHabilidades(resposta);
-        if (resposta.length === 1) {
-          form?.setFieldValue(Campos.habilidade, resposta[0].value);
+      if (value && !validarCampoForm(value)) {
+        const resposta = await configuracaoItemService.obterHabilidadesCompetencia(value);
+        if (resposta?.length) {
+          setListaHabilidades(resposta);
+          if (resposta.length === 1) {
+            form?.setFieldValue(Campos.habilidade, resposta[0].value);
+          }
+        } else {
+          setListaHabilidades([]);
         }
-      } else {
-        setListaHabilidades([]);
       }
-    }
-  }, [form]);
-  const handleAssuntoChange = useCallback(async (value: SelectValueType) => {
-    form?.setFieldValue(Campos.subAssunto, null);
-    setListaSubAssuntos([]);
+    },
+    [form],
+  );
+  const handleAssuntoChange = useCallback(
+    async (value: SelectValueType) => {
+      form?.setFieldValue(Campos.subAssunto, null);
+      setListaSubAssuntos([]);
 
-    if (value && !validarCampoForm(value)) {
-      const resposta = await configuracaoItemService.obterSubAssuntos(value);
-      if (resposta?.length) {
-        setListaSubAssuntos(resposta);
-        if (resposta.length === 1) {
-          form?.setFieldValue(Campos.subAssunto, resposta[0].value);
+      if (value && !validarCampoForm(value)) {
+        const resposta = await configuracaoItemService.obterSubAssuntos(value);
+        if (resposta?.length) {
+          setListaSubAssuntos(resposta);
+          if (resposta.length === 1) {
+            form?.setFieldValue(Campos.subAssunto, resposta[0].value);
+          }
+        } else {
+          setListaSubAssuntos([]);
         }
-      } else {
-        setListaSubAssuntos([]);
       }
-    }
-  }, [form]);
+    },
+    [form],
+  );
   const carregarListasBasicas = useCallback(async () => {
     const [nivelItem, quantidadeAlternativas, tiposItem, situacoesItem] = await Promise.all([
       configuracaoItemService.obterNivelItem(),
       configuracaoItemService.obterQuantidadeAlternativas(),
       configuracaoItemService.obterTiposItem(),
-      configuracaoItemService.obterSituacoesItem()
+      configuracaoItemService.obterSituacoesItem(),
     ]);
 
     setListaNivelItem(nivelItem?.length ? nivelItem : []);
@@ -179,19 +193,19 @@ const FormularioUnico: React.FC<FormularioUnicoProps> = ({ form, setCarregando }
     setListaTiposItem(tiposItem?.length ? tiposItem : []);
     setListaSituacoesItem(situacoesItem?.length ? situacoesItem : []);
   }, []);
-  const executarCascataAutomatica = useCallback(async () => {    
+  const executarCascataAutomatica = useCallback(async () => {
     setCarregando?.(true);
 
     try {
       const itemSalvoStr = localStorage.getItem(STORAGE_KEYS.itemAtual);
-      if (!itemSalvoStr) {        
+      if (!itemSalvoStr) {
         return;
       }
 
       const itemSalvo = JSON.parse(itemSalvoStr);
       const config = itemSalvo.configuracao;
 
-      if (!config) {        
+      if (!config) {
         return;
       }
       if (config.areaConhecimento) {
@@ -204,14 +218,13 @@ const FormularioUnico: React.FC<FormularioUnicoProps> = ({ form, setCarregando }
             form?.setFieldValue(Campos.disciplinas, resposta[0].value);
           }
         }
-
       }
       if (config.disciplina) {
         form?.setFieldValue(Campos.disciplinas, config.disciplina);
 
         const [respostaMatriz, respostaAssuntos] = await Promise.all([
           configuracaoItemService.obterMatriz(config.disciplina),
-          configuracaoItemService.obterAssuntos(config.disciplina)
+          configuracaoItemService.obterAssuntos(config.disciplina),
         ]);
         if (respostaMatriz?.length) {
           setListaMatriz(respostaMatriz);
@@ -225,14 +238,13 @@ const FormularioUnico: React.FC<FormularioUnicoProps> = ({ form, setCarregando }
             form?.setFieldValue(Campos.assunto, respostaAssuntos[0].value);
           }
         }
-
       }
       if (config.matriz) {
         form?.setFieldValue(Campos.matriz, config.matriz);
 
         const [respostaAnos, respostaCompetencias] = await Promise.all([
           configuracaoItemService.obterAnosMatriz(config.matriz),
-          configuracaoItemService.obterCompetenciasMatriz(config.matriz)
+          configuracaoItemService.obterCompetenciasMatriz(config.matriz),
         ]);
         if (respostaAnos?.length) {
           setListaAnosMatriz(respostaAnos);
@@ -246,7 +258,6 @@ const FormularioUnico: React.FC<FormularioUnicoProps> = ({ form, setCarregando }
             form?.setFieldValue(Campos.competencia, respostaCompetencias[0].value);
           }
         }
-
       }
       if (config.anoMatriz && form?.getFieldValue(Campos.anoMatriz) !== config.anoMatriz) {
         form?.setFieldValue(Campos.anoMatriz, config.anoMatriz);
@@ -254,14 +265,15 @@ const FormularioUnico: React.FC<FormularioUnicoProps> = ({ form, setCarregando }
       if (config.competencia) {
         form?.setFieldValue(Campos.competencia, config.competencia);
 
-        const resposta = await configuracaoItemService.obterHabilidadesCompetencia(config.competencia);
+        const resposta = await configuracaoItemService.obterHabilidadesCompetencia(
+          config.competencia,
+        );
         if (resposta?.length) {
           setListaHabilidades(resposta);
           if (resposta.length === 1) {
             form?.setFieldValue(Campos.habilidade, resposta[0].value);
           }
         }
-
       }
       if (config.assunto) {
         form?.setFieldValue(Campos.assunto, config.assunto);
@@ -273,7 +285,6 @@ const FormularioUnico: React.FC<FormularioUnicoProps> = ({ form, setCarregando }
             form?.setFieldValue(Campos.subAssunto, resposta[0].value);
           }
         }
-
       }
 
       if (config.habilidade) {
@@ -299,7 +310,7 @@ const FormularioUnico: React.FC<FormularioUnicoProps> = ({ form, setCarregando }
         observacao: Campos.observacao,
       };
 
-      Object.keys(camposSimples).forEach(key => {
+      Object.keys(camposSimples).forEach((key) => {
         const value = config[key as keyof typeof config];
         const formFieldName = camposSimples[key as keyof typeof camposSimples];
         if (value !== undefined && value !== null && formFieldName) {
@@ -310,41 +321,42 @@ const FormularioUnico: React.FC<FormularioUnicoProps> = ({ form, setCarregando }
         setPalavrasChave(config.palavrasChave);
         form?.setFieldValue(Campos.palavraChave, config.palavrasChave);
       }
-
     } catch (error) {
       console.error('❌ Erro na cascata automática:', error);
     } finally {
       setCarregando?.(false);
     }
   }, [form, setCarregando]);
-  
+
   const disciplinaIdForm = form?.getFieldValue(Campos.disciplinas);
   const assuntoIdForm = form?.getFieldValue(Campos.assunto);
   useEffect(() => {
     const inicializarFormulario = async () => {
-      await Promise.all([
-        carregarAreaConhecimento(),
-        carregarListasBasicas()
-      ]);
-      const voltandoParaPrimeiraTela = localStorage.getItem(STORAGE_KEYS.voltandoParaPrimeiraTela) === 'true';
+      await Promise.all([carregarAreaConhecimento(), carregarListasBasicas()]);
+      const voltandoParaPrimeiraTela =
+        localStorage.getItem(STORAGE_KEYS.voltandoParaPrimeiraTela) === 'true';
       const itemSalvoStr = localStorage.getItem(STORAGE_KEYS.itemAtual);
 
-      if (voltandoParaPrimeiraTela || itemSalvoStr) {        
+      if (voltandoParaPrimeiraTela || itemSalvoStr) {
         localStorage.removeItem(STORAGE_KEYS.voltandoParaPrimeiraTela);
         await executarCascataAutomatica();
 
         return;
       }
       const valores = form?.getFieldsValue();
-      const formularioVazio = !valores || Object.keys(valores).length === 0 ||
-        Object.values(valores).every(v => !v || (Array.isArray(v) && v.length === 0));
+      const formularioVazio =
+        !valores ||
+        Object.keys(valores).length === 0 ||
+        Object.values(valores).every((v) => !v || (Array.isArray(v) && v.length === 0));
 
       if (formularioVazio) {
         form?.resetFields();
-        form?.setFields(Object.keys(form?.getFieldsValue() || {}).map(name => ({
-          name,
-          errors: []
-        })));
+        form?.setFields(
+          Object.keys(form?.getFieldsValue() || {}).map((name) => ({
+            name,
+            errors: [],
+          })),
+        );
       }
     };
 
@@ -365,7 +377,7 @@ const FormularioUnico: React.FC<FormularioUnicoProps> = ({ form, setCarregando }
                 form={form}
                 options={listaAreaConhecimento}
                 nomeCampo={Campos.areaConhecimento}
-                label="Área de conhecimento"
+                label='Área de conhecimento'
                 campoObrigatorio={true}
                 disabled={false}
                 onChange={handleAreaConhecimentoChange}
@@ -376,7 +388,7 @@ const FormularioUnico: React.FC<FormularioUnicoProps> = ({ form, setCarregando }
                 form={form}
                 options={listaDisciplinas}
                 nomeCampo={Campos.disciplinas}
-                label="Componente curricular"
+                label='Componente curricular'
                 campoObrigatorio={true}
                 onChange={handleDisciplinaChange}
               />
@@ -388,7 +400,7 @@ const FormularioUnico: React.FC<FormularioUnicoProps> = ({ form, setCarregando }
                 form={form}
                 options={listaMatriz}
                 nomeCampo={Campos.matriz}
-                label="Matriz de avaliação"
+                label='Matriz de avaliação'
                 campoObrigatorio={true}
                 onChange={handleMatrizChange}
               />
@@ -398,7 +410,7 @@ const FormularioUnico: React.FC<FormularioUnicoProps> = ({ form, setCarregando }
                 form={form}
                 options={listaAnosMatriz}
                 nomeCampo={Campos.anoMatriz}
-                label="Ano (ano escolar)"
+                label='Ano (ano escolar)'
                 campoObrigatorio={true}
               />
             </Col>
@@ -406,29 +418,27 @@ const FormularioUnico: React.FC<FormularioUnicoProps> = ({ form, setCarregando }
         </div>
       </div>
 
-      <div className="card">
-        <div className="card-titulo">Competências e habilidades</div>
-        <div className="card-subtitulo">
-          Vincule o item às competências e habilidades.
-        </div>
-        <div className="card-corpo">
+      <div className='card'>
+        <div className='card-titulo'>Competências e habilidades</div>
+        <div className='card-subtitulo'>Vincule o item às competências e habilidades.</div>
+        <div className='card-corpo'>
           <Row>
-            <Col xs={24} md={12} className="card-campo">
+            <Col xs={24} md={12} className='card-campo'>
               <SelectForm
                 form={form}
                 options={listaCompetencias}
                 nomeCampo={Campos.competencia}
-                label="Competência"
+                label='Competência'
                 campoObrigatorio={true}
                 onChange={handleCompetenciaChange}
               />
             </Col>
-            <Col xs={24} md={12} className="card-campo">
+            <Col xs={24} md={12} className='card-campo'>
               <SelectForm
                 form={form}
                 options={listaHabilidades}
                 nomeCampo={Campos.habilidade}
-                label="Habilidade"
+                label='Habilidade'
                 campoObrigatorio={true}
               />
             </Col>
@@ -436,23 +446,23 @@ const FormularioUnico: React.FC<FormularioUnicoProps> = ({ form, setCarregando }
         </div>
       </div>
 
-      <div className="card">
-        <div className="card-titulo">Características do item</div>
-        <div className="card-subtitulo">Configure as propriedades técnicas do item</div>
-        <div className="card-corpo">
+      <div className='card'>
+        <div className='card-titulo'>Características do item</div>
+        <div className='card-subtitulo'>Configure as propriedades técnicas do item</div>
+        <div className='card-corpo'>
           <Row>
-            <Col xs={24} md={12} className="card-campo">
+            <Col xs={24} md={12} className='card-campo'>
               <Form.Item
-                label="Dificuldade sugerida"
+                label='Dificuldade sugerida'
                 name={Campos.dificuldadeSugerida}
                 rules={ruleCampoObrigatorioForm(form?.getFieldValue(Campos.dificuldadeSugerida))}
               >
                 {/* 🏃‍♂️ HTML FIXO: Opções conhecidas para carregamento instantâneo */}
                 <Radio.Group
-                  className="dificuldadeSugeridaCadastroItem"
-                  id="rblDificuldadeSugerida"
-                  buttonStyle="solid"
-                  optionType="button"
+                  className='dificuldadeSugeridaCadastroItem'
+                  id='rblDificuldadeSugerida'
+                  buttonStyle='solid'
+                  optionType='button'
                   onChange={(e) => form?.setFieldValue(Campos.dificuldadeSugerida, e.target.value)}
                 >
                   <Radio value={5}>1 - Muito Fácil</Radio>
@@ -464,12 +474,12 @@ const FormularioUnico: React.FC<FormularioUnicoProps> = ({ form, setCarregando }
               </Form.Item>
             </Col>
 
-            <Col xs={24} md={12} className="card-campo">
+            <Col xs={24} md={12} className='card-campo'>
               <SelectForm
                 form={form}
                 options={listaNivelItem}
                 nomeCampo={Campos.nivelItem}
-                label="Nível do Item"
+                label='Nível do Item'
                 campoObrigatorio={false}
                 labelInValue={false}
               />
@@ -477,40 +487,42 @@ const FormularioUnico: React.FC<FormularioUnicoProps> = ({ form, setCarregando }
           </Row>
 
           <Row>
-            <Col xs={24} md={24} className="card-campo">
+            <Col xs={24} md={24} className='card-campo'>
               <SelectForm
                 form={form}
                 options={listaQuantidadeAlternativas}
                 nomeCampo={Campos.quantidadeAlternativas}
-                label="Categoria do item e quantidade de alternativas*"
-                campoObrigatorio={true}                
+                label='Categoria do item e quantidade de alternativas*'
+                campoObrigatorio={true}
                 labelInValue={false}
               />
             </Col>
           </Row>
 
           <Row>
-            <Col xs={24} md={12} className="card-campo">
+            <Col xs={24} md={12} className='card-campo'>
               <TipoItem
                 form={form}
                 options={listaTiposItem}
                 campoObrigatorio={true}
                 disabled={!form?.getFieldValue(Campos.quantidadeAlternativas)}
               />
-              <div className="caracteristicasItemTexto">
+              <div className='caracteristicasItemTexto'>
                 <p>
-                  <b>Observação:</b> Dicotômico apresenta apenas duas opções (certo/errado).<br />
-                  Politômico apresenta várias opções com graus de resposta (classificações ou níveis).
+                  <b>Observação:</b> Dicotômico apresenta apenas duas opções (certo/errado).
+                  <br />
+                  Politômico apresenta várias opções com graus de resposta (classificações ou
+                  níveis).
                 </p>
               </div>
             </Col>
 
-            <Col xs={24} md={12} className="card-campo">
+            <Col xs={24} md={12} className='card-campo'>
               <SelectForm
                 form={form}
                 options={listaSituacoesItem}
                 nomeCampo={Campos.situacaoItem}
-                label="Situação do item"
+                label='Situação do item'
                 campoObrigatorio={true}
                 labelInValue={false}
               />
@@ -549,11 +561,7 @@ const FormularioUnico: React.FC<FormularioUnicoProps> = ({ form, setCarregando }
               />
             </Col>
             <Col xs={24} md={8} className='card-campo'>
-              <Form.Item
-                label='Palavra-chave'
-                name={Campos.palavraChave}
-                rules={[]}
-              >
+              <Form.Item label='Palavra-chave' name={Campos.palavraChave} rules={[]}>
                 <InputTag
                   valueForm={palavrasChave}
                   tags={palavrasChave}
@@ -564,7 +572,7 @@ const FormularioUnico: React.FC<FormularioUnicoProps> = ({ form, setCarregando }
                   }}
                 />
               </Form.Item>
-              <div className="caracteristicasItemTexto">
+              <div className='caracteristicasItemTexto'>
                 <p>Digite uma palavra e pressione "Enter" para adicioná-la.</p>
               </div>
             </Col>
@@ -572,33 +580,27 @@ const FormularioUnico: React.FC<FormularioUnicoProps> = ({ form, setCarregando }
 
           <Row>
             <Col xs={24} md={12} className='card-campo'>
-              <Form.Item
-                label='Sentença Descritora'
-                name={Campos.sentencaDescritora}
-              >
+              <Form.Item label='Sentença Descritora' name={Campos.sentencaDescritora}>
                 <TextArea
                   rows={4}
-                  placeholder="Descreva a habilidade ou competência específica avaliada pelo item..."
+                  placeholder='Descreva a habilidade ou competência específica avaliada pelo item...'
                   maxLength={100}
                 />
               </Form.Item>
-              <div className="caracteristicasItemTexto">
+              <div className='caracteristicasItemTexto'>
                 <p>Insira até 100 caracteres</p>
               </div>
             </Col>
 
             <Col xs={24} md={12} className='card-campo'>
-              <Form.Item
-                label='Observação'
-                name={Campos.observacao}
-              >
+              <Form.Item label='Observação' name={Campos.observacao}>
                 <TextArea
                   rows={4}
-                  placeholder="Adicione observações sobre a questão, orientações para aplicação ou outras informações importantes..."
+                  placeholder='Adicione observações sobre a questão, orientações para aplicação ou outras informações importantes...'
                   maxLength={100}
                 />
               </Form.Item>
-              <div className="caracteristicasItemTexto">
+              <div className='caracteristicasItemTexto'>
                 <p>Insira até 100 caracteres</p>
               </div>
             </Col>
@@ -607,86 +609,66 @@ const FormularioUnico: React.FC<FormularioUnicoProps> = ({ form, setCarregando }
       </div>
 
       <div className='card'>
-        <div className='card-titulo'>
-          Informações estatísticas
-        </div>
-        <div className='card-subtitulo'>
-          Configure as informações estatísticas do item
-        </div>
+        <div className='card-titulo'>Informações estatísticas</div>
+        <div className='card-subtitulo'>Configure as informações estatísticas do item</div>
         <div className='card-corpo'>
           <Row>
             <Col xs={24} md={8} className='card-campo'>
-              <Form.Item
-                label='Discriminação'
-                name={Campos.discriminacao}
-              >
+              <Form.Item label='Discriminação' name={Campos.discriminacao}>
                 <CampoNumero
                   value={form?.getFieldValue(Campos.discriminacao)}
                   onChange={(valor) => form?.setFieldValue(Campos.discriminacao, valor)}
-                  placeholder='Exemplo: 1' />
+                  placeholder='Exemplo: 1'
+                />
               </Form.Item>
             </Col>
             <Col xs={24} md={8} className='card-campo'>
-              <Form.Item
-                label='Dificuldade'
-                name={Campos.dificuldade}
-              >
+              <Form.Item label='Dificuldade' name={Campos.dificuldade}>
                 <CampoNumero
                   value={form?.getFieldValue(Campos.dificuldade)}
                   onChange={(valor) => form?.setFieldValue(Campos.dificuldade, valor)}
-                  placeholder='Exemplo: 2' />
+                  placeholder='Exemplo: 2'
+                />
               </Form.Item>
             </Col>
             <Col xs={24} md={8} className='card-campo'>
-              <Form.Item
-                label='Acerto casual'
-                name={Campos.acertoCasual}
-              >
+              <Form.Item label='Acerto casual' name={Campos.acertoCasual}>
                 <CampoNumero
                   value={form?.getFieldValue(Campos.acertoCasual)}
                   onChange={(valor) => form?.setFieldValue(Campos.acertoCasual, valor)}
-                  placeholder='Exemplo: 3' />
+                  placeholder='Exemplo: 3'
+                />
               </Form.Item>
             </Col>
           </Row>
 
           <Row>
             <Col xs={24} md={12} className='card-campo'>
-              <Form.Item
-                label='Parâmetro b transformado'
-                name={Campos.parametroBTransformado}
-              >
+              <Form.Item label='Parâmetro b transformado' name={Campos.parametroBTransformado}>
                 <CampoNumero
                   value={form?.getFieldValue(Campos.parametroBTransformado)}
                   onChange={(valor) => form?.setFieldValue(Campos.parametroBTransformado, valor)}
                   placeholder='Exemplo: 4'
                 />
               </Form.Item>
-              <div className="caracteristicasItemTexto">
-                <p>
-                  Indica em que ponto da escala de proficiência a questão está localizada.
-                </p>
+              <div className='caracteristicasItemTexto'>
+                <p>Indica em que ponto da escala de proficiência a questão está localizada.</p>
               </div>
             </Col>
             <Col xs={24} md={12} className='card-campo'>
-              <Form.Item
-                label='Média e desvio padrão'
-                name={Campos.mediaDesvioPadrao}
-              >
+              <Form.Item label='Média e desvio padrão' name={Campos.mediaDesvioPadrao}>
                 <CampoNumero
                   value={form?.getFieldValue(Campos.mediaDesvioPadrao)}
                   onChange={(valor) => form?.setFieldValue(Campos.mediaDesvioPadrao, valor)}
-                  placeholder="Exemplo: 5"
+                  placeholder='Exemplo: 5'
                 />
               </Form.Item>
             </Col>
           </Row>
         </div>
       </div>
-
     </>
   );
 };
 
 export default FormularioUnico;
-
