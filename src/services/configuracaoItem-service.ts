@@ -30,6 +30,9 @@ const salvarItem = (item: ItemDto): Promise<AxiosResponse<number>> =>
 const salvarItemNovo = (item: ItemNovoDto): Promise<AxiosResponse<number>> =>
   api.post(`${URL_DEFAULT}/Item/salvar`, item);
 
+const editarItemNovo = (item: ItemNovoDto): Promise<AxiosResponse<number>> =>
+  api.post(`${URL_DEFAULT}/Item/salvar`, item);
+
 const salvarRascunhoItem = (item: ItemDto): Promise<AxiosResponse<number>> =>
   api.post(`${URL_DEFAULT}/Item/salvar-rascunho`, item);
 
@@ -70,7 +73,8 @@ const obterQuantidadeAlternativas = (): Promise<DefaultOptionType[]> =>
 
 const obterItem = (id: number): Promise<AxiosResponse<any>> => api.get(`${URL_DEFAULT}/Item/${id}`);
 
-const obterItemComAlternativas = (id: number): Promise<AxiosResponse<any>> => api.get(`${URL_DEFAULT}/Item/${id}/Alternativas`);
+const obterItemComAlternativas = (id: number): Promise<AxiosResponse<any>> =>
+  api.get(`${URL_DEFAULT}/Item/${id}/Alternativas`);
 
 export default {
   obterAreaConhecimento,
@@ -85,6 +89,7 @@ export default {
   obterNivelEnsino,
   salvarItem,
   salvarItemNovo,
+  editarItemNovo,
   salvarRascunhoItem,
   salvarRascunhoItemNovo,
   obterItem,

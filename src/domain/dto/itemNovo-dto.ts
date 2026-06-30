@@ -9,7 +9,7 @@ export interface ItemNovoDto {
   matrizId: SelectValueType;
   anoMatrizId: SelectValueType;
   competenciaId: SelectValueType;
-  habilidadeId: SelectValueType;  
+  habilidadeId: SelectValueType;
   assuntoId: SelectValueType;
   subAssuntoId: SelectValueType;
   situacao: SelectValueType;
@@ -28,6 +28,8 @@ export interface ItemNovoDto {
   textoBase: string;
   fonte: string;
   enunciado: string;
+  versaoItem?: number;
+  itemCodeVersion?: number;
   alternativasDto?: AltenativaDto[];
   arquivoVideoId?: number;
   arquivoAudioId?: number;

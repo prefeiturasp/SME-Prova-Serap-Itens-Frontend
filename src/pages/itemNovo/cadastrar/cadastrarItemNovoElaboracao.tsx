@@ -36,6 +36,8 @@ export interface ConfiguracaoItemNovoProps {
   mediaDesvioPadrao: string | null;
   observacao: string | null;
   sentencaDescritora: string | null;
+  versaoItem?: number;
+  itemCodeVersion?: number;
 }
 
 export interface ElaboracaoLocalProps {
@@ -80,6 +82,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
 
   const [itemId, setItemId] = useState<number>(0);
   const [codigoItemEstado, setCodigoItemEstado] = useState<string>('');
+  const [editandoItem, setEditandoItem] = useState<boolean>(false);
   const [configuracaoItemNovo, setConfiguracaoItemNovoLocal] = useState<
     Partial<ConfiguracaoItemNovoProps>
   >({});
@@ -370,6 +373,8 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
           mediaDesvioPadrao: resposta.data.mediaEhDesvio,
           sentencaDescritora: resposta.data.sentencaDescritora,
           observacao: resposta.data.observacao,
+          versaoItem: resposta.data.versaoItem ?? 0,
+          itemCodeVersion: resposta.data.itemCodeVersion ?? 0,
         };
         let elaboracaoItemRetorno: ElaboracaoLocalProps = {
           textoBase: resposta.data.textoBase || '',
@@ -460,6 +465,8 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
   }, []);
   useEffect(() => {
     const executarCarregamento = async () => {
+      setEditandoItem(localStorage.getItem(STORAGE_KEYS.editandoItem) === 'true');
+
       if (itemId > 0) {
         const dadosBackend = await obterItemComAlternativasEPopular(itemId);
 
@@ -701,6 +708,8 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
       textoBase: values[campoTextoBase] || '',
       fonte: values[campoFonte] || '',
       enunciado: values[campoEnunciado] || '',
+      versaoItem: configuracaoItemNovo?.versaoItem ?? 0,
+      itemCodeVersion: configuracaoItemNovo?.itemCodeVersion ?? 0,
       alternativasDto: alternativasDto,
     };
 
@@ -852,6 +861,31 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
     setCarregando(false);
   }, [gerarItemSalvar, inserirRascunhoItem, salvarDadosFormularioNoLocalStorage]);
 
+  const salvar = useCallback(async () => {
+    setCarregando(true);
+    salvarDadosFormularioNoLocalStorage();
+
+    const itemSalvar = gerarItemSalvar();
+
+    try {
+      await configuracaoItemService.editarItemNovo(itemSalvar);
+      mensagem('success', 'Sucesso', 'Item salvo com sucesso');
+      limparItemDoLocalStorage();
+      navigate('/listagem');
+      window.scrollTo(0, 0);
+    } catch {
+      mensagem('error', 'Erro', 'Ocorreu um erro ao salvar o item');
+    } finally {
+      setCarregando(false);
+    }
+  }, [
+    gerarItemSalvar,
+    limparItemDoLocalStorage,
+    mensagem,
+    navigate,
+    salvarDadosFormularioNoLocalStorage,
+  ]);
+
   const cancelar = () => {
     setCarregando(true);
     limparItemDoLocalStorage();
@@ -903,7 +937,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
             margin: 0,
           }}
         >
-          <CadastrarItemHeaderComponent pagina={2} />
+          <CadastrarItemHeaderComponent pagina={2} editando={editandoItem} />
 
           <div className='cadastrarItem-corpo'>
             <div className='cadastrarItem-titulo-corpo'>
@@ -946,7 +980,9 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
                 </Button>
               </div>
               <div className='cadastrarItem-btn'>
-                <Button className='btnAvancar'>Salvar</Button>
+                <Button className='btnAvancar' onClick={salvar}>
+                  Salvar
+                </Button>
               </div>
             </div>
           </div>

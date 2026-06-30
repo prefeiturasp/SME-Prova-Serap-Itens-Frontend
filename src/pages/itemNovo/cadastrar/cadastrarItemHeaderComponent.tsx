@@ -4,8 +4,17 @@ import { Link } from 'react-router-dom';
 import { ArrowLeftOutlined, RightOutlined } from '@ant-design/icons';
 import './cadastrarItemHeaderComponent.css';
 
-const CadastrarItemHeaderComponent: React.FC<{ pagina: number }> = ({ pagina }) => {
+interface CadastrarItemHeaderComponentProps {
+  pagina: number;
+  editando?: boolean;
+}
+
+const CadastrarItemHeaderComponent: React.FC<CadastrarItemHeaderComponentProps> = ({
+  pagina,
+  editando = false,
+}) => {
   const linkRetorno = '/listagem';
+  const tituloPagina = editando ? 'Editar item' : 'Cadastrar novo item';
   return (
     <>
       <div className='cadastrarItemHeader'>
@@ -17,13 +26,13 @@ const CadastrarItemHeaderComponent: React.FC<{ pagina: number }> = ({ pagina }) 
             </Link>
           </Col>
           <Col xs={12} md={12} className='cadastrarItemHeader-titulo'>
-            Cadastrar novo item
+            {tituloPagina}
           </Col>
           <Col xs={0} md={6} />
         </Row>
         <div className='cadastrarItemHeader-rota'>
-          <div className='cadastrarItemHeader-rota-texto'>Home / Itens/ Cadastrar novo item</div>
-          <div className='cadastrarItemHeader-rota-titulo'>Cadastrar novo item</div>
+          <div className='cadastrarItemHeader-rota-texto'>Home / Itens/ {tituloPagina}</div>
+          <div className='cadastrarItemHeader-rota-titulo'>{tituloPagina}</div>
         </div>
         <div className='cadastrarItemHeader-Breadcrumb-corpo'>
           <div
