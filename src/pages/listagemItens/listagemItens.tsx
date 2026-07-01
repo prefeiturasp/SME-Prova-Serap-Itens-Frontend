@@ -332,7 +332,10 @@ const ListagemItens: React.FC = () => {
                 <ListagemResumoItemComponent dados={itemResumoVersao} onEditarItem={editarItem} />
               </div>
               <div>
-                <ListagemVersaoItemComponent versoes={itemResumoVersao?.versoesDisponiveis!} />
+                <ListagemVersaoItemComponent
+                  versoes={itemResumoVersao?.versoesDisponiveis!}
+                  onEditarVersao={editarItem}
+                />
               </div>
             </>
           )}
