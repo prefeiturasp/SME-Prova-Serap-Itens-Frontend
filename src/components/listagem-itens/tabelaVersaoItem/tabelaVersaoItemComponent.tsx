@@ -6,12 +6,13 @@ import iconDelete from '~/assets/icon-remover.svg';
 
 interface Props {
   versoes: VersaoDto[];
+  onEditarVersao?: (itemId: number) => void;
 }
 
-const TabelaVersaoItemComponent: React.FC<Props> = ({ versoes }) => {
+const TabelaVersaoItemComponent: React.FC<Props> = ({ versoes, onEditarVersao }) => {
   const editarHandler = (id: number) => {
-    // Lógica para editar a versão do item
-    console.log(id);
+    if (!onEditarVersao) return;
+    onEditarVersao(id);
   };
 
   const removerHandler = (id: number) => {
@@ -19,13 +20,21 @@ const TabelaVersaoItemComponent: React.FC<Props> = ({ versoes }) => {
     console.log(id);
   };
 
-  const acaoColumnRender = (id: number) => {
+  const acaoColumnRender = (_: any, record: VersaoDto) => {
     return (
       <div className='acao-container'>
-        <Button type='primary' className='btn-acao btn-editar' onClick={() => editarHandler(id)}>
+        <Button
+          type='primary'
+          className='btn-acao btn-editar'
+          onClick={() => editarHandler(record.id)}
+        >
           <img src={iconEdit} alt='Editar' style={{ width: 12, height: 12 }} />
         </Button>
-        <Button type='default' className='btn-acao btn-remover' onClick={() => removerHandler(id)}>
+        <Button
+          type='default'
+          className='btn-acao btn-remover'
+          onClick={() => removerHandler(record.id)}
+        >
           <img src={iconDelete} alt='Remover' style={{ width: 16, height: 16 }} />
         </Button>
       </div>
@@ -43,7 +52,7 @@ const TabelaVersaoItemComponent: React.FC<Props> = ({ versoes }) => {
     { title: 'Código do item', dataIndex: 'codigoItem', ellipsis: true },
     { title: 'Versão', dataIndex: 'versaoItem', width: 100 },
     { title: 'Data de criação', dataIndex: 'dataCriacao', width: 200 },
-    { title: 'Ação', render: () => acaoColumnRender(0), width: 100 },
+    { title: 'Ação', render: acaoColumnRender, width: 100 },
   ];
 
   return (

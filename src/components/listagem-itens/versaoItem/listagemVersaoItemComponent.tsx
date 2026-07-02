@@ -6,39 +6,42 @@ import type { VersaoDto } from '~/domain/dto/versao-dto';
 
 interface Props {
   versoes: VersaoDto[];
+  onEditarVersao?: (itemId: number) => void;
 }
 
-const ListagemVersaoItemComponent: React.FC<Props> = ({versoes}) => {
-  const cardHeader = (
-    <span className='versoes-titulo'>Versões do item</span>
-  );
+const ListagemVersaoItemComponent: React.FC<Props> = ({ versoes, onEditarVersao }) => {
+  const cardHeader = <span className='versoes-titulo'>Versões do item</span>;
 
   const possuiMultiplasVersoes = (lista: VersaoDto[]) => {
     return lista && lista.length > 1;
-  }
+  };
 
-  return <div className='versoes-wrapper'>
-      <Card title={cardHeader} className='versoes-container' >
+  return (
+    <div className='versoes-wrapper'>
+      <Card title={cardHeader} className='versoes-container'>
         <Row>
           <Col xs={24} md={24}>
-            {possuiMultiplasVersoes(versoes) ?
-              <span className='versoes-descricao'>Este item possui mais versões anteriores, confira na lista abaixo.</span>
-              :
+            {possuiMultiplasVersoes(versoes) ? (
+              <span className='versoes-descricao'>
+                Este item possui mais versões anteriores, confira na lista abaixo.
+              </span>
+            ) : (
               <span className='versoes-subtitulo'>Este item não possui outras versões.</span>
-            }
+            )}
           </Col>
         </Row>
-        {possuiMultiplasVersoes(versoes) ?
-          (
-            <Row className='versoes-tabela-container'>
-              <Col xs={24} md={24}>
-                <TabelaVersaoItemComponent versoes={versoes} />
-              </Col>
-            </Row>
-          ) : <></>
-        }
+        {possuiMultiplasVersoes(versoes) ? (
+          <Row className='versoes-tabela-container'>
+            <Col xs={24} md={24}>
+              <TabelaVersaoItemComponent versoes={versoes} onEditarVersao={onEditarVersao} />
+            </Col>
+          </Row>
+        ) : (
+          <></>
+        )}
       </Card>
-  </div>;
+    </div>
+  );
 };
 
 export default ListagemVersaoItemComponent;

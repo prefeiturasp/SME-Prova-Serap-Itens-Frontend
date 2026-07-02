@@ -11,6 +11,7 @@ interface AlternativaResumoViewModel {
 }
 
 interface ItemResumoViewModel {
+  id?: number;
   codigoItem?: string | number;
   enunciado?: string;
   textoBase?: string;
@@ -20,12 +21,21 @@ interface ItemResumoViewModel {
 
 interface listagemResumoItemProps {
   dados?: ItemResumoViewModel;
+  onEditarItem?: (itemId: number) => void;
 }
 
-const ListagemResumoItemComponent: React.FC<listagemResumoItemProps> = ({ dados }) => {
+const ListagemResumoItemComponent: React.FC<listagemResumoItemProps> = ({
+  dados,
+  onEditarItem,
+}) => {
   const item = dados;
 
   if (!item) return <></>;
+
+  const handleEditarItem = () => {
+    if (!item.id || !onEditarItem) return;
+    onEditarItem(item.id);
+  };
 
   return (
     <div className='resumo'>
@@ -33,7 +43,7 @@ const ListagemResumoItemComponent: React.FC<listagemResumoItemProps> = ({ dados 
         <div className='resumo-item-titulo'>Resumo do item</div>
 
         <div className='resumo-item-botoes'>
-          <Button className='btn-azul-padrao'>
+          <Button className='btn-azul-padrao' onClick={handleEditarItem}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
               <img src={iconEdit} alt='Editar' width={16} height={16} />
               <span>Editar Item</span>

@@ -18,7 +18,7 @@ import { VideoArquivoDto, AudioArquivoDto } from '~/domain/dto/ArquivoMidiaDto';
 import { SelectValueType } from '~/domain/type/select';
 import CadastrarItemHeaderComponent from './cadastrarItemHeaderComponent';
 import CadastrarItemRodapeComponent from './cadastrarItemRodapeComponent';
-import { limparStorageFluxoCadastro } from '~/utils/fluxo-item-storage';
+import { limparStorageFluxoCadastro, STORAGE_KEYS } from '~/utils/fluxo-item-storage';
 
 interface ElaboracaoLocalProps {
   textoBase?: string;
@@ -64,6 +64,8 @@ export interface ConfiguracaoItemNovoProps {
   mediaDesvioPadrao: string | null;
   observacao: string | null;
   sentencaDescritora: string | null;
+  versaoItem?: number;
+  itemCodeVersion?: number;
 }
 
 const CadastrarItemNovo: React.FC<FormProps> = () => {
@@ -72,6 +74,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
 
   const [itemId, setItemId] = useState<number>(0);
   const [codigoItem, setCodigoItem] = useState<string>('');
+  const [editandoItem, setEditandoItem] = useState<boolean>(false);
   const [elaboracaoItem, setElaboracaoItem] = useState<ElaboracaoLocalProps>({});
 
   const [form] = Form.useForm();
@@ -137,6 +140,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
 
   useEffect(() => {
     carregarEstadosDoLocalStorage();
+    setEditandoItem(localStorage.getItem(STORAGE_KEYS.editandoItem) === 'true');
   }, [carregarEstadosDoLocalStorage]);
 
   useEffect(() => {
@@ -298,6 +302,8 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
       textoBase: elaboracaoLS?.textoBase || '',
       fonte: elaboracaoLS?.fonte || '',
       enunciado: elaboracaoLS?.enunciado || '',
+      versaoItem: 0,
+      itemCodeVersion: 0,
       alternativasDto: undefined,
     } as ItemNovoDto;
 
@@ -353,6 +359,8 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
             mediaDesvioPadrao: resp.data.mediaEhDesvio,
             sentencaDescritora: resp.data.sentencaDescritora,
             observacao: resp.data.observacao,
+            versaoItem: resp.data.versaoItem ?? 0,
+            itemCodeVersion: resp.data.itemCodeVersion ?? 0,
           };
 
           setItemId(id);
@@ -492,7 +500,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
             margin: 0,
           }}
         >
-          <CadastrarItemHeaderComponent pagina={1} />
+          <CadastrarItemHeaderComponent pagina={1} editando={editandoItem} />
 
           <div className='cadastrarItem-corpo'>
             <div className='cadastrarItem-titulo-corpo'>

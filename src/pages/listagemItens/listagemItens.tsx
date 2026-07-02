@@ -17,7 +17,8 @@ import { DefaultOptionType } from 'antd/es/select';
 import { SelecioneDto } from '~/domain/dto/selecione-dto';
 import { converterSelecineDto } from '~/utils/converte-dto';
 import carregarFiltroDeItensDoLocalStorage from '~/utils/filtro-helper';
-import { limparStorageFiltroListagem } from '~/utils/fluxo-item-storage';
+import { limparStorageFiltroListagem, STORAGE_KEYS } from '~/utils/fluxo-item-storage';
+import configuracaoItemService from '~/services/configuracaoItem-service';
 
 const ListagemItens: React.FC = () => {
   const linkRetorno = 'https://hom-serap.sme.prefeitura.sp.gov.br/';
@@ -127,6 +128,114 @@ const ListagemItens: React.FC = () => {
     setCodigoItemTabelaSelecionado(id);
   };
 
+  const editarItem = async (itemId: number) => {
+    try {
+      const resposta = await configuracaoItemService.obterItemComAlternativas(itemId);
+      const item = resposta?.data;
+
+      if (!item) return;
+
+      const configuracao = {
+        codigoItem: item.codigoItem,
+        areaConhecimento: item.areaconhecimentoId,
+        disciplina: item.disciplinaId,
+        matriz: item.matrizId,
+        competencia: item.competenciaId,
+        habilidade: item.habilidadeId,
+        anoMatriz: item.anoMatrizId,
+        assunto: item.assuntoId,
+        subAssunto: item.subAssuntoId,
+        situacaoItem: item.situacao,
+        tipoItem: item.tipo,
+        quantidadeAlternativas: item.quantidadeAlternativasId,
+        dificuldadeSugerida: item.dificuldadeSugeridaId,
+        discriminacao: item.discriminacao,
+        dificuldade: item.dificuldade,
+        nivelItem: item.nivelItem,
+        acertoCasual: item.acertoCasual,
+        palavrasChave: Array.isArray(item.palavrasChave)
+          ? item.palavrasChave.filter((p: string) => p && p.trim())
+          : item.palavrasChave
+          ? item.palavrasChave.split(';').filter((p: string) => p && p.trim())
+          : [],
+        parametroBTransformado: item.parametroBTransformado,
+        mediaDesvioPadrao: item.mediaEhDesvio,
+        sentencaDescritora: item.sentencaDescritora,
+        observacao: item.observacao,
+        versaoItem: item.versaoItem ?? 0,
+        itemCodeVersion: item.itemCodeVersion ?? 0,
+      };
+
+      const elaboracao = {
+        textoBase: item.textoBase || '',
+        fonte: item.fonte || '',
+        enunciado: item.enunciado || '',
+        codigoItem: item.codigoItem,
+        alternativaA: item.alternativas?.find((a: any) => a.numeracao === 'A')?.descricao || '',
+        justificativaA:
+          item.alternativas?.find((a: any) => a.numeracao === 'A')?.justificativa || '',
+        alternativaB: item.alternativas?.find((a: any) => a.numeracao === 'B')?.descricao || '',
+        justificativaB:
+          item.alternativas?.find((a: any) => a.numeracao === 'B')?.justificativa || '',
+        alternativaC: item.alternativas?.find((a: any) => a.numeracao === 'C')?.descricao || '',
+        justificativaC:
+          item.alternativas?.find((a: any) => a.numeracao === 'C')?.justificativa || '',
+        alternativaD: item.alternativas?.find((a: any) => a.numeracao === 'D')?.descricao || '',
+        justificativaD:
+          item.alternativas?.find((a: any) => a.numeracao === 'D')?.justificativa || '',
+        alternativaCorreta: item.alternativas?.find((a: any) => a.correta)?.numeracao || 'A',
+        idAlternativaA: item.alternativas?.find((a: any) => a.numeracao === 'A')?.id || null,
+        idAlternativaB: item.alternativas?.find((a: any) => a.numeracao === 'B')?.id || null,
+        idAlternativaC: item.alternativas?.find((a: any) => a.numeracao === 'C')?.id || null,
+        idAlternativaD: item.alternativas?.find((a: any) => a.numeracao === 'D')?.id || null,
+        ArquivoVideoId: item.video?.arquivoId || null,
+        ArquivoAudioId: item.audio?.arquivoId || null,
+      };
+
+      const videoAudio = {
+        videoSalvo: item.video?.arquivoId
+          ? {
+              idFile: item.video.arquivoId,
+              fileLink: item.video.caminho || undefined,
+              name: item.video.nomeArquivo || undefined,
+              status: 'done',
+              uid: `video-${item.video.arquivoId}`,
+              type: item.video.contentType || undefined,
+            }
+          : undefined,
+        audioSalvo: item.audio?.arquivoId
+          ? {
+              idFile: item.audio.arquivoId,
+              fileLink: item.audio.caminho || undefined,
+              name: item.audio.nomeArquivo || undefined,
+              status: 'done',
+              uid: `audio-${item.audio.arquivoId}`,
+              type: item.audio.contentType || undefined,
+            }
+          : undefined,
+        videoTemp: undefined,
+        audioTemp: undefined,
+      };
+
+      localStorage.setItem(
+        STORAGE_KEYS.itemAtual,
+        JSON.stringify({
+          id: item.id,
+          codigoItem: item.codigoItem,
+          configuracao,
+          elaboracao,
+          videoAudio,
+        }),
+      );
+      localStorage.setItem(STORAGE_KEYS.editandoItem, 'true');
+      localStorage.removeItem(STORAGE_KEYS.voltandoParaPrimeiraTela);
+      navigate('/criacao');
+      window.scrollTo(0, 0);
+    } catch {
+      // Mantem comportamento atual sem bloquear a listagem em caso de falha na consulta.
+    }
+  };
+
   useEffect(() => {
     return () => {
       limparStorageFiltroListagem();
@@ -175,6 +284,7 @@ const ListagemItens: React.FC = () => {
         <div className='listagem-head-botao'>
           <Button
             onClick={() => {
+              localStorage.removeItem(STORAGE_KEYS.editandoItem);
               navigate(`/criacao`);
               window.scrollTo(0, 0);
             }}
@@ -219,10 +329,13 @@ const ListagemItens: React.FC = () => {
           ) : (
             <>
               <div>
-                <ListagemResumoItemComponent dados={itemResumoVersao} />
+                <ListagemResumoItemComponent dados={itemResumoVersao} onEditarItem={editarItem} />
               </div>
               <div>
-                <ListagemVersaoItemComponent versoes={itemResumoVersao?.versoesDisponiveis!} />
+                <ListagemVersaoItemComponent
+                  versoes={itemResumoVersao?.versoesDisponiveis!}
+                  onEditarVersao={editarItem}
+                />
               </div>
             </>
           )}
