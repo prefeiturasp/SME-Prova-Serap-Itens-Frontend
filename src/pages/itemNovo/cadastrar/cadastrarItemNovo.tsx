@@ -172,6 +172,70 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
     navigate('/listagem');
   };
 
+  const sincronizarConfiguracaoNoLocalStorage = useCallback(() => {
+    try {
+      const values = form.getFieldsValue(true);
+      const itemAtualStr = localStorage.getItem(STORAGE_KEYS.itemAtual);
+      if (!itemAtualStr) return;
+
+      const itemAtual = JSON.parse(itemAtualStr);
+
+      let palavrasChaveArray: string[] | null = null;
+      if (values?.palavraChave) {
+        if (Array.isArray(values.palavraChave)) {
+          const validas = values.palavraChave.filter((p: string) => p && p.trim());
+          palavrasChaveArray = validas.length > 0 ? validas : null;
+        } else if (typeof values.palavraChave === 'string' && values.palavraChave.trim()) {
+          const str = values.palavraChave.trim();
+          palavrasChaveArray = str.includes(';')
+            ? str
+                .split(';')
+                .filter((p: string) => p && p.trim())
+                .map((p: string) => p.trim())
+            : [str];
+        }
+      }
+
+      const configuracaoAtualizada = {
+        ...itemAtual.configuracao,
+        areaConhecimento: values?.AreaConhecimento ?? itemAtual.configuracao?.areaConhecimento,
+        disciplina: values?.disciplinas ?? itemAtual.configuracao?.disciplina,
+        matriz: values?.matriz ?? itemAtual.configuracao?.matriz,
+        anoMatriz: values?.anoMatriz ?? itemAtual.configuracao?.anoMatriz,
+        competencia: values?.competencia ?? itemAtual.configuracao?.competencia,
+        habilidade: values?.habilidade ?? itemAtual.configuracao?.habilidade,
+        assunto: values?.assunto ?? itemAtual.configuracao?.assunto,
+        subAssunto: values?.subAssunto ?? itemAtual.configuracao?.subAssunto,
+        situacaoItem: values?.situacaoItem ?? itemAtual.configuracao?.situacaoItem,
+        tipoItem: values?.tipoItem ?? itemAtual.configuracao?.tipoItem,
+        quantidadeAlternativas:
+          values?.quantidadeAlternativas ?? itemAtual.configuracao?.quantidadeAlternativas,
+        dificuldadeSugerida:
+          values?.dificuldadeSugerida ?? itemAtual.configuracao?.dificuldadeSugerida,
+        nivelItem: values?.nivelItem ?? itemAtual.configuracao?.nivelItem,
+        discriminacao:
+          values?.infoEstatisticasDiscriminacao ?? itemAtual.configuracao?.discriminacao,
+        dificuldade: values?.infoEstatisticasDificuldade ?? itemAtual.configuracao?.dificuldade,
+        acertoCasual: values?.infoEstatisticasAcertoCasual ?? itemAtual.configuracao?.acertoCasual,
+        palavrasChave:
+          palavrasChaveArray !== null ? palavrasChaveArray : itemAtual.configuracao?.palavrasChave,
+        parametroBTransformado:
+          values?.parametroBTransformado ?? itemAtual.configuracao?.parametroBTransformado,
+        mediaDesvioPadrao: values?.mediaDesvioPadrao ?? itemAtual.configuracao?.mediaDesvioPadrao,
+        sentencaDescritora:
+          values?.sentencaDescritora ?? itemAtual.configuracao?.sentencaDescritora,
+        observacao: values?.observacao ?? itemAtual.configuracao?.observacao,
+      };
+
+      localStorage.setItem(
+        STORAGE_KEYS.itemAtual,
+        JSON.stringify({ ...itemAtual, configuracao: configuracaoAtualizada }),
+      );
+    } catch (error) {
+      console.error('❌ Erro ao sincronizar configuração no localStorage:', error);
+    }
+  }, [form]);
+
   const avancar = () => {
     if (!itemId || itemId === 0) {
       mensagem('error', 'Erro', 'É necessário salvar o item antes de avançar');
@@ -181,6 +245,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
       mensagem('error', 'Erro', 'É necessário que o item tenha um código antes de avançar');
       return;
     }
+    sincronizarConfiguracaoNoLocalStorage();
     navigate('/elaboracao');
   };
 
@@ -524,7 +589,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                 <Button
                   type='primary'
                   onClick={() => salvarItem(true)}
-                  disabled={bloquearBtnSalvarRascunho}
+                  disabled={bloquearBtnSalvarRascunho || editandoItem}
                   className='btnRascunho'
                 >
                   Salvar rascunho
