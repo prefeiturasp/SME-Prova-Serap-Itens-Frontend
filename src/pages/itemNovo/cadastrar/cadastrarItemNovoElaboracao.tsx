@@ -283,6 +283,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
   const campoFonte = Campos.fonte;
   const campoEnunciado = Campos.enunciado;
   const campoCodigoItem = Campos.codigoItem;
+  const campoSituacaoItem = Campos.situacaoItem;
   const campoVideo = Campos.video;
   const campoAudio = Campos.audio;
   const campoAlternativaA = Campos.alternativaA;
@@ -500,6 +501,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
         [campoFonte]: elaboracaoItemNovo.fonte || '',
         [campoEnunciado]: elaboracaoItemNovo.enunciado || '',
         [campoCodigoItem]: elaboracaoItemNovo.codigoItem || '',
+        [campoSituacaoItem]: configuracaoItemNovo.situacaoItem || '',
         [campoAlternativaA]: elaboracaoItemNovo.alternativaA || '',
         [campoJustificativaA]: elaboracaoItemNovo.justificativaA || '',
         [campoAlternativaB]: elaboracaoItemNovo.alternativaB || '',
@@ -543,7 +545,10 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
       };
       setElaboracaoItemNovoLocal(elaboracaoAtual);
 
+      
+
       configuracaoItemNovo.codigoItem = values[campoCodigoItem] || '';
+      configuracaoItemNovo.situacaoItem = values[campoSituacaoItem];
       setConfiguracaoItemNovoLocal(configuracaoItemNovo);
       const itemAtualLocalStorage = localStorage.getItem('itemAtual');
       let videoAudioPreservado = videoAudioData;
@@ -576,6 +581,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
     campoFonte,
     campoEnunciado,
     campoCodigoItem,
+    campoSituacaoItem,
     campoVideo,
     campoAudio,
     campoAlternativaA,
@@ -666,7 +672,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
       anoMatrizId: configuracaoItemNovo?.anoMatriz || null,
       assuntoId: configuracaoItemNovo?.assunto || null,
       subAssuntoId: configuracaoItemNovo?.subAssunto || null,
-      situacao: configuracaoItemNovo?.situacaoItem || null,
+      situacao: values[campoSituacaoItem] || configuracaoItemNovo?.situacaoItem || null,
       tipo: configuracaoItemNovo?.tipoItem ? Number(configuracaoItemNovo.tipoItem) : 1,
       quantidadeAlternativasId: configuracaoItemNovo?.quantidadeAlternativas || null,
       dificuldadeSugeridaId: configuracaoItemNovo?.dificuldadeSugerida || null,
@@ -741,6 +747,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
     campoTextoBase,
     campoFonte,
     campoEnunciado,
+    campoSituacaoItem,
     campoVideo,
     campoAudio,
     campoAlternativaA,
@@ -838,6 +845,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
       campoFonte,
       campoEnunciado,
       campoCodigoItem,
+      campoSituacaoItem,
       campoVideo,
       campoAudio,
       campoAlternativaA,
@@ -863,6 +871,14 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
 
   const salvar = useCallback(async () => {
     setCarregando(true);
+
+      // Sincronizar valores do form ANTES de gerar o DTO
+    const values = form.getFieldsValue(true);
+    setConfiguracaoItemNovoLocal((prev) => ({
+      ...prev,
+      situacaoItem: values[campoSituacaoItem],
+    }));
+
     salvarDadosFormularioNoLocalStorage();
 
     const itemSalvar = gerarItemSalvar();

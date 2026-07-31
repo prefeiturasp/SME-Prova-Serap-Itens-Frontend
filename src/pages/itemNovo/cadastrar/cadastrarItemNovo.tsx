@@ -343,7 +343,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
       anoMatrizId: values?.anoMatriz || null,
       assuntoId: values?.assunto || null,
       subAssuntoId: values?.subAssunto || null,
-      situacao: values?.situacaoItem || null,
+      situacao: values?.situacaoItem ? Number(values.situacaoItem) : 3,
       tipo: values?.tipoItem ? Number(values.tipoItem) : 1,
       quantidadeAlternativasId: values?.quantidadeAlternativas || null,
       dificuldadeSugeridaId: values?.dificuldadeSugerida || null,
@@ -588,7 +588,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
               <div className='cadastrarItem-btn'>
                 <Button
                   type='primary'
-                  onClick={() => salvarItem(true)}
+                  onClick={() => salvarItem(false)}
                   disabled={bloquearBtnSalvarRascunho || editandoItem}
                   className='btnAvancar'
                 >

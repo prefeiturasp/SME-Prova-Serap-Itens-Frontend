@@ -12,8 +12,8 @@ import arquivoService from '~/services/arquivo-service';
 import { PreViewVideoAudio } from '~/components/lib/preViewVideoAudio/preViewVideoAudio';
 import { atualizarItemAtual, lerItemAtual } from '~/utils/item-atual-storage';
 import { htmlSeguro } from '~/utils/html-seguro';
-import SelectForm from '~/components/select-form';
 import configuracaoItemService from '~/services/configuracaoItem-service';
+import { Select } from 'antd';
 
 interface VideoAudioProps {
   videoTemp?: VideoArquivoDto;
@@ -929,14 +929,17 @@ const FormularioElaboracaoComponent: React.FC<
         <div className='card-corpo'>
           <Row>
             <Col xs={24} md={24} className='card-campo-elaboracao'>
-              <SelectForm
-                form={form}
-                options={listaSituacoesItem}
-                nomeCampo={Campos.situacaoItem}
+              <Form.Item
+                name={Campos.situacaoItem}
                 label='Situação do item'
-                campoObrigatorio={true}
-                labelInValue={false}
-              />
+              >
+                <Select
+                  options={listaSituacoesItem}
+                  placeholder='Selecione'
+                  allowClear
+                  showSearch={false}
+                />
+              </Form.Item>
             </Col>
           </Row>
         </div>

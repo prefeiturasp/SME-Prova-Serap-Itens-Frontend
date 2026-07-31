@@ -3,5 +3,6 @@ export interface VersaoDto {
   codigoItem: string;
   versaoItem: number;
   dataCriacao: string;
-  provas: string[];
+  situacaoItem: number;
+  provas?: string[];
 }
