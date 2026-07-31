@@ -784,13 +784,11 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
   const salvar = useCallback(async () => {
     setCarregando(true);
 
-    // Captura o status original ANTES de qualquer atualização de estado
     const statusOriginal =
       configuracaoItemNovo?.situacaoItem !== undefined && configuracaoItemNovo?.situacaoItem !== null
         ? Number(configuracaoItemNovo.situacaoItem)
         : Situacao.Rascunho;
 
-      // Sincronizar valores do form ANTES de gerar o DTO
     const values = form.getFieldsValue(true);
     setConfiguracaoItemNovoLocal((prev) => ({
       ...prev,
