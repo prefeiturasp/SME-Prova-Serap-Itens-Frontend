@@ -12,7 +12,9 @@ import { VideoArquivoDto, AudioArquivoDto } from '~/domain/dto/ArquivoMidiaDto';
 import configuracaoItemService from '~/services/configuracaoItem-service';
 import { limparStorageFluxoCadastro, STORAGE_KEYS } from '~/utils/fluxo-item-storage';
 import { Campos } from '~/domain/enums/campos-cadastro-item';
+import { Situacao } from '~/domain/enums/situacao';
 import { SelectValueType } from '~/domain/type/select';
+
 export interface ConfiguracaoItemNovoProps {
   codigoItem: string;
   areaConhecimento: SelectValueType;
@@ -661,9 +663,20 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
     alternativasDto.push(alternativaD);
     const codigoItemAtualizado =
       configuracaoItemNovo?.codigoItem || codigoItemEstado || values[campoCodigoItem] || '';
+
+    // Editar rascunho: id=ID, codigoItem=preservado, situacao=3
+    // Salvar ativo (finalizar/nova versão): id=0, codigoItem=preservado, situacao=1
+    const situacaoForm =
+      values[campoSituacaoItem] !== undefined && values[campoSituacaoItem] !== null
+        ? Number(values[campoSituacaoItem])
+        : configuracaoItemNovo?.situacaoItem !== undefined && configuracaoItemNovo?.situacaoItem !== null
+        ? Number(configuracaoItemNovo.situacaoItem)
+        : Situacao.Rascunho;
+    const ehRascunho = situacaoForm === Situacao.Rascunho;
+
     const dto: ItemNovoDto = {
-      id: itemId,
-      codigoItem: codigoItemAtualizado,
+      id: ehRascunho ? itemId : 0,
+      codigoItem: codigoItemAtualizado || null,
       areaConhecimentoId: configuracaoItemNovo?.areaConhecimento || null,
       disciplinaId: configuracaoItemNovo?.disciplina || null,
       matrizId: configuracaoItemNovo?.matriz || null,
@@ -672,7 +685,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
       anoMatrizId: configuracaoItemNovo?.anoMatriz || null,
       assuntoId: configuracaoItemNovo?.assunto || null,
       subAssuntoId: configuracaoItemNovo?.subAssunto || null,
-      situacao: values[campoSituacaoItem] || configuracaoItemNovo?.situacaoItem || null,
+      situacao: situacaoForm,
       tipo: configuracaoItemNovo?.tipoItem ? Number(configuracaoItemNovo.tipoItem) : 1,
       quantidadeAlternativasId: configuracaoItemNovo?.quantidadeAlternativas || null,
       dificuldadeSugeridaId: configuracaoItemNovo?.dificuldadeSugerida || null,
@@ -760,114 +773,6 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
     campoJustificativaD,
     campoAlternativaCorreta,
   ]);
-
-  const inserirRascunhoItem = useCallback(
-    async (itemDto: ItemNovoDto) => {
-      await configuracaoItemService
-        .salvarRascunhoItemNovo(itemDto)
-        .then(async (resp) => {
-          mensagem('success', 'Sucesso', 'Rascunho de item salvo com sucesso');
-          if (videoAudioData.videoTemp || videoAudioData.audioTemp) {
-            const novoVideoAudio = {
-              ...videoAudioData,
-              videoSalvo: videoAudioData.videoTemp || videoAudioData.videoSalvo,
-              audioSalvo: videoAudioData.audioTemp || videoAudioData.audioSalvo,
-              videoTemp: undefined,
-              audioTemp: undefined,
-            };
-            setVideoAudioData(novoVideoAudio);
-            const itemAtualizado = localStorage.getItem('itemAtual');
-            if (itemAtualizado) {
-              const item = JSON.parse(itemAtualizado);
-              item.videoAudio = novoVideoAudio;
-              localStorage.setItem('itemAtual', JSON.stringify(item));
-            }
-          }
-          try {
-            const dadosAtualizados = await obterItemComAlternativasEPopular(resp.data);
-
-            if (dadosAtualizados) {
-            } else {
-              console.warn('⚠️ Falha ao recarregar dados do backend após salvar rascunho');
-              const values = form.getFieldsValue(true);
-              const elaboracaoAtualizada = {
-                textoBase: values[campoTextoBase],
-                fonte: values[campoFonte],
-                enunciado: values[campoEnunciado],
-                codigoItem: values[campoCodigoItem],
-                video: values[campoVideo],
-                audio: values[campoAudio],
-                alternativaA: values[campoAlternativaA],
-                justificativaA: values[campoJustificativaA],
-                alternativaB: values[campoAlternativaB],
-                justificativaB: values[campoJustificativaB],
-                alternativaC: values[campoAlternativaC],
-                justificativaC: values[campoJustificativaC],
-                alternativaD: values[campoAlternativaD],
-                justificativaD: values[campoJustificativaD],
-                alternativaCorreta: values[campoAlternativaCorreta],
-              };
-              setElaboracaoItemNovoLocal(elaboracaoAtualizada);
-            }
-          } catch (error) {
-            console.error('❌ Erro ao recarregar dados após salvar rascunho:', error);
-            const values = form.getFieldsValue(true);
-            const elaboracaoAtualizada = {
-              textoBase: values[campoTextoBase],
-              fonte: values[campoFonte],
-              enunciado: values[campoEnunciado],
-              codigoItem: values[campoCodigoItem],
-              video: values[campoVideo],
-              audio: values[campoAudio],
-              alternativaA: values[campoAlternativaA],
-              justificativaA: values[campoJustificativaA],
-              alternativaB: values[campoAlternativaB],
-              justificativaB: values[campoJustificativaB],
-              alternativaC: values[campoAlternativaC],
-              justificativaC: values[campoJustificativaC],
-              alternativaD: values[campoAlternativaD],
-              justificativaD: values[campoJustificativaD],
-              alternativaCorreta: values[campoAlternativaCorreta],
-            };
-            setElaboracaoItemNovoLocal(elaboracaoAtualizada);
-          }
-        })
-        .catch(() => {
-          mensagem('error', 'Erro', 'Ocorreu um erro ao salvar o rascunho');
-        });
-    },
-    [
-      mensagem,
-      form,
-      itemId,
-      configuracaoItemNovo,
-      campoTextoBase,
-      campoFonte,
-      campoEnunciado,
-      campoCodigoItem,
-      campoSituacaoItem,
-      campoVideo,
-      campoAudio,
-      campoAlternativaA,
-      campoJustificativaA,
-      campoAlternativaB,
-      campoJustificativaB,
-      campoAlternativaC,
-      campoJustificativaC,
-      campoAlternativaD,
-      campoJustificativaD,
-      campoAlternativaCorreta,
-    ],
-  );
-
-  const salvarRascunho = useCallback(async () => {
-    setCarregando(true);
-    salvarDadosFormularioNoLocalStorage();
-
-    const itemSalvar = gerarItemSalvar();
-    await inserirRascunhoItem(itemSalvar);
-    setCarregando(false);
-  }, [gerarItemSalvar, inserirRascunhoItem, salvarDadosFormularioNoLocalStorage]);
 
   const salvar = useCallback(async () => {
     setCarregando(true);

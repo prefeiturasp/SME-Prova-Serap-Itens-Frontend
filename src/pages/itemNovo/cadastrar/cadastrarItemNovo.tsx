@@ -332,9 +332,14 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
       return alt.length ? alt : undefined;
     };
 
+    // Novo rascunho: id=0, codigoItem=null
+    // Editar rascunho: id=ID, codigoItem=preservado
+    const ehNovoItem = !itemId || itemId === 0;
+    const codigoItemEnviar = ehNovoItem ? null : (codigoItem || null);
+
     const dto: ItemNovoDto = {
-      id: itemId,
-      codigoItem: codigoItem || '',
+      id: itemId || 0,
+      codigoItem: codigoItemEnviar,
       areaConhecimentoId: values?.AreaConhecimento || null,
       disciplinaId: values?.disciplinas || null,
       matrizId: values?.matriz || null,
@@ -457,31 +462,20 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
     [form, mensagem, salvarItemNoLocalStorage],
   );
 
+  //método de salvar — backend determina o comportamento pelo id/codigoItem/situacao
   const inserirItem = useCallback(
     async (item: ItemNovoDto) => {
       await configuracaoItemService
         .salvarItemNovo(item)
         .then((resp) => {
           obterDadosItem(resp.data);
-          mensagem('success', 'Sucesso', 'Item cadastrado com sucesso');
+          const msg = item.situacao === 3
+            ? 'Rascunho salvo com sucesso'
+            : 'Item salvo com sucesso';
+          mensagem('success', 'Sucesso', msg);
         })
         .catch(() => {
-          mensagem('error', 'Erro', 'ocorreu um erro ao cadastrar o item');
-        });
-    },
-    [mensagem, obterDadosItem],
-  );
-
-  const inserirRascunhoItem = useCallback(
-    async (item: ItemNovoDto) => {
-      await configuracaoItemService
-        .salvarRascunhoItemNovo(item)
-        .then((resp) => {
-          obterDadosItem(resp.data);
-          mensagem('success', 'Sucesso', 'Rascunho de item cadastrado com sucesso');
-        })
-        .catch(() => {
-          mensagem('error', 'Erro', 'ocorreu um erro ao cadastrar o rascunho');
+          mensagem('error', 'Erro', 'Ocorreu um erro ao salvar o item');
         });
     },
     [mensagem, obterDadosItem],
@@ -530,7 +524,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
   );
 
   const salvarItem = useCallback(
-    async (rascunho = false) => {
+    async () => {
       setCarregando(true);
       const itemSalvar = gerarItemSalvar();
 
@@ -539,15 +533,10 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
         return;
       }
 
-      if (rascunho) {
-        await inserirRascunhoItem(itemSalvar);
-      } else {
-        await inserirItem(itemSalvar);
-      }
-
+      await inserirItem(itemSalvar);
       setCarregando(false);
     },
-    [mensagem, inserirItem, inserirRascunhoItem, gerarItemSalvar, validarCamposObrigatorios],
+    [mensagem, inserirItem, gerarItemSalvar, validarCamposObrigatorios],
   );
 
   return (
@@ -588,7 +577,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
               <div className='cadastrarItem-btn'>
                 <Button
                   type='primary'
-                  onClick={() => salvarItem(false)}
+                  onClick={() => salvarItem()}
                   disabled={bloquearBtnSalvarRascunho || editandoItem}
                   className='btnAvancar'
                 >

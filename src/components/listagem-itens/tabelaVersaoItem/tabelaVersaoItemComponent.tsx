@@ -3,7 +3,8 @@ import type { VersaoDto } from '~/domain/dto/versao-dto';
 import './tabelaVersaoItemComponent.css';
 import iconEdit from '~/assets/icon-editar.svg';
 import iconDelete from '~/assets/icon-remover.svg';
-import { SituacaoItem } from '~/domain/enums/situacao-item';
+import { Situacao } from '~/domain/enums/situacao';
+
 
 interface Props {
   versoes: VersaoDto[];
@@ -23,12 +24,12 @@ const TabelaVersaoItemComponent: React.FC<Props> = ({ versoes, onEditarVersao, o
   };
 
   const situacaoColumnRender = (_: any, record: VersaoDto) => {
-    const isAtivo = record.situacaoItem === SituacaoItem.Ativo;
+    const isAtivo = record.situacaoItem === Situacao.Ativo;
     return (
       <Switch
         checked={isAtivo}
         onChange={(checked) => {
-          const novoStatus = checked ? SituacaoItem.Ativo : SituacaoItem.Inativo;
+          const novoStatus = checked ? Situacao.Ativo : Situacao.Inativo;
           onToggleAtivo && onToggleAtivo(record.id, novoStatus);
         }}
       />
