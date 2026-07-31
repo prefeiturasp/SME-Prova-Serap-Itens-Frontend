@@ -1,15 +1,18 @@
-import { Button, Table, type TableColumnsType } from 'antd';
+import { Button, Switch, Table, type TableColumnsType } from 'antd';
 import type { VersaoDto } from '~/domain/dto/versao-dto';
 import './tabelaVersaoItemComponent.css';
 import iconEdit from '~/assets/icon-editar.svg';
 import iconDelete from '~/assets/icon-remover.svg';
+import { Situacao } from '~/domain/enums/situacao';
+
 
 interface Props {
   versoes: VersaoDto[];
   onEditarVersao?: (itemId: number) => void;
+  onToggleAtivo?: (id: number, novoStatus: number) => void;
 }
 
-const TabelaVersaoItemComponent: React.FC<Props> = ({ versoes, onEditarVersao }) => {
+const TabelaVersaoItemComponent: React.FC<Props> = ({ versoes, onEditarVersao, onToggleAtivo }) => {
   const editarHandler = (id: number) => {
     if (!onEditarVersao) return;
     onEditarVersao(id);
@@ -18,6 +21,19 @@ const TabelaVersaoItemComponent: React.FC<Props> = ({ versoes, onEditarVersao })
   const removerHandler = (id: number) => {
     // Lógica para remover a versão do item
     console.log(id);
+  };
+
+  const situacaoColumnRender = (_: any, record: VersaoDto) => {
+    const isAtivo = record.situacaoItem === Situacao.Ativo;
+    return (
+      <Switch
+        checked={isAtivo}
+        onChange={(checked) => {
+          const novoStatus = checked ? Situacao.Ativo : Situacao.Inativo;
+          onToggleAtivo && onToggleAtivo(record.id, novoStatus);
+        }}
+      />
+    );
   };
 
   const acaoColumnRender = (_: any, record: VersaoDto) => {
@@ -51,7 +67,8 @@ const TabelaVersaoItemComponent: React.FC<Props> = ({ versoes, onEditarVersao })
   const versaoColumns: TableColumnsType<VersaoDto> = [
     { title: 'Código do item', dataIndex: 'codigoItem', ellipsis: true },
     { title: 'Versão', dataIndex: 'versaoItem', width: 100 },
-    { title: 'Data de criação', dataIndex: 'dataCriacao', width: 200 },
+    { title: 'Data de criação', dataIndex: 'dataCriacao', width: 150 },
+    { title: ' ', render: situacaoColumnRender, width: 50 },
     { title: 'Ação', render: acaoColumnRender, width: 100 },
   ];
 
