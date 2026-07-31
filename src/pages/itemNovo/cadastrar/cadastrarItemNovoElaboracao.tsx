@@ -970,16 +970,6 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
                 </Button>
               </div>
               <div className='cadastrarItem-btn'>
-                <Button
-                  type='primary'
-                  onClick={salvarRascunho}
-                  loading={carregando}
-                  className='btnRascunho'
-                >
-                  Salvar rascunho
-                </Button>
-              </div>
-              <div className='cadastrarItem-btn'>
                 <Button className='btnAvancar' onClick={salvar}>
                   Salvar
                 </Button>

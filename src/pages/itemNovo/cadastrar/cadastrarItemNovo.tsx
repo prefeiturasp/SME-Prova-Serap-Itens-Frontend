@@ -590,9 +590,9 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                   type='primary'
                   onClick={() => salvarItem(true)}
                   disabled={bloquearBtnSalvarRascunho || editandoItem}
-                  className='btnRascunho'
+                  className='btnAvancar'
                 >
-                  Salvar rascunho
+                  Salvar
                 </Button>
               </div>
               <div className='cadastrarItem-btn'>
