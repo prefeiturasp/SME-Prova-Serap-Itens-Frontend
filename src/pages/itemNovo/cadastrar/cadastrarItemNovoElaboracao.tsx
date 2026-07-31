@@ -667,7 +667,6 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
     const codigoItemAtualizado =
       configuracaoItemNovo?.codigoItem || codigoItemEstado || values[campoCodigoItem] || '';
 
-    // situacaoForm = status que o usuário quer salvar (valor do formulário)
     const situacaoForm =
       values[campoSituacaoItem] !== undefined && values[campoSituacaoItem] !== null
         ? Number(values[campoSituacaoItem])
@@ -675,8 +674,6 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
         ? Number(configuracaoItemNovo.situacaoItem)
         : Situacao.Rascunho;
 
-    // statusOriginal = status do item no banco antes da edição
-    // Determina se atualiza o próprio item (Rascunho/Pendente) ou cria nova versão (Ativo/Inativo)
     const statusOriginal =
       configuracaoItemNovo?.situacaoItem !== undefined && configuracaoItemNovo?.situacaoItem !== null
         ? Number(configuracaoItemNovo.situacaoItem)

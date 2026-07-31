@@ -341,8 +341,6 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
       return alt.length ? alt : undefined;
     };
 
-    // Novo rascunho: id=0, codigoItem=null
-    // Editar rascunho: id=ID, codigoItem=preservado
     const ehNovoItem = !itemId || itemId === 0;
     const codigoItemEnviar = ehNovoItem ? null : (codigoItem || null);
 
@@ -471,7 +469,6 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
     [form, mensagem, salvarItemNoLocalStorage],
   );
 
-  //método de salvar — backend determina o comportamento pelo id/codigoItem/situacao
   const inserirItem = useCallback(
     async (item: ItemNovoDto) => {
       await configuracaoItemService
