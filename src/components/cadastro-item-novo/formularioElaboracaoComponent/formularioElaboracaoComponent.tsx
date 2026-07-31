@@ -242,13 +242,19 @@ const FormularioElaboracaoComponent: React.FC<
     configuracaoItemService.obterSituacoesItem().then((resposta) => {
       setListaSituacoesItem(resposta?.length ? resposta : []);
     });
+  }, []);
 
+  useEffect(() => {
+    if (listaSituacoesItem.length === 0) return;
     const item = lerItemAtual();
     const situacao = (item?.configuracao as any)?.situacaoItem;
+    const valorAtual = form?.getFieldValue(Campos.situacaoItem);
     if (situacao !== undefined && situacao !== null) {
       form?.setFieldValue(Campos.situacaoItem, situacao);
+    } else if (valorAtual === undefined || valorAtual === null) {
+      form?.setFieldValue(Campos.situacaoItem, listaSituacoesItem[0].value);
     }
-  }, []);
+  }, [listaSituacoesItem]);
 
   const safeString = (value: unknown): string => {
     if (value === null || value === undefined) return '';
@@ -936,7 +942,6 @@ const FormularioElaboracaoComponent: React.FC<
                 <Select
                   options={listaSituacoesItem}
                   placeholder='Selecione'
-                  allowClear
                   showSearch={false}
                 />
               </Form.Item>
