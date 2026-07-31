@@ -31,7 +31,6 @@ const FormularioUnico: React.FC<FormularioUnicoProps> = ({ form, setCarregando }
     DefaultOptionType[]
   >([]);
   const [listaTiposItem, setListaTiposItem] = useState<DefaultOptionType[]>([]);
-  const [listaSituacoesItem, setListaSituacoesItem] = useState<DefaultOptionType[]>([]);
 
   const [listaAssuntos, setListaAssuntos] = useState<DefaultOptionType[]>([]);
   const [listaSubAssuntos, setListaSubAssuntos] = useState<DefaultOptionType[]>([]);
