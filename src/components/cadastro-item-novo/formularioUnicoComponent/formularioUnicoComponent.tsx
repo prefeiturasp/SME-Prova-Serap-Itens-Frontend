@@ -31,7 +31,6 @@ const FormularioUnico: React.FC<FormularioUnicoProps> = ({ form, setCarregando }
     DefaultOptionType[]
   >([]);
   const [listaTiposItem, setListaTiposItem] = useState<DefaultOptionType[]>([]);
-  const [listaSituacoesItem, setListaSituacoesItem] = useState<DefaultOptionType[]>([]);
 
   const [listaAssuntos, setListaAssuntos] = useState<DefaultOptionType[]>([]);
   const [listaSubAssuntos, setListaSubAssuntos] = useState<DefaultOptionType[]>([]);
@@ -181,7 +180,7 @@ const FormularioUnico: React.FC<FormularioUnicoProps> = ({ form, setCarregando }
     [form],
   );
   const carregarListasBasicas = useCallback(async () => {
-    const [nivelItem, quantidadeAlternativas, tiposItem, situacoesItem] = await Promise.all([
+    const [nivelItem, quantidadeAlternativas, tiposItem] = await Promise.all([
       configuracaoItemService.obterNivelItem(),
       configuracaoItemService.obterQuantidadeAlternativas(),
       configuracaoItemService.obterTiposItem(),
@@ -191,7 +190,6 @@ const FormularioUnico: React.FC<FormularioUnicoProps> = ({ form, setCarregando }
     setListaNivelItem(nivelItem?.length ? nivelItem : []);
     setListaQuantidadeAlternativas(quantidadeAlternativas?.length ? quantidadeAlternativas : []);
     setListaTiposItem(tiposItem?.length ? tiposItem : []);
-    setListaSituacoesItem(situacoesItem?.length ? situacoesItem : []);
   }, []);
   const executarCascataAutomatica = useCallback(async () => {
     setCarregando?.(true);
