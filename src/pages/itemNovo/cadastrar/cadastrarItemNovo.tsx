@@ -1,4 +1,4 @@
-import { Button, Form, FormProps, notification, Spin } from 'antd';
+import { Button, Form, FormProps, Modal, notification, Spin } from 'antd';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './cadastrarItemNovo.css';
@@ -11,6 +11,7 @@ import { Campos } from '~/domain/enums/campos-cadastro-item';
 import configuracaoItemService from '~/services/configuracaoItem-service';
 
 import { AltenativaDto } from '~/domain/dto/AltenativaDto';
+import { Situacao } from '~/domain/enums/situacao';
 import { DadosIniciais } from '~/domain/enums/campos-cadastro-item';
 
 import { ItemNovoDto } from '~/domain/dto/itemNovo-dto';
@@ -76,6 +77,8 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
   const [codigoItem, setCodigoItem] = useState<string>('');
   const [editandoItem, setEditandoItem] = useState<boolean>(false);
   const [elaboracaoItem, setElaboracaoItem] = useState<ElaboracaoLocalProps>({});
+  const [situacaoItemAtual, setSituacaoItemAtual] = useState<number>(Situacao.Rascunho);
+  const [formModificado, setFormModificado] = useState<boolean>(false);
 
   const [form] = Form.useForm();
   const initialValuesForm = {
@@ -133,6 +136,9 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
       if (itemSalvo.id) setItemId(itemSalvo.id);
       if (itemSalvo.codigoItem) setCodigoItem(itemSalvo.codigoItem);
       if (itemSalvo.elaboracao) setElaboracaoItem(itemSalvo.elaboracao);
+      if (itemSalvo.configuracao?.situacaoItem !== undefined) {
+        setSituacaoItemAtual(Number(itemSalvo.configuracao.situacaoItem));
+      }
     } catch (error) {
       console.error('❌ Erro ao carregar estados do localStorage:', error);
     }
@@ -533,10 +539,33 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
         return;
       }
 
+      const statusAtual = editandoItem ? situacaoItemAtual : Situacao.Rascunho;
+
+      if (statusAtual === Situacao.Ativo || statusAtual === Situacao.Inativo) {
+        setCarregando(false);
+        Modal.confirm({
+          title: 'Criar nova versão',
+          content: 'Deseja criar uma nova versão do item?',
+          okText: 'Sim',
+          cancelText: 'Não',
+          onOk: async () => {
+            setCarregando(true);
+            const novaVersao: ItemNovoDto = {
+              ...itemSalvar,
+              id: 0,
+              situacao: Situacao.Rascunho,
+            };
+            await inserirItem(novaVersao);
+            setCarregando(false);
+          },
+        });
+        return;
+      }
+
       await inserirItem(itemSalvar);
       setCarregando(false);
     },
-    [mensagem, inserirItem, gerarItemSalvar, validarCamposObrigatorios],
+    [mensagem, inserirItem, gerarItemSalvar, validarCamposObrigatorios, editandoItem, situacaoItemAtual],
   );
 
   return (
@@ -550,6 +579,9 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
           layout='vertical'
           autoComplete='off'
           initialValues={initialValuesForm}
+          onValuesChange={() => {
+            if (editandoItem) setFormModificado(true);
+          }}
           style={{
             margin: 0,
           }}
@@ -578,7 +610,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
                 <Button
                   type='primary'
                   onClick={() => salvarItem()}
-                  disabled={bloquearBtnSalvarRascunho || editandoItem}
+                  disabled={editandoItem ? !formModificado : bloquearBtnSalvarRascunho}
                   className='btnAvancar'
                 >
                   Salvar

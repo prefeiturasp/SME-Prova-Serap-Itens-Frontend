@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Button, Form, FormProps, notification, Spin } from 'antd';
+import { Button, Form, FormProps, Modal, notification, Spin } from 'antd';
 import { useNavigate } from 'react-router';
 import { cloneDeep } from 'lodash';
 import './cadastrarItemNovoElaboracao.css';
@@ -788,6 +788,41 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
 
     const itemSalvar = gerarItemSalvar();
 
+    const statusAtual =
+      configuracaoItemNovo?.situacaoItem !== undefined && configuracaoItemNovo?.situacaoItem !== null
+        ? Number(configuracaoItemNovo.situacaoItem)
+        : Situacao.Rascunho;
+
+    if (statusAtual === Situacao.Ativo || statusAtual === Situacao.Inativo) {
+      setCarregando(false);
+      Modal.confirm({
+        title: 'Criar nova versão',
+        content: 'Deseja criar uma nova versão do item?',
+        okText: 'Sim',
+        cancelText: 'Não',
+        onOk: async () => {
+          setCarregando(true);
+          const novaVersao: ItemNovoDto = {
+            ...itemSalvar,
+            id: 0,
+            situacao: Situacao.Rascunho,
+          };
+          try {
+            await configuracaoItemService.editarItemNovo(novaVersao);
+            mensagem('success', 'Sucesso', 'Nova versão criada com sucesso');
+            limparItemDoLocalStorage();
+            navigate('/listagem');
+            window.scrollTo(0, 0);
+          } catch {
+            mensagem('error', 'Erro', 'Ocorreu um erro ao criar nova versão');
+          } finally {
+            setCarregando(false);
+          }
+        },
+      });
+      return;
+    }
+
     try {
       await configuracaoItemService.editarItemNovo(itemSalvar);
       mensagem('success', 'Sucesso', 'Item salvo com sucesso');
@@ -805,6 +840,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
     mensagem,
     navigate,
     salvarDadosFormularioNoLocalStorage,
+    configuracaoItemNovo,
   ]);
 
   const cancelar = () => {
