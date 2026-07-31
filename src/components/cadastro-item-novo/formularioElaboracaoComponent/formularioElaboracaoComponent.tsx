@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo, useCallback, Dispatch, SetStateAction } from 'react';
 import { Col, Form, FormProps, Input, Row, Radio, Modal, Button } from 'antd';
+import { DefaultOptionType } from 'antd/lib/select';
 import { TextEditor } from '~/components/lib/editor';
 import { EditOutlined } from '@ant-design/icons';
 import './formularioElaboracaoComponent.css';
@@ -11,6 +12,8 @@ import arquivoService from '~/services/arquivo-service';
 import { PreViewVideoAudio } from '~/components/lib/preViewVideoAudio/preViewVideoAudio';
 import { atualizarItemAtual, lerItemAtual } from '~/utils/item-atual-storage';
 import { htmlSeguro } from '~/utils/html-seguro';
+import configuracaoItemService from '~/services/configuracaoItem-service';
+import { Select } from 'antd';
 
 interface VideoAudioProps {
   videoTemp?: VideoArquivoDto;
@@ -41,6 +44,8 @@ const FormularioElaboracaoComponent: React.FC<
     return null;
   }
 
+  const [listaSituacoesItem, setListaSituacoesItem] = useState<DefaultOptionType[]>([]);
+
   const campoTextoBase = Campos.textoBase;
   const campoFonte = Campos.fonte;
   const campoEnunciado = Campos.enunciado;
@@ -61,6 +66,8 @@ const FormularioElaboracaoComponent: React.FC<
   const [isModalBVisible, setIsModalBVisible] = useState(false);
   const [isModalCVisible, setIsModalCVisible] = useState(false);
   const [isModalDVisible, setIsModalDVisible] = useState(false);
+
+
 
   const [renderTextEditorA, setRenderTextEditorA] = useState(true);
   const [renderTextEditorB, setRenderTextEditorB] = useState(true);
@@ -101,6 +108,8 @@ const FormularioElaboracaoComponent: React.FC<
   const handleJustificativaDChange = (value: string) => {
     setJustificativaD(value || '');
   };
+
+
 
   const videoFormItemProps = useMemo(() => ({ name: campoVideo }), [campoVideo]);
   const videoUploadProps = useMemo(
@@ -228,6 +237,24 @@ const FormularioElaboracaoComponent: React.FC<
   useEffect(() => {
     carregarDadosDoLocalStorage();
   }, [videoAudioData, carregarDadosDoLocalStorage]);
+
+  useEffect(() => {
+    configuracaoItemService.obterSituacoesItem().then((resposta) => {
+      setListaSituacoesItem(resposta?.length ? resposta : []);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (listaSituacoesItem.length === 0) return;
+    const item = lerItemAtual();
+    const situacao = (item?.configuracao as any)?.situacaoItem;
+    const valorAtual = form?.getFieldValue(Campos.situacaoItem);
+    if (situacao !== undefined && situacao !== null) {
+      form?.setFieldValue(Campos.situacaoItem, situacao);
+    } else if (valorAtual === undefined || valorAtual === null) {
+      form?.setFieldValue(Campos.situacaoItem, listaSituacoesItem[0].value);
+    }
+  }, [listaSituacoesItem]);
 
   const safeString = (value: unknown): string => {
     if (value === null || value === undefined) return '';
@@ -898,6 +925,25 @@ const FormularioElaboracaoComponent: React.FC<
             <Col xs={24} md={24} className='card-campo-elaboracao'>
               <Form.Item name={campoCodigoItem} label='Código do item'>
                 <Input placeholder='Digite o código...' />
+              </Form.Item>
+            </Col>
+          </Row>
+        </div>
+      </div>
+
+      <div className='card-elaboracao'>
+        <div className='card-corpo'>
+          <Row>
+            <Col xs={24} md={24} className='card-campo-elaboracao'>
+              <Form.Item
+                name={Campos.situacaoItem}
+                label='Situação do item'
+              >
+                <Select
+                  options={listaSituacoesItem}
+                  placeholder='Selecione'
+                  showSearch={false}
+                />
               </Form.Item>
             </Col>
           </Row>

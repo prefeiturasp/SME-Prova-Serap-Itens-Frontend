@@ -1,5 +1,6 @@
-import { Button, Form, FormProps, notification, Spin } from 'antd';
-import React, { useCallback, useEffect, useState } from 'react';
+import { Button, Form, FormProps, Modal, notification, Spin } from 'antd';
+import { ExclamationCircleOutlined } from '@ant-design/icons';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './cadastrarItemNovo.css';
 
@@ -11,6 +12,7 @@ import { Campos } from '~/domain/enums/campos-cadastro-item';
 import configuracaoItemService from '~/services/configuracaoItem-service';
 
 import { AltenativaDto } from '~/domain/dto/AltenativaDto';
+import { Situacao } from '~/domain/enums/situacao';
 import { DadosIniciais } from '~/domain/enums/campos-cadastro-item';
 
 import { ItemNovoDto } from '~/domain/dto/itemNovo-dto';
@@ -76,6 +78,10 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
   const [codigoItem, setCodigoItem] = useState<string>('');
   const [editandoItem, setEditandoItem] = useState<boolean>(false);
   const [elaboracaoItem, setElaboracaoItem] = useState<ElaboracaoLocalProps>({});
+  const [situacaoItemAtual, setSituacaoItemAtual] = useState<number>(Situacao.Rascunho);
+  const [formModificado, setFormModificado] = useState<boolean>(false);
+  const [isModalNovaVersaoVisible, setIsModalNovaVersaoVisible] = useState<boolean>(false);
+  const novaVersaoPendenteRef = useRef<ItemNovoDto | null>(null);
 
   const [form] = Form.useForm();
   const initialValuesForm = {
@@ -133,6 +139,9 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
       if (itemSalvo.id) setItemId(itemSalvo.id);
       if (itemSalvo.codigoItem) setCodigoItem(itemSalvo.codigoItem);
       if (itemSalvo.elaboracao) setElaboracaoItem(itemSalvo.elaboracao);
+      if (itemSalvo.configuracao?.situacaoItem !== undefined) {
+        setSituacaoItemAtual(Number(itemSalvo.configuracao.situacaoItem));
+      }
     } catch (error) {
       console.error('❌ Erro ao carregar estados do localStorage:', error);
     }
@@ -332,9 +341,12 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
       return alt.length ? alt : undefined;
     };
 
+    const ehNovoItem = !itemId || itemId === 0;
+    const codigoItemEnviar = ehNovoItem ? null : (codigoItem || null);
+
     const dto: ItemNovoDto = {
-      id: itemId,
-      codigoItem: codigoItem || '',
+      id: itemId || 0,
+      codigoItem: codigoItemEnviar,
       areaConhecimentoId: values?.AreaConhecimento || null,
       disciplinaId: values?.disciplinas || null,
       matrizId: values?.matriz || null,
@@ -343,7 +355,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
       anoMatrizId: values?.anoMatriz || null,
       assuntoId: values?.assunto || null,
       subAssuntoId: values?.subAssunto || null,
-      situacao: values?.situacaoItem || null,
+      situacao: values?.situacaoItem ? Number(values.situacaoItem) : 3,
       tipo: values?.tipoItem ? Number(values.tipoItem) : 1,
       quantidadeAlternativasId: values?.quantidadeAlternativas || null,
       dificuldadeSugeridaId: values?.dificuldadeSugerida || null,
@@ -463,25 +475,13 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
         .salvarItemNovo(item)
         .then((resp) => {
           obterDadosItem(resp.data);
-          mensagem('success', 'Sucesso', 'Item cadastrado com sucesso');
+          const msg = item.situacao === 3
+            ? 'Rascunho salvo com sucesso'
+            : 'Item salvo com sucesso';
+          mensagem('success', 'Sucesso', msg);
         })
         .catch(() => {
-          mensagem('error', 'Erro', 'ocorreu um erro ao cadastrar o item');
-        });
-    },
-    [mensagem, obterDadosItem],
-  );
-
-  const inserirRascunhoItem = useCallback(
-    async (item: ItemNovoDto) => {
-      await configuracaoItemService
-        .salvarRascunhoItemNovo(item)
-        .then((resp) => {
-          obterDadosItem(resp.data);
-          mensagem('success', 'Sucesso', 'Rascunho de item cadastrado com sucesso');
-        })
-        .catch(() => {
-          mensagem('error', 'Erro', 'ocorreu um erro ao cadastrar o rascunho');
+          mensagem('error', 'Erro', 'Ocorreu um erro ao salvar o item');
         });
     },
     [mensagem, obterDadosItem],
@@ -530,7 +530,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
   );
 
   const salvarItem = useCallback(
-    async (rascunho = false) => {
+    async () => {
       setCarregando(true);
       const itemSalvar = gerarItemSalvar();
 
@@ -539,15 +539,19 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
         return;
       }
 
-      if (rascunho) {
-        await inserirRascunhoItem(itemSalvar);
-      } else {
-        await inserirItem(itemSalvar);
+      const statusAtual = editandoItem ? situacaoItemAtual : Situacao.Rascunho;
+
+      if (statusAtual === Situacao.Ativo || statusAtual === Situacao.Inativo) {
+        setCarregando(false);
+        novaVersaoPendenteRef.current = { ...itemSalvar, id: 0, situacao: Situacao.Rascunho };
+        setIsModalNovaVersaoVisible(true);
+        return;
       }
 
+      await inserirItem(itemSalvar);
       setCarregando(false);
     },
-    [mensagem, inserirItem, inserirRascunhoItem, gerarItemSalvar, validarCamposObrigatorios],
+    [mensagem, inserirItem, gerarItemSalvar, validarCamposObrigatorios, editandoItem, situacaoItemAtual],
   );
 
   return (
@@ -555,12 +559,58 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
       <Spin size='small' spinning={carregando}>
         {contextHolder}
 
+        <Modal
+          open={isModalNovaVersaoVisible}
+          onCancel={() => setIsModalNovaVersaoVisible(false)}
+          maskClosable={false}
+          closable={false}
+          keyboard={false}
+          footer={
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+              <Button
+                className='btnVoltar'
+                onClick={() => setIsModalNovaVersaoVisible(false)}
+              >
+                Voltar
+              </Button>
+              <Button
+                className='btnAvancar'
+                type='primary'
+                onClick={async () => {
+                  setIsModalNovaVersaoVisible(false);
+                  if (novaVersaoPendenteRef.current) {
+                    setCarregando(true);
+                    await inserirItem(novaVersaoPendenteRef.current);
+                    novaVersaoPendenteRef.current = null;
+                    setCarregando(false);
+                  }
+                }}
+              >
+                Criar nova versão
+              </Button>
+            </div>
+          }
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <ExclamationCircleOutlined style={{ fontSize: 22, color: '#5A94D6' }} />
+              <span style={{ fontWeight: 600, fontSize: 16 }}>Deseja criar uma nova versão do item?</span>
+            </div>
+            <p style={{ marginLeft: 30, color: '#595959' }}>
+              O item possui status que não permite edição direta. Uma nova versão será criada com status Rascunho.
+            </p>
+          </div>
+        </Modal>
+
         <Form
           className='form'
           form={form}
           layout='vertical'
           autoComplete='off'
           initialValues={initialValuesForm}
+          onValuesChange={() => {
+            if (editandoItem) setFormModificado(true);
+          }}
           style={{
             margin: 0,
           }}
@@ -588,11 +638,11 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
               <div className='cadastrarItem-btn'>
                 <Button
                   type='primary'
-                  onClick={() => salvarItem(true)}
-                  disabled={bloquearBtnSalvarRascunho || editandoItem}
-                  className='btnRascunho'
+                  onClick={() => salvarItem()}
+                  disabled={editandoItem ? !formModificado : bloquearBtnSalvarRascunho}
+                  className='btnAvancar'
                 >
-                  Salvar rascunho
+                  Salvar
                 </Button>
               </div>
               <div className='cadastrarItem-btn'>

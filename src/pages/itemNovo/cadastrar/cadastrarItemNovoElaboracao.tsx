@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Button, Form, FormProps, notification, Spin } from 'antd';
+import { Button, Form, FormProps, Modal, notification, Spin } from 'antd';
+import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router';
 import { cloneDeep } from 'lodash';
 import './cadastrarItemNovoElaboracao.css';
@@ -12,7 +13,9 @@ import { VideoArquivoDto, AudioArquivoDto } from '~/domain/dto/ArquivoMidiaDto';
 import configuracaoItemService from '~/services/configuracaoItem-service';
 import { limparStorageFluxoCadastro, STORAGE_KEYS } from '~/utils/fluxo-item-storage';
 import { Campos } from '~/domain/enums/campos-cadastro-item';
+import { Situacao } from '~/domain/enums/situacao';
 import { SelectValueType } from '~/domain/type/select';
+
 export interface ConfiguracaoItemNovoProps {
   codigoItem: string;
   areaConhecimento: SelectValueType;
@@ -83,6 +86,8 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
   const [itemId, setItemId] = useState<number>(0);
   const [codigoItemEstado, setCodigoItemEstado] = useState<string>('');
   const [editandoItem, setEditandoItem] = useState<boolean>(false);
+  const [isModalNovaVersaoVisible, setIsModalNovaVersaoVisible] = useState<boolean>(false);
+  const novaVersaoPendenteRef = useRef<ItemNovoDto | null>(null);
   const [configuracaoItemNovo, setConfiguracaoItemNovoLocal] = useState<
     Partial<ConfiguracaoItemNovoProps>
   >({});
@@ -283,6 +288,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
   const campoFonte = Campos.fonte;
   const campoEnunciado = Campos.enunciado;
   const campoCodigoItem = Campos.codigoItem;
+  const campoSituacaoItem = Campos.situacaoItem;
   const campoVideo = Campos.video;
   const campoAudio = Campos.audio;
   const campoAlternativaA = Campos.alternativaA;
@@ -500,6 +506,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
         [campoFonte]: elaboracaoItemNovo.fonte || '',
         [campoEnunciado]: elaboracaoItemNovo.enunciado || '',
         [campoCodigoItem]: elaboracaoItemNovo.codigoItem || '',
+        [campoSituacaoItem]: configuracaoItemNovo.situacaoItem || '',
         [campoAlternativaA]: elaboracaoItemNovo.alternativaA || '',
         [campoJustificativaA]: elaboracaoItemNovo.justificativaA || '',
         [campoAlternativaB]: elaboracaoItemNovo.alternativaB || '',
@@ -543,7 +550,10 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
       };
       setElaboracaoItemNovoLocal(elaboracaoAtual);
 
+      
+
       configuracaoItemNovo.codigoItem = values[campoCodigoItem] || '';
+      configuracaoItemNovo.situacaoItem = values[campoSituacaoItem];
       setConfiguracaoItemNovoLocal(configuracaoItemNovo);
       const itemAtualLocalStorage = localStorage.getItem('itemAtual');
       let videoAudioPreservado = videoAudioData;
@@ -576,6 +586,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
     campoFonte,
     campoEnunciado,
     campoCodigoItem,
+    campoSituacaoItem,
     campoVideo,
     campoAudio,
     campoAlternativaA,
@@ -655,9 +666,24 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
     alternativasDto.push(alternativaD);
     const codigoItemAtualizado =
       configuracaoItemNovo?.codigoItem || codigoItemEstado || values[campoCodigoItem] || '';
+
+    const situacaoForm =
+      values[campoSituacaoItem] !== undefined && values[campoSituacaoItem] !== null
+        ? Number(values[campoSituacaoItem])
+        : configuracaoItemNovo?.situacaoItem !== undefined && configuracaoItemNovo?.situacaoItem !== null
+        ? Number(configuracaoItemNovo.situacaoItem)
+        : Situacao.Rascunho;
+
+    const statusOriginal =
+      configuracaoItemNovo?.situacaoItem !== undefined && configuracaoItemNovo?.situacaoItem !== null
+        ? Number(configuracaoItemNovo.situacaoItem)
+        : Situacao.Rascunho;
+    const ehRascunhoOuPendente =
+      statusOriginal === Situacao.Rascunho || statusOriginal === Situacao.Pendente;
+
     const dto: ItemNovoDto = {
-      id: itemId,
-      codigoItem: codigoItemAtualizado,
+      id: ehRascunhoOuPendente ? itemId : 0,
+      codigoItem: codigoItemAtualizado || null,
       areaConhecimentoId: configuracaoItemNovo?.areaConhecimento || null,
       disciplinaId: configuracaoItemNovo?.disciplina || null,
       matrizId: configuracaoItemNovo?.matriz || null,
@@ -666,7 +692,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
       anoMatrizId: configuracaoItemNovo?.anoMatriz || null,
       assuntoId: configuracaoItemNovo?.assunto || null,
       subAssuntoId: configuracaoItemNovo?.subAssunto || null,
-      situacao: configuracaoItemNovo?.situacaoItem || null,
+      situacao: situacaoForm,
       tipo: configuracaoItemNovo?.tipoItem ? Number(configuracaoItemNovo.tipoItem) : 1,
       quantidadeAlternativasId: configuracaoItemNovo?.quantidadeAlternativas || null,
       dificuldadeSugeridaId: configuracaoItemNovo?.dificuldadeSugerida || null,
@@ -741,6 +767,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
     campoTextoBase,
     campoFonte,
     campoEnunciado,
+    campoSituacaoItem,
     campoVideo,
     campoAudio,
     campoAlternativaA,
@@ -754,118 +781,32 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
     campoAlternativaCorreta,
   ]);
 
-  const inserirRascunhoItem = useCallback(
-    async (itemDto: ItemNovoDto) => {
-      await configuracaoItemService
-        .salvarRascunhoItemNovo(itemDto)
-        .then(async (resp) => {
-          mensagem('success', 'Sucesso', 'Rascunho de item salvo com sucesso');
-          if (videoAudioData.videoTemp || videoAudioData.audioTemp) {
-            const novoVideoAudio = {
-              ...videoAudioData,
-              videoSalvo: videoAudioData.videoTemp || videoAudioData.videoSalvo,
-              audioSalvo: videoAudioData.audioTemp || videoAudioData.audioSalvo,
-              videoTemp: undefined,
-              audioTemp: undefined,
-            };
-            setVideoAudioData(novoVideoAudio);
-            const itemAtualizado = localStorage.getItem('itemAtual');
-            if (itemAtualizado) {
-              const item = JSON.parse(itemAtualizado);
-              item.videoAudio = novoVideoAudio;
-              localStorage.setItem('itemAtual', JSON.stringify(item));
-            }
-          }
-          try {
-            const dadosAtualizados = await obterItemComAlternativasEPopular(resp.data);
-
-            if (dadosAtualizados) {
-            } else {
-              console.warn('⚠️ Falha ao recarregar dados do backend após salvar rascunho');
-              const values = form.getFieldsValue(true);
-              const elaboracaoAtualizada = {
-                textoBase: values[campoTextoBase],
-                fonte: values[campoFonte],
-                enunciado: values[campoEnunciado],
-                codigoItem: values[campoCodigoItem],
-                video: values[campoVideo],
-                audio: values[campoAudio],
-                alternativaA: values[campoAlternativaA],
-                justificativaA: values[campoJustificativaA],
-                alternativaB: values[campoAlternativaB],
-                justificativaB: values[campoJustificativaB],
-                alternativaC: values[campoAlternativaC],
-                justificativaC: values[campoJustificativaC],
-                alternativaD: values[campoAlternativaD],
-                justificativaD: values[campoJustificativaD],
-                alternativaCorreta: values[campoAlternativaCorreta],
-              };
-              setElaboracaoItemNovoLocal(elaboracaoAtualizada);
-            }
-          } catch (error) {
-            console.error('❌ Erro ao recarregar dados após salvar rascunho:', error);
-            const values = form.getFieldsValue(true);
-            const elaboracaoAtualizada = {
-              textoBase: values[campoTextoBase],
-              fonte: values[campoFonte],
-              enunciado: values[campoEnunciado],
-              codigoItem: values[campoCodigoItem],
-              video: values[campoVideo],
-              audio: values[campoAudio],
-              alternativaA: values[campoAlternativaA],
-              justificativaA: values[campoJustificativaA],
-              alternativaB: values[campoAlternativaB],
-              justificativaB: values[campoJustificativaB],
-              alternativaC: values[campoAlternativaC],
-              justificativaC: values[campoJustificativaC],
-              alternativaD: values[campoAlternativaD],
-              justificativaD: values[campoJustificativaD],
-              alternativaCorreta: values[campoAlternativaCorreta],
-            };
-            setElaboracaoItemNovoLocal(elaboracaoAtualizada);
-          }
-        })
-        .catch(() => {
-          mensagem('error', 'Erro', 'Ocorreu um erro ao salvar o rascunho');
-        });
-    },
-    [
-      mensagem,
-      form,
-      itemId,
-      configuracaoItemNovo,
-      campoTextoBase,
-      campoFonte,
-      campoEnunciado,
-      campoCodigoItem,
-      campoVideo,
-      campoAudio,
-      campoAlternativaA,
-      campoJustificativaA,
-      campoAlternativaB,
-      campoJustificativaB,
-      campoAlternativaC,
-      campoJustificativaC,
-      campoAlternativaD,
-      campoJustificativaD,
-      campoAlternativaCorreta,
-    ],
-  );
-
-  const salvarRascunho = useCallback(async () => {
-    setCarregando(true);
-    salvarDadosFormularioNoLocalStorage();
-
-    const itemSalvar = gerarItemSalvar();
-    await inserirRascunhoItem(itemSalvar);
-    setCarregando(false);
-  }, [gerarItemSalvar, inserirRascunhoItem, salvarDadosFormularioNoLocalStorage]);
-
   const salvar = useCallback(async () => {
     setCarregando(true);
+
+    const statusOriginal =
+      configuracaoItemNovo?.situacaoItem !== undefined && configuracaoItemNovo?.situacaoItem !== null
+        ? Number(configuracaoItemNovo.situacaoItem)
+        : Situacao.Rascunho;
+
+    const values = form.getFieldsValue(true);
+    setConfiguracaoItemNovoLocal((prev) => ({
+      ...prev,
+      situacaoItem: values[campoSituacaoItem],
+    }));
+
     salvarDadosFormularioNoLocalStorage();
 
     const itemSalvar = gerarItemSalvar();
+
+    const statusAtual = statusOriginal;
+
+    if (statusAtual === Situacao.Ativo || statusAtual === Situacao.Inativo) {
+      setCarregando(false);
+      novaVersaoPendenteRef.current = { ...itemSalvar, id: 0, situacao: Situacao.Rascunho };
+      setIsModalNovaVersaoVisible(true);
+      return;
+    }
 
     try {
       await configuracaoItemService.editarItemNovo(itemSalvar);
@@ -884,6 +825,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
     mensagem,
     navigate,
     salvarDadosFormularioNoLocalStorage,
+    configuracaoItemNovo,
   ]);
 
   const cancelar = () => {
@@ -916,6 +858,58 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
     <>
       <Spin size='small' spinning={carregando}>
         {contextHolder}
+
+        <Modal
+          open={isModalNovaVersaoVisible}
+          onCancel={() => setIsModalNovaVersaoVisible(false)}
+          maskClosable={false}
+          closable={false}
+          keyboard={false}
+          footer={
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+              <Button
+                className='btnVoltar'
+                onClick={() => setIsModalNovaVersaoVisible(false)}
+              >
+                Voltar
+              </Button>
+              <Button
+                className='btnAvancar'
+                type='primary'
+                onClick={async () => {
+                  setIsModalNovaVersaoVisible(false);
+                  if (novaVersaoPendenteRef.current) {
+                    setCarregando(true);
+                    try {
+                      await configuracaoItemService.editarItemNovo(novaVersaoPendenteRef.current);
+                      mensagem('success', 'Sucesso', 'Nova versão criada com sucesso');
+                      limparItemDoLocalStorage();
+                      navigate('/listagem');
+                      window.scrollTo(0, 0);
+                    } catch {
+                      mensagem('error', 'Erro', 'Ocorreu um erro ao criar nova versão');
+                    } finally {
+                      novaVersaoPendenteRef.current = null;
+                      setCarregando(false);
+                    }
+                  }
+                }}
+              >
+                Criar nova versão
+              </Button>
+            </div>
+          }
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <ExclamationCircleOutlined style={{ fontSize: 22, color: '#5A94D6' }} />
+              <span style={{ fontWeight: 600, fontSize: 16 }}>Deseja criar uma nova versão do item?</span>
+            </div>
+            <p style={{ marginLeft: 30, color: '#595959' }}>
+              O item possui status que não permite edição direta. Uma nova versão será criada com status Rascunho.
+            </p>
+          </div>
+        </Modal>
 
         <Form
           className='form'
@@ -967,16 +961,6 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
               <div className='cadastrarItem-btn'>
                 <Button className='btnVoltar' onClick={cancelar}>
                   Cancelar
-                </Button>
-              </div>
-              <div className='cadastrarItem-btn'>
-                <Button
-                  type='primary'
-                  onClick={salvarRascunho}
-                  loading={carregando}
-                  className='btnRascunho'
-                >
-                  Salvar rascunho
                 </Button>
               </div>
               <div className='cadastrarItem-btn'>

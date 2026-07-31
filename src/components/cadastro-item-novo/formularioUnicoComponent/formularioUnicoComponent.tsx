@@ -500,7 +500,7 @@ const FormularioUnico: React.FC<FormularioUnicoProps> = ({ form, setCarregando }
           </Row>
 
           <Row>
-            <Col xs={24} md={12} className='card-campo'>
+            <Col xs={24} md={24} className='card-campo'>
               <TipoItem
                 form={form}
                 options={listaTiposItem}
@@ -517,16 +517,6 @@ const FormularioUnico: React.FC<FormularioUnicoProps> = ({ form, setCarregando }
               </div>
             </Col>
 
-            <Col xs={24} md={12} className='card-campo'>
-              <SelectForm
-                form={form}
-                options={listaSituacoesItem}
-                nomeCampo={Campos.situacaoItem}
-                label='Situação do item'
-                campoObrigatorio={true}
-                labelInValue={false}
-              />
-            </Col>
           </Row>
         </div>
       </div>
