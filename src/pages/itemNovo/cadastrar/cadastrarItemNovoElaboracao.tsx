@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Button, Form, FormProps, Modal, notification, Spin } from 'antd';
+import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router';
 import { cloneDeep } from 'lodash';
 import './cadastrarItemNovoElaboracao.css';
@@ -85,6 +86,8 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
   const [itemId, setItemId] = useState<number>(0);
   const [codigoItemEstado, setCodigoItemEstado] = useState<string>('');
   const [editandoItem, setEditandoItem] = useState<boolean>(false);
+  const [isModalNovaVersaoVisible, setIsModalNovaVersaoVisible] = useState<boolean>(false);
+  const novaVersaoPendenteRef = useRef<ItemNovoDto | null>(null);
   const [configuracaoItemNovo, setConfiguracaoItemNovoLocal] = useState<
     Partial<ConfiguracaoItemNovoProps>
   >({});
@@ -664,18 +667,25 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
     const codigoItemAtualizado =
       configuracaoItemNovo?.codigoItem || codigoItemEstado || values[campoCodigoItem] || '';
 
-    // Editar rascunho: id=ID, codigoItem=preservado, situacao=3
-    // Salvar ativo (finalizar/nova versão): id=0, codigoItem=preservado, situacao=1
+    // situacaoForm = status que o usuário quer salvar (valor do formulário)
     const situacaoForm =
       values[campoSituacaoItem] !== undefined && values[campoSituacaoItem] !== null
         ? Number(values[campoSituacaoItem])
         : configuracaoItemNovo?.situacaoItem !== undefined && configuracaoItemNovo?.situacaoItem !== null
         ? Number(configuracaoItemNovo.situacaoItem)
         : Situacao.Rascunho;
-    const ehRascunho = situacaoForm === Situacao.Rascunho;
+
+    // statusOriginal = status do item no banco antes da edição
+    // Determina se atualiza o próprio item (Rascunho/Pendente) ou cria nova versão (Ativo/Inativo)
+    const statusOriginal =
+      configuracaoItemNovo?.situacaoItem !== undefined && configuracaoItemNovo?.situacaoItem !== null
+        ? Number(configuracaoItemNovo.situacaoItem)
+        : Situacao.Rascunho;
+    const ehRascunhoOuPendente =
+      statusOriginal === Situacao.Rascunho || statusOriginal === Situacao.Pendente;
 
     const dto: ItemNovoDto = {
-      id: ehRascunho ? itemId : 0,
+      id: ehRascunhoOuPendente ? itemId : 0,
       codigoItem: codigoItemAtualizado || null,
       areaConhecimentoId: configuracaoItemNovo?.areaConhecimento || null,
       disciplinaId: configuracaoItemNovo?.disciplina || null,
@@ -777,6 +787,12 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
   const salvar = useCallback(async () => {
     setCarregando(true);
 
+    // Captura o status original ANTES de qualquer atualização de estado
+    const statusOriginal =
+      configuracaoItemNovo?.situacaoItem !== undefined && configuracaoItemNovo?.situacaoItem !== null
+        ? Number(configuracaoItemNovo.situacaoItem)
+        : Situacao.Rascunho;
+
       // Sincronizar valores do form ANTES de gerar o DTO
     const values = form.getFieldsValue(true);
     setConfiguracaoItemNovoLocal((prev) => ({
@@ -788,38 +804,12 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
 
     const itemSalvar = gerarItemSalvar();
 
-    const statusAtual =
-      configuracaoItemNovo?.situacaoItem !== undefined && configuracaoItemNovo?.situacaoItem !== null
-        ? Number(configuracaoItemNovo.situacaoItem)
-        : Situacao.Rascunho;
+    const statusAtual = statusOriginal;
 
     if (statusAtual === Situacao.Ativo || statusAtual === Situacao.Inativo) {
       setCarregando(false);
-      Modal.confirm({
-        title: 'Criar nova versão',
-        content: 'Deseja criar uma nova versão do item?',
-        okText: 'Sim',
-        cancelText: 'Não',
-        onOk: async () => {
-          setCarregando(true);
-          const novaVersao: ItemNovoDto = {
-            ...itemSalvar,
-            id: 0,
-            situacao: Situacao.Rascunho,
-          };
-          try {
-            await configuracaoItemService.editarItemNovo(novaVersao);
-            mensagem('success', 'Sucesso', 'Nova versão criada com sucesso');
-            limparItemDoLocalStorage();
-            navigate('/listagem');
-            window.scrollTo(0, 0);
-          } catch {
-            mensagem('error', 'Erro', 'Ocorreu um erro ao criar nova versão');
-          } finally {
-            setCarregando(false);
-          }
-        },
-      });
+      novaVersaoPendenteRef.current = { ...itemSalvar, id: 0, situacao: Situacao.Rascunho };
+      setIsModalNovaVersaoVisible(true);
       return;
     }
 
@@ -873,6 +863,58 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
     <>
       <Spin size='small' spinning={carregando}>
         {contextHolder}
+
+        <Modal
+          open={isModalNovaVersaoVisible}
+          onCancel={() => setIsModalNovaVersaoVisible(false)}
+          maskClosable={false}
+          closable={false}
+          keyboard={false}
+          footer={
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+              <Button
+                className='btnVoltar'
+                onClick={() => setIsModalNovaVersaoVisible(false)}
+              >
+                Voltar
+              </Button>
+              <Button
+                className='btnAvancar'
+                type='primary'
+                onClick={async () => {
+                  setIsModalNovaVersaoVisible(false);
+                  if (novaVersaoPendenteRef.current) {
+                    setCarregando(true);
+                    try {
+                      await configuracaoItemService.editarItemNovo(novaVersaoPendenteRef.current);
+                      mensagem('success', 'Sucesso', 'Nova versão criada com sucesso');
+                      limparItemDoLocalStorage();
+                      navigate('/listagem');
+                      window.scrollTo(0, 0);
+                    } catch {
+                      mensagem('error', 'Erro', 'Ocorreu um erro ao criar nova versão');
+                    } finally {
+                      novaVersaoPendenteRef.current = null;
+                      setCarregando(false);
+                    }
+                  }
+                }}
+              >
+                Criar nova versão
+              </Button>
+            </div>
+          }
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <ExclamationCircleOutlined style={{ fontSize: 22, color: '#5A94D6' }} />
+              <span style={{ fontWeight: 600, fontSize: 16 }}>Deseja criar uma nova versão do item?</span>
+            </div>
+            <p style={{ marginLeft: 30, color: '#595959' }}>
+              O item possui status que não permite edição direta. Uma nova versão será criada com status Rascunho.
+            </p>
+          </div>
+        </Modal>
 
         <Form
           className='form'

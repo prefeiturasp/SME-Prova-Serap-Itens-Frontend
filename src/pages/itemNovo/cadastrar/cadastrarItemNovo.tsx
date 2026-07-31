@@ -1,5 +1,6 @@
 import { Button, Form, FormProps, Modal, notification, Spin } from 'antd';
-import React, { useCallback, useEffect, useState } from 'react';
+import { ExclamationCircleOutlined } from '@ant-design/icons';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './cadastrarItemNovo.css';
 
@@ -79,6 +80,8 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
   const [elaboracaoItem, setElaboracaoItem] = useState<ElaboracaoLocalProps>({});
   const [situacaoItemAtual, setSituacaoItemAtual] = useState<number>(Situacao.Rascunho);
   const [formModificado, setFormModificado] = useState<boolean>(false);
+  const [isModalNovaVersaoVisible, setIsModalNovaVersaoVisible] = useState<boolean>(false);
+  const novaVersaoPendenteRef = useRef<ItemNovoDto | null>(null);
 
   const [form] = Form.useForm();
   const initialValuesForm = {
@@ -543,22 +546,8 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
 
       if (statusAtual === Situacao.Ativo || statusAtual === Situacao.Inativo) {
         setCarregando(false);
-        Modal.confirm({
-          title: 'Criar nova versão',
-          content: 'Deseja criar uma nova versão do item?',
-          okText: 'Sim',
-          cancelText: 'Não',
-          onOk: async () => {
-            setCarregando(true);
-            const novaVersao: ItemNovoDto = {
-              ...itemSalvar,
-              id: 0,
-              situacao: Situacao.Rascunho,
-            };
-            await inserirItem(novaVersao);
-            setCarregando(false);
-          },
-        });
+        novaVersaoPendenteRef.current = { ...itemSalvar, id: 0, situacao: Situacao.Rascunho };
+        setIsModalNovaVersaoVisible(true);
         return;
       }
 
@@ -572,6 +561,49 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
     <>
       <Spin size='small' spinning={carregando}>
         {contextHolder}
+
+        <Modal
+          open={isModalNovaVersaoVisible}
+          onCancel={() => setIsModalNovaVersaoVisible(false)}
+          maskClosable={false}
+          closable={false}
+          keyboard={false}
+          footer={
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+              <Button
+                className='btnVoltar'
+                onClick={() => setIsModalNovaVersaoVisible(false)}
+              >
+                Voltar
+              </Button>
+              <Button
+                className='btnAvancar'
+                type='primary'
+                onClick={async () => {
+                  setIsModalNovaVersaoVisible(false);
+                  if (novaVersaoPendenteRef.current) {
+                    setCarregando(true);
+                    await inserirItem(novaVersaoPendenteRef.current);
+                    novaVersaoPendenteRef.current = null;
+                    setCarregando(false);
+                  }
+                }}
+              >
+                Criar nova versão
+              </Button>
+            </div>
+          }
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <ExclamationCircleOutlined style={{ fontSize: 22, color: '#5A94D6' }} />
+              <span style={{ fontWeight: 600, fontSize: 16 }}>Deseja criar uma nova versão do item?</span>
+            </div>
+            <p style={{ marginLeft: 30, color: '#595959' }}>
+              O item possui status que não permite edição direta. Uma nova versão será criada com status Rascunho.
+            </p>
+          </div>
+        </Modal>
 
         <Form
           className='form'
