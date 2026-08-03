@@ -12,7 +12,7 @@ import { Campos } from '~/domain/enums/campos-cadastro-item';
 import configuracaoItemService from '~/services/configuracaoItem-service';
 
 import { AltenativaDto } from '~/domain/dto/AltenativaDto';
-import { Situacao } from '~/domain/enums/situacao';
+import { Situacao, SituacaoDescricao } from '~/domain/enums/situacao';
 import { DadosIniciais } from '~/domain/enums/campos-cadastro-item';
 
 import { ItemNovoDto } from '~/domain/dto/itemNovo-dto';
@@ -92,6 +92,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
     tipoItem: DadosIniciais.tipoItemIdPadrao,
     dificuldadeSugerida: 5,
     quantidadeAlternativas: 23,
+    SituacaoItem: Situacao.Rascunho,
   };
 
   const areaConhecimentoIdForm = Form.useWatch(Campos.areaConhecimento, form);
@@ -139,9 +140,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
       if (itemSalvo.id) setItemId(itemSalvo.id);
       if (itemSalvo.codigoItem) setCodigoItem(itemSalvo.codigoItem);
       if (itemSalvo.elaboracao) setElaboracaoItem(itemSalvo.elaboracao);
-      if (itemSalvo.configuracao?.situacaoItem !== undefined) {
-        setSituacaoItemAtual(Number(itemSalvo.configuracao.situacaoItem));
-      }
+      if (itemSalvo.configuracao) { setSituacaoItemAtual(Number(itemSalvo.configuracao.situacaoItem));}
     } catch (error) {
       console.error('❌ Erro ao carregar estados do localStorage:', error);
     }
@@ -341,12 +340,9 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
       return alt.length ? alt : undefined;
     };
 
-    const ehNovoItem = !itemId || itemId === 0;
-    const codigoItemEnviar = ehNovoItem ? null : (codigoItem || null);
-
     const dto: ItemNovoDto = {
       id: itemId || 0,
-      codigoItem: codigoItemEnviar,
+      codigoItem: codigoItem || null,
       areaConhecimentoId: values?.AreaConhecimento || null,
       disciplinaId: values?.disciplinas || null,
       matrizId: values?.matriz || null,
@@ -355,7 +351,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
       anoMatrizId: values?.anoMatriz || null,
       assuntoId: values?.assunto || null,
       subAssuntoId: values?.subAssunto || null,
-      situacao: values?.situacaoItem ? Number(values.situacaoItem) : 3,
+      situacao: values?.situacaoItem ?? 3,
       tipo: values?.tipoItem ? Number(values.tipoItem) : 1,
       quantidadeAlternativasId: values?.quantidadeAlternativas || null,
       dificuldadeSugeridaId: values?.dificuldadeSugerida || null,
@@ -539,11 +535,10 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
         return;
       }
 
-      const statusAtual = editandoItem ? situacaoItemAtual : Situacao.Rascunho;
 
-      if (statusAtual === Situacao.Ativo || statusAtual === Situacao.Inativo) {
+      if (situacaoItemAtual === Situacao.Ativo || situacaoItemAtual === Situacao.Inativo) {
         setCarregando(false);
-        novaVersaoPendenteRef.current = { ...itemSalvar, id: 0, situacao: Situacao.Rascunho };
+        novaVersaoPendenteRef.current = { ...itemSalvar, id: 0, situacao: situacaoItemAtual};
         setIsModalNovaVersaoVisible(true);
         return;
       }
@@ -597,7 +592,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
               <span style={{ fontWeight: 600, fontSize: 16 }}>Deseja criar uma nova versão do item?</span>
             </div>
             <p style={{ marginLeft: 30, color: '#595959' }}>
-              O item possui status que não permite edição direta. Uma nova versão será criada com status Rascunho.
+              {`O item possui status que não permite edição direta. Uma nova versão será criada com status "${SituacaoDescricao[situacaoItemAtual as Situacao]}".`}
             </p>
           </div>
         </Modal>

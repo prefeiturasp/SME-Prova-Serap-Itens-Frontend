@@ -13,7 +13,7 @@ import { VideoArquivoDto, AudioArquivoDto } from '~/domain/dto/ArquivoMidiaDto';
 import configuracaoItemService from '~/services/configuracaoItem-service';
 import { limparStorageFluxoCadastro, STORAGE_KEYS } from '~/utils/fluxo-item-storage';
 import { Campos } from '~/domain/enums/campos-cadastro-item';
-import { Situacao } from '~/domain/enums/situacao';
+import { Situacao, SituacaoDescricao } from '~/domain/enums/situacao';
 import { SelectValueType } from '~/domain/type/select';
 
 export interface ConfiguracaoItemNovoProps {
@@ -553,7 +553,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
       
 
       configuracaoItemNovo.codigoItem = values[campoCodigoItem] || '';
-      configuracaoItemNovo.situacaoItem = values[campoSituacaoItem];
+      configuracaoItemNovo.situacaoItem = values[campoSituacaoItem] ?? configuracaoItemNovo.situacaoItem ?? Situacao.Rascunho;
       setConfiguracaoItemNovoLocal(configuracaoItemNovo);
       const itemAtualLocalStorage = localStorage.getItem('itemAtual');
       let videoAudioPreservado = videoAudioData;
@@ -667,22 +667,8 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
     const codigoItemAtualizado =
       configuracaoItemNovo?.codigoItem || codigoItemEstado || values[campoCodigoItem] || '';
 
-    const situacaoForm =
-      values[campoSituacaoItem] !== undefined && values[campoSituacaoItem] !== null
-        ? Number(values[campoSituacaoItem])
-        : configuracaoItemNovo?.situacaoItem !== undefined && configuracaoItemNovo?.situacaoItem !== null
-        ? Number(configuracaoItemNovo.situacaoItem)
-        : Situacao.Rascunho;
-
-    const statusOriginal =
-      configuracaoItemNovo?.situacaoItem !== undefined && configuracaoItemNovo?.situacaoItem !== null
-        ? Number(configuracaoItemNovo.situacaoItem)
-        : Situacao.Rascunho;
-    const ehRascunhoOuPendente =
-      statusOriginal === Situacao.Rascunho || statusOriginal === Situacao.Pendente;
-
     const dto: ItemNovoDto = {
-      id: ehRascunhoOuPendente ? itemId : 0,
+      id: itemId || 0,
       codigoItem: codigoItemAtualizado || null,
       areaConhecimentoId: configuracaoItemNovo?.areaConhecimento || null,
       disciplinaId: configuracaoItemNovo?.disciplina || null,
@@ -692,7 +678,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
       anoMatrizId: configuracaoItemNovo?.anoMatriz || null,
       assuntoId: configuracaoItemNovo?.assunto || null,
       subAssuntoId: configuracaoItemNovo?.subAssunto || null,
-      situacao: situacaoForm,
+      situacao: values[campoSituacaoItem],
       tipo: configuracaoItemNovo?.tipoItem ? Number(configuracaoItemNovo.tipoItem) : 1,
       quantidadeAlternativasId: configuracaoItemNovo?.quantidadeAlternativas || null,
       dificuldadeSugeridaId: configuracaoItemNovo?.dificuldadeSugerida || null,
@@ -803,7 +789,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
 
     if (statusAtual === Situacao.Ativo || statusAtual === Situacao.Inativo) {
       setCarregando(false);
-      novaVersaoPendenteRef.current = { ...itemSalvar, id: 0, situacao: Situacao.Rascunho };
+      novaVersaoPendenteRef.current = { ...itemSalvar, id: 0 };
       setIsModalNovaVersaoVisible(true);
       return;
     }
@@ -906,7 +892,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
               <span style={{ fontWeight: 600, fontSize: 16 }}>Deseja criar uma nova versão do item?</span>
             </div>
             <p style={{ marginLeft: 30, color: '#595959' }}>
-              O item possui status que não permite edição direta. Uma nova versão será criada com status Rascunho.
+              {`O item possui status que não permite edição direta. Uma nova versão será criada com status "${SituacaoDescricao[(Number(configuracaoItemNovo?.situacaoItem) ?? Situacao.Rascunho) as Situacao]}".`}
             </p>
           </div>
         </Modal>
