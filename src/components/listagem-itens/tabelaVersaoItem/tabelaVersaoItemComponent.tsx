@@ -1,9 +1,9 @@
-import { Button, Switch, Table, type TableColumnsType } from 'antd';
+import { Button, Switch, Table, Tooltip, type TableColumnsType } from 'antd';
 import type { VersaoDto } from '~/domain/dto/versao-dto';
 import './tabelaVersaoItemComponent.css';
 import iconEdit from '~/assets/icon-editar.svg';
 import iconDelete from '~/assets/icon-remover.svg';
-import { Situacao } from '~/domain/enums/situacao';
+import { Situacao, SituacaoDescricao } from '~/domain/enums/situacao';
 
 
 interface Props {
@@ -24,15 +24,19 @@ const TabelaVersaoItemComponent: React.FC<Props> = ({ versoes, onEditarVersao, o
   };
 
   const situacaoColumnRender = (_: any, record: VersaoDto) => {
-    const isAtivo = record.situacaoItem === Situacao.Ativo;
+    const isAtivo = record.situacao === Situacao.Ativo;
+    const situacaoDescricao = SituacaoDescricao[record.situacao as Situacao] || 'Desconhecido';
     return (
-      <Switch
-        checked={isAtivo}
-        onChange={(checked) => {
-          const novoStatus = checked ? Situacao.Ativo : Situacao.Inativo;
-          onToggleAtivo && onToggleAtivo(record.id, novoStatus);
-        }}
-      />
+      <Tooltip title={`Situação: ${situacaoDescricao}`}>
+        <Switch
+          className='switch-custom'
+          checked={isAtivo}
+          onChange={(checked) => {
+            const novoStatus = checked ? Situacao.Ativo : Situacao.Inativo;
+            onToggleAtivo && onToggleAtivo(record.id, novoStatus);
+          }}
+        />
+      </Tooltip>
     );
   };
 

@@ -7,6 +7,8 @@ import './formularioElaboracaoComponent.css';
 import UploadArquivosSME from '~/components/lib/upload';
 import ButtonPrimary from '~/components/lib/button/primary';
 import { Campos } from '~/domain/enums/campos-cadastro-item';
+import { Situacao } from '~/domain/enums/situacao';
+import { SelectValueType } from '~/domain/type/select';
 import { VideoArquivoDto, AudioArquivoDto } from '~/domain/dto/ArquivoMidiaDto';
 import arquivoService from '~/services/arquivo-service';
 import { PreViewVideoAudio } from '~/components/lib/preViewVideoAudio/preViewVideoAudio';
@@ -30,6 +32,7 @@ const FormularioElaboracaoComponent: React.FC<
     setVideoAudioData?: Dispatch<SetStateAction<VideoAudioProps>>;
     setVideoCaminho?: Dispatch<SetStateAction<string>>;
     setAudioCaminho?: Dispatch<SetStateAction<string>>;
+    onSituacaoInicialChange?: (situacao: SelectValueType) => void;
   }
 > = ({
   form,
@@ -39,12 +42,14 @@ const FormularioElaboracaoComponent: React.FC<
   setVideoAudioData,
   setVideoCaminho,
   setAudioCaminho,
+  onSituacaoInicialChange,
 }) => {
   if (!form) {
     return null;
   }
 
   const [listaSituacoesItem, setListaSituacoesItem] = useState<DefaultOptionType[]>([]);
+  const [situacaoInicial, setSituacaoInicial] = useState<SelectValueType>(null);
 
   const campoTextoBase = Campos.textoBase;
   const campoFonte = Campos.fonte;
@@ -248,13 +253,18 @@ const FormularioElaboracaoComponent: React.FC<
     if (listaSituacoesItem.length === 0) return;
     const item = lerItemAtual();
     const situacao = (item?.configuracao as any)?.situacaoItem;
-    const valorAtual = form?.getFieldValue(Campos.situacaoItem);
+    
     if (situacao !== undefined && situacao !== null) {
+      setSituacaoInicial(situacao);
+      onSituacaoInicialChange?.(situacao);
       form?.setFieldValue(Campos.situacaoItem, situacao);
-    } else if (valorAtual === undefined || valorAtual === null) {
-      form?.setFieldValue(Campos.situacaoItem, listaSituacoesItem[0].value);
+    } else {
+      const valorAtual = form?.getFieldValue(Campos.situacaoItem);
+      if (valorAtual === undefined || valorAtual === null) {
+        form?.setFieldValue(Campos.situacaoItem, listaSituacoesItem[0].value);
+      }
     }
-  }, [listaSituacoesItem]);
+  }, [listaSituacoesItem, onSituacaoInicialChange]);
 
   const safeString = (value: unknown): string => {
     if (value === null || value === undefined) return '';
@@ -943,6 +953,7 @@ const FormularioElaboracaoComponent: React.FC<
                   options={listaSituacoesItem}
                   placeholder='Selecione'
                   showSearch={false}
+                  disabled={Number(situacaoInicial) === Situacao.Ativo || Number(situacaoInicial) === Situacao.Inativo}
                 />
               </Form.Item>
             </Col>
