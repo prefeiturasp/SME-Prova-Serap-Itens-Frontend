@@ -90,3 +90,11 @@
   color: #5A94D8;
   border-color: #5A94D8
 }
+
+.switch-custom {
+  --ant-primary-color: #5a94d8;
+}
+
+.switch-custom.ant-switch-checked {
+     background: #5a94d8 !important;
+}
