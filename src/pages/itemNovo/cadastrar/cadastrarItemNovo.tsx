@@ -592,7 +592,7 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
               <span style={{ fontWeight: 600, fontSize: 16 }}>Deseja criar uma nova versão do item?</span>
             </div>
             <p style={{ marginLeft: 30, color: '#595959' }}>
-              {`O item possui status que não permite edição direta. Uma nova versão será criada com status "${SituacaoDescricao[situacaoItemAtual as Situacao]}".`}
+              {`O item possui status que não permite edição direta. Uma nova versão será criada com status "${SituacaoDescricao[Situacao.Rascunho]}".`}
             </p>
           </div>
         </Modal>
