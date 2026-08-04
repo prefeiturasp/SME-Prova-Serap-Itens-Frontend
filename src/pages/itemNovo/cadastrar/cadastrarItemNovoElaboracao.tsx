@@ -101,6 +101,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
     videoTemp: undefined,
     audioTemp: undefined,
   });
+  const [situacaoInicial, setSituacaoInicial] = useState<SelectValueType>(null);
 
   type tipoMsg = 'success' | 'info' | 'warning' | 'error';
   const [api, contextHolder] = notification.useNotification();
@@ -770,9 +771,10 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
   const salvar = useCallback(async () => {
     setCarregando(true);
 
-    const statusOriginal =
-      configuracaoItemNovo?.situacaoItem !== undefined && configuracaoItemNovo?.situacaoItem !== null
-        ? Number(configuracaoItemNovo.situacaoItem)
+    // Usa a situação INICIAL para determinar se deve criar nova versão
+    const statusInicial =
+      situacaoInicial !== undefined && situacaoInicial !== null
+        ? Number(situacaoInicial)
         : Situacao.Rascunho;
 
     const values = form.getFieldsValue(true);
@@ -785,9 +787,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
 
     const itemSalvar = gerarItemSalvar();
 
-    const statusAtual = statusOriginal;
-
-    if (statusAtual === Situacao.Ativo || statusAtual === Situacao.Inativo) {
+    if (statusInicial === Situacao.Ativo || statusInicial === Situacao.Inativo) {
       setCarregando(false);
       novaVersaoPendenteRef.current = { ...itemSalvar, id: 0 };
       setIsModalNovaVersaoVisible(true);
@@ -800,8 +800,15 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
       limparItemDoLocalStorage();
       navigate('/listagem');
       window.scrollTo(0, 0);
-    } catch {
-      mensagem('error', 'Erro', 'Ocorreu um erro ao salvar o item');
+    } catch (error: any) {
+      const mensagensErro = error?.response?.data?.mensagens;
+      
+      if (mensagensErro && Array.isArray(mensagensErro) && mensagensErro.length > 0) {
+        const mensagemFormatada = mensagensErro[0];
+        mensagem('error', 'Erro de validação', mensagemFormatada);
+      } else {
+        mensagem('error', 'Erro', 'Ocorreu um erro ao salvar o item');
+      }
     } finally {
       setCarregando(false);
     }
@@ -811,7 +818,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
     mensagem,
     navigate,
     salvarDadosFormularioNoLocalStorage,
-    configuracaoItemNovo,
+    situacaoInicial,
   ]);
 
   const cancelar = () => {
@@ -892,7 +899,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
               <span style={{ fontWeight: 600, fontSize: 16 }}>Deseja criar uma nova versão do item?</span>
             </div>
             <p style={{ marginLeft: 30, color: '#595959' }}>
-              {`O item possui status que não permite edição direta. Uma nova versão será criada com status "${SituacaoDescricao[(Number(configuracaoItemNovo?.situacaoItem) ?? Situacao.Rascunho) as Situacao]}".`}
+              {`O item possui status que não permite edição direta. Uma nova versão será criada com status "${SituacaoDescricao[Situacao.Rascunho]}".`}
             </p>
           </div>
         </Modal>
@@ -936,6 +943,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
               setVideoAudioData={setVideoAudioData}
               setVideoCaminho={setVideoCaminho}
               setAudioCaminho={setAudioCaminho}
+              onSituacaoInicialChange={setSituacaoInicial}
             />
 
             <div className='cadastrarItem-botoes'>
