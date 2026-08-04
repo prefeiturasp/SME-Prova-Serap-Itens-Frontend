@@ -771,7 +771,6 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
   const salvar = useCallback(async () => {
     setCarregando(true);
 
-    // Usa a situação INICIAL para determinar se deve criar nova versão
     const statusInicial =
       situacaoInicial !== undefined && situacaoInicial !== null
         ? Number(situacaoInicial)
