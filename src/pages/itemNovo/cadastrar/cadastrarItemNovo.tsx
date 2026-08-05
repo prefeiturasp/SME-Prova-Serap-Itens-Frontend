@@ -177,7 +177,12 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
     limparItemDoLocalStorage();
     form.resetFields();
     setCarregando(false);
-    navigate('/listagem');
+    if (itemId > 0) {
+      navigate('/listagem', { state: { selectedItemId: itemId } });
+      window.scrollTo(0, 0);
+    } else {
+      navigate('/listagem');
+    }
   };
 
   const sincronizarConfiguracaoNoLocalStorage = useCallback(() => {
@@ -466,22 +471,29 @@ const CadastrarItemNovo: React.FC<FormProps> = () => {
   );
 
   const inserirItem = useCallback(
-    async (item: ItemNovoDto) => {
-      await configuracaoItemService
-        .salvarItemNovo(item)
-        .then((resp) => {
-          obterDadosItem(resp.data);
-          const msg = item.situacao === 3
-            ? 'Rascunho salvo com sucesso'
-            : 'Item salvo com sucesso';
-          mensagem('success', 'Sucesso', msg);
-        })
-        .catch(() => {
-          mensagem('error', 'Erro', 'Ocorreu um erro ao salvar o item');
-        });
-    },
-    [mensagem, obterDadosItem],
-  );
+  async (item: ItemNovoDto) => {
+    await configuracaoItemService
+      .salvarItemNovo(item)
+      .then((resp) => {
+        const novoItemId = resp.data;
+        obterDadosItem(novoItemId);
+        const msg = item.situacao === Situacao.Rascunho
+          ? 'Rascunho salvo com sucesso'
+          : 'Item salvo com sucesso';
+        mensagem('success', 'Sucesso', msg);
+        
+        setTimeout(() => {
+          limparItemDoLocalStorage();
+          navigate('/listagem', { state: { selectedItemId: novoItemId } });
+          window.scrollTo(0, 0);
+        }, 1000);
+      })
+      .catch(() => {
+        mensagem('error', 'Erro', 'Ocorreu um erro ao salvar o item');
+      });
+  },
+  [mensagem, obterDadosItem, navigate, limparItemDoLocalStorage],
+);
 
   const validarCamposObrigatorios = useCallback(
     (dto: ItemNovoDto): boolean => {

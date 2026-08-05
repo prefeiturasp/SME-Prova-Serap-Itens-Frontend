@@ -183,7 +183,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
     }
     setTimeout(() => {
       setCarregando(false);
-      navigate('/criacao');
+      navigate('/criacao', { state: { selectedItemId: itemId } });
     }, 500);
   };
   useEffect(() => {
@@ -797,7 +797,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
       await configuracaoItemService.editarItemNovo(itemSalvar);
       mensagem('success', 'Sucesso', 'Item salvo com sucesso');
       limparItemDoLocalStorage();
-      navigate('/listagem');
+      navigate('/listagem', { state: { selectedItemId: itemId } });
       window.scrollTo(0, 0);
     } catch (error: any) {
       const mensagensErro = error?.response?.data?.mensagens;
@@ -837,7 +837,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
     setAudioCaminho('');
     form.resetFields();
     setCarregando(false);
-    navigate('/listagem');
+    navigate('/listagem', { state: { selectedItemId: itemId } });
   };
   useEffect(() => {
     const codigoItemAtual = form.getFieldValue(campoCodigoItem);
@@ -876,7 +876,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
                       await configuracaoItemService.editarItemNovo(novaVersaoPendenteRef.current);
                       mensagem('success', 'Sucesso', 'Nova versão criada com sucesso');
                       limparItemDoLocalStorage();
-                      navigate('/listagem');
+                      navigate('/listagem', { state: { selectedItemId: itemId } });
                       window.scrollTo(0, 0);
                     } catch {
                       mensagem('error', 'Erro', 'Ocorreu um erro ao criar nova versão');
