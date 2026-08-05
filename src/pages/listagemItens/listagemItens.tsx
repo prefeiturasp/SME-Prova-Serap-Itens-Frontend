@@ -6,7 +6,7 @@ import ListagemTabela from '~/components/listagem-itens/tabela/listagemTabelaCom
 import ListagemSelectComponent from '~/components/listagem-itens/select/listagemSelectComponent';
 import ListagemResumoItemComponent from '~/components/listagem-itens/resumoItem/listagemResumoItemComponent';
 import ListagemVersaoItemComponent from '~/components/listagem-itens/versaoItem/listagemVersaoItemComponent';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { AntDesignDto } from '~/domain/dto/ant-design-dto';
 import itemService from '~/services/item-service';
 import type { ItemListagemDto } from '~/domain/dto/item-listagem-dto';
@@ -23,6 +23,7 @@ import configuracaoItemService from '~/services/configuracaoItem-service';
 const ListagemItens: React.FC = () => {
   const linkRetorno = 'https://hom-serap.sme.prefeitura.sp.gov.br/';
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [pagina, setPagina] = useState(1);
   const [itensPorPagina, setItensPorPagina] = useState(10);
@@ -47,6 +48,16 @@ const ListagemItens: React.FC = () => {
   useEffect(() => {
     if (codigoItemTabelaSelecionado) buscaResumoEVersoes();
   }, [codigoItemTabelaSelecionado]);
+
+  useEffect(() => {
+  const state = location.state as { selectedItemId?: number } | null;
+  if (state?.selectedItemId && tabelaItens.length > 0) {
+    const itemSelecionado = tabelaItens.find((item) => Number(item.id) === state.selectedItemId);
+    if (itemSelecionado) {
+      tabelaItemClick(itemSelecionado.id);
+    }
+  }
+}, [tabelaItens, location.state]);
 
   const buscaDadosTabela = async () => {
     try {
