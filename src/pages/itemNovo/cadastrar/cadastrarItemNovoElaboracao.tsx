@@ -838,6 +838,7 @@ const CadastrarItemNovoElaboracao: React.FC<FormProps> = () => {
     form.resetFields();
     setCarregando(false);
     navigate('/listagem', { state: { selectedItemId: itemId } });
+    window.scrollTo(0, 0);
   };
   useEffect(() => {
     const codigoItemAtual = form.getFieldValue(campoCodigoItem);

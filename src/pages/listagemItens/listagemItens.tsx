@@ -295,7 +295,9 @@ const ListagemItens: React.FC = () => {
         <div className='listagem-head-botao'>
           <Button
             onClick={() => {
-              localStorage.removeItem(STORAGE_KEYS.editandoItem);
+                  localStorage.removeItem(STORAGE_KEYS.itemAtual);
+                  localStorage.removeItem(STORAGE_KEYS.editandoItem);
+                  localStorage.removeItem(STORAGE_KEYS.voltandoParaPrimeiraTela);
               navigate(`/criacao`);
               window.scrollTo(0, 0);
             }}
